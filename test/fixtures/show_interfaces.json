@@ -1,0 +1,497 @@
+[
+    {
+        "interfaces": {
+            "Ethernet1": {
+                "autoNegotiate": "unknown",
+                "bandwidth": 10000000000,
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "routed",
+                "hardware": "ethernet",
+                "interfaceAddress": [
+                    {
+                        "broadcastAddress": "255.255.255.255",
+                        "primaryIp": {
+                            "address": "172.16.11.1",
+                            "maskLen": 24
+                        },
+                        "secondaryIps": {},
+                        "secondaryIpsOrderedList": [],
+                        "virtualIp": {
+                            "address": "0.0.0.0",
+                            "maskLen": 0
+                        }
+                    }
+                ],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.64,
+                    "inBroadcastPkts": 425,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 2553,
+                    "inOctets": 582780,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 1,
+                    "outBroadcastPkts": 102,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 8250,
+                    "outOctets": 1231864,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "connected",
+                "lastStatusChangeTimestamp": 1410901662.63,
+                "lineProtocolStatus": "up",
+                "mtu": 1500,
+                "name": "Ethernet1",
+                "physicalAddress": "00:0c:29:f5:d2:7d"
+            },
+            "Ethernet2": {
+                "autoNegotiate": "unknown",
+                "bandwidth": 10000000000,
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "routed",
+                "hardware": "ethernet",
+                "interfaceAddress": [
+                    {
+                        "broadcastAddress": "255.255.255.255",
+                        "primaryIp": {
+                            "address": "172.16.12.1",
+                            "maskLen": 24
+                        },
+                        "secondaryIps": {},
+                        "secondaryIpsOrderedList": [],
+                        "virtualIp": {
+                            "address": "0.0.0.0",
+                            "maskLen": 0
+                        }
+                    }
+                ],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.64,
+                    "inBroadcastPkts": 374,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 2535,
+                    "inOctets": 572428,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 1,
+                    "outBroadcastPkts": 153,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 8265,
+                    "outOctets": 1241847,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "connected",
+                "lastStatusChangeTimestamp": 1410901662.63,
+                "lineProtocolStatus": "up",
+                "mtu": 1500,
+                "name": "Ethernet2",
+                "physicalAddress": "00:0c:29:f5:d2:7d"
+            },
+            "Ethernet3": {
+                "autoNegotiate": "off",
+                "bandwidth": 10000000000,
+                "burnedInAddress": "00:50:56:27:98:44",
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "bridged",
+                "hardware": "ethernet",
+                "interfaceAddress": [],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.65,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 255,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 6250,
+                    "outOctets": 835182,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "disabled",
+                "lastStatusChangeTimestamp": 1410913331.7,
+                "lineProtocolStatus": "down",
+                "mtu": 9214,
+                "name": "Ethernet3",
+                "physicalAddress": "00:50:56:27:98:44"
+            },
+            "Ethernet4": {
+                "autoNegotiate": "off",
+                "bandwidth": 10000000000,
+                "burnedInAddress": "00:50:56:2d:19:03",
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "bridged",
+                "hardware": "ethernet",
+                "interfaceAddress": [],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.66,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "lastClear": 1410901491.4,
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 255,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 6250,
+                    "outOctets": 835182,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "disabled",
+                "lastStatusChangeTimestamp": 1410913332.36,
+                "lineProtocolStatus": "down",
+                "mtu": 9214,
+                "name": "Ethernet4",
+                "physicalAddress": "00:50:56:2d:19:03"
+            },
+            "Ethernet5": {
+                "autoNegotiate": "off",
+                "bandwidth": 10000000000,
+                "burnedInAddress": "00:0c:29:2a:74:36",
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "bridged",
+                "hardware": "ethernet",
+                "interfaceAddress": [],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.66,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 255,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 6251,
+                    "outOctets": 835305,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "disabled",
+                "lastStatusChangeTimestamp": 1410913332.94,
+                "lineProtocolStatus": "down",
+                "mtu": 9214,
+                "name": "Ethernet5",
+                "physicalAddress": "00:0c:29:2a:74:36"
+            },
+            "Ethernet6": {
+                "autoNegotiate": "off",
+                "bandwidth": 10000000000,
+                "burnedInAddress": "00:0c:29:2a:74:40",
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "bridged",
+                "hardware": "ethernet",
+                "interfaceAddress": [],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.67,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 255,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 6251,
+                    "outOctets": 835305,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "disabled",
+                "lastStatusChangeTimestamp": 1410913333.57,
+                "lineProtocolStatus": "down",
+                "mtu": 9214,
+                "name": "Ethernet6",
+                "physicalAddress": "00:0c:29:2a:74:40"
+            },
+            "Ethernet7": {
+                "autoNegotiate": "off",
+                "bandwidth": 10000000000,
+                "burnedInAddress": "00:0c:29:2a:74:4a",
+                "description": "Managed by Ansible",
+                "duplex": "duplexFull",
+                "forwardingModel": "bridged",
+                "hardware": "ethernet",
+                "interfaceAddress": [],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.67,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 255,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 6251,
+                    "outOctets": 835305,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 0.0,
+                    "outPktsRate": 0.0,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "disabled",
+                "lastStatusChangeTimestamp": 1410913334.23,
+                "lineProtocolStatus": "down",
+                "mtu": 9214,
+                "name": "Ethernet7",
+                "physicalAddress": "00:0c:29:2a:74:4a"
+            },
+            "Loopback0": {
+                "bandwidth": 0,
+                "description": "Managed by Ansible",
+                "forwardingModel": "routed",
+                "hardware": "loopback",
+                "interfaceAddress": [
+                    {
+                        "broadcastAddress": "255.255.255.255",
+                        "primaryIp": {
+                            "address": "1.1.1.1",
+                            "maskLen": 32
+                        },
+                        "secondaryIps": {},
+                        "secondaryIpsOrderedList": [],
+                        "virtualIp": {
+                            "address": "0.0.0.0",
+                            "maskLen": 0
+                        }
+                    }
+                ],
+                "interfaceStatus": "connected",
+                "lastStatusChangeTimestamp": 1410913334.97,
+                "lineProtocolStatus": "up",
+                "mtu": 65535,
+                "name": "Loopback0"
+            },
+            "Management1": {
+                "autoNegotiate": "success",
+                "bandwidth": 1000000000,
+                "burnedInAddress": "00:1c:73:2a:00:01",
+                "description": "",
+                "duplex": "duplexFull",
+                "forwardingModel": "routed",
+                "hardware": "ethernet",
+                "interfaceAddress": [
+                    {
+                        "broadcastAddress": "255.255.255.255",
+                        "primaryIp": {
+                            "address": "192.168.1.16",
+                            "maskLen": 24
+                        },
+                        "secondaryIps": {},
+                        "secondaryIpsOrderedList": [],
+                        "virtualIp": {
+                            "address": "0.0.0.0",
+                            "maskLen": 0
+                        }
+                    }
+                ],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1410974362.68,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 15172431,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 3,
+                    "outBroadcastPkts": 0,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 0,
+                    "outOctets": 821068,
+                    "outUcastPkts": 7823,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 1679.52284441,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 65.2084066523,
+                    "outPktsRate": 0.0837097191065,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "connected",
+                "lastStatusChangeTimestamp": 1410901662.74,
+                "lineProtocolStatus": "up",
+                "mtu": 1500,
+                "name": "Management1",
+                "physicalAddress": "00:1c:73:2a:00:01"
+            }
+        }
+    }
+]

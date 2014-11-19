@@ -1,0 +1,5 @@
+[
+      {
+         "output": "Name: Et1\nSwitchport: Enabled\nAdministrative Mode: static access\nOperational Mode: static access\nMAC Address Learning: enabled\nAccess Mode VLAN: 1 (default)\nTrunking Native Mode VLAN: 1 (default)\nAdministrative Native VLAN tagging: disabled\nAdministrative private VLAN mapping: ALL\nTrunking VLANs Enabled: ALL\nTrunk Groups: \n\n"
+      }
+   ]

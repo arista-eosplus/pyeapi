@@ -1,0 +1,13 @@
+{
+    "architecture": "i386",
+    "bootupTimestamp": 1410471963.75,
+    "hardwareRevision": "01.07",
+    "internalBuildId": "7a4a170a-38f1-43eb-95df-53ec81fc61e1",
+    "internalVersion": "4.14.1-2055159.fldaytonamplspush",
+    "memFree": 1318624,
+    "memTotal": 3992600,
+    "modelName": "DCS-7048T-A-F",
+    "serialNumber": "JPE14151521",
+    "systemMacAddress": "00:1c:73:61:79:79",
+    "version": "4.14.1-2055159.fldaytonamplspush (engineering build)"
+}
