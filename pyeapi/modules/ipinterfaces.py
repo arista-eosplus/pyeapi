@@ -32,7 +32,8 @@ class Ipinterface(object):
     def create(self, name):
         """ Creates a new IP interface instance
         """
-        return self.api.config(['interface %s' % name, 'no switchport']) == [{}, {}]
+        commands = ['interface %s' % name, 'no switchport']
+        return self.api.config(commands) == [{}, {}]
 
     def delete(self, name):
         """ Deletes an IP interface instance from the running configuration

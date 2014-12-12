@@ -81,8 +81,7 @@ class TestModuleStpInterfaces(EapiConfigUnitTest):
 
     def test_set_portfast_with_value(self):
         for intf in self.INTERFACES:
-            #for value in ['auto', 'edge', 'network', 'normal', 'disable']:
-            for value in ['enable', 'disable']:
+            for value in ['edge', 'network', 'disable']:
                 cmds = ['interface %s' % intf]
                 if value is 'disable':
                     cmds.append('no spanning-tree portfast')

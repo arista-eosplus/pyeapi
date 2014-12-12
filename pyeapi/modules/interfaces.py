@@ -65,7 +65,7 @@ class Interfaces(object):
     def _get_sflow_for(self, name):
         result = self.api.enable('show running-config interfaces %s' % name,
                                  'text')
-        return not 'no sflow enable' in result[0]['output']
+        return 'no sflow enable' not in result[0]['output']
 
 
     def _parse_flowcontrol(self, name, flowcontrol):

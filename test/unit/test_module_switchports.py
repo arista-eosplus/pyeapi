@@ -55,7 +55,7 @@ class TestModuleSwitchports(EapiConfigUnitTest):
         fixture = get_fixture('switchports_et1.json')
         self.eapi.enable.return_value = json.load(open(fixture))
         result = self.instance.get('Ethernet1')
-        self.eapi.enable.assert_called_with(\
+        self.eapi.enable.assert_called_with(
             'show interfaces Ethernet1 switchport', 'text')
         self.assertIsInstance(result, dict)
 

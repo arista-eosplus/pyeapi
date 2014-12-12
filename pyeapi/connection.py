@@ -83,7 +83,7 @@ class Connection(object):
         return self.__uri
 
     def http(self, *args, **kwargs):
-        if self._http  is not None:
+        if self._http is not None:
             for handler in self._http.handlers:
                 handler.retried = 0
             return self._http.open(*args, **kwargs)
