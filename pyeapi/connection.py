@@ -180,7 +180,7 @@ class Connection(object):
         return response['result']
 
     def module(self, name):
+        """Loads the module identified by name
+        """
         module = load_module('pyeapi.modules.%s' % name)
-        module.api = self
-        return module
-
+        return module.instance(self)

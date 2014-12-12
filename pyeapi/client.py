@@ -56,6 +56,8 @@ def load_config(filename=None):
                 config[section] = dict(host=name)
                 config[section].update(dict(conf.items(section)))
 
+            break
+
 def config_for(name):
     return config.get('connection:%s' % name)
 

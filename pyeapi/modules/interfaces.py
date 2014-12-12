@@ -29,183 +29,260 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+import re
+import shlex
 
-api = None
+INTF_RE = re.compile(r'(?P<name>[a-zA-Z]*)(?P<index>.*)$')
 
-def _parse_get(interface, flowcontrol):
-    """Returns an interface as a set of key/value pairs
+class Interfaces(object):
 
-    Example:
-        {
-            "description": <string>
-            "shutdown": [true, false],
-            "flowcontrol_send": [on, off, desired],
-            "flowcontrol_receive": [on, off, desired]
-        }
+    def __init__(self, api):
+        self.api = api
 
-    Args:
-        interface (dict): set of attributes returned from eAPI command
-                          "show interface <name>"
-        flowcontrol (dict): set of attributes return from eAPI command
-                            "show interface <name> flowcontrol"
+    def _parse_interface(self, interface):
+        """Returns an interface as a set of key/value pairs
 
-    Returns:
-        dict: A dict object containing the interface key/value pairs
-    """
-    response = dict()
-    response['description'] = interface['description']
-    response['shutdown'] = interface['interfaceStatus'] == 'disabled'
-    response['flowcontrol_send'] = flowcontrol['txAdminState']
-    response['flowcontrol_receive'] = flowcontrol['rxAdminState']
-    return response
+        Example:
+            {
+                "description": <string>
+                "shutdown": [true, false],
+                "sflow": [true, false]
+            }
 
-def get(name):
-    """Returns a single interface attributes dict as a set of key/value pairs
+        Args:
+            interface (dict): set of attributes returned from eAPI command
+                              "show interface <name>"
 
-    The interface attributes are parsed with _parse_get function
+        Returns:
+            dict: A dict object containing the interface key/value pairs
+        """
+        response = dict()
+        response['description'] = interface['description']
+        response['shutdown'] = interface['interfaceStatus'] == 'disabled'
+        response['sflow'] = self._get_sflow_for(interface['name'])
+        return response
 
-    Example
-        {
-            "Ethernet1": {...}
-        }
+    def _get_sflow_for(self, name):
+        result = self.api.enable('show running-config interfaces %s' % name,
+                                 'text')
+        return not 'no sflow enable' in result[0]['output']
 
-    Args:
-        name (str): the name of the interface to retieve from
-                    the running-config
 
-    Returns:
-        dict: a dict object that represents the single interface
-    """
-    result = api.enable(['show interfaces %s' % name,
-                         'show interfaces %s flowcontrol' % name])
-    return { name: _parse_get(result[0]['interfaces'][name],
-                              result[1]['interfaceFlowControls'][name]) }
+    def _parse_flowcontrol(self, name, flowcontrol):
+        response = {}
+        for line in flowcontrol.split('\n')[3:]:
+            tokens = shlex.split(line)
+            if tokens:
+                if tokens[0] == name:
+                    return (tokens[1], tokens[3])
+        return (None, None)
 
-def getall():
-    """Returns all interfaces in a dict object.
+    def _get_flowcontrol_for(self, name, flowcontrol):
+        match = INTF_RE.match(name)
+        if not match:
+            return (None, None)
 
-    The interface attributes are parsed with _parse_get function
+        idx = match.group('index')
+        shortname = name[0:2] + idx
+        if shortname not in flowcontrol:
+            return (None, None)
 
-    Example:
-        {
-            "Ethernet1": {...},
-            "Ethernet2": {...}
-        }
+        return self._parse_flowcontrol(shortname, flowcontrol)
 
-    Returns:
-        dict: a dict object containing all interfaces and attributes
-    """
-    result = api.enable(['show interfaces', 'show interfaces flowcontrol'])
-    response = dict()
-    for name in result[0]['interfaces'].keys():
-        response[name] = _parse_get(result[0]['interfaces'][name],
-                                    result[1]['interfaceFlowControls'][name])
-    return response
+    def get(self, name):
+        """Returns a single interface attribute dict as a set of
+        key/value pairs
 
-def create(id):
-    """Creates a new interface in EOS
+        The interface attributes are parsed with _parse_get function
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
+        Example
+            {
+                "Ethernet1": {...}
+            }
 
-    Returns:
-        bool: True if the create operation succeeds otherwise False
-    """
-    if id[0:2].upper() in ['ET', 'MA']:
-        return False
-    return api.config('interface %s' % id) == [{}]
+        Args:
+            name (str): the name of the interface to retieve from
+                        the running-config
 
-def delete(id):
-    """Deletes an interface from the running configuration
+        Returns:
+            dict: a dict object that represents the single interface
+        """
+        interface = self.api.enable('show interfaces')
+        interface = interface[0]['interfaces'][name]
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
+        flowcontrol = self.api.enable('show interfaces flowcontrol', 'text')
+        flowcontrol = flowcontrol[0]['output']
 
-    Returns:
-        bool: True if the delete operation succeeds otherwise False
-    """
-    if id[0:2].upper() in ['ET', 'MA']:
-        return False
-    return api.config('no interface %s' % id) == [{}]
+        response = self._parse_interface(interface)
+        (tx, rx) = self._get_flowcontrol_for(name, flowcontrol)
+        response['flowcontrol_send'] = tx
+        response['flowcontrol_receive'] = rx
 
-def default(id):
-    """Defaults an interface in the running configuration
+        return response
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
+    def getall(self):
+        """Returns all interfaces in a dict object.
 
-    Returns:
-        bool: True if the default operation succeeds otherwise False
-    """
-    return api.config('default interface %s' % id) == [{}]
+        The interface attributes are parsed with _parse_get function
 
-def set_description(id, value=None, default=False):
-    """Configures the interface description
+        Example:
+            {
+                "Ethernet1": {...},
+                "Ethernet2": {...}
+            }
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
-        value (str): The value to set the description to.
-        default (bool): Specifies to default the interface description
+        Returns:
+            dict: a dict object containing all interfaces and attributes
+        """
+        interfaces = self.api.enable('show interfaces')
+        interfaces = interfaces[0]['interfaces']
 
-    Returns:
-        bool: True if the delete operation succeeds otherwise False
-    """
-    commands = ['interface %s' % id]
-    if default:
-        commands.append('default description')
-    elif value is not None:
-        commands.append('description %s' % value)
-    else:
-        commands.append('no description')
-    return api.config(commands) == [{}, {}]
+        flowcontrol = self.api.enable('show interfaces flowcontrol', 'text')
+        flowcontrol = flowcontrol[0]['output']
 
-def set_shutdown(id, value=None, default=False):
-    """Configures the interface shutdown state
+        response = dict()
+        for name in interfaces:
+            response[name] = self._parse_interface(interfaces[name])
+            (tx, rx) = self._get_flowcontrol_for(name, flowcontrol)
+            response[name]['flowcontrol_send'] = tx
+            response[name]['flowcontrol_receive'] = rx
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
-        value (bool): True if the interface should be in shutdown state
-                      otherwise False
-        default (bool): Specifies to default the interface description
+        return response
 
-    Returns:
-        bool: True if the delete operation succeeds otherwise False
-    """
-    commands = ['interface %s' % id]
-    if default:
-        commands.append('default shutdown')
-    elif value:
-        commands.append('shutdown')
-    else:
-        commands.append('no shutdown')
-    return api.config(commands) == [{}, {}]
+    def create(self, id):
+        """Creates a new interface in EOS
 
-def set_flowcontrol(id, direction, value=None, default=False):
-    """Configures the interface flowcontrol value
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
 
-    Args:
-        id (str): The interface identifier.  It must be a full interface
-                  name (ie Ethernet, not Et)
-        direction (str): one of either 'send' or 'receive'
-        value (bool): True if the interface should be in shutdown state
-                      otherwise False
-        default (bool): Specifies to default the interface description
+        Returns:
+            bool: True if the create operation succeeds otherwise False
+        """
+        if id[0:2].upper() in ['ET', 'MA']:
+            return False
+        return self.api.config('interface %s' % id) == [{}]
 
-    Returns:
-        bool: True if the delete operation succeeds otherwise False
-    """
-    if direction not in ['send', 'receive']:
-        return False
-    commands = ['interface %s' % id]
-    if default:
-        commands.append('default flowcontrol %s' % direction)
-    elif value:
-        commands.append('flowcontrol %s %s' % (direction, value))
-    else:
-        commands.append('no flowcontrol %s' % direction)
-    return api.config(commands) == [{}, {}]
+    def delete(self, id):
+        """Deletes an interface from the running configuration
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+
+        Returns:
+            bool: True if the delete operation succeeds otherwise False
+        """
+        if id[0:2].upper() in ['ET', 'MA']:
+            return False
+        return self.api.config('no interface %s' % id) == [{}]
+
+    def default(self, id):
+        """Defaults an interface in the running configuration
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+
+        Returns:
+            bool: True if the default operation succeeds otherwise False
+        """
+        return self.api.config('default interface %s' % id) == [{}]
+
+    def set_description(self, id, value=None, default=False):
+        """Configures the interface description
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+            value (str): The value to set the description to.
+            default (bool): Specifies to default the interface description
+
+        Returns:
+            bool: True if the delete operation succeeds otherwise False
+        """
+        commands = ['interface %s' % id]
+        if default:
+            commands.append('default description')
+        elif value is not None:
+            commands.append('description %s' % value)
+        else:
+            commands.append('no description')
+        return self.api.config(commands) == [{}, {}]
+
+    def set_shutdown(self, id, value=None, default=False):
+        """Configures the interface shutdown state
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+            value (bool): True if the interface should be in shutdown state
+                          otherwise False
+            default (bool): Specifies to default the interface description
+
+        Returns:
+            bool: True if the delete operation succeeds otherwise False
+        """
+        commands = ['interface %s' % id]
+        if default:
+            commands.append('default shutdown')
+        elif value:
+            commands.append('shutdown')
+        else:
+            commands.append('no shutdown')
+        return self.api.config(commands) == [{}, {}]
+
+    def set_flowcontrol(self, id, direction, value=None, default=False):
+        """Configures the interface flowcontrol value
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+            direction (str): one of either 'send' or 'receive'
+            value (bool): True if the interface should be in shutdown state
+                          otherwise False
+            default (bool): Specifies to default the interface description
+
+        Returns:
+            bool: True if the delete operation succeeds otherwise False
+        """
+        if direction not in ['send', 'receive']:
+            return False
+        commands = ['interface %s' % id]
+        if default:
+            commands.append('default flowcontrol %s' % direction)
+        elif value:
+            commands.append('flowcontrol %s %s' % (direction, value))
+        else:
+            commands.append('no flowcontrol %s' % direction)
+        return self.api.config(commands) == [{}, {}]
+
+    def set_sflow(self, id, value=None, default=False):
+        """Configures the sflow state on the interface
+
+        Args:
+            id (str): The interface identifier.  It must be a full interface
+                      name (ie Ethernet, not Et)
+            value (bool): True if sflow should be enabled otherwise False
+            default (bool): Specifies the default value for sflow
+
+        Returns:
+            bool: True if the command succeeds otherwise False
+        """
+        commands = ['interface %s' % id]
+        if default:
+            commands.append('default sflow')
+        elif value:
+            commands.append('sflow enable')
+        else:
+            commands.append('no sflow enable')
+        return self.api.config(commands) == [{}, {}]
+
+
+
+def instance(api):
+    return Interfaces(api)
+
+
+
+

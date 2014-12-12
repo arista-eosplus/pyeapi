@@ -47,7 +47,7 @@ class TestModuleVxlan(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleVxlan, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.vxlan
+        self.instance = pyeapi.modules.vxlan.instance(None)
 
     def test_get(self):
         fixture = get_fixture('vxlan.json')

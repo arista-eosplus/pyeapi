@@ -50,7 +50,7 @@ class TestModuleIpinterfaces(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleIpinterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.ipinterfaces
+        self.instance = pyeapi.modules.ipinterfaces.instance(None)
 
     def test_getall(self):
         fixture = get_fixture('ipinterfaces.json')
@@ -66,7 +66,8 @@ class TestModuleIpinterfaces(EapiConfigUnitTest):
                 if name == 'create':
                     cmds = ['interface %s' % intf, 'no switchport']
                 elif name == 'delete':
-                    cmds = ['interface %s' % intf, 'switchport']
+                    cmds = ['interface %s' % intf, 'no ip address',
+                            'switchport']
                 func = function(name, intf)
                 self.eapi_positive_config_test(func, cmds)
 

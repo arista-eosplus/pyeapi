@@ -30,143 +30,157 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-api = None
+class Vlans(object):
 
-def get():
-    """ Returns all of the Vlans found in the running-config
+    def __init__(self, api):
+        self.api = api
 
-    Example:
-        {
-            '1': {
-                'dynamic': <boolean>,
-                'interfaces': <dict>,
-                'name': <string>,
-                'status': [active, suspend]
+
+    def _parse_get(self, vlan, trunkgroup):
+        """Returns a vlan as a set of key/value pairs
+
+        Example:
+            {
+                "name": <string>,
+                "status": [active, suspend],
+                "trunk_groups": [array]
             }
-        }
 
-    Returns:
-        dict: a dict object of vlan attributes
-    """
-    result = api.enable('show vlan')
-    return dict(vlans=result[0]['vlans'])
+        Args:
+            vlan (dict): set of attributes returned from eAPI
+                         command "show vlans"
+            trunkgroup (dict): set of attributes returned from eAPI
+                               command "show vlan trunk group"
 
-def trunk_groups():
-    """Returns all of the trunk groups from the running-config
+        Returns:
+            dict: a dict object containing the vlan key/value pairs
+        """
+        response = dict()
+        response['name'] = vlan['name']
+        response['status'] = vlan['status']
+        response['trunk_groups'] = trunkgroup['names']
 
-    Example:
-        {
-            'trunk_groups': {
-                '1': {
-                    'names': []
-                }
+
+    def getall(self):
+        """Returns a dict object of all Vlans in the running-config
+
+        Example:
+            {
+                "1": {...},
+                "2": {...}
             }
-        }
 
-    Returns:
-        dict: a dict object of the trunk group attributes
-    """
-    result = api.enable('show vlan trunk group')
-    return dict(trunk_groups=result[0]['trunkGroups'])
+        Returns:
+            dict: a dict object of Vlan attributes
+        """
+        result = self.api.enable(['show vlan', 'show vlan trunk group'])
+        response = dict()
+        for vid in result[0]['vlans'].keys():
+            response[vid] = self._parse_get(result[0]['vlans'][vid],
+                                            result[1]['trunkGroups'][vid])
+        return response
 
-def create(vid):
-    """ Creates a new VLAN resource
 
-    Args:
-        vid (str): The VLAN ID to create
+    def create(self, vid):
+        """ Creates a new VLAN resource
 
-    Returns:
-        bool: True if create was successful otherwise False
-    """
-    return api.config('vlan %s' % vid) == [{}]
+        Args:
+            vid (str): The VLAN ID to create
 
-def delete(vid):
-    """ Deletes a VLAN from the running configuration
+        Returns:
+            bool: True if create was successful otherwise False
+        """
+        return self.api.config('vlan %s' % vid) == [{}]
 
-    Args:
-        vid (str): The VLAN ID to delete
+    def delete(self, vid):
+        """ Deletes a VLAN from the running configuration
 
-    Returns:
-        bool: True if the delete operation was successful otherwise False
-    """
-    return api.config('no vlan %s' % vid) == [{}]
+        Args:
+            vid (str): The VLAN ID to delete
 
-def default(vid):
-    """ Defaults the VLAN configuration
+        Returns:
+            bool: True if the delete operation was successful otherwise False
+        """
+        return self.api.config('no vlan %s' % vid) == [{}]
 
-    Args:
-        vid (str): The VLAN ID to default
+    def default(self, vid):
+        """ Defaults the VLAN configuration
 
-    Returns:
-        bool: True if the delete operation was successful otherwise False
-    """
-    return api.config('default vlan %s' % vid) == [{}]
+        Args:
+            vid (str): The VLAN ID to default
 
-def set_name(vid, name=None, default=False):
-    """ Configures the VLAN name
+        Returns:
+            bool: True if the delete operation was successful otherwise False
+        """
+        return self.api.config('default vlan %s' % vid) == [{}]
 
-    Args:
-        vid (str): The VLAN ID to Configures
-        name (str): The value to configure the vlan name
-        default (bool): Defaults the VLAN ID name
+    def set_name(self, vid, name=None, default=False):
+        """ Configures the VLAN name
 
-    Returns:
-        bool: True if the delete operation was successful otherwise False
-    """
-    commands = ['vlan %s' % vid]
-    if default:
-        commands.append('default name')
-    elif name is not None:
-        commands.append('name %s' % name)
-    else:
-        commands.append('no name')
-    return api.config(commands) == [{}, {}]
+        Args:
+            vid (str): The VLAN ID to Configures
+            name (str): The value to configure the vlan name
+            default (bool): Defaults the VLAN ID name
 
-def set_state(vid, value=None, default=False):
-    """ Configures the VLAN state
+        Returns:
+            bool: True if the delete operation was successful otherwise False
+        """
+        commands = ['vlan %s' % vid]
+        if default:
+            commands.append('default name')
+        elif name is not None:
+            commands.append('name %s' % name)
+        else:
+            commands.append('no name')
+        return self.api.config(commands) == [{}, {}]
 
-    Args:
-        vid (str): The VLAN ID to configure
-        value (str): The value to set the vlan state to
-        default (bool): Configures the vlan state to its default value
+    def set_state(self, vid, value=None, default=False):
+        """ Configures the VLAN state
 
-    Returns:
-        bool: True if the delete operation was successful otherwise False
-    """
-    commands = ['vlan %s' % vid]
-    if default:
-        commands.append('default state')
-    elif value is not None:
-        commands.append('state %s' % value)
-    else:
-        commands.append('no state')
-    return api.config(commands) == [{}, {}]
+        Args:
+            vid (str): The VLAN ID to configure
+            value (str): The value to set the vlan state to
+            default (bool): Configures the vlan state to its default value
 
-def add_trunk_group(vid, name):
-    """ Adds a new trunk group to the Vlan in the running-config
+        Returns:
+            bool: True if the delete operation was successful otherwise False
+        """
+        commands = ['vlan %s' % vid]
+        if default:
+            commands.append('default state')
+        elif value is not None:
+            commands.append('state %s' % value)
+        else:
+            commands.append('no state')
+        return self.api.config(commands) == [{}, {}]
 
-    Args:
-        vid (str): The VLAN ID to configure
-        name (str): The trunk group to add to the list
+    def add_trunk_group(self, vid, name):
+        """ Adds a new trunk group to the Vlan in the running-config
 
-    Returns:
-        bool: Tre if the add operation was successful otherwise False
-    """
-    commands = ["vlan %s" % vid, "trunk group %s" % name]
-    return api.config(commands) == [{}, {}]
+        Args:
+            vid (str): The VLAN ID to configure
+            name (str): The trunk group to add to the list
 
-def remove_trunk_group(vid, name):
-    """ Removes a trunk group from the list of configured trunk groups
-    for the specified VLAN ID
+        Returns:
+            bool: Tre if the add operation was successful otherwise False
+        """
+        commands = ["vlan %s" % vid, "trunk group %s" % name]
+        return self.api.config(commands) == [{}, {}]
 
-    Args:
-        vid (str): The VLAN ID to configure
-        name (str): The trunk group to add to the list
+    def remove_trunk_group(self, vid, name):
+        """ Removes a trunk group from the list of configured trunk groups
+        for the specified VLAN ID
 
-    Returns:
-        bool: Tre if the add operation was successful otherwise False
-    """
-    commands = ["vlan %s" % vid, "no trunk group %s" % name]
-    return api.config(commands) == [{}, {}]
+        Args:
+            vid (str): The VLAN ID to configure
+            name (str): The trunk group to add to the list
 
+        Returns:
+            bool: Tre if the add operation was successful otherwise False
+        """
+        commands = ["vlan %s" % vid, "no trunk group %s" % name]
+        return self.api.config(commands) == [{}, {}]
+
+def instance(api):
+    return Vlans(api)
 

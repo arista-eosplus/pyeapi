@@ -49,5 +49,5 @@ setup(
     license='BSD-3',
     packages=['pyeapi',
               'pyeapi.modules',
-              'pyeapi.modules.stp']
+              'pyeapi.modules']
 )

@@ -49,7 +49,7 @@ class TestModuleSwitchports(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleSwitchports, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.switchports
+        self.instance = pyeapi.modules.switchports.instance(None)
 
     def test_get(self):
         fixture = get_fixture('switchports_et1.json')

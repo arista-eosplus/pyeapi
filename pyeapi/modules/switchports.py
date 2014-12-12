@@ -38,87 +38,100 @@ TRUNK_VLAN_RE = re.compile(r'(?<=Trunking Native Mode VLAN:\s)'
 TRUNKING_VLANS_RE = re.compile(r'(?<=Trunking VLANs Enabled:\s)'
                                r'(?P<trunking_vlans>.*)')
 
-api = None
 
-def get(name):
-    """Returns a dictionary object that represents a switchport
-    """
-    result = api.enable('show interfaces %s switchport' % name, 'text')
-    output = result[0]['output']
+class Switchport(object):
 
-    data = dict(name=name)
+    def __init__(self, api):
+        self.api = api
 
-    match = MODE_RE.search(output)
-    data['mode'] = \
-        'access' if match.group('mode') == 'static access' else 'trunk'
 
-    data['access_vlan'] = \
-        ACCESS_VLAN_RE.search(output).group('access_vlan')
+    def get(self, name):
+        """Returns a dictionary object that represents a switchport
+        """
+        result = self.api.enable('show interfaces %s switchport' % name, 'text')
+        output = result[0]['output']
 
-    data['trunk_native_vlan'] = \
-        TRUNK_VLAN_RE.search(output).group('trunk_vlan')
+        data = dict(name=name)
 
-    data['trunk_allowed_vlans'] = \
-        TRUNKING_VLANS_RE.search(output).group('trunking_vlans')
+        match = MODE_RE.search(output)
+        data['mode'] = \
+            'access' if match.group('mode') == 'static access' else 'trunk'
 
-    return data
+        data['access_vlan'] = \
+            ACCESS_VLAN_RE.search(output).group('access_vlan')
 
-def getall():
-    """Returns a dictionary object that represents all configured switchports
-    found in the running-config
-    """
-    result = api.enable('show interfaces')
-    response = dict()
-    for key, value in result[0]['interfaces'].items():
-        if value['forwardingModel'] == 'bridged':
-            response[key] = get(key)
-    return response
+        data['trunk_native_vlan'] = \
+            TRUNK_VLAN_RE.search(output).group('trunk_vlan')
 
-def create(name):
-    return api.config(['interface %s' % name, 'no ip address']) == [{}, {}]
+        data['trunk_allowed_vlans'] = \
+            TRUNKING_VLANS_RE.search(output).group('trunking_vlans')
 
-def delete(name):
-    return api.config(['interface %s' % name, 'no switchport']) == [{}, {}]
+        return data
 
-def default(name):
-    return api.config(['interface %s' % name, 'default switchport']) == [{}, {}]
+    def getall(self):
+        """Returns a dictionary object that represents all configured
+        switchports found in the running-config
+        """
+        result = self.api.enable('show interfaces')
+        response = dict()
+        for key, value in result[0]['interfaces'].items():
+            if value['forwardingModel'] == 'bridged':
+                response[key] = self.get(key)
+        return response
 
-def set_mode(name, value=None, default=False):
-    commands = ['interface %s' % name]
-    if default:
-        commands.append('default switchport mode')
-    elif value is None:
-        commands.append('no switchport mode')
-    else:
-        commands.append('switchport mode %s' % value)
-    return api.config(commands) == [{}, {}]
+    def create(self, name):
+        command = ['interface %s' % name, 'no ip address',
+                   'default switchport']
+        return self.api.config(command) == [{}, {}, {}]
 
-def set_access_vlan(name, value=None, default=False):
-    commands = ['interface %s' % name]
-    if default:
-        commands.append('default switchport access vlan')
-    elif value is None:
-        commands.append('no switchport access vlan')
-    else:
-        commands.append('switchport access vlan %s' % value)
-    return api.config(commands) == [{}, {}]
+    def delete(self, name):
+        command = ['interface %s' % name, 'no switchport']
+        return self.api.config(command) == [{}, {}]
 
-def set_trunk_native_vlan(name, value=None, default=False):
-    commands = ['interface %s' % name]
-    if default:
-        commands.append('default switchport trunk native vlan')
-    elif value is None:
-        commands.append('no switchport trunk native vlan')
-    else:
-        commands.append('switchport trunk native vlan %s' % value)
-    return api.config(commands) == [{}, {}]
+    def default(self, name):
+        command = ['interface %s' % name, 'default switchport']
+        return self.api.config(command) == [{}, {}]
 
-def set_trunk_allowed_vlans(name, value=None, default=False):
-    commands = ['interface %s' % name]
-    if default:
-        commands.append('default switchport trunk allowed vlan')
-    elif value is None:
-        commands.append('no switchport trunk allowed vlan')
-    else:
-        commands.append('switchport trunk allowed vlan %s' % value)
-    return api.config(commands) == [{}, {}]
+    def set_mode(self, name, value=None, default=False):
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default switchport mode')
+        elif value is None:
+            commands.append('no switchport mode')
+        else:
+            commands.append('switchport mode %s' % value)
+        return self.api.config(commands) == [{}, {}]
+
+    def set_access_vlan(self, name, value=None, default=False):
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default switchport access vlan')
+        elif value is None:
+            commands.append('no switchport access vlan')
+        else:
+            commands.append('switchport access vlan %s' % value)
+        return self.api.config(commands) == [{}, {}]
+
+    def set_trunk_native_vlan(self, name, value=None, default=False):
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default switchport trunk native vlan')
+        elif value is None:
+            commands.append('no switchport trunk native vlan')
+        else:
+            commands.append('switchport trunk native vlan %s' % value)
+        return self.api.config(commands) == [{}, {}]
+
+    def set_trunk_allowed_vlans(self, name, value=None, default=False):
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default switchport trunk allowed vlan')
+        elif value is None:
+            commands.append('no switchport trunk allowed vlan')
+        else:
+            commands.append('switchport trunk allowed vlan %s' % value)
+        return self.api.config(commands) == [{}, {}]
+
+
+def instance(api):
+    return Switchport(api)

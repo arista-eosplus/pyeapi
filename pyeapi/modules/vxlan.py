@@ -30,52 +30,58 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-api = None
+class Vxlan(object):
 
-def get():
-    """Retrieves the vxlan interface from the running-config
-    """
-    result = api.enable('show interfaces vxlan1')
-    result = result[0]['interfaces']['Vxlan1']
-    return dict(name=result['name'],
-                multicast_group=result['floodMcastGrp'],
-                source_interface=result['srcIpIntf'])
+    def __init__(self, api):
+        self.api = api
 
-def create():
-    """Creates a new vxlan interface instance
-    """
-    return api.config('interface vxlan1') == [{}]
+    def get(self):
+        """Retrieves the vxlan interface from the running-config
+        """
+        result = self.api.enable('show interfaces vxlan1')
+        result = result[0]['interfaces']['Vxlan1']
+        return dict(name=result['name'],
+                    multicast_group=result['floodMcastGrp'],
+                    source_interface=result['srcIpIntf'])
 
-def delete():
-    """Deletes the vxlan interface from the running configuration
-    """
-    return api.config('no interface vxlan1') == [{}]
+    def create(self):
+        """Creates a new vxlan interface instance
+        """
+        return self.api.config('interface vxlan1') == [{}]
 
-def default():
-    """Defaults the vxlan interface in the running configuration
-    """
-    return api.config('default interface vxlan1') == [{}]
+    def delete(self):
+        """Deletes the vxlan interface from the running configuration
+        """
+        return self.api.config('no interface vxlan1') == [{}]
 
-def set_source_interface(value=None, default=False):
-    """Configures the vlan source-interface value
-    """
-    commands = ['interface vxlan1']
-    if default:
-        commands.append('default vxlan source-interface')
-    elif value is not None:
-        commands.append('vxlan source-interface %s' % value)
-    else:
-        commands.append('no vxlan source-interface')
-    return api.config(commands) == [{}, {}]
+    def default(self):
+        """Defaults the vxlan interface in the running configuration
+        """
+        return self.api.config('default interface vxlan1') == [{}]
 
-def set_multicast_group(value=None, default=False):
-    """Configures the vxlan interface multicast-group value
-    """
-    commands = ['interface vxlan1']
-    if default:
-        commands.append('default vxlan multicast-group')
-    elif value:
-        commands.append('vxlan multicast-group %s' % value)
-    else:
-        commands.append('no vxlan multicast-group')
-    return api.config(commands) == [{}, {}]
+    def set_source_interface(self, value=None, default=False):
+        """Configures the vlan source-interface value
+        """
+        commands = ['interface vxlan1']
+        if default:
+            commands.append('default vxlan source-interface')
+        elif value is not None:
+            commands.append('vxlan source-interface %s' % value)
+        else:
+            commands.append('no vxlan source-interface')
+        return self.api.config(commands) == [{}, {}]
+
+    def set_multicast_group(self, value=None, default=False):
+        """Configures the vxlan interface multicast-group value
+        """
+        commands = ['interface vxlan1']
+        if default:
+            commands.append('default vxlan multicast-group')
+        elif value:
+            commands.append('vxlan multicast-group %s' % value)
+        else:
+            commands.append('no vxlan multicast-group')
+        return self.api.config(commands) == [{}, {}]
+
+def instance(api):
+    return Vxlan(api)

@@ -36,6 +36,8 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
+from mock import Mock, call
+
 from testlib import get_fixture, random_vlan, random_string, function
 from testlib import EapiConfigUnitTest
 
@@ -45,23 +47,18 @@ class TestModuleVlans(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleVlans, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.vlans
+        self.instance = pyeapi.modules.vlans.instance(None)
 
-    def test_get(self):
-        fixture = get_fixture('vlan_show.json')
+    def test_getall(self):
+        fixture = get_fixture('vlans_getall.json')
         self.eapi.enable.return_value = json.load(open(fixture))
-        result = self.instance.get()
-        self.eapi.enable.assert_called_with('show vlan')
-        self.assertIsInstance(result, dict)
-        self.assertIn('vlans', result)
+        result = self.instance.getall()
 
-    def test_trunk_groups(self):
-        fixture = get_fixture('vlan_trunk_groups.json')
-        self.eapi.enable.return_value = json.load(open(fixture))
-        result = self.instance.trunk_groups()
-        self.eapi.enable.assert_called_with('show vlan trunk group')
+        calls = call.enable(['show vlan', 'show vlan trunk group'])
+        self.eapi.assert_has_calls(calls)
+
         self.assertIsInstance(result, dict)
-        self.assertIn('trunk_groups', result)
+        self.assertEqual(len(result), 4)
 
     def test_vlan_functions(self):
         for name in ['create', 'delete', 'default']:

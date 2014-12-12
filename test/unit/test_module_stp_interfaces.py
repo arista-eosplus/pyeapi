@@ -41,7 +41,15 @@ from mock import Mock, call
 from testlib import get_fixture, function, random_int
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.stp.interfaces
+import pyeapi.modules.spanningtree
+
+class TestModuleStp(EapiConfigUnitTest):
+
+    def __init__(self, *args, **kwargs):
+        super(TestModuleStp, self).__init__(*args, **kwargs)
+        self.instances = pyeapi.modules.spanningtree.Stp(None)
+
+
 
 class TestModuleStpInterfaces(EapiConfigUnitTest):
 
@@ -49,7 +57,7 @@ class TestModuleStpInterfaces(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleStpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.stp.interfaces
+        self.instance = pyeapi.modules.spanningtree.StpInterfaces(None)
 
     def test_getall(self):
 
