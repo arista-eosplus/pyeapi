@@ -32,7 +32,6 @@
 import os
 from ConfigParser import ConfigParser
 
-from pyeapi.utils import islocalconnection
 from pyeapi.connection import Connection
 
 config = dict()

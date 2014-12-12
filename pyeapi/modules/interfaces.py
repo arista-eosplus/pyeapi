@@ -69,7 +69,6 @@ class Interfaces(object):
 
 
     def _parse_flowcontrol(self, name, flowcontrol):
-        response = {}
         for line in flowcontrol.split('\n')[3:]:
             tokens = shlex.split(line)
             if tokens:
