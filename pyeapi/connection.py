@@ -33,7 +33,7 @@ import collections
 import json
 import urllib2
 
-from pyeapi.utils import load_module, debug
+from pyeapi.utils import load_module, parseconfig, debug
 
 class CommandError(Exception):
     """ Base exception raised for command errors
@@ -71,16 +71,35 @@ class Connection(object):
         self.error = None
         self.debug = kwargs.get('debug') or False
 
+        # runtime properties
+        self._uri = None
+        self._running = None
+        self._startup = None
+
     def __repr__(self):
         return 'Connection(uri=%s)' % self.uri
 
     @property
     def uri(self):
-        if hasattr(self, '__uri'):
-            return self.__uri
-        _uri = "{}://{}:{}/command-api"
-        self.__uri = _uri.format(self.protocol, self.host, self.port)
-        return self.__uri
+        if self._uri is not None:
+            return self._uri
+        self._uri = "{}://{}:{}/command-api".format(self.protocol, self.host,
+                                                    self.port)
+        return self._uri
+
+    @property
+    def running(self):
+        if self._running is not None:
+            return self._running
+        self._running = self.get_config(flags=['all'])
+        return self._running
+
+    @property
+    def startup(self):
+        if self._startup is not None:
+            return self._startup
+        self._startup = self.get_config(config='startup-config', flags=['all'])
+        return self._startup
 
     def http(self, *args, **kwargs):
         if self._http is not None:
@@ -184,3 +203,13 @@ class Connection(object):
         """
         module = load_module('pyeapi.modules.%s' % name)
         return module.instance(self)
+
+    def get_config(self, config='running-config', flags=[]):
+        """Convenience method that returns the running-config as a dict
+        """
+        command = 'show %s' % config
+        for flag in flags:
+            command += ' %s' % flag
+        result = self.enable(command, 'text')
+        return parseconfig(result[0]['output'])
+

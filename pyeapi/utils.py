@@ -57,6 +57,18 @@ def load_module(name):
             raise ImportError('unable to import module %s' % name)
         return mod
 
+def parseconfig(config):
+    cfg = dict()
+    for element in config.strip().split('\n'):
+        if element[0] != ' ':
+            key = element
+            cfg[key] = []
+        elif element[0] == '!':
+            continue
+        else:
+            cfg[key].append(element.strip())
+    return cfg
+
 def islocalconnection():
     return os.path.exists('/etc/Eos-release')
 

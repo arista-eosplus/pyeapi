@@ -1,5 +1,0 @@
-[
-    {
-        "output": "Port        Send FlowControl  Receive FlowControl  RxPause       TxPause      \n            admin    oper     admin    oper                                   \n----------  -------- -------- -------- --------    ------------- -------------\nEt1         off      unknown  off      unknown     0             0            \nEt2         off      unknown  off      unknown     0             0            \nEt3         off      unknown  off      unknown     0             0            \nEt4         off      unknown  off      unknown     0             0            \nEt5         off      unknown  off      unknown     0             0            \nEt6         off      unknown  off      unknown     0             0            \nEt7         off      unknown  off      unknown     0             0            \nMa1         desired  off      desired  on          0             0            \n"
-    }
-]

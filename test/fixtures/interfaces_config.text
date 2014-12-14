@@ -1,0 +1,48 @@
+! Command: show running-config
+! device: veos01 (vEOS, EOS-4.13.7M)
+!
+! boot system flash:/vEOS.swi
+!
+transceiver qsfp default-mode 4x10G
+!
+hostname veos01
+
+spanning-tree mode none
+!
+no aaa root
+aaa authentication policy local allow-nopassword-remote-login
+!
+
+clock timezone America/New_York
+!
+
+interface Port-Channel10
+!
+interface Port-Channel123
+!
+interface Ethernet1
+   flowcontrol send on
+   flowcontrol receive off
+!
+interface Ethernet2
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+
+interface Ethernet7
+
+interface Loopback0
+!
+interface Management1
+
+interface Vlan4094
+!
+ip routing
+!
+end
+

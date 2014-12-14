@@ -36,8 +36,6 @@ import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, call
-
 from testlib import get_fixture, random_string, function
 from testlib import EapiConfigUnitTest
 
@@ -53,44 +51,36 @@ class TestModuleInterfaces(EapiConfigUnitTest):
         self.instance = pyeapi.modules.interfaces.instance(None)
 
     def test_get(self):
-        def enable(*args):
-            if args == ('show interfaces',):
-                fixture = get_fixture('interfaces_show.json')
-            elif args == ('show interfaces flowcontrol', 'text'):
-                fixture = get_fixture('interfaces_flowcontrol.json')
-            else:
-                raise TypeError('Fixture not found: %r' % args)
-            return json.load(open(fixture))
+        fixture = get_fixture('interfaces_config.text')
+        self.eapi.enable.return_value = open(fixture).read()
 
-        self.eapi.enable.side_effect = enable
         result = self.instance.get('Ethernet1')
 
-        calls = [call('show interfaces'),
-                 call('show interfaces flowcontrol', 'text')]
-        self.eapi.enable.assert_has_calls(calls)
+        self.assertEqual(result['name'], 'Ethernet1')
+        self.assertEqual(result['description'], '')
+        self.assertFalse(result['shutdown'])
+        self.assertTrue(result['sflow'])
+        self.assertEqual(result['flowcontrol_send'], 'off')
+        self.assertEqual(result['flowcontrol_receive'], 'off')
 
-        self.assertIsInstance(result, dict)
 
     def test_getall(self):
 
         def enable(*args):
             if args == ('show interfaces',):
                 fixture = get_fixture('interfaces_show.json')
-            elif args == ('show interfaces flowcontrol', 'text'):
-                fixture = get_fixture('interfaces_flowcontrol.json')
+                return json.load(open(fixture))
+            elif args == ('show running-config all', 'text'):
+                fixture = get_fixture('interfaces_config.text')
+                return open(fixture).read()
             else:
                 raise TypeError('Fixture not found: %r' % args)
-            return json.load(open(fixture))
 
         self.eapi.enable.side_effect = enable
         result = self.instance.getall()
 
-        calls = [call('show interfaces'),
-                 call('show interfaces flowcontrol', 'text')]
-        self.eapi.enable.assert_has_calls(calls)
-
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 13)
+        self.assertEqual(len(result), 9)
 
     def test_instance_functions(self):
         for intf in self.INTERFACES:

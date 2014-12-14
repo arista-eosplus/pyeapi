@@ -30,63 +30,11 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import re
-import shlex
-
-INTF_RE = re.compile(r'(?P<name>[a-zA-Z]*)(?P<index>.*)$')
 
 class Interfaces(object):
 
     def __init__(self, api):
         self.api = api
-
-    def _parse_interface(self, interface):
-        """Returns an interface as a set of key/value pairs
-
-        Example:
-            {
-                "description": <string>
-                "shutdown": [true, false],
-                "sflow": [true, false]
-            }
-
-        Args:
-            interface (dict): set of attributes returned from eAPI command
-                              "show interface <name>"
-
-        Returns:
-            dict: A dict object containing the interface key/value pairs
-        """
-        response = dict()
-        response['description'] = interface['description']
-        response['shutdown'] = interface['interfaceStatus'] == 'disabled'
-        response['sflow'] = self._get_sflow_for(interface['name'])
-        return response
-
-    def _get_sflow_for(self, name):
-        result = self.api.enable('show running-config interfaces %s' % name,
-                                 'text')
-        return 'no sflow enable' not in result[0]['output']
-
-
-    def _parse_flowcontrol(self, name, flowcontrol):
-        for line in flowcontrol.split('\n')[3:]:
-            tokens = shlex.split(line)
-            if tokens:
-                if tokens[0] == name:
-                    return (tokens[1], tokens[3])
-        return (None, None)
-
-    def _get_flowcontrol_for(self, name, flowcontrol):
-        match = INTF_RE.match(name)
-        if not match:
-            return (None, None)
-
-        idx = match.group('index')
-        shortname = name[0:2] + idx
-        if shortname not in flowcontrol:
-            return (None, None)
-
-        return self._parse_flowcontrol(shortname, flowcontrol)
 
     def get(self, name):
         """Returns a single interface attribute dict as a set of
@@ -96,7 +44,12 @@ class Interfaces(object):
 
         Example
             {
-                "Ethernet1": {...}
+                "name": "Ethernet1",
+                "description": <string>,
+                "shutdown": [true, false],
+                "sflow": [true, false],
+                "flowcontrol_send": [on, off, desired],
+                "flowcontrol_recieve": [on, off, desired]
             }
 
         Args:
@@ -106,16 +59,37 @@ class Interfaces(object):
         Returns:
             dict: a dict object that represents the single interface
         """
-        interface = self.api.enable('show interfaces')
-        interface = interface[0]['interfaces'][name]
+        config = self.api.running.get('interface %s' % name)
+        config = '\n'.join(config)
 
-        flowcontrol = self.api.enable('show interfaces flowcontrol', 'text')
-        flowcontrol = flowcontrol[0]['output']
+        response = dict(name=name)
 
-        response = self._parse_interface(interface)
-        (tx, rx) = self._get_flowcontrol_for(name, flowcontrol)
-        response['flowcontrol_send'] = tx
-        response['flowcontrol_receive'] = rx
+        # description
+        match = re.search(r"(?<=\s{3}description\s)(.+)$", config, re.M)
+        response['description'] = match.groups(1)[0] if match else ''
+
+        # shutdown
+        response['shutdown'] = 'no shutdown' in config
+
+        # sflow
+        response['sflow'] = 'no sflow' not in config
+
+        # flowcontrol
+        if name[0:2] in ['Et', 'Ma']:
+            match = re.findall(r"(?<=flowcontrol\s)(send|receive)\s(.+)$",
+                               config, re.M)
+
+            send = receive = 'off'
+            for token, value in match:
+                if token == 'send':
+                    send = value
+                elif token == 'receive':
+                    receive = value
+        else:
+            send = receive = 'unsupported'
+
+        response['flowcontrol_send'] = send
+        response['flowcontrol_receive'] = receive
 
         return response
 
@@ -133,18 +107,12 @@ class Interfaces(object):
         Returns:
             dict: a dict object containing all interfaces and attributes
         """
-        interfaces = self.api.enable('show interfaces')
-        interfaces = interfaces[0]['interfaces']
-
-        flowcontrol = self.api.enable('show interfaces flowcontrol', 'text')
-        flowcontrol = flowcontrol[0]['output']
+        results  = self.api.enable('show interfaces')
+        interfaces = results[0]['interfaces']
 
         response = dict()
         for name in interfaces:
-            response[name] = self._parse_interface(interfaces[name])
-            (tx, rx) = self._get_flowcontrol_for(name, flowcontrol)
-            response[name]['flowcontrol_send'] = tx
-            response[name]['flowcontrol_receive'] = rx
+            response[name] = self.get(name)
 
         return response
 
