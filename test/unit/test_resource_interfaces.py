@@ -39,7 +39,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_string, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.interfaces
+import pyeapi.resources.interfaces
 
 class TestModuleInterfaces(EapiConfigUnitTest):
 
@@ -48,39 +48,20 @@ class TestModuleInterfaces(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.interfaces.instance(None)
+        self.instance = pyeapi.resources.interfaces.instance(None)
+        self.running_config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        fixture = get_fixture('interfaces_config.text')
-        self.eapi.enable.return_value = open(fixture).read()
-
         result = self.instance.get('Ethernet1')
-
-        self.assertEqual(result['name'], 'Ethernet1')
-        self.assertEqual(result['description'], '')
-        self.assertFalse(result['shutdown'])
-        self.assertTrue(result['sflow'])
-        self.assertEqual(result['flowcontrol_send'], 'off')
-        self.assertEqual(result['flowcontrol_receive'], 'off')
-
+        values = dict(name='Ethernet1', description='', shutdown=False,
+                      sflow=True, flowcontrol_send='off',
+                      flowcontrol_receive='off')
+        self.assertEqual(values, result)
 
     def test_getall(self):
-
-        def enable(*args):
-            if args == ('show interfaces',):
-                fixture = get_fixture('interfaces_show.json')
-                return json.load(open(fixture))
-            elif args == ('show running-config all', 'text'):
-                fixture = get_fixture('interfaces_config.text')
-                return open(fixture).read()
-            else:
-                raise TypeError('Fixture not found: %r' % args)
-
-        self.eapi.enable.side_effect = enable
         result = self.instance.getall()
-
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 9)
+        self.assertEqual(len(result), 10)
 
     def test_instance_functions(self):
         for intf in self.INTERFACES:

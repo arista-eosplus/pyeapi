@@ -31,11 +31,11 @@
 #
 import re
 
-DESCRIPTION_RE = re.compile(r'(?<=description\s)(?P<value>.*)$', re.M)
-SHUTDOWN_RE = re.compile(r'(shutdown)', re.M)
-SFLOW_RE = re.compile(r'(no slfow)')
-FLOWC_TX_RE = re.compile(r'(?:flowcontrol\ssend\s)(?P<value>.*)$')
-FLOWC_RX_RE = re.compile(r'(?:flowcontrol\sreceive\s)(?P<value>.*)$')
+DESCRIPTION_RE = re.compile(r'(?<=\s{3}description\s)(?P<value>.+)$', re.M)
+SHUTDOWN_RE = re.compile(r'\s{3}(no\sshutdown)$', re.M)
+SFLOW_RE = re.compile(r'(\s{3}no sflow)', re.M)
+FLOWC_TX_RE = re.compile(r'(?<=\s{3}flowcontrol\ssend\s)(?P<value>.+)$', re.M)
+FLOWC_RX_RE = re.compile(r'(?<=\s{3}flowcontrol\sreceive\s)(?P<value>.+)$', re.M)
 
 class Interfaces(object):
 
@@ -43,34 +43,47 @@ class Interfaces(object):
         self.api = api
 
     def get(self, name):
-        config = self.api.get_block('interface %s' % name)
+        """Returns an interface as a set of key/value pairs
 
-        searches = dict()
-        searches['description'] = (DESCRIPTION_RE, None, '')
-        searches['shutdown'] = (SHUTDOWN_RE, lambda x: x is not None, False)
-        searches['sflow'] = (SFLOW_RE, lambda x: x is not None, True)
+        Example:
+            {
+                "name": <string>,
+                "shutdown": [true, false],
+                "description": <string>,
+                "sflow": [true, false],
+                "flowcontrol_send": [on, off],
+                "flowcontrol_receive": [on, off]
+            }
 
-        searches['flowcontrol_send'] = (FLOWC_TX_RE,
-                                        lambda x: str(x[0].group('value')),
-                                        'off')
+        Args:
+            name (string): the iterface identifier to retrive the from
+                the configuration
 
-        searches['flowcontrol_receive'] = (FLOWC_RX_RE,
-                                           lambda x: str(x[0].group('value')),
-                                           'off')
+        Returns:
+            dict: a dict of key/value pairs that represent the current
+                running configuration from the node.  Returns None if
+                the specified interface is not found in the current
+                configuration
+        """
+        config = self.api.running_config.get_block('interface %s' % name)
+        if not config:
+            return None
 
-        results = dict()
+        response = dict(name=name)
+        response['shutdown'] = SHUTDOWN_RE.search(config) is None
+        response['sflow'] = SFLOW_RE.search(config) is None
 
-        for name, (regex, transform, default) in searches.items():
-            result = [m for l in config for m in [regex.match(l)] if m]
-            if result and transform:
-                results[name] = transform(result)
-            elif result:
-                results[name] = result[0].group('value')
-            else:
-                results[name] = default(result) if callable(default) else default
+        value = lambda x, y: x.group('value') if x else y
 
+        response['description'] = value(DESCRIPTION_RE.search(config), '')
 
-        return results
+        response['flowcontrol_send'] = value(FLOWC_TX_RE.search(config),
+                                             'off')
+
+        response['flowcontrol_receive'] = value(FLOWC_RX_RE.search(config),
+                                                'off')
+
+        return response
 
     def getall(self):
         """Returns all interfaces in a dict object.
@@ -86,8 +99,10 @@ class Interfaces(object):
         Returns:
             dict: a dict object containing all interfaces and attributes
         """
+        interfaces_re = re.compile('(?<=^interface\s)(.+)$', re.M)
+
         response = dict()
-        for name in self.api.findall('^interface\s(.+)$'):
+        for name in interfaces_re.findall(self.api.running_config.text):
             response[name] = self.get(name)
         return response
 
