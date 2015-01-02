@@ -49,23 +49,23 @@ class TestClient(unittest.TestCase):
         self.assertEqual(pyeapi.client.config, dict())
 
     def test_load_config_for_connection_with_filename(self):
-        conf = get_fixture('pyeapi.conf')
-        result = pyeapi.client.load_config(filename=conf)
+        conf = get_fixture('eapi.conf')
+        pyeapi.client.load_config(filename=conf)
         cfg = pyeapi.client.config['connection:test1']
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
 
     def test_load_config_for_connection_with_env(self):
-        os.environ['PYEAPI_CONF'] = get_fixture('pyeapi.conf')
-        result = pyeapi.client.load_config()
+        os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
+        pyeapi.client.load_config()
         cfg = pyeapi.client.config['connection:test1']
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
 
     def test_load_config(self):
-        conf = get_fixture('pyeapi.conf')
+        conf = get_fixture('eapi.conf')
         result = pyeapi.client.load_config(conf)
         self.assertEqual(len(pyeapi.client.config), 3)
         for name in ['localhost', 'test1', 'test2']:
@@ -81,12 +81,13 @@ class TestClient(unittest.TestCase):
 
     @patch('pyeapi.client.Connection')
     def test_connect_to_with_config(self, connection):
-        conf = get_fixture('pyeapi.conf')
+        conf = get_fixture('eapi.conf')
         pyeapi.client.load_config(filename=conf)
         result = pyeapi.client.connect_to('test1')
         kwargs = dict(host='192.168.1.16', username='eapi', password='password',
                       enablepwd='', use_ssl=False, port=None)
         connection.assert_called_once_with(**kwargs)
+
 
 
 

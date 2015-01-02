@@ -41,22 +41,23 @@ from mock import Mock, call
 from testlib import get_fixture, random_vlan, random_string, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.vlans
+import pyeapi.resources.vlans
 
 class TestModuleVlans(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleVlans, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.vlans.instance(None)
+        self.instance = pyeapi.resources.vlans.instance(None)
+        self.running_config = open(get_fixture('running_config.text')).read()
+
+    def test_get(self):
+        result = self.instance.get('1')
+        vlan = dict(vlan_id='1', name='default', state='active',
+                    trunk_groups=[])
+        self.assertEqual(vlan, result)
 
     def test_getall(self):
-        fixture = get_fixture('vlans_getall.json')
-        self.eapi.enable.return_value = json.load(open(fixture))
         result = self.instance.getall()
-
-        calls = call.enable(['show vlan', 'show vlan trunk group'])
-        self.eapi.assert_has_calls(calls)
-
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 4)
 
