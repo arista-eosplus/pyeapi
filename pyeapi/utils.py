@@ -34,6 +34,7 @@ import sys
 import imp
 import pprint
 import syslog
+import collections
 
 def import_module(name, path=None):
     parts = name.split('.')
@@ -80,4 +81,12 @@ def debug(text):
         syslog.openlog('pyeapi')
         syslog.syslog(syslog.LOG_NOTICE, str(text))
 
-
+def convert(data):
+    if isinstance(data, basestring):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert, data.iteritems()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert, data))
+    else:
+        return data

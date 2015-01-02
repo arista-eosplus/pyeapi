@@ -32,21 +32,22 @@
 import os
 from ConfigParser import ConfigParser
 
+from pyeapi.node import Node
 from pyeapi.connection import Connection
 
 config = dict()
 
-CONFPATHS = ['/mnt/flash/pyeapi.conf', '/etc/pyeapi/pyeapi.conf']
+CONFPATHS = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
 def load_config(filename=None):
-    if 'PYEAPI_CONF' in os.environ:
-        CONFPATHS.insert(0, os.environ['PYEAPI_CONF'])
+    if 'EAPI_CONF' in os.environ:
+        CONFPATHS.insert(0, os.environ['EAPI_CONF'])
 
     if filename is not None:
         CONFPATHS.insert(0, filename)
 
     for filename in CONFPATHS:
-        if os.path.exists(filename):
+        if os.path.exists(os.path.expanduser(filename)):
             conf = ConfigParser()
             conf.read(filename)
 
@@ -55,7 +56,7 @@ def load_config(filename=None):
                 config[section] = dict(host=name)
                 config[section].update(dict(conf.items(section)))
 
-            break
+            return filename
 
 def config_for(name):
     return config.get('connection:%s' % name)
@@ -74,6 +75,8 @@ def connect(host='localhost', username='admin', password='', use_ssl=True,
 
 def connect_to(name):
     kwargs = config_for(name)
-    return connect(**kwargs)
+    connection = connect(**kwargs)
+    return Node(connection)
+
 
 

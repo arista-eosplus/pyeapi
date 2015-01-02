@@ -35,61 +35,64 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_int, random_string
+from testlib import random_int, random_string, get_fixture
 
 import pyeapi.client
 
 class TestClient(unittest.TestCase):
 
+    def setUp(self):
+        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapi.client.config
+        connections = [dut.replace('connection:', '').strip() for dut in \
+                       config.keys() if dut.startswith('connection:')]
+        self.duts = list()
+        for connection in connections:
+            self.duts.append(pyeapi.client.connect_to(connection))
+
+
     def test_enable_single_command(self):
-        dut = pyeapi.client.connect('192.168.1.16', username='eapi',
-                                    password='password', use_ssl=False)
-        result = dut.enable('show version')
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
+        for dut in self.duts:
+            result = dut.enable('show version')
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
     def test_enable_multiple_commands(self):
-        dut = pyeapi.client.connect('192.168.1.16', username='eapi',
-                                    password='password', use_ssl=False)
-        commands = list()
-        for i in range(1, random_int(10, 200)):
-            commands.append('show version')
-        result = dut.enable(commands[:])
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), len(commands))
+        for dut in self.duts:
+            commands = list()
+            for i in range(1, random_int(10, 200)):
+                commands.append('show version')
+            result = dut.enable(commands[:])
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
 
     def test_config_single_command(self):
-        dut = pyeapi.client.connect('192.168.1.16', username='eapi',
-                                    password='password', use_ssl=False)
+        for dut in self.duts:
+            hostname = 'hostname %s' % random_string(5, 50)
+            result = dut.config(hostname)
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+            self.assertEqual(result[0], {}, 'dut=%s' % dut)
 
-        hostname = 'hostname %s' % random_string(5, 50)
-        result = dut.config(hostname)
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], {})
-
-        result = dut.enable('show running-config | include %s$' % hostname,
-                            'text')
-        self.assertEqual(result[0]['output'].strip(), hostname)
+            result = dut.enable('show running-config | include %s$' % hostname,
+                                'text')
+            self.assertEqual(result[0]['output'].strip(), hostname)
 
     def test_config_multiple_commands(self):
-        dut = pyeapi.client.connect('192.168.1.16', username='eapi',
-                                    password='password', use_ssl=False)
-
-        commands = list()
-        for i in range(1, random_int(10, 200)):
-            commands.append('hostname %s' % random_string(5, 20))
-        result = dut.config(commands[:])
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), len(commands))
+        for dut in self.duts:
+            commands = list()
+            for i in range(1, random_int(10, 200)):
+                commands.append('hostname %s' % random_string(5, 20))
+            result = dut.config(commands[:])
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
 
     def test_multiple_requests(self):
-        dut = pyeapi.client.connect('192.168.1.16', username='eapi',
-                                    password='password', use_ssl=False)
-        for i in range(1, random_int(10, 200)):
-            result = dut.enable('show version')
-            self.assertIsInstance(result, list)
-            self.assertEqual(len(result), 1)
+        for dut in self.duts:
+            for i in range(1, random_int(10, 200)):
+                result = dut.enable('show version')
+                self.assertIsInstance(result, list, 'dut=%s' % dut)
+                self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
 
 if __name__ == '__main__':

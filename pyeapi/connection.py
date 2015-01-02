@@ -29,7 +29,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-import collections
 import json
 import urllib2
 
@@ -73,8 +72,6 @@ class Connection(object):
 
         # runtime properties
         self._uri = None
-        self._running = None
-        self._startup = None
 
     def __repr__(self):
         return 'Connection(uri=%s)' % self.uri
@@ -86,20 +83,6 @@ class Connection(object):
         self._uri = "{}://{}:{}/command-api".format(self.protocol, self.host,
                                                     self.port)
         return self._uri
-
-    @property
-    def running(self):
-        if self._running is not None:
-            return self._running
-        self._running = self.get_config(flags=['all'])
-        return self._running
-
-    @property
-    def startup(self):
-        if self._startup is not None:
-            return self._startup
-        self._startup = self.get_config(config='startup-config', flags=['all'])
-        return self._startup
 
     def http(self, *args, **kwargs):
         if self._http is not None:
@@ -168,48 +151,4 @@ class Connection(object):
             self.error = exc
             raise
 
-    def config(self, commands):
-        """Convenience method that sends commands to config mode
-        """
-        if isinstance(commands, basestring):
-            commands = [commands]
-
-        if not isinstance(commands, collections.Iterable):
-            raise TypeError('commands must be an iterable object')
-
-        # push the configure command onto the command stack
-        commands.insert(0, 'configure')
-        response = self.enable(commands)
-
-        # pop the configure command output off the stack
-        response.pop(0)
-
-        return response
-
-    def enable(self, commands, format='json'):
-        """Convenience method that sends commands to enable mode
-        """
-        if isinstance(commands, basestring):
-            commands = [commands]
-
-        if not isinstance(commands, collections.Iterable):
-            raise TypeError('commands must be an iterable object')
-
-        response = self.execute(commands, format)
-        return response['result']
-
-    def module(self, name):
-        """Loads the module identified by name
-        """
-        module = load_module('pyeapi.modules.%s' % name)
-        return module.instance(self)
-
-    def get_config(self, config='running-config', flags=[]):
-        """Convenience method that returns the running-config as a dict
-        """
-        command = 'show %s' % config
-        for flag in flags:
-            command += ' %s' % flag
-        result = self.enable(command, 'text')
-        return parseconfig(result[0]['output'])
 

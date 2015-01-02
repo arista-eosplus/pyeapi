@@ -50,7 +50,8 @@ The username (eapi) and password (icanttellyou) can be anything you like.  In ad
 pyEAPI uses a conf file to pass the required parameters for username and password to the API client.  The default conf file location depends on if pyEAPI is running locally on an EOS switch or remotely on a Linux host.
 
 * If running directly in EOS, then the default file location is /mnt/flash/eapi.conf.
-* If running on a Linux host, the default file location is /etc/pyeapi/pyeapi.conf
+* If running on a Linux host, the default file location is ~/.eapi.conf,
+  followed by /etc/eapi.conf
 
 The pyEAPI conf file is an INI-style config file that supplies the basic authentication and connection parameters necessary to communicate with eAPI.
 
