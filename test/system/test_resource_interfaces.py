@@ -35,10 +35,9 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_int, random_string, get_fixture
+from testlib import random_string
 from systestlib import DutSystemTest
 
-import pyeapi.client
 
 class TestResourceInterfaces(DutSystemTest):
 
@@ -107,7 +106,7 @@ class TestResourceInterfaces(DutSystemTest):
             self.assertTrue(result)
             config = dut.enable('show interfaces Ethernet1')
             self.assertEqual(config[0]['interfaces']['Ethernet1']['description'],
-                            text)
+                             text)
 
     def test_set_sflow_enable(self):
         for dut in self.duts:
@@ -115,7 +114,7 @@ class TestResourceInterfaces(DutSystemTest):
             result = dut.resource('interfaces').set_sflow('Ethernet1', True)
             self.assertTrue(result)
             config = dut.enable('show running-config interfaces Ethernet1',
-                                    'text')
+                                'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
     def test_set_sflow_disable(self):
@@ -124,7 +123,7 @@ class TestResourceInterfaces(DutSystemTest):
             result = dut.resource('interfaces').set_sflow('Ethernet1', False)
             self.assertTrue(result)
             config = dut.enable('show running-config interfaces Ethernet1',
-                                    'text')
+                                'text')
             self.assertIn('no sflow enable', config[0]['output'])
 
 if __name__ == '__main__':

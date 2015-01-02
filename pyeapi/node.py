@@ -102,7 +102,7 @@ class Node(object):
     def get_config(self, config='running-config', flags=None):
         """Convenience method that returns the running-config as a dict
         """
-        flags = [] if  not flags else flags
+        flags = [] if not flags else flags
         command = 'show %s' % config
         for flag in flags:
             command += ' %s' % flag

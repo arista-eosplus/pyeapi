@@ -32,7 +32,7 @@
 import json
 import urllib2
 
-from pyeapi.utils import load_module, parseconfig, debug
+from pyeapi.utils import debug
 
 class CommandError(Exception):
     """ Base exception raised for command errors

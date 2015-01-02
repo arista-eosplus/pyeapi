@@ -44,7 +44,7 @@ class DutSystemTest(unittest.TestCase):
     def setUp(self):
         pyeapi.client.load_config(filename=get_fixture('dut.conf'))
         config = pyeapi.client.config
-        connections = [dut.replace('connection:', '').strip() for dut in \
+        connections = [dut.replace('connection:', '').strip() for dut in
                        config.keys() if dut.startswith('connection:')]
         self.duts = list()
         for connection in connections:

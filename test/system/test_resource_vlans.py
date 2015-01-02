@@ -35,10 +35,9 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_int, random_string, get_fixture
+from testlib import random_int, random_string
 from systestlib import DutSystemTest
 
-import pyeapi.client
 
 class TestResourceVlans(DutSystemTest):
 

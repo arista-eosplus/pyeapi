@@ -32,11 +32,8 @@
 import sys
 import os
 import unittest
-import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
-
-from mock import Mock, call
 
 from testlib import get_fixture, random_vlan, random_string, function
 from testlib import EapiConfigUnitTest
@@ -92,7 +89,6 @@ class TestModuleVlans(EapiConfigUnitTest):
     def test_set_state(self):
         for state in ['config', 'negate', 'default']:
             vid = random_vlan()
-            name = random_string()
             if state == 'config':
                 for value in ['active', 'suspend']:
                     cmds = ['vlan %s' % vid, 'state %s' % value]

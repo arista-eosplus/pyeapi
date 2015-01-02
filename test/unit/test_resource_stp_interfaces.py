@@ -32,13 +32,10 @@
 import sys
 import os
 import unittest
-import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, call
-
-from testlib import get_fixture, function, random_int
+from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
 import pyeapi.resources.spanningtree
