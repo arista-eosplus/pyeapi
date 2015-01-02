@@ -41,7 +41,7 @@ from mock import Mock, call
 from testlib import get_fixture, random_vlan, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.switchports
+import pyeapi.resources.switchports
 
 class TestModuleSwitchports(EapiConfigUnitTest):
 
@@ -49,43 +49,34 @@ class TestModuleSwitchports(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleSwitchports, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.switchports.instance(None)
+        self.instance = pyeapi.resources.switchports.instance(None)
+        self.running_config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        fixture = get_fixture('switchports_et1.json')
-        self.eapi.enable.return_value = json.load(open(fixture))
         result = self.instance.get('Ethernet1')
-        self.eapi.enable.assert_called_with(
-            'show interfaces Ethernet1 switchport', 'text')
+        values = dict(name='Ethernet1', mode='access', access_vlan='1',
+                      trunk_native_vlan='1', trunk_allowed_vlans='1-4094')
         self.assertIsInstance(result, dict)
 
     def test_getall(self):
-        def result(*args, **kwargs):
-            if args[0] == 'show interfaces':
-                fixture = get_fixture('switchports_getall.json')
-            elif args[0] == 'show interfaces Ethernet1 switchport':
-                fixture = get_fixture('switchports_et1.json')
-            return json.load(open(fixture))
-
-        self.eapi.enable.side_effect = result
-
         result = self.instance.getall()
-        calls = [call('show interfaces'),
-                 call('show interfaces Ethernet1 switchport', 'text')]
-        self.eapi.enable.assert_has_calls(calls)
-
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 7)
 
     def test_instance_functions(self):
         for intf in self.INTERFACES:
             for name in ['create', 'delete', 'default']:
                 if name == 'create':
-                    cmds = ['interface %s' % intf, 'no ip address']
+                    cmds = ['interface %s' % intf, 'no ip address',
+                            'default switchport']
+
                 elif name == 'delete':
                     cmds = ['interface %s' % intf, 'no switchport']
+
                 elif name == 'default':
-                    cmds = ['interface %s' % intf, 'default switchport']
+                    cmds = ['interface %s' % intf, 'no ip address',
+                            'default switchport']
+
                 func = function(name, intf)
                 self.eapi_positive_config_test(func, cmds)
 

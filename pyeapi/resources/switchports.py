@@ -31,15 +31,16 @@
 #
 import re
 
-MODE_RE = re.compile(r'(?<=Operational Mode:\s)(?P<mode>.*)')
-ACCESS_VLAN_RE = re.compile(r'(?<=Access Mode VLAN:\s)(?P<access_vlan>\d+)')
-TRUNK_VLAN_RE = re.compile(r'(?<=Trunking Native Mode VLAN:\s)'
-                           r'(?P<trunk_vlan>\d+)')
-TRUNKING_VLANS_RE = re.compile(r'(?<=Trunking VLANs Enabled:\s)'
-                               r'(?P<trunking_vlans>.*)')
+MODE_RE = re.compile(r'(?<=\s{3}switchport\smode\s)(?P<value>.+)$', re.M)
+ACCESS_VLAN_RE = re.compile(r'(?<=\s{3}switchport\saccess\svlan\s)'
+                            r'(?P<value>\d+)$', re.M)
+TRUNK_VLAN_RE = re.compile(r'(?<=\s{3}switchport\strunk\snative\svlan\s)'
+                           r'(?P<value>\d+)$', re.M)
+TRUNKING_VLANS_RE = re.compile(r'(?<=\s{3}switchport\strunk\sallowed\svlan\s)'
+                               r'(?P<value>.*)$', re.M)
 
 
-class Switchport(object):
+class Switchports(object):
 
     def __init__(self, api):
         self.api = api
@@ -47,36 +48,47 @@ class Switchport(object):
 
     def get(self, name):
         """Returns a dictionary object that represents a switchport
+
+        Example
+            {
+                "name": <string>,
+                "mode": [access, trunk],
+                "access_vlan": <string>
+                "trunk_native_vlan": <string>,
+                "trunk_allowed_vlans": <string>
+            }
+
+        Args:
+            name (string): The interface identifer to get.  Note: Switchports
+                are only supported on Ethernet and Port-Channel interfaces
+
+        Returns:
+            dict: The current interface configuration attributes as a
+                dict object
         """
-        result = self.api.enable('show interfaces %s switchport' % name, 'text')
-        output = result[0]['output']
+        config = self.api.running_config.get_block('interface %s' % name)
 
-        data = dict(name=name)
-
-        match = MODE_RE.search(output)
-        data['mode'] = \
-            'access' if match.group('mode') == 'static access' else 'trunk'
-
-        data['access_vlan'] = \
-            ACCESS_VLAN_RE.search(output).group('access_vlan')
-
-        data['trunk_native_vlan'] = \
-            TRUNK_VLAN_RE.search(output).group('trunk_vlan')
-
-        data['trunk_allowed_vlans'] = \
-            TRUNKING_VLANS_RE.search(output).group('trunking_vlans')
-
-        return data
+        if not re.match('\s{3}no\sswitchport', config, re.M):
+            resp = dict(name=name)
+            resp['mode'] = MODE_RE.search(config, re.M).group('value')
+            resp['access_vlan'] = ACCESS_VLAN_RE.search(config, re.M).group('value')
+            resp['trunk_native_vlan'] = \
+                 TRUNK_VLAN_RE.search(config, re.M).group('value')
+            resp['trunk_allowed_vlans'] = \
+                TRUNKING_VLANS_RE.search(config, re.M).group('value')
+            return resp
 
     def getall(self):
         """Returns a dictionary object that represents all configured
         switchports found in the running-config
         """
-        result = self.api.enable('show interfaces')
+        interfaces_re = re.compile('(?<=^interface\s)([Et|Po].+)$', re.M)
+
         response = dict()
-        for key, value in result[0]['interfaces'].items():
-            if value['forwardingModel'] == 'bridged':
-                response[key] = self.get(key)
+        for name in interfaces_re.findall(self.api.running_config.text):
+            interface = self.get(name)
+            if interface:
+                response[name] = interface
         return response
 
     def create(self, name):
@@ -89,8 +101,9 @@ class Switchport(object):
         return self.api.config(command) == [{}, {}]
 
     def default(self, name):
-        command = ['interface %s' % name, 'default switchport']
-        return self.api.config(command) == [{}, {}]
+        command = ['interface %s' % name, 'no ip address',
+                   'default switchport']
+        return self.api.config(command) == [{}, {}, {}]
 
     def set_mode(self, name, value=None, default=False):
         commands = ['interface %s' % name]
@@ -134,4 +147,4 @@ class Switchport(object):
 
 
 def instance(api):
-    return Switchport(api)
+    return Switchports(api)
