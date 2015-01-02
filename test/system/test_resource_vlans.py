@@ -36,20 +36,11 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_int, random_string, get_fixture
+from systestlib import DutSystemTest
 
 import pyeapi.client
 
-class TestResourceVlans(unittest.TestCase):
-
-    def setUp(self):
-        self.longMessage = True
-        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
-        config = pyeapi.client.config
-        connections = [dut.replace('connection:', '').strip() for dut in \
-                       config.keys() if dut.startswith('connection:')]
-        self.duts = list()
-        for connection in connections:
-            self.duts.append(pyeapi.client.connect_to(connection))
+class TestResourceVlans(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
