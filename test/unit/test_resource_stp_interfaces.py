@@ -41,43 +41,28 @@ from mock import Mock, call
 from testlib import get_fixture, function, random_int
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.spanningtree
+import pyeapi.resources.spanningtree
 
-class TestModuleStp(EapiConfigUnitTest):
+class TestResourceStp(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestModuleStp, self).__init__(*args, **kwargs)
-        self.instances = pyeapi.modules.spanningtree.Stp(None)
+        super(TestResourceStp, self).__init__(*args, **kwargs)
+        self.instances = pyeapi.resources.spanningtree.Stp(None)
 
 
-
-class TestModuleStpInterfaces(EapiConfigUnitTest):
+class TestResourceStpInterfaces(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
-        super(TestModuleStpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.spanningtree.StpInterfaces(None)
+        super(TestResourceStpInterfaces, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.resources.spanningtree.StpInterfaces(None)
+        self.running_config = open(get_fixture('running_config.text')).read()
 
     def test_getall(self):
-
-        def enable(*args):
-            if args == ('show interfaces',):
-                fixture = get_fixture('stp_interfaces_getall.json')
-            elif args == ('show running-config section Ethernet2', 'text'):
-                fixture = get_fixture('stp_interfaces_et2.json')
-            return json.load(open(fixture))
-
-        self.eapi.enable.side_effect = enable
-
         result = self.instance.getall()
-
-        calls = [call.enable('show interfaces'),
-                 call.enable('show running-config section Ethernet2', 'text')]
-        self.eapi.assert_has_calls(calls)
-
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), 7)
 
     def test_set_portfast_with_value(self):
         for intf in self.INTERFACES:
@@ -86,7 +71,7 @@ class TestModuleStpInterfaces(EapiConfigUnitTest):
                 if value is 'disable':
                     cmds.append('no spanning-tree portfast')
                 else:
-                    cmds.append('spanning-tree portfast')
+                    cmds.append('spanning-tree portfast %s' % value)
                 func = function('set_portfast', intf, value)
                 self.eapi_positive_config_test(func, cmds)
 
@@ -105,9 +90,10 @@ class TestModuleStpInterfaces(EapiConfigUnitTest):
     def test_set_bpduguard_with_value(self):
         for intf in self.INTERFACES:
             for value in ['enable', 'disable']:
+                cfgvalue = value == 'enable'
                 cmds = ['interface %s' % intf,
                         'spanning-tree bpduguard %s' % value]
-                func = function('set_bpduguard', intf, value)
+                func = function('set_bpduguard', intf, cfgvalue)
                 self.eapi_positive_config_test(func, cmds)
 
     def test_set_bpduguard_with_no_value(self):

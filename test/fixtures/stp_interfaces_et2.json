@@ -1,5 +1,0 @@
-[
-  {
-     "output": "interface Ethernet2\n   spanning-tree portfast\n   spanning-tree bpduguard enable\n"
-  }
-]
