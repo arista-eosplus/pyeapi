@@ -60,6 +60,9 @@ class Node(object):
         self._startup = self.get_config(config='startup-config', flags=['all'])
         return self._startup
 
+    def __str__(self):
+        return 'Node(connection=%s)' % self.connection
+
     def config(self, commands):
         """Convenience method that sends commands to config mode
         """
