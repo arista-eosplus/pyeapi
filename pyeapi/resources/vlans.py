@@ -31,6 +31,8 @@
 #
 import re
 
+from pyeapi.validators import isvlan
+
 NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
 TRUNK_GROUPS_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
@@ -97,7 +99,10 @@ class Vlans(object):
         Returns:
             bool: True if create was successful otherwise False
         """
-        return self.api.config('vlan %s' % vid) == [{}]
+        if isvlan(vid):
+            return self.api.config('vlan %s' % vid) == [{}]
+        else:
+            return False
 
     def delete(self, vid):
         """ Deletes a VLAN from the running configuration
@@ -108,7 +113,10 @@ class Vlans(object):
         Returns:
             bool: True if the delete operation was successful otherwise False
         """
-        return self.api.config('no vlan %s' % vid) == [{}]
+        if isvlan(vid):
+            return self.api.config('no vlan %s' % vid) == [{}]
+        else:
+            return False
 
     def default(self, vid):
         """ Defaults the VLAN configuration
