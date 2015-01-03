@@ -41,22 +41,20 @@ from mock import Mock
 from testlib import get_fixture, function, random_int
 from testlib import EapiConfigUnitTest
 
-import pyeapi.modules.ipinterfaces
+import pyeapi.resources.ipinterfaces
 
-class TestModuleIpinterfaces(EapiConfigUnitTest):
+class TestResourcesIpinterfaces(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
                   'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
-        super(TestModuleIpinterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.modules.ipinterfaces.instance(None)
+        super(TestResourcesIpinterfaces, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.resources.ipinterfaces.instance(None)
+        self.running_config = open(get_fixture('running_config.text')).read()
 
     def test_getall(self):
-        fixture = get_fixture('ipinterfaces.json')
-        self.eapi.enable.return_value = json.load(open(fixture))
         result = self.instance.getall()
-        self.eapi.enable.assert_called_with('show ip interfaces')
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 3)
 
