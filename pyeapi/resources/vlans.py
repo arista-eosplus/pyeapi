@@ -29,21 +29,65 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+"""Module for working with EOS VLAN configuration
+
+The Vlans resource provides configuration of VLAN resources for an EOS
+node.
+
+Parameters:
+    name (string): The name parameter maps to the VLAN name in EOS.  Valid
+        values include any consecutive sequence of numbers, letters and
+        underscore up to the maximum number of characters.  This parameter
+        is defaultable
+
+    state (string): The state parameter sets the operational state of
+        the VLAN on the node.   It has two valid values: active or suspend.
+        The state parameter is defaultable
+
+    trunk_groups (array): The trunk_groups parameter provides a list of
+        trunk groups configured for this VLAN.  This parameter is
+        defaultable.
+
+"""
+
 import re
 
-from pyeapi.validators import isvlan
+from pyeapi.resource import BaseResource
 
 NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
-TRUNK_GROUPS_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
+TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
 
-class Vlans(object):
+def isvlan(value):
+    """Checks if the argument is a valid VLAN
 
-    def __init__(self, api):
-        self.api = api
+    A valid VLAN is an integeer value in the range of 1 to 4094.  This
+    function will test if the argument falls into the specified range and
+    is considered a valid VLAN
+
+    Args:
+        value: The value to check if is a valid VLAN
+
+    Returns:
+        True if the supplied value is a valid VLAN otherwise False
+    """
+    try:
+        value = int(value)
+        return value in range(1, 4095)
+    except ValueError:
+        return False
+
+
+class Vlans(BaseResource):
+    """The Vlans class provides a configuration resource for VLANs
+
+    The Vlans class is derived from ResourceBase a standard set of methods
+    for working with VLAN configurations on an EOS node.
+
+    """
 
     def get(self, vid):
-        """Returns a vlan as a set of key/value pairs
+        """Returns the VLAN configuration as key/value pairs
 
         Example:
             {
@@ -57,16 +101,17 @@ class Vlans(object):
                 running-config
 
         Returns:
-            dict: a dict object containing the vlan key/value pairs
+            A dict object containing the vlan key/value pairs
+
         """
-        config = self.api.running_config.get_block('vlan %s' % vid)
+        config = self.node.config.get_block('vlan %s' % vid)
         if not config:
             return None
 
         response = dict(vlan_id=vid)
         response['name'] = NAME_RE.search(config).group('value')
         response['state'] = STATE_RE.search(config).group('value')
-        response['trunk_groups'] = TRUNK_GROUPS_RE.findall(config)
+        response['trunk_groups'] = TRUNK_GROUP_RE.findall(config)
 
         return response
 
@@ -80,12 +125,13 @@ class Vlans(object):
             }
 
         Returns:
-            dict: a dict object of Vlan attributes
+            A dict object of Vlan attributes
+
         """
         vlans_re = re.compile(r'(?<=^vlan\s)(\d+)', re.M)
 
         response = dict()
-        for vid in vlans_re.findall(self.api.running_config.text):
+        for vid in vlans_re.findall(self.node.config.text):
             response[vid] = self.get(vid)
         return response
 
@@ -97,12 +143,10 @@ class Vlans(object):
             vid (str): The VLAN ID to create
 
         Returns:
-            bool: True if create was successful otherwise False
+            True if create was successful otherwise False
         """
-        if isvlan(vid):
-            return self.api.config('vlan %s' % vid) == [{}]
-        else:
-            return False
+        command = 'vlan %s' % vid
+        return self.configure(command) if isvlan(vid) else False
 
     def delete(self, vid):
         """ Deletes a VLAN from the running configuration
@@ -111,12 +155,10 @@ class Vlans(object):
             vid (str): The VLAN ID to delete
 
         Returns:
-            bool: True if the delete operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
-        if isvlan(vid):
-            return self.api.config('no vlan %s' % vid) == [{}]
-        else:
-            return False
+        command = 'no vlan %s' % vid
+        return self.configure(command) if isvlan(vid) else False
 
     def default(self, vid):
         """ Defaults the VLAN configuration
@@ -125,9 +167,10 @@ class Vlans(object):
             vid (str): The VLAN ID to default
 
         Returns:
-            bool: True if the delete operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
-        return self.api.config('default vlan %s' % vid) == [{}]
+        command = 'default vlan %s' % vid
+        return self.configure(command) if isvlan(vid) else False
 
     def set_name(self, vid, name=None, default=False):
         """ Configures the VLAN name
@@ -138,7 +181,7 @@ class Vlans(object):
             default (bool): Defaults the VLAN ID name
 
         Returns:
-            bool: True if the delete operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
         commands = ['vlan %s' % vid]
         if default:
@@ -147,7 +190,7 @@ class Vlans(object):
             commands.append('name %s' % name)
         else:
             commands.append('no name')
-        return self.api.config(commands) == [{}, {}]
+        return self.configure(commands)
 
     def set_state(self, vid, value=None, default=False):
         """ Configures the VLAN state
@@ -158,7 +201,7 @@ class Vlans(object):
             default (bool): Configures the vlan state to its default value
 
         Returns:
-            bool: True if the delete operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
         commands = ['vlan %s' % vid]
         if default:
@@ -167,7 +210,7 @@ class Vlans(object):
             commands.append('state %s' % value)
         else:
             commands.append('no state')
-        return self.api.config(commands) == [{}, {}]
+        return self.configure(commands)
 
     def add_trunk_group(self, vid, name):
         """ Adds a new trunk group to the Vlan in the running-config
@@ -177,10 +220,10 @@ class Vlans(object):
             name (str): The trunk group to add to the list
 
         Returns:
-            bool: Tre if the add operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
         commands = ["vlan %s" % vid, "trunk group %s" % name]
-        return self.api.config(commands) == [{}, {}]
+        return self.configure(commands)
 
     def remove_trunk_group(self, vid, name):
         """ Removes a trunk group from the list of configured trunk groups
@@ -191,11 +234,21 @@ class Vlans(object):
             name (str): The trunk group to add to the list
 
         Returns:
-            bool: Tre if the add operation was successful otherwise False
+            True if the operation was successful otherwise False
         """
         commands = ["vlan %s" % vid, "no trunk group %s" % name]
-        return self.api.config(commands) == [{}, {}]
+        return self.configure(commands)
 
-def instance(api):
-    return Vlans(api)
+def instance(node):
+    """Returns an instance of Vlans
+
+    This method will create and return an instance of the Vlans object passing
+    the value of API to the object.  The instance method is required for the
+    resource to be autoloaded by the Node object
+
+    Args:
+        node (Node): The node argument passes an instance of Node to the
+            resource
+    """
+    return Vlans(node)
 
