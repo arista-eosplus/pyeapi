@@ -39,29 +39,15 @@ class Node(object):
     def __init__(self, connection):
         self._connection = connection
 
-        self._running = None
-        self._startup = None
-
     @property
     def connection(self):
         return self._connection
 
-    @property
-    def running_config(self):
-        if self._running is not None:
-            return self._running
-        self._running = self.get_config(flags=['all'])
-        return self._running
-
-    @property
-    def startup_config(self):
-        if self._startup is not None:
-            return self._startup
-        self._startup = self.get_config(config='startup-config', flags=['all'])
-        return self._startup
-
     def __str__(self):
-        return 'Node(connection=%s)' % self.connection
+        return 'Node(uri=%s)' % self.connection.uri
+
+    def __repr__(self):
+        return 'Node(%s)' % repr(self.connection)
 
     def config(self, commands):
         """Convenience method that sends commands to config mode
@@ -99,13 +85,12 @@ class Node(object):
         module = load_module('pyeapi.resources.%s' % name)
         return module.instance(self)
 
-    def get_config(self, config='running-config', flags=None):
+    def get_config(self, config='running-config', params=None):
         """Convenience method that returns the running-config as a dict
         """
-        flags = [] if not flags else flags
         command = 'show %s' % config
-        for flag in flags:
-            command += ' %s' % flag
+        if params:
+            command += ' %s' % params
         result = self.enable(command, 'text')
         return Config(str(result[0]['output']).strip())
 
