@@ -35,17 +35,36 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, function
+from testlib import get_fixture, random_string, function
 from testlib import EapiConfigUnitTest
 
 import pyeapi.resources.spanningtree
+
+def get_running_config():
+    return get_fixture('running_config.text')
 
 class TestResourceStp(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestResourceStp, self).__init__(*args, **kwargs)
-        self.instances = pyeapi.resources.spanningtree.Stp(None)
+        self.instance = pyeapi.resources.spanningtree.Stp(None)
+        self.config = open(get_running_config()).read()
 
+    def test_set_mode_with_value(self):
+        for value in ['mstp', 'none']:
+            cmds = 'spanning-tree mode %s' % value
+            func = function('set_mode', value)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_mode_with_no_value(self):
+        cmds = 'no spanning-tree mode'
+        func = function('set_mode')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_mode_invalid_value_raises_value_error(self):
+        value = random_string()
+        func = function('set_mode', value)
+        self.eapi_exception_config_test(func, ValueError)
 
 class TestResourceStpInterfaces(EapiConfigUnitTest):
 
@@ -54,7 +73,7 @@ class TestResourceStpInterfaces(EapiConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestResourceStpInterfaces, self).__init__(*args, **kwargs)
         self.instance = pyeapi.resources.spanningtree.StpInterfaces(None)
-        self.running_config = open(get_fixture('running_config.text')).read()
+        self.config = open(get_running_config()).read()
 
     def test_getall(self):
         result = self.instance.getall()
@@ -84,6 +103,17 @@ class TestResourceStpInterfaces(EapiConfigUnitTest):
             func = function('set_portfast', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
+    def test_set_portfast_invalid_value_raises_value_error(self):
+        for intf in self.INTERFACES:
+            value = random_string()
+            func = function('set_portfast', intf, value)
+            self.eapi_exception_config_test(func, ValueError)
+
+    def test_set_portfast_invalid_intf_raises_value_error(self):
+        intf = random_string()
+        func = function('set_portfast', intf)
+        self.eapi_exception_config_test(func, ValueError)
+
     def test_set_bpduguard_with_value(self):
         for intf in self.INTERFACES:
             for value in ['enable', 'disable']:
@@ -99,11 +129,22 @@ class TestResourceStpInterfaces(EapiConfigUnitTest):
             func = function('set_bpduguard', intf)
             self.eapi_positive_config_test(func, cmds)
 
-    def tset_set_bpduguard_with_default(self):
+    def test_set_bpduguard_with_default(self):
         for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'no spanning-tree bpduguard']
-            func = function('set_bpduguard', default=True)
+            cmds = ['interface %s' % intf, 'default spanning-tree bpduguard']
+            func = function('set_bpduguard', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+    def test_set_bpduguard_invalid_value_raises_type_error(self):
+        for intf in self.INTERFACES:
+            value = random_string()
+            func = function('set_bpduguard', intf, value)
+            self.eapi_exception_config_test(func, TypeError)
+
+    def test_set_bpduguard_invalid_intf_raises_value_error(self):
+        intf = random_string()
+        func = function('set_bpduguard', intf)
+        self.eapi_exception_config_test(func, ValueError)
 
 
 if __name__ == '__main__':
