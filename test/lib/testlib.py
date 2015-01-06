@@ -99,5 +99,11 @@ class EapiConfigUnitTest(unittest.TestCase):
         result = self.eapi_config_test(func, cmds, *args, **kwargs)
         self.assertFalse(result)
 
+    def eapi_exception_config_test(self, func, exc, *args, **kwargs):
+        with self.assertRaises(exc) as context:
+            self.eapi_config_test(func, *args, **kwargs)
+
+
+
 
 
