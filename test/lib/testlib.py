@@ -66,17 +66,15 @@ class EapiConfigUnitTest(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         self.instance = None
-        self.running_config = None
+        self.config = None
         super(EapiConfigUnitTest, self).__init__(*args, **kwargs)
 
     def setUp(self):
         self.node = Mock(spec=Node)
-
-        running = PropertyMock(return_value=Config(self.running_config))
-        type(self.node).running_config = running
+        self.node.get_config.return_value = self.config
 
         self.assertIsNotNone(self.instance)
-        self.instance.api = self.node
+        self.instance.node = self.node
 
     def eapi_config_test(self, func, cmds=None, *args, **kwargs):
         func, fargs, fkwargs = func

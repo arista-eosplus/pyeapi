@@ -35,7 +35,9 @@ This module provides a set of base classes and functions common to
 all resources.  All resources should drive from BaseResource
 
 """
+
 from pyeapi.connection import CommandError
+from pyeapi.config import Config
 
 class BaseResource(object):
     """Base class for all resources to derive from
@@ -67,7 +69,7 @@ class BaseResource(object):
     def config(self):
         if self._config is not None:
             return self._config
-        self._config = self.node.get_config(params=['all'])
+        self._config = Config(self.node.get_config(params=['all']))
         return self._config
 
     def configure(self, commands):

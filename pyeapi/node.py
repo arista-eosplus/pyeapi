@@ -31,7 +31,6 @@
 #
 import collections
 
-from pyeapi.config import Config
 from pyeapi.utils import load_module
 
 class Node(object):
@@ -92,5 +91,5 @@ class Node(object):
         if params:
             command += ' %s' % params
         result = self.enable(command, 'text')
-        return Config(str(result[0]['output']).strip())
+        return str(result[0]['output']).strip()
 

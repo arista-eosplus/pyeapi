@@ -45,7 +45,7 @@ class TestModuleVlans(EapiConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestModuleVlans, self).__init__(*args, **kwargs)
         self.instance = pyeapi.resources.vlans.instance(None)
-        self.running_config = open(get_fixture('running_config.text')).read()
+        self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
         result = self.instance.get('1')

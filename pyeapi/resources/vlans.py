@@ -104,7 +104,7 @@ class Vlans(BaseResource):
             A dict object containing the vlan key/value pairs
 
         """
-        config = self.node.config.get_block('vlan %s' % vid)
+        config = self.config.get_block('vlan %s' % vid)
         if not config:
             return None
 
@@ -131,7 +131,7 @@ class Vlans(BaseResource):
         vlans_re = re.compile(r'(?<=^vlan\s)(\d+)', re.M)
 
         response = dict()
-        for vid in vlans_re.findall(self.node.config.text):
+        for vid in vlans_re.findall(self.config.text):
             response[vid] = self.get(vid)
         return response
 
