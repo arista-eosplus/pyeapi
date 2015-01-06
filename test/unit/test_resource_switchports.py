@@ -50,7 +50,7 @@ class TestModuleSwitchports(EapiConfigUnitTest):
     def __init__(self, *args, **kwargs):
         super(TestModuleSwitchports, self).__init__(*args, **kwargs)
         self.instance = pyeapi.resources.switchports.instance(None)
-        self.running_config = open(get_fixture('running_config.text')).read()
+        self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
         result = self.instance.get('Ethernet1')
@@ -68,7 +68,7 @@ class TestModuleSwitchports(EapiConfigUnitTest):
             for name in ['create', 'delete', 'default']:
                 if name == 'create':
                     cmds = ['interface %s' % intf, 'no ip address',
-                            'default switchport']
+                            'switchport']
 
                 elif name == 'delete':
                     cmds = ['interface %s' % intf, 'no switchport']
