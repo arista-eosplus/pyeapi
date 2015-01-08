@@ -59,8 +59,7 @@ def load_config(filename=None):
             return filename
 
 def config_for(name):
-    return config.get('connection:%s' % name)
-
+    return config['connection:%s' % name]
 
 def connect(host='localhost', username='admin', password='', use_ssl=True,
             enablepwd='', port=None):
@@ -77,6 +76,7 @@ def connect_to(name):
     kwargs = config_for(name)
     connection = connect(**kwargs)
     return Node(connection)
+
 
 
 
