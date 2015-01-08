@@ -48,7 +48,7 @@ class TestResourceInterfaces(DutSystemTest):
                         'flowcontrol send off',
                         'flowcontrol receive on',
                         'no sflow enable'])
-            result = dut.resource('interfaces').get('Ethernet1')
+            result = dut.api('interfaces').get('Ethernet1')
             self.assertIsInstance(result, dict)
             self.assertEqual(result['description'], 'this is a test')
             self.assertFalse(result['shutdown'])
@@ -59,7 +59,7 @@ class TestResourceInterfaces(DutSystemTest):
     def test_getall(self):
         for dut in self.duts:
             dut.config(['default interface et1-7'])
-            result = dut.resource('interfaces').getall()
+            result = dut.api('interfaces').getall()
             self.assertIsInstance(result, dict)
             for intf in ['Ethernet1', 'Management1']:
                 self.assertIn(intf, result)
@@ -67,33 +67,33 @@ class TestResourceInterfaces(DutSystemTest):
     def test_create_and_return_true(self):
         for dut in self.duts:
             dut.config('no interface Loopback0')
-            result = dut.resource('interfaces').create('Loopback0')
+            result = dut.api('interfaces').create('Loopback0')
             self.assertTrue(result)
             config = dut.enable('show interfaces')
             self.assertIn('Loopback0', config[0]['interfaces'])
 
-    def test_create_and_return_false(self):
-        for dut in self.duts:
-            result = dut.resource('interfaces').create('Ethernet1')
-            self.assertFalse(result)
+    def test_create_ethernet_raises_not_implemented_error(self):
+        with self.assertRaises(NotImplementedError):
+            for dut in self.duts:
+                dut.api('interfaces').create('Ethernet1')
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
             dut.config('interface Loopback0')
-            result = dut.resource('interfaces').delete('Loopback0')
+            result = dut.api('interfaces').delete('Loopback0')
             self.assertTrue(result)
             config = dut.enable('show interfaces')
             self.assertNotIn('Loopback0', config[0]['interfaces'])
 
-    def test_delete_and_return_false(self):
-        for dut in self.duts:
-            result = dut.resource('interfaces').delete('Ethernet1')
-            self.assertFalse(result)
+    def test_delete_ethernet_raises_not_implemented_error(self):
+        with self.assertRaises(NotImplementedError):
+            for dut in self.duts:
+                dut.api('interfaces').delete('Ethernet1')
 
     def test_default(self):
         for dut in self.duts:
             dut.config(['interface Ethernet1', 'shutdown'])
-            result = dut.resource('interfaces').default('Ethernet1')
+            result = dut.api('interfaces').default('Ethernet1')
             self.assertTrue(result)
             config = dut.enable('show interfaces Ethernet1')
             config = config[0]['interfaces']['Ethernet1']
@@ -102,16 +102,16 @@ class TestResourceInterfaces(DutSystemTest):
     def test_set_description(self):
         for dut in self.duts:
             text = random_string()
-            result = dut.resource('interfaces').set_description('Ethernet1', text)
+            result = dut.api('interfaces').set_description('Ethernet1', text)
             self.assertTrue(result)
             config = dut.enable('show interfaces Ethernet1')
-            self.assertEqual(config[0]['interfaces']['Ethernet1']['description'],
-                             text)
+            config = config[0]['interfaces']['Ethernet1']
+            self.assertEqual(config['description'], text)
 
     def test_set_sflow_enable(self):
         for dut in self.duts:
             dut.config(['interface Ethernet1', 'no sflow enable'])
-            result = dut.resource('interfaces').set_sflow('Ethernet1', True)
+            result = dut.api('interfaces').set_sflow('Ethernet1', True)
             self.assertTrue(result)
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')
@@ -120,7 +120,7 @@ class TestResourceInterfaces(DutSystemTest):
     def test_set_sflow_disable(self):
         for dut in self.duts:
             dut.config('default interface Ethernet1')
-            result = dut.resource('interfaces').set_sflow('Ethernet1', False)
+            result = dut.api('interfaces').set_sflow('Ethernet1', False)
             self.assertTrue(result)
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')

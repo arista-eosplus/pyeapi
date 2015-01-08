@@ -75,6 +75,16 @@ def load_module(name):
             raise ImportError('unable to import module %s' % name)
         return mod
 
+class ProxyCall(object):
+
+    def __init__(self, proxy, method):
+        self.proxy = proxy
+        self.method = method
+
+    def __call__(self, *args, **kwargs):
+        return self.proxy(self.method, *args, **kwargs)
+
+
 def parseconfig(config):
     cfg = dict()
     for element in config.strip().split('\n'):

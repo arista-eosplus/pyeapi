@@ -1314,7 +1314,7 @@ interface Ethernet7
    no switchport tool group
 !
 interface Loopback0
-   description automatically provisioned by Puppet
+   no description
    no shutdown
    default load-interval
    mtu 1500
