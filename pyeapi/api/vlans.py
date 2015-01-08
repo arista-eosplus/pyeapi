@@ -52,7 +52,7 @@ Parameters:
 
 import re
 
-from pyeapi.resource import BaseResource
+from pyeapi.api import EntityCollection
 
 NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
@@ -78,7 +78,7 @@ def isvlan(value):
         return False
 
 
-class Vlans(BaseResource):
+class Vlans(EntityCollection):
     """The Vlans class provides a configuration resource for VLANs
 
     The Vlans class is derived from ResourceBase a standard set of methods
@@ -86,7 +86,7 @@ class Vlans(BaseResource):
 
     """
 
-    def get(self, vid):
+    def get(self, value):
         """Returns the VLAN configuration as key/value pairs
 
         Example:
@@ -104,11 +104,11 @@ class Vlans(BaseResource):
             A dict object containing the vlan key/value pairs
 
         """
-        config = self.config.get_block('vlan %s' % vid)
+        config = self.config.get_block('vlan %s' % value)
         if not config:
             return None
 
-        response = dict(vlan_id=vid)
+        response = dict(vlan_id=value)
         response['name'] = NAME_RE.search(config).group('value')
         response['state'] = STATE_RE.search(config).group('value')
         response['trunk_groups'] = TRUNK_GROUP_RE.findall(config)
@@ -134,7 +134,6 @@ class Vlans(BaseResource):
         for vid in vlans_re.findall(self.config.text):
             response[vid] = self.get(vid)
         return response
-
 
     def create(self, vid):
         """ Creates a new VLAN resource
