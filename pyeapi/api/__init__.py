@@ -60,8 +60,9 @@ class BaseEntity(object):
             instance if raised
 
     """
-    def __init__(self, node):
+    def __init__(self, node, autorefresh=False):
         self.node = node
+        self.autorefresh = autorefresh
 
         # runtime properties
         self._config = None
@@ -96,6 +97,8 @@ class BaseEntity(object):
         try:
             self.error = None
             self.node.config(commands)
+            if self.autorefresh:
+                self.refresh()
             return True
         except CommandError as exc:
             self.error = exc
