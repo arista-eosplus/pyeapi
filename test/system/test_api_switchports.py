@@ -35,7 +35,6 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_int, random_string
 from systestlib import DutSystemTest
 
 
@@ -64,7 +63,7 @@ class TestApiSwitchports(DutSystemTest):
     def test_create_and_return_true(self):
         for dut in self.duts:
             dut.config(['default interface Ethernet1', 'interface Ethernet1',
-                            'no switchport'])
+                        'no switchport'])
             result = dut.api('switchports').create('Ethernet1')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
@@ -114,7 +113,7 @@ class TestApiSwitchports(DutSystemTest):
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('switchport trunk allowed vlan 1,10,100',
-                        config[0]['output'], 'dut=%s' % dut)
+                          config[0]['output'], 'dut=%s' % dut)
 
 if __name__ == '__main__':
     unittest.main()

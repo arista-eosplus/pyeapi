@@ -32,11 +32,9 @@
 import sys
 import os
 import unittest
-import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, call
 
 from testlib import get_fixture, random_vlan, function
 from testlib import EapiConfigUnitTest
@@ -56,7 +54,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
         result = self.instance.get('Ethernet1')
         values = dict(name='Ethernet1', mode='access', access_vlan='1',
                       trunk_native_vlan='1', trunk_allowed_vlans='1-4094')
-        self.assertIsInstance(result, dict)
+        self.assertEqual(result, values)
 
     def test_getall(self):
         result = self.instance.getall()
@@ -128,14 +126,12 @@ class TestApiSwitchports(EapiConfigUnitTest):
 
     def test_set_trunk_native_vlan_with_no_value(self):
         for intf in self.INTERFACES:
-            vid = random_vlan()
             cmds = ['interface %s' % intf, 'no switchport trunk native vlan']
             func = function('set_trunk_native_vlan', intf)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_trunk_native_vlan_with_default(self):
         for intf in self.INTERFACES:
-            vid = random_vlan()
             cmds = ['interface %s' % intf,
                     'default switchport trunk native vlan']
             func = function('set_trunk_native_vlan', intf, default=True)

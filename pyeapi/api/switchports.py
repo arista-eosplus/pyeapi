@@ -104,9 +104,9 @@ class Switchports(EntityCollection):
             resp = dict(name=name)
             resp['mode'] = MODE_RE.search(config, re.M).group('value')
             resp['access_vlan'] = \
-                    ACCESS_VLAN_RE.search(config, re.M).group('value')
+                ACCESS_VLAN_RE.search(config, re.M).group('value')
             resp['trunk_native_vlan'] = \
-                 TRUNK_VLAN_RE.search(config, re.M).group('value')
+                TRUNK_VLAN_RE.search(config, re.M).group('value')
             resp['trunk_allowed_vlans'] = \
                 TRUNKING_VLANS_RE.search(config, re.M).group('value')
             return resp

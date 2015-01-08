@@ -34,10 +34,9 @@ import random
 import string
 import unittest
 
-from mock import Mock, PropertyMock
+from mock import Mock
 
 from pyeapi.node import Node
-from pyeapi.config import Config
 
 def get_fixtures_path():
     return os.path.join(os.path.dirname(__file__), '../fixtures')
@@ -100,7 +99,7 @@ class EapiConfigUnitTest(unittest.TestCase):
         self.assertFalse(result)
 
     def eapi_exception_config_test(self, func, exc, *args, **kwargs):
-        with self.assertRaises(exc) as context:
+        with self.assertRaises(exc):
             self.eapi_config_test(func, *args, **kwargs)
 
 
