@@ -40,10 +40,10 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.vlans
 
-class TestModuleVlans(EapiConfigUnitTest):
+class TestApiVlans(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
-        super(TestModuleVlans, self).__init__(*args, **kwargs)
+        super(TestApiVlans, self).__init__(*args, **kwargs)
         self.instance = pyeapi.api.vlans.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 

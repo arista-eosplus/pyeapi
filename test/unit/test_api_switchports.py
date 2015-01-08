@@ -43,12 +43,12 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.switchports
 
-class TestModuleSwitchports(EapiConfigUnitTest):
+class TestApiSwitchports(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
-        super(TestModuleSwitchports, self).__init__(*args, **kwargs)
+        super(TestApiSwitchports, self).__init__(*args, **kwargs)
         self.instance = pyeapi.api.switchports.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 

@@ -39,7 +39,7 @@ from testlib import random_int, random_string
 from systestlib import DutSystemTest
 
 
-class TestResourceVlans(DutSystemTest):
+class TestApiVlans(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
