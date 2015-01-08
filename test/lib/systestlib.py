@@ -30,6 +30,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import unittest
+import random
 
 from testlib import get_fixture
 
@@ -50,6 +51,10 @@ class DutSystemTest(unittest.TestCase):
         for connection in connections:
             self.duts.append(pyeapi.client.connect_to(connection))
 
+def random_interface(dut):
+    interfaces = dut.api('interfaces')
+    names = [name for name in interfaces.keys() if name.startswith('Et')]
+    return random.choice(names)
 
 
 

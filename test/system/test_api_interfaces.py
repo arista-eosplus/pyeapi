@@ -36,19 +36,22 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_string
-from systestlib import DutSystemTest
+from systestlib import DutSystemTest, random_interface
 
 
 class TestResourceInterfaces(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf,
+                        'interface %s' % intf,
                         'description this is a test',
                         'flowcontrol send off',
                         'flowcontrol receive on',
                         'no sflow enable'])
-            result = dut.api('interfaces').get('Ethernet1')
+            result = dut.api('interfaces').get(intf)
+
             self.assertIsInstance(result, dict)
             self.assertEqual(result['description'], 'this is a test')
             self.assertFalse(result['shutdown'])
