@@ -29,14 +29,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-import sys
 import os
 import unittest
-import json
 
+import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock
 
 from testlib import get_fixture, function, random_int, random_string
 from testlib import EapiConfigUnitTest

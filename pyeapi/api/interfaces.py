@@ -59,7 +59,7 @@ Parameters:
 
 import re
 
-from pyeapi.api import Entity, EntityCollection
+from pyeapi.api import EntityCollection
 from pyeapi.utils import ProxyCall
 
 DESCRIPTION_RE = re.compile(r'(?<=\s{3}description\s)(?P<value>.+)$', re.M)
