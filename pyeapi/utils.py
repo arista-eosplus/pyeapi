@@ -38,20 +38,37 @@ import collections
 
 def import_module(name, path=None):
     parts = name.split('.')
-    module_name = ""
+    module_name = ''
+
     for index, part in enumerate(parts):
         module_name = part if index == 0 else '%s.%s' % (module_name, part)
-        if path is not None:
-            path = [path]
-        fh, path, descr = imp.find_module(part, path)
-        mod = imp.load_module(module_name, fh, path, descr)
+        path = [path] if path is not None else path
+
+        try:
+            fhandle, path, descr = imp.find_module(part, path)
+            if module_name in sys.modules:
+                # since imp.load_module works like reload, need to be sure not
+                # to reload a previously loaded module
+                debug('returing module {} from cache'.format(module_name))
+                mod = sys.modules[module_name]
+            else:
+                debug('loading new module {}'.format(module_name))
+                mod = imp.load_module(module_name, fhandle, path, descr)
+        finally:
+            # lets be sure to clean up after ourselves
+            if fhandle:
+                fhandle.close()
+
     return mod
 
 def load_module(name):
     try:
         mod = None
+        if name in sys.modules:
+            debug('returning {} from cache'.format(name))
         mod = sys.modules[name]
     except KeyError:
+        debug('importing module {}'.format(name))
         mod = import_module(name)
     finally:
         if not mod:
