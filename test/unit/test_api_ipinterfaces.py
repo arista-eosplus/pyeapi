@@ -38,20 +38,25 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from mock import Mock
 
-from testlib import get_fixture, function, random_int
+from testlib import get_fixture, function, random_int, random_string
 from testlib import EapiConfigUnitTest
 
-import pyeapi.resources.ipinterfaces
+import pyeapi.api.ipinterfaces
 
-class TestResourcesIpinterfaces(EapiConfigUnitTest):
+class TestApiIpinterfaces(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
                   'Port-Channel1']
 
     def __init__(self, *args, **kwargs):
-        super(TestResourcesIpinterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.resources.ipinterfaces.instance(None)
-        self.running_config = open(get_fixture('running_config.text')).read()
+        super(TestApiIpinterfaces, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.api.ipinterfaces.instance(None)
+        self.config = open(get_fixture('running_config.text')).read()
+
+    def test_get(self):
+        result = self.instance.get('Loopback0')
+        values = dict(name='Loopback0', address='1.1.1.1/32', mtu=1500)
+        self.assertEqual(result, values)
 
     def test_getall(self):
         result = self.instance.getall()
@@ -90,10 +95,10 @@ class TestResourcesIpinterfaces(EapiConfigUnitTest):
 
     def test_set_mtu_with_values(self):
         for intf in self.INTERFACES:
-            value = random_int(68, 9214)
-            cmds = ['interface %s' % intf, 'mtu %s' % value]
-            func = function('set_mtu', intf, value)
-            self.eapi_positive_config_test(func, cmds)
+            for value in [68, 65535, random_int(68, 65535)]:
+                cmds = ['interface %s' % intf, 'mtu %s' % value]
+                func = function('set_mtu', intf, value)
+                self.eapi_positive_config_test(func, cmds)
 
     def test_set_mtu_with_no_value(self):
         for intf in self.INTERFACES:
@@ -106,6 +111,12 @@ class TestResourcesIpinterfaces(EapiConfigUnitTest):
             cmds = ['interface %s' % intf, 'default mtu']
             func = function('set_mtu', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+    def test_set_mtu_invalid_value_raises_value_error(self):
+        for intf in self.INTERFACES:
+            for value in [67, 65536, random_string()]:
+                func = function('set_mtu', intf, value)
+                self.eapi_exception_config_test(func, ValueError)
 
 if __name__ == '__main__':
     unittest.main()
