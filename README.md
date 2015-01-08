@@ -63,6 +63,11 @@ node = pyeapi.client.connect(host='10.10.10.10')
 ```
 
 ### Using a conf file
+The library will automatically search for the config file in the following
+locations: ~/.eapi.conf, /mnt/flash/eapi.conf.  It will load the first 
+config file that it finds.   Alternatively you can pass the full path to the 
+config file in the load_config method.
+
 ```
 import pyeapi.client
 pyeapi.client.load_config()
@@ -70,6 +75,10 @@ node = pyeapi.client.connect_to('veos01')
 ```
 
 ### Example conf file
+Config files support multiple nodes.  Each node should have a connection
+section in the config file.  To create a node entry, preceed the name of the 
+node with connection: (see examples below).  
+
 ```
 [connection:eos01]
 username: eapi
@@ -83,6 +92,19 @@ password: password
 [connection:eos02]
 host: 172.10.10.1
 ```
+
+The following configuration options are available for entries:
+
+* host - The IP address or FQDN of the remote device.  If the host parameter
+    is omitted then the connection name is used
+* username - The eAPI username to use for authentication
+* password - The eAPI password to use for authentication
+* use_ssl - Whether or not an SSL connection should be created.
+* port - Configures the port to use for the eAPI connection.  A default port
+    is used if this parameter is absent, based on the use_ssl setting.  If
+    use_ssl is True, then the port is set to 443.  If use_ssl is False, then
+    the port is set to 80
+
 
 ## License
 BSD-3, See LICENSE file
