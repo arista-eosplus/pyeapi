@@ -41,7 +41,7 @@ from mock import Mock, call
 from testlib import get_fixture, random_vlan, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.resources.switchports
+import pyeapi.api.switchports
 
 class TestModuleSwitchports(EapiConfigUnitTest):
 
@@ -49,7 +49,7 @@ class TestModuleSwitchports(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestModuleSwitchports, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.resources.switchports.instance(None)
+        self.instance = pyeapi.api.switchports.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):

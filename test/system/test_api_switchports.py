@@ -44,7 +44,7 @@ class TestModuleSwitchports(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             dut.config('default interface Ethernet1')
-            result = dut.resource('switchports').get('Ethernet1')
+            result = dut.api('switchports').get('Ethernet1')
             self.assertIsInstance(result, dict)
             self.assertEqual(result['mode'], 'access')
             self.assertEqual(result['access_vlan'], '1')
@@ -55,7 +55,7 @@ class TestModuleSwitchports(DutSystemTest):
     def test_getall(self):
         for dut in self.duts:
             dut.config('default interface Ethernet1-7')
-            result = dut.resource('switchports').getall()
+            result = dut.api('switchports').getall()
             self.assertIsInstance(result, dict, 'dut=%s' % dut)
             for idx in range(1, 7):
                 intf = 'Ethernet%s' % idx
@@ -65,7 +65,7 @@ class TestModuleSwitchports(DutSystemTest):
         for dut in self.duts:
             dut.config(['default interface Ethernet1', 'interface Ethernet1',
                             'no switchport'])
-            result = dut.resource('switchports').create('Ethernet1')
+            result = dut.api('switchports').create('Ethernet1')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')
@@ -75,7 +75,7 @@ class TestModuleSwitchports(DutSystemTest):
     def test_delete_and_return_true(self):
         for dut in self.duts:
             dut.config('default interface Ethernet1')
-            result = dut.resource('switchports').delete('Ethernet1')
+            result = dut.api('switchports').delete('Ethernet1')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')
@@ -84,7 +84,7 @@ class TestModuleSwitchports(DutSystemTest):
     def test_set_access_vlan_to_value(self):
         for dut in self.duts:
             dut.config(['default interface Ethernet1', 'vlan 100'])
-            resource = dut.resource('switchports')
+            resource = dut.api('switchports')
             result = resource.set_access_vlan('Ethernet1', '100')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
@@ -96,7 +96,7 @@ class TestModuleSwitchports(DutSystemTest):
         for dut in self.duts:
             dut.config(['default interface Ethernet1', 'interface Ethernet1',
                         'switchport mode trunk', 'vlan 100'])
-            resource = dut.resource('switchports')
+            resource = dut.api('switchports')
             result = resource.set_trunk_native_vlan('Ethernet1', '100')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
@@ -108,30 +108,13 @@ class TestModuleSwitchports(DutSystemTest):
         for dut in self.duts:
             dut.config(['default interface Ethernet1', 'interface Ethernet1',
                         'switchport mode trunk'])
-            resource = dut.resource('switchports')
+            resource = dut.api('switchports')
             result = resource.set_trunk_allowed_vlans('Ethernet1', '1,10,100')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.enable('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('switchport trunk allowed vlan 1,10,100',
                         config[0]['output'], 'dut=%s' % dut)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     unittest.main()
