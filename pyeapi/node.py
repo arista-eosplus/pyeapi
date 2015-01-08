@@ -33,6 +33,7 @@ import collections
 
 from pyeapi.utils import load_module
 
+
 class Node(object):
 
     def __init__(self, connection):
@@ -78,10 +79,10 @@ class Node(object):
         response = self._connection.execute(commands, serialization)
         return response['result']
 
-    def resource(self, name):
+    def api(self, name, namespace='pyeapi.api'):
         """Loads the resource identified by name
         """
-        module = load_module('pyeapi.resources.%s' % name)
+        module = load_module('{}.{}'.format(namespace, name))
         return module.instance(self)
 
     def get_config(self, config='running-config', params=None):
