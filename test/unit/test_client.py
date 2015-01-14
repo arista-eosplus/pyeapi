@@ -41,11 +41,13 @@ from testlib import get_fixture
 
 import pyeapi.client
 
+DEFAULT_CONFIG = {'connection:localhost': dict(transport='socket')}
+
 class TestClient(unittest.TestCase):
 
     def setUp(self):
         reload(pyeapi.client)
-        self.assertEqual(pyeapi.client.config, dict())
+        self.assertEqual(pyeapi.client.config, DEFAULT_CONFIG)
 
     def test_load_config_for_connection_with_filename(self):
         conf = get_fixture('eapi.conf')

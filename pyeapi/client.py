@@ -36,7 +36,7 @@ from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.node import Node
 
-config = dict()
+config = {'connection:localhost': dict(transport='socket')}
 
 CONF_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
