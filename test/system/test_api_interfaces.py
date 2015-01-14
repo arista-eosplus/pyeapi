@@ -61,10 +61,11 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_getall(self):
         for dut in self.duts:
-            dut.config(['default interface et1-7'])
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf])
             result = dut.api('interfaces').getall()
             self.assertIsInstance(result, dict)
-            for intf in ['Ethernet1', 'Management1']:
+            for intf in [intf, 'Management1']:
                 self.assertIn(intf, result)
 
     def test_create_and_return_true(self):
@@ -78,7 +79,7 @@ class TestResourceInterfaces(DutSystemTest):
     def test_create_ethernet_raises_not_implemented_error(self):
         with self.assertRaises(NotImplementedError):
             for dut in self.duts:
-                dut.api('interfaces').create('Ethernet1')
+                dut.api('interfaces').create(random_interface(dut))
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
@@ -91,41 +92,45 @@ class TestResourceInterfaces(DutSystemTest):
     def test_delete_ethernet_raises_not_implemented_error(self):
         with self.assertRaises(NotImplementedError):
             for dut in self.duts:
-                dut.api('interfaces').delete('Ethernet1')
+                dut.api('interfaces').delete(random_interface(dut))
 
     def test_default(self):
         for dut in self.duts:
-            dut.config(['interface Ethernet1', 'shutdown'])
-            result = dut.api('interfaces').default('Ethernet1')
+            intf = random_interface(dut)
+            dut.config(['interface %s' % intf, 'shutdown'])
+            result = dut.api('interfaces').default(intf)
             self.assertTrue(result)
-            config = dut.enable('show interfaces Ethernet1')
-            config = config[0]['interfaces']['Ethernet1']
+            config = dut.enable('show interfaces %s' % intf)
+            config = config[0]['interfaces'][intf]
             self.assertEqual(config['interfaceStatus'], 'connected')
 
     def test_set_description(self):
         for dut in self.duts:
             text = random_string()
-            result = dut.api('interfaces').set_description('Ethernet1', text)
+            intf = random_interface(dut)
+            result = dut.api('interfaces').set_description(intf, text)
             self.assertTrue(result)
-            config = dut.enable('show interfaces Ethernet1')
-            config = config[0]['interfaces']['Ethernet1']
+            config = dut.enable('show interfaces %s' % intf)
+            config = config[0]['interfaces'][intf]
             self.assertEqual(config['description'], text)
 
     def test_set_sflow_enable(self):
         for dut in self.duts:
-            dut.config(['interface Ethernet1', 'no sflow enable'])
-            result = dut.api('interfaces').set_sflow('Ethernet1', True)
+            intf = random_interface(dut)
+            dut.config(['interface %s' % intf, 'no sflow enable'])
+            result = dut.api('interfaces').set_sflow(intf, True)
             self.assertTrue(result)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
     def test_set_sflow_disable(self):
         for dut in self.duts:
-            dut.config('default interface Ethernet1')
-            result = dut.api('interfaces').set_sflow('Ethernet1', False)
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
+            result = dut.api('interfaces').set_sflow(intf, False)
             self.assertTrue(result)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertIn('no sflow enable', config[0]['output'])
 

@@ -35,24 +35,24 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from systestlib import DutSystemTest
+from systestlib import DutSystemTest, random_interface
 
 
 class TestResourceIpinterfaces(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'no switchport', 'ip address 99.99.99.99/24',
                         'mtu 1800'])
-            result = dut.api('ipinterfaces').get('Ethernet1')
-            values = dict(name='Ethernet1', address='99.99.99.99/24',
+            result = dut.api('ipinterfaces').get(intf)
+            values = dict(name=intf, address='99.99.99.99/24',
                           mtu=1800)
             self.assertEqual(values, result, 'dut=%s' % dut)
 
     def test_getall(self):
         for dut in self.duts:
-            dut.config(['default interface et1-7'])
             result = dut.api('interfaces').getall()
             self.assertIsInstance(result, dict)
             for intf in ['Management1']:
@@ -60,47 +60,55 @@ class TestResourceIpinterfaces(DutSystemTest):
 
     def test_create_and_return_true(self):
         for dut in self.duts:
-            dut.config('default interface Ethernet1')
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
             resource = dut.api('ipinterfaces')
-            result = resource.create('Ethernet1')
+            result = resource.create(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertIn('no switchport', config[0]['output'])
+            dut.config('default interface %s' % intf)
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
-            dut.config(['interface Ethernet1', 'ip address 199.1.1.1/24'])
+            intf = random_interface(dut)
+            dut.config(['interface %s' % intf, 'ip address 199.1.1.1/24'])
             resource = dut.api('ipinterfaces')
-            result = resource.delete('Ethernet1')
+            result = resource.delete(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertNotIn('ip address 199.1.1.1/24', config[0]['output'],
                              'dut=%s' % dut)
+            dut.config('default interface %s' % intf)
 
     def test_set_address(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'no switchport'])
             resource = dut.api('ipinterfaces')
-            result = resource.set_address('Ethernet1', '111.111.111.111/24')
+            result = resource.set_address(intf, '111.111.111.111/24')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertIn('ip address 111.111.111.111/24',
                           config[0]['output'], 'dut=%s' % dut)
+            dut.config('default interface %s' % intf)
 
     def test_set_mtu(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'ip address 111.111.111.111/24'])
             resource = dut.api('ipinterfaces')
-            result = resource.set_mtu('Ethernet1', 2000)
+            result = resource.set_mtu(intf, 2000)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.enable('show running-config interfaces %s' % intf,
                                 'text')
             self.assertIn('mtu 2000', config[0]['output'], 'dut=%s' % dut)
+            dut.config('default interface %s' % intf)
 
 if __name__ == '__main__':
     unittest.main()
