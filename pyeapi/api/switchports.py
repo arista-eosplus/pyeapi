@@ -98,7 +98,7 @@ class Switchports(EntityCollection):
             If the specified argument is not a switchport then None is
                 returned
         """
-        config = self.config.get_block('interface %s' % name)
+        config = self.get_block('interface %s' % name)
 
         if not re.match(r'\s{3}no\sswitchport', config, re.M):
             resp = dict(name=name)
@@ -124,7 +124,7 @@ class Switchports(EntityCollection):
         interfaces_re = re.compile(r'(?<=^interface\s)([Et|Po].+)$', re.M)
 
         response = dict()
-        for name in interfaces_re.findall(self.config.text):
+        for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
                 response[name] = interface

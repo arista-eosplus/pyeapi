@@ -76,7 +76,7 @@ class Ipinterfaces(EntityCollection):
                 the current configuration of the node.  If the specified
                 interface does not exist then None is returned.
         """
-        config = self.config.get_block('interface %s' % name)
+        config = self.get_block('interface %s' % name)
 
         if SWITCHPORT_RE.search(config, re.M):
             return None
@@ -103,7 +103,7 @@ class Ipinterfaces(EntityCollection):
         interfaces_re = re.compile(r'^interface\s(.+)', re.M)
 
         response = dict()
-        for name in interfaces_re.findall(self.config.text):
+        for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
                 response[name] = interface

@@ -199,7 +199,7 @@ class StpInterfaces(EntityCollection):
         if not isvalidinterface(name):
             return None
 
-        config = self.config.get_block(r'^interface\s%s$' % name)
+        config = self.get_block(r'^interface\s%s$' % name)
 
         resp = dict()
 
@@ -233,7 +233,7 @@ class StpInterfaces(EntityCollection):
         interfaces_re = re.compile(r'(?<=^interface\s)(.+)$', re.M)
 
         response = dict()
-        for name in interfaces_re.findall(self.config.text):
+        for name in interfaces_re.findall(self.config):
             if name[0:2] in ['Et', 'Po']:
                 interface = self.get(name)
                 if interface:

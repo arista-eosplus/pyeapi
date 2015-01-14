@@ -104,7 +104,7 @@ class Vlans(EntityCollection):
             A dict object containing the vlan key/value pairs
 
         """
-        config = self.config.get_block('vlan %s' % value)
+        config = self.get_block('vlan %s' % value)
         if not config:
             return None
 
@@ -131,7 +131,7 @@ class Vlans(EntityCollection):
         vlans_re = re.compile(r'(?<=^vlan\s)(\d+)', re.M)
 
         response = dict()
-        for vid in vlans_re.findall(self.config.text):
+        for vid in vlans_re.findall(self.config):
             response[vid] = self.get(vid)
         return response
 

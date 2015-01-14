@@ -106,7 +106,7 @@ class Interfaces(EntityCollection):
         interfaces_re = re.compile(r'(?<=^interface\s)(.+)$', re.M)
 
         response = dict()
-        for name in interfaces_re.findall(self.config.text):
+        for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
                 response[name] = interface
@@ -137,7 +137,7 @@ class Interfaces(EntityCollection):
 class BaseInterface(EntityCollection):
 
     def get(self, name):
-        config = self.config.get_block('^interface %s' % name)
+        config = self.get_block('^interface %s' % name)
 
         if not config:
             return None
@@ -268,7 +268,7 @@ class EthernetInterface(BaseInterface):
             the current configuration for the specified node.  If the
             specified interface name does not exist, then None is returned.
         """
-        config = self.config.get_block('^interface %s' % name)
+        config = self.get_block('^interface %s' % name)
 
         if not config:
             return None

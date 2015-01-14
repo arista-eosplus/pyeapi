@@ -35,10 +35,12 @@ This module provides a set of base classes and functions common to
 all resources.  All resources should drive from BaseResource
 
 """
+import re
 import collections
 
 from pyeapi.connection import CommandError
-from pyeapi.config import Config
+
+BLOCK_END_RE = re.compile(r'^[^\s]')
 
 
 class BaseEntity(object):
@@ -72,8 +74,19 @@ class BaseEntity(object):
     def config(self):
         if self._config is not None:
             return self._config
-        self._config = Config(self.node.get_config(params='all'))
+        self._config = self.node.get_config(params='all')
         return self._config
+
+    def get_block(self, parent):
+        match = re.search(r'^%s$' % parent, self.config, re.M)
+        block_start, line_end = match.regs[0]
+
+        match = re.search(r'^[^\s]', self.config[line_end:], re.M)
+        _, block_end = match.regs[0]
+
+        block_end = line_end + block_end
+
+        return self.config[block_start:block_end]
 
     def refresh(self):
         self._config = None
