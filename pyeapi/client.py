@@ -32,31 +32,31 @@
 import os
 from ConfigParser import ConfigParser
 
-from pyeapi.eapilib import UnixEapiConnection, HttpLocalEapiConnection
+from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.node import Node
 
 config = dict()
 
-CONFPATHS = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
+CONF_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
-CONNECTION_TYPES = {
-    'unix': UnixEapiConnection,
+TRANSPORTS = {
+    'socket': SocketEapiConnection,
     'http_local': HttpLocalEapiConnection,
     'http': HttpEapiConnection,
     'https': HttpsEapiConnection
 }
 
-DEFAULT_CONNECTION_TYPE = 'http'
+DEFAULT_TRANSPORT = 'http'
 
 def load_config(filename=None):
     if 'EAPI_CONF' in os.environ:
-        CONFPATHS.insert(0, os.environ['EAPI_CONF'])
+        CONF_SEARCH_PATH.insert(0, os.environ['EAPI_CONF'])
 
     if filename is not None:
-        CONFPATHS.insert(0, filename)
+        CONF_SEARCH_PATH.insert(0, filename)
 
-    for filename in CONFPATHS:
+    for filename in CONF_SEARCH_PATH:
         if os.path.exists(os.path.expanduser(filename)):
             conf = ConfigParser()
             conf.read(filename)
@@ -71,18 +71,18 @@ def load_config(filename=None):
 def config_for(name):
     return config['connection:%s' % name]
 
-def make_connection(connection_type, **kwargs):
-    if connection_type not in CONNECTION_TYPES.keys():
-        raise TypeError('invalid connection type specified')
-    klass = CONNECTION_TYPES.get(connection_type)
+def make_connection(transport, **kwargs):
+    if transport not in TRANSPORTS.keys():
+        raise TypeError('invalid transport specified')
+    klass = TRANSPORTS.get(transport)
     return klass(**kwargs)
 
-def connect(connection_type=None, host='localhost', username='admin',
+def connect(transport=None, host='localhost', username='admin',
             password='', port=None):
 
-    connection_type = connection_type or DEFAULT_CONNECTION_TYPE
+    transport = transport or DEFAULT_TRANSPORT
     kwargs = dict(host=host, username=username, password=password, port=port)
-    return make_connection(connection_type, **kwargs)
+    return make_connection(transport, **kwargs)
 
 def connect_to(name):
     kwargs = config_for(name)

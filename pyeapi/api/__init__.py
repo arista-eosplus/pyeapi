@@ -38,7 +38,7 @@ all resources.  All resources should drive from BaseResource
 import re
 import collections
 
-from pyeapi.connection import CommandError
+from pyeapi.eapilib import CommandError
 
 BLOCK_END_RE = re.compile(r'^[^\s]')
 

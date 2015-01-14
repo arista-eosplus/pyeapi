@@ -83,11 +83,12 @@ node with connection: (see examples below).
 [connection:eos01]
 username: eapi
 password: password
-use_ssl: false
+connection_type: http
 
 [connection:localhost]
 username: eapi
 password: password
+connection_type: unix
 
 [connection:eos02]
 host: 172.10.10.1
@@ -99,7 +100,8 @@ The following configuration options are available for entries:
     is omitted then the connection name is used
 * username - The eAPI username to use for authentication
 * password - The eAPI password to use for authentication
-* use_ssl - Whether or not an SSL connection should be created.
+* connection_type - Configures the type of transport connection to use.  Valid
+    values are unix, http_local, http, https.  The default value is http
 * port - Configures the port to use for the eAPI connection.  A default port
     is used if this parameter is absent, based on the use_ssl setting.  If
     use_ssl is True, then the port is set to 443.  If use_ssl is False, then

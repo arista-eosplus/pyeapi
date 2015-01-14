@@ -72,7 +72,7 @@ class CommandError(Exception):
         self.message = 'Error [{}]: {}'.format(code, message)
         super(CommandError, self).__init__(message)
 
-class UnixHTTPConnection(HTTPConnection):
+class SocketHTTPConnection(HTTPConnection):
 
     def __init__(self, path):
         HTTPConnection.__init__(self, 'localhost')
@@ -273,11 +273,11 @@ class EapiConnection(object):
             self.error = exc
             raise
 
-class UnixEapiConnection(EapiConnection):
+class SocketEapiConnection(EapiConnection):
     def __init__(self, path=None):
-        super(UnixEapiConnection, self).__init__()
+        super(SocketEapiConnection, self).__init__()
         path = path or DEFAULT_UNIX_SOCKET
-        self.transport = UnixHTTPConnection(path)
+        self.transport = SocketHTTPConnection(path)
 
 class HttpLocalEapiConnection(EapiConnection):
     def __init__(self):

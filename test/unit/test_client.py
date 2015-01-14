@@ -71,35 +71,33 @@ class TestClient(unittest.TestCase):
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config)
 
-    def test_connect_types(self):
-        connection = Mock()
-        conntypes = pyeapi.client.CONNECTION_TYPES.keys()
+    @patch('pyeapi.client.make_connection')
+    def test_connect_types(self, connection):
+        transports = pyeapi.client.TRANSPORTS.keys()
         kwargs = dict(host='localhost', username='admin', password='',
                       port=None)
 
-        for conntype in conntypes:
-            with patch.dict(pyeapi.client.CONNECTION_TYPES,
-                            {'http': connection}):
-                pyeapi.client.connect()
-                connection.assert_called_with(**kwargs)
+        for transport in transports:
+            pyeapi.client.connect(transport)
+            connection.assert_called_with(transport, **kwargs)
 
     def test_connect_default_type(self):
-        connection = Mock()
-        with patch.dict(pyeapi.client.CONNECTION_TYPES, {'http': connection}):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None)
-            connection.assert_called_once_with(**kwargs)
+            transport.assert_called_once_with(**kwargs)
 
     def test_connect_to_with_config(self):
-        connection = Mock()
-        with patch.dict(pyeapi.client.CONNECTION_TYPES, {'http': connection}):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
             conf = get_fixture('eapi.conf')
             pyeapi.client.load_config(filename=conf)
             pyeapi.client.connect_to('test1')
             kwargs = dict(host='192.168.1.16', username='eapi',
-                          password='password',port=None)
-            connection.assert_called_once_with(**kwargs)
+                          password='password', port=None)
+            transport.assert_called_once_with(**kwargs)
 
 
 
