@@ -35,7 +35,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import patch
+from mock import Mock, patch
 
 from testlib import get_fixture
 
@@ -71,21 +71,35 @@ class TestClient(unittest.TestCase):
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config)
 
-    @patch('pyeapi.client.Connection')
-    def test_connect(self, connection):
-        pyeapi.client.connect()
+    def test_connect_types(self):
+        connection = Mock()
+        conntypes = pyeapi.client.CONNECTION_TYPES.keys()
         kwargs = dict(host='localhost', username='admin', password='',
-                      enablepwd='', use_ssl=True, port=None)
-        connection.assert_called_once_with(**kwargs)
+                      port=None)
 
-    @patch('pyeapi.client.Connection')
-    def test_connect_to_with_config(self, connection):
-        conf = get_fixture('eapi.conf')
-        pyeapi.client.load_config(filename=conf)
-        pyeapi.client.connect_to('test1')
-        kwargs = dict(host='192.168.1.16', username='eapi', password='password',
-                      enablepwd='', use_ssl=False, port=None)
-        connection.assert_called_once_with(**kwargs)
+        for conntype in conntypes:
+            with patch.dict(pyeapi.client.CONNECTION_TYPES,
+                            {'http': connection}):
+                pyeapi.client.connect()
+                connection.assert_called_with(**kwargs)
+
+    def test_connect_default_type(self):
+        connection = Mock()
+        with patch.dict(pyeapi.client.CONNECTION_TYPES, {'http': connection}):
+            pyeapi.client.connect()
+            kwargs = dict(host='localhost', username='admin', password='',
+                          port=None)
+            connection.assert_called_once_with(**kwargs)
+
+    def test_connect_to_with_config(self):
+        connection = Mock()
+        with patch.dict(pyeapi.client.CONNECTION_TYPES, {'http': connection}):
+            conf = get_fixture('eapi.conf')
+            pyeapi.client.load_config(filename=conf)
+            pyeapi.client.connect_to('test1')
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password',port=None)
+            connection.assert_called_once_with(**kwargs)
 
 
 

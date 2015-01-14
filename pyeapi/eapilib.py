@@ -37,9 +37,17 @@ for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
 import json
-import urllib2
+import socket
+import base64
+
+from httplib import HTTPConnection, HTTPSConnection
 
 from pyeapi.utils import debug
+
+DEFAULT_HTTP_PORT = 80
+DEFAULT_HTTPS_PORT = 443
+DEFAULT_HTTP_LOCAL_PORT = 8080
+DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
 class CommandError(Exception):
     """Base exception raised for command errors
@@ -64,119 +72,47 @@ class CommandError(Exception):
         self.message = 'Error [{}]: {}'.format(code, message)
         super(CommandError, self).__init__(message)
 
+class UnixHTTPConnection(HTTPConnection):
 
-class Connection(object):
-    """Creates a connection to an EOS node using eAPI
+    def __init__(self, path):
+        HTTPConnection.__init__(self, 'localhost')
+        self.path = path
 
-    The Connection object wraps around JSON-RPC calls to an EOS node for
-    sending and receive data using eAPI.  In order for the connection
-    object to be successful, the command API (eAPI) must be enabled on the
-    destination node using the following configuration commands:
+    def connect(self):
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.sock.connect(self.path)
 
-        eos# config
-        eos(config)# management api http-commands
-        eos(config-mgmt-api-http-cmds)# no shutdown
 
-        The above configuration will enable eAPI listening on the default
-        HTTPS port 443.   For additional configuration options please
-        consult the Arista EOS Command API Guide downloadable from
-        http://www.arista.com.
+class EapiConnection(object):
+    """Creates a connection to eAPI for sending and receiving eAPI requests
 
-    Args:
-        host (string): The hostname to set host to, defaults to 'localhost'
-        username (string): The username to set username to, defaults to a
-            value of 'admin'
-        password (string): The password to set the connection instance to,
-            defaults to the value of ''
-        uri (string): The full URI of the connection object, defaults to
-            ''.  This parameter will override all others when creating a
-            new instance of Connection
-        **kwargs: Arbitrary set of keyword arguments
-
-    Attributes:
-        host (string): The IP address or hostname of the node
-        username (string): The username used to authenticate to eAPI
-        password (string): The password used to authenticate to eAPI
-        enablepwd (string): The enable password to use, if required
-        protocol (string): The protocol as either 'http' or 'https'.  This
-            attribute is automatically set and should generally not need to
-            be overridden
-        port (int): The port of the eAPI endpoint.  If the port is not
-            specified, then it is automatically determined based on the
-            protocol setting (443 for https, 80 for http)
-
+    The EapiConnection object provides an implementation for sending and
+    receiving eAPI requests and responses.  This class should not need to
+    be instantiated directly.
     """
 
-    def __init__(self, host='localhost', username='admin', password='',
-                 uri=None, **kwargs):
-
-        self.host = host
-        self.username = username
-        self.password = password
-        self.enablepwd = kwargs.get('enablepwd') or ''
-        self.protocol = 'https' if kwargs.get('use_ssl') else 'http'
-        self.port = kwargs.get('port') or \
-            (443 if self.protocol == 'https' else 80)
-
-        self._http = None
+    def __init__(self):
+        self.transport = None
         self.error = None
-        self.debug = kwargs.get('debug') or False
+        self._auth = None
 
-        # runtime properties
-        self._uri = uri
+    def user_authentication(self, username, password):
+        """Configures the user authentication for eAPI
 
-    def __str__(self):
-        return 'Connection(uri=%s)' % self.uri
-
-    def __repr__(self):
-        return 'Connection(uri=%s)' % self.uri
-
-    @property
-    def uri(self):
-        if self._uri is not None:
-            return self._uri
-        self._uri = "{}://{}:{}/command-api".format(self.protocol, self.host,
-                                                    self.port)
-        return self._uri
-
-    def http(self, *args, **kwargs):
-        """Opens a HTTP request
-
-        This method will take the current URI and open an HTTP request to
-        the destination endpoint.   The HTTP connection is returned to the
-        caller for sending requests
+        This method configures the username and password combination to use
+        for authenticating to eAPI.
 
         Args:
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
+            username (str): The username to use to authenticate the eAPI
+                connection with
+            password (str): The password in clear text to use to authenticate
+                the eAPI connection with
 
-        Returns:
-            An open HTTP connection for sending requests
         """
-        if self._http is not None:
-            for handler in self._http.handlers:
-                handler.retried = 0
-            return self._http.open(*args, **kwargs)
-        self._http = self._get_auth_opener()
-        return self._http.open(*args, **kwargs)
+        _auth = base64.encodestring('{}:{}'.format(username, password))
+        self._auth = str(_auth).replace('\n', '')
 
-    def _get_auth_opener(self):
-        """Creates a URL opener using basic authentication
-
-        The HTTP opener adds a basic authentication header to the HTTP
-        call which is required by eAPI.  The authentication header passes
-        the username and password values of the instance
-
-        Returns:
-            An URL opener object
-        """
-        passmgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passmgr.add_password(None, self.uri, self.username, self.password)
-        handler = urllib2.HTTPBasicAuthHandler(passmgr)
-        opener = urllib2.build_opener(handler)
-        return opener
-
-    def _request(self, commands, encoding=None, reqid=None):
+    def request(self, commands, encoding=None, reqid=None):
         """Generates an eAPI request object
 
         This method will take a list of EOS commands and generate a valid
@@ -211,13 +147,11 @@ class Connection(object):
         """
 
         reqid = id(self) if reqid is None else reqid
-
         params = {"version": 1, "cmds": commands, "format": encoding}
-
         return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
                            "params": params, "id": str(reqid)})
 
-    def _send(self, data):
+    def send(self, data):
         """Sends the eAPI request to the destination node
 
         This method is responsible for sending an eAPI request to the
@@ -272,13 +206,24 @@ class Connection(object):
                 the node.   The CommandError exception includes the error
                 code and error message from the eAPI response.
         """
-        header = {'Content-Type': 'application/json'}
+        debug('eapi_request: %s' % data)
 
-        debug('EAPI REQ: %s' % data)
-        request = urllib2.Request(self.uri, data, header)
-        response = self.http(request)
+        self.transport.putrequest('POST', '/command-api')
+
+        self.transport.putheader('Content-type', 'application/json-rpc')
+        self.transport.putheader('Content-length', '%d' % len(data))
+
+        if self._auth:
+            self.transport.putheader('Authorization',
+                                     'Basic %s' % (self._auth))
+
+        self.transport.endheaders()
+        self.transport.send(data)
+
+        response = self.transport.getresponse()
         decoded = json.loads(response.read())
-        debug('EAPI RESP: %s' % decoded)
+
+        debug('eapi_response: %s' % decoded)
 
         if 'error' in decoded:
             _message = decoded['error']['message']
@@ -319,20 +264,40 @@ class Connection(object):
 
         try:
             self.error = None
-
-            # push enable into the command stack
-            commands.insert(0, {'cmd': 'enable', 'input': self.enablepwd})
-
-            request = self._request(commands, encoding=encoding, **kwargs)
-            response = self._send(request)
-
-            # pop enable command from the response
-            response['result'].pop(0)
+            request = self.request(commands, encoding=encoding, **kwargs)
+            response = self.send(request)
             return response
 
         except CommandError as exc:
             exc.commands = commands
             self.error = exc
             raise
+
+class UnixEapiConnection(EapiConnection):
+    def __init__(self, path=None):
+        super(UnixEapiConnection, self).__init__()
+        path = path or DEFAULT_UNIX_SOCKET
+        self.transport = UnixHTTPConnection(path)
+
+class HttpLocalEapiConnection(EapiConnection):
+    def __init__(self):
+        super(HttpLocalEapiConnection, self).__init__()
+        self.transport = HTTPConnection('localhost', DEFAULT_HTTP_LOCAL_PORT)
+
+class HttpEapiConnection(EapiConnection):
+    def __init__(self, host, port=None, username=None, password=None):
+        super(HttpEapiConnection, self).__init__()
+        port = port or DEFAULT_HTTP_PORT
+        self.transport = HTTPConnection(host, port)
+        self.user_authentication(username, password)
+
+class HttpsEapiConnection(EapiConnection):
+    def __init__(self, host, port=None, username=None, password=None):
+        super(HttpsEapiConnection, self).__init__()
+        port = port or DEFAULT_HTTPS_PORT
+        self.transport = HTTPSConnection(host, port)
+        self.user_authentication(username, password)
+
+
 
 

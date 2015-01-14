@@ -36,18 +36,28 @@ from pyeapi.utils import load_module
 
 class Node(object):
 
-    def __init__(self, connection):
+    def __init__(self, connection, **kwargs):
         self._connection = connection
+        self._exec = None
 
     @property
     def connection(self):
         return self._connection
 
-    def __str__(self):
-        return 'Node(uri=%s)' % self.connection.uri
+    def exec_authentication(self, password):
+        """Configures the executive mode authentication password
 
-    def __repr__(self):
-        return 'Node(%s)' % repr(self.connection)
+        EOS supports an additional password authentication mechanism for
+        sessions that want to switch to executive (or enable) mode.  This
+        method will configure the password, if required, for entering
+        executive mode
+
+        Args:
+            password (str): The password string in clear text used to
+                authenticate to exec mode
+        """
+        self._exec = password
+        self._exec = str(password).strip()
 
     def config(self, commands):
         """Convenience method that sends commands to config mode
@@ -76,7 +86,16 @@ class Node(object):
         if not isinstance(commands, collections.Iterable):
             raise TypeError('commands must be an iterable object')
 
+        if self._exec:
+            commands.insert(0, {'cmd': 'enable', 'input': self._exec})
+        else:
+            commands.insert(0, 'enable')
+
         response = self._connection.execute(commands, serialization)
+
+        # pop enable command from the response
+        response['result'].pop(0)
+
         return response['result']
 
     def api(self, name, namespace='pyeapi.api'):

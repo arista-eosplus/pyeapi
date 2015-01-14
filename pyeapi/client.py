@@ -32,12 +32,22 @@
 import os
 from ConfigParser import ConfigParser
 
+from pyeapi.eapilib import UnixEapiConnection, HttpLocalEapiConnection
+from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.node import Node
-from pyeapi.connection import Connection
 
 config = dict()
 
 CONFPATHS = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
+
+CONNECTION_TYPES = {
+    'unix': UnixEapiConnection,
+    'http_local': HttpLocalEapiConnection,
+    'http': HttpEapiConnection,
+    'https': HttpsEapiConnection
+}
+
+DEFAULT_CONNECTION_TYPE = 'http'
 
 def load_config(filename=None):
     if 'EAPI_CONF' in os.environ:
@@ -61,21 +71,26 @@ def load_config(filename=None):
 def config_for(name):
     return config['connection:%s' % name]
 
-def connect(host='localhost', username='admin', password='', use_ssl=True,
-            enablepwd='', port=None):
+def make_connection(connection_type, **kwargs):
+    if connection_type not in CONNECTION_TYPES.keys():
+        raise TypeError('invalid connection type specified')
+    klass = CONNECTION_TYPES.get(connection_type)
+    return klass(**kwargs)
 
-    if not isinstance(use_ssl, bool):
-        use_ssl = str(use_ssl).upper() in ['TRUE', 'YES', '1']
+def connect(connection_type=None, host='localhost', username='admin',
+            password='', port=None):
 
-    kwargs = dict(host=host, use_ssl=use_ssl, port=port, username=username,
-                  password=password, enablepwd=enablepwd)
-
-    return Connection(**kwargs)
+    connection_type = connection_type or DEFAULT_CONNECTION_TYPE
+    kwargs = dict(host=host, username=username, password=password, port=port)
+    return make_connection(connection_type, **kwargs)
 
 def connect_to(name):
     kwargs = config_for(name)
     connection = connect(**kwargs)
-    return Node(connection)
+    node = Node(connection)
+    if kwargs.get('enablepwd') is not None:
+        node.exec_authentication(kwargs['enablepwd'])
+    return node
 
 
 
