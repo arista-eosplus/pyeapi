@@ -59,7 +59,7 @@ def load_config(filename=None):
     for filename in CONF_SEARCH_PATH:
         if os.path.exists(os.path.expanduser(filename)):
             conf = ConfigParser()
-            conf.read(filename)
+            conf.read(os.path.expanduser(filename))
 
             for section in conf.sections():
                 name = section.split(':')[1]
