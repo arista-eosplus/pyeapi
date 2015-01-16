@@ -37,7 +37,7 @@ switch(config-mgmt-api-http-cmds)# no shutdown
 The configuration above enables eAPI with the default settings.  This enables eAPI to listen for connections on HTTPS port 443 by default.
 
 __Step 3.__ Create a local user
-The user is used to authenticate commands for use during eAPI calls.  s
+The user is used to authenticate commands for use during eAPI calls. 
 
 ```
 switch(config)# username eapi secret icanttellyou
@@ -58,8 +58,8 @@ The pyEAPI conf file is an INI-style config file that supplies the basic authent
 ### Creating a connection
 
 ```
-import pyeapi.client
-node = pyeapi.client.connect(host='10.10.10.10')
+import pyeapi
+node = pyeapi.connect(host='10.10.10.10')
 ```
 
 ### Using a conf file
@@ -69,9 +69,9 @@ config file that it finds.   Alternatively you can pass the full path to the
 config file in the load_config method.
 
 ```
-import pyeapi.client
-pyeapi.client.load_config()
-node = pyeapi.client.connect_to('veos01')
+import pyeapi
+pyeapi.load_config()
+node = pyeapi.connect_to('veos01')
 ```
 
 ### Example conf file
@@ -109,4 +109,4 @@ The following configuration options are available for entries:
         trasnport: socket, default port: n/a
 
 ## License
-BSD-3, See LICENSE file
+BSD-3, See [LICENSE] file
