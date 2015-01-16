@@ -36,7 +36,7 @@ import unittest
 
 from mock import Mock
 
-from pyeapi.node import Node
+from pyeapi.client import Node
 
 def get_fixtures_path():
     return os.path.join(os.path.dirname(__file__), '../fixtures')
