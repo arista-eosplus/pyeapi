@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 # import the client library
-import pyeapi.client
+import pyeapi
 
 # load the conf file and connect to the node
-pyeapi.client.load_config('nodes.conf')
-node = pyeapi.client.connect_to('veos01')
+pyeapi.load_config('nodes.conf')
+node = pyeapi.connect_to('veos01')
 
 # get the vlan api and enable autorefresh
 vlans = node.api('vlans')

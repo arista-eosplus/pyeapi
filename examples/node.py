@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-import pyeapi.client
+import pyeapi
 
-pyeapi.client.load_config('nodes.conf')
-node = pyeapi.client.connect_to('veos01')
+pyeapi.load_config('nodes.conf')
+node = pyeapi.connect_to('veos01')
 
 output = node.enable('show version')
 
