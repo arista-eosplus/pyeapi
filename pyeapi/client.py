@@ -30,11 +30,13 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import os
+import collections
+
 from ConfigParser import ConfigParser
 
-from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
+from pyeapi.utils import load_module
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
-from pyeapi.node import Node
+from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 
 config = {'connection:localhost': dict(transport='socket')}
 
@@ -69,7 +71,10 @@ def load_config(filename=None):
             return filename
 
 def config_for(name):
-    return config['connection:%s' % name]
+    _name = 'connection:{}'.format(name)
+    if _name not in config:
+        raise KeyError(name)
+    return config[_name]
 
 def make_connection(transport, **kwargs):
     if transport not in TRANSPORTS.keys():
@@ -83,6 +88,89 @@ def connect(transport=None, host='localhost', username='admin',
     transport = transport or DEFAULT_TRANSPORT
     kwargs = dict(host=host, username=username, password=password, port=port)
     return make_connection(transport, **kwargs)
+
+
+class Node(object):
+
+    def __init__(self, connection, **kwargs):
+        self._connection = connection
+        self._exec = None
+
+    @property
+    def connection(self):
+        return self._connection
+
+    def exec_authentication(self, password):
+        """Configures the executive mode authentication password
+
+        EOS supports an additional password authentication mechanism for
+        sessions that want to switch to executive (or enable) mode.  This
+        method will configure the password, if required, for entering
+        executive mode
+
+        Args:
+            password (str): The password string in clear text used to
+                authenticate to exec mode
+        """
+        self._exec = password
+        self._exec = str(password).strip()
+
+    def config(self, commands):
+        """Convenience method that sends commands to config mode
+        """
+        if isinstance(commands, basestring):
+            commands = [commands]
+
+        if not isinstance(commands, collections.Iterable):
+            raise TypeError('commands must be an iterable object')
+
+        # push the configure command onto the command stack
+        commands.insert(0, 'configure')
+        response = self.enable(commands)
+
+        # pop the configure command output off the stack
+        response.pop(0)
+
+        return response
+
+    def enable(self, commands, serialization='json'):
+        """Convenience method that sends commands to enable mode
+        """
+        if isinstance(commands, basestring):
+            commands = [commands]
+
+        if not isinstance(commands, collections.Iterable):
+            raise TypeError('commands must be an iterable object')
+
+        if self._exec:
+            commands.insert(0, {'cmd': 'enable', 'input': self._exec})
+        else:
+            commands.insert(0, 'enable')
+
+        response = self._connection.execute(commands, serialization)
+
+        # pop enable command from the response
+        response['result'].pop(0)
+
+        return response['result']
+
+    def api(self, name, namespace='pyeapi.api'):
+        """Loads the resource identified by name
+        """
+        module = load_module('{}.{}'.format(namespace, name))
+        if hasattr(module, 'instance'):
+            return module.instance(self)
+        return module
+
+    def get_config(self, config='running-config', params=None):
+        """Convenience method that returns the running-config as a dict
+        """
+        command = 'show %s' % config
+        if params:
+            command += ' %s' % params
+        result = self.enable(command, 'text')
+        return str(result[0]['output']).strip()
+
 
 def connect_to(name):
     kwargs = config_for(name)
