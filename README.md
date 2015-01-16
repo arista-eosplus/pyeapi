@@ -109,4 +109,4 @@ The following configuration options are available for entries:
         trasnport: socket, default port: n/a
 
 ## License
-BSD-3, See [LICENSE] file
+New BSD, See [LICENSE](LICENSE) file
