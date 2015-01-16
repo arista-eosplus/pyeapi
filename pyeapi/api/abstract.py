@@ -86,9 +86,13 @@ class BaseEntity(object):
 
     def get_block(self, parent):
         match = re.search(r'^%s$' % parent, self.config, re.M)
+        if not match:
+            return None
         block_start, line_end = match.regs[0]
 
         match = re.search(r'^[^\s]', self.config[line_end:], re.M)
+        if not match:
+            return None
         _, block_end = match.regs[0]
 
         block_end = line_end + block_end
