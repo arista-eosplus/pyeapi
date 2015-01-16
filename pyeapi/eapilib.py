@@ -215,15 +215,16 @@ class EapiConnection(object):
 
         if self._auth:
             self.transport.putheader('Authorization',
-                                     'Basic %s' % (self._auth))
+                                    'Basic %s' % (self._auth))
 
         self.transport.endheaders()
         self.transport.send(data)
 
         response = self.transport.getresponse()
         decoded = json.loads(response.read())
-
         debug('eapi_response: %s' % decoded)
+
+        self.transport.close()
 
         if 'error' in decoded:
             _message = decoded['error']['message']
@@ -274,25 +275,26 @@ class EapiConnection(object):
             raise
 
 class SocketEapiConnection(EapiConnection):
-    def __init__(self, path=None):
+    def __init__(self, path=None, **kwargs):
         super(SocketEapiConnection, self).__init__()
         path = path or DEFAULT_UNIX_SOCKET
         self.transport = SocketHTTPConnection(path)
 
 class HttpLocalEapiConnection(EapiConnection):
-    def __init__(self):
+    def __init__(self, port=None, **kwargs):
         super(HttpLocalEapiConnection, self).__init__()
-        self.transport = HTTPConnection('localhost', DEFAULT_HTTP_LOCAL_PORT)
+        port = port or DEFAULT_HTTP_LOCAL_PORT
+        self.transport = HTTPConnection('localhost', port)
 
 class HttpEapiConnection(EapiConnection):
-    def __init__(self, host, port=None, username=None, password=None):
+    def __init__(self, host, port=None, username=None, password=None, **kwargs):
         super(HttpEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_PORT
         self.transport = HTTPConnection(host, port)
         self.user_authentication(username, password)
 
 class HttpsEapiConnection(EapiConnection):
-    def __init__(self, host, port=None, username=None, password=None):
+    def __init__(self, host, port=None, username=None, password=None, **kwargs):
         super(HttpsEapiConnection, self).__init__()
         port = port or DEFAULT_HTTPS_PORT
         self.transport = HTTPSConnection(host, port)
