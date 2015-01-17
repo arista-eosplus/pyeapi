@@ -121,7 +121,7 @@ class TestResourceInterfaces(DutSystemTest):
             result = dut.api('interfaces').set_sflow(intf, True)
             self.assertTrue(result)
             config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+                                      'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
     def test_set_sflow_disable(self):
@@ -131,7 +131,7 @@ class TestResourceInterfaces(DutSystemTest):
             result = dut.api('interfaces').set_sflow(intf, False)
             self.assertTrue(result)
             config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+                                      'text')
             self.assertIn('no sflow enable', config[0]['output'])
 
 if __name__ == '__main__':

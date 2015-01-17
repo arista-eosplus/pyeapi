@@ -31,7 +31,6 @@
 #
 import os
 
-from collections import namedtuple
 from ConfigParser import ConfigParser
 
 from pyeapi.utils import load_module, make_iterable

@@ -65,8 +65,8 @@ class TestResourceIpinterfaces(DutSystemTest):
             resource = dut.api('ipinterfaces')
             result = resource.create(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('no switchport', config[0]['output'])
             dut.config('default interface %s' % intf)
 
@@ -77,8 +77,8 @@ class TestResourceIpinterfaces(DutSystemTest):
             resource = dut.api('ipinterfaces')
             result = resource.delete(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertNotIn('ip address 199.1.1.1/24', config[0]['output'],
                              'dut=%s' % dut)
             dut.config('default interface %s' % intf)
@@ -91,8 +91,8 @@ class TestResourceIpinterfaces(DutSystemTest):
             resource = dut.api('ipinterfaces')
             result = resource.set_address(intf, '111.111.111.111/24')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('ip address 111.111.111.111/24',
                           config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)
@@ -105,8 +105,8 @@ class TestResourceIpinterfaces(DutSystemTest):
             resource = dut.api('ipinterfaces')
             result = resource.set_mtu(intf, 2000)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('mtu 2000', config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)
 

@@ -35,7 +35,7 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from systestlib import DutSystemTest
+from systestlib import DutSystemTest, random_interface
 
 class TestApiStpInterfaces(DutSystemTest):
 
@@ -56,58 +56,63 @@ class TestApiStpInterfaces(DutSystemTest):
 
     def test_set_bpduguard_to_true(self):
         for dut in self.duts:
-            dut.config('default interface Ethernet1')
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
             resource = dut.api('spanningtree').interfaces
-            result = resource.set_bpduguard('Ethernet1', True)
+            result = resource.set_bpduguard(intf, True)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces Ethernet1',
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('spanning-tree bpduguard enable',
                           config[0]['output'], 'dut=%s' % dut)
 
     def test_set_bpdugard_to_false(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'spanning-tree bpduguard disable'])
             resource = dut.api('spanningtree').interfaces
             result = resource.set_bpduguard('Ethernet1', False)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces Ethernet1',
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('spanning-tree bpduguard disable',
                           config[0]['output'], 'dut=%s' % dut)
 
     def test_set_portfast_to_edge(self):
         for dut in self.duts:
-            dut.config('default interface Ethernet1')
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
             resource = dut.api('spanningtree').interfaces
-            result = resource.set_portfast('Ethernet1', 'edge')
+            result = resource.set_portfast(intf, 'edge')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces Ethernet1',
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('spanning-tree portfast\n', config[0]['output'],
                           'dut=%s' % dut)
 
     def test_set_portfast_to_network(self):
         for dut in self.duts:
-            dut.config('default interface Ethernet1')
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
             resource = dut.api('spanningtree').interfaces
-            result = resource.set_portfast('Ethernet1', 'network')
+            result = resource.set_portfast(intf, 'network')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces Ethernet1',
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('spanning-tree portfast network\n',
                           config[0]['output'], 'dut=%s' % dut)
 
     def test_set_portfast_to_disable(self):
         for dut in self.duts:
-            dut.config(['default interface Ethernet1', 'interface Ethernet1',
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'spanning-tree portfast'])
             resource = dut.api('spanningtree').interfaces
-            result = resource.set_portfast('Ethernet1', 'disable')
+            result = resource.set_portfast(intf, 'disable')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces Ethernet1',
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertNotIn('spanning-tree portfast', config[0]['output'],
                              'dut=%s' % dut)
 

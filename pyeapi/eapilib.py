@@ -215,7 +215,7 @@ class EapiConnection(object):
 
         if self._auth:
             self.transport.putheader('Authorization',
-                                    'Basic %s' % (self._auth))
+                                     'Basic %s' % (self._auth))
 
         self.transport.endheaders()
         self.transport.send(data)

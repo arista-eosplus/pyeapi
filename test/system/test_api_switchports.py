@@ -67,8 +67,8 @@ class TestApiSwitchports(DutSystemTest):
                         'no switchport'])
             result = dut.api('switchports').create(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertNotIn('no switchport', config[0]['output'],
                              'dut=%s' % dut)
             dut.config('default interface %s' % intf)
@@ -79,8 +79,8 @@ class TestApiSwitchports(DutSystemTest):
             dut.config('default interface %s' % intf)
             result = dut.api('switchports').delete(intf)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('no switchport', config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)
 
@@ -91,8 +91,8 @@ class TestApiSwitchports(DutSystemTest):
             resource = dut.api('switchports')
             result = resource.set_access_vlan(intf, '100')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('switchport access vlan 100', config[0]['output'],
                           'dut=%s' % dut)
             dut.config('default interface %s' % intf)
@@ -105,8 +105,8 @@ class TestApiSwitchports(DutSystemTest):
             resource = dut.api('switchports')
             result = resource.set_trunk_native_vlan(intf, '100')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('switchport trunk native vlan 100',
                           config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)
@@ -119,8 +119,8 @@ class TestApiSwitchports(DutSystemTest):
             resource = dut.api('switchports')
             result = resource.set_trunk_allowed_vlans(intf, '1,10,100')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('switchport trunk allowed vlan 1,10,100',
                           config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)

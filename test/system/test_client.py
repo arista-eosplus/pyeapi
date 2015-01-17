@@ -75,8 +75,8 @@ class TestClient(unittest.TestCase):
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
             self.assertEqual(result[0], {}, 'dut=%s' % dut)
 
-            result = dut.run_commands('show running-config | include %s$' % hostname,
-                                'text')
+            result = dut.run_commands('show running-config | include %s$' %
+                                      hostname, 'text')
             self.assertEqual(result[0]['output'].strip(), hostname)
 
     def test_config_multiple_commands(self):
