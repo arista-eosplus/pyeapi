@@ -108,6 +108,16 @@ def debug(text):
         syslog.openlog('pyeapi')
         syslog.syslog(syslog.LOG_NOTICE, str(text))
 
+def make_iterable(value):
+    if isinstance(value, basestring):
+        value = [value]
+
+    if not isinstance(value, collections.Iterable):
+        raise TypeError('value must be an iterable object')
+
+    return value
+
+
 def convert(data):
     if isinstance(data, basestring):
         return str(data)
