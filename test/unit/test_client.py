@@ -37,11 +37,49 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from mock import Mock, patch
 
-from testlib import get_fixture
+from testlib import get_fixture, random_string, random_int
 
 import pyeapi.client
 
 DEFAULT_CONFIG = {'connection:localhost': dict(transport='socket')}
+
+
+class TestNode(unittest.TestCase):
+
+    def setUp(self):
+        self.connection = Mock()
+        self.node = pyeapi.client.Node(self.connection)
+
+    def test_enable_with_single_command(self):
+        command = random_string()
+        response = ['enable', command]
+
+        self.connection.execute.return_value = {'result': list(response)}
+        result = self.node.enable(command)
+
+        self.connection.execute.assert_called_once_with(response, 'json')
+        self.assertEqual(command, result[0]['result'])
+
+    def test_enable_with_multiple_commands(self):
+        commands = list()
+        for i in range(0, random_int(2, 5)):
+            commands.append(random_string())
+
+        def execute_response(cmds, *args):
+            return {'result': [x for x in cmds]}
+
+        self.connection.execute.side_effect = execute_response
+
+        responses = self.node.enable(commands)
+
+
+        self.assertEqual(self.connection.execute.call_count, len(commands))
+
+        for cmd in commands:
+            self.connection.execute.assert_call_with(['enable', cmd], 'json')
+
+        for index, response in enumerate(responses):
+            self.assertEqual(commands[index], response['result'])
 
 class TestClient(unittest.TestCase):
 

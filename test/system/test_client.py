@@ -54,7 +54,7 @@ class TestClient(unittest.TestCase):
 
     def test_enable_single_command(self):
         for dut in self.duts:
-            result = dut.enable('show version')
+            result = dut.run_commands('show version')
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
@@ -63,7 +63,7 @@ class TestClient(unittest.TestCase):
             commands = list()
             for i in range(1, random_int(10, 200)):
                 commands.append('show version')
-            result = dut.enable(commands[:])
+            result = dut.run_commands(commands[:])
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
 
@@ -75,7 +75,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
             self.assertEqual(result[0], {}, 'dut=%s' % dut)
 
-            result = dut.enable('show running-config | include %s$' % hostname,
+            result = dut.run_commands('show running-config | include %s$' % hostname,
                                 'text')
             self.assertEqual(result[0]['output'].strip(), hostname)
 
@@ -91,7 +91,7 @@ class TestClient(unittest.TestCase):
     def test_multiple_requests(self):
         for dut in self.duts:
             for i in range(1, random_int(10, 200)):
-                result = dut.enable('show version')
+                result = dut.run_commands('show version')
                 self.assertIsInstance(result, list, 'dut=%s' % dut)
                 self.assertEqual(len(result), 1, 'dut=%s' % dut)
 

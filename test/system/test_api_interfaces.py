@@ -73,7 +73,7 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config('no interface Loopback0')
             result = dut.api('interfaces').create('Loopback0')
             self.assertTrue(result)
-            config = dut.enable('show interfaces')
+            config = dut.run_commands('show interfaces')
             self.assertIn('Loopback0', config[0]['interfaces'])
 
     def test_create_ethernet_raises_not_implemented_error(self):
@@ -86,7 +86,7 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config('interface Loopback0')
             result = dut.api('interfaces').delete('Loopback0')
             self.assertTrue(result)
-            config = dut.enable('show interfaces')
+            config = dut.run_commands('show interfaces')
             self.assertNotIn('Loopback0', config[0]['interfaces'])
 
     def test_delete_ethernet_raises_not_implemented_error(self):
@@ -100,7 +100,7 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config(['interface %s' % intf, 'shutdown'])
             result = dut.api('interfaces').default(intf)
             self.assertTrue(result)
-            config = dut.enable('show interfaces %s' % intf)
+            config = dut.run_commands('show interfaces %s' % intf)
             config = config[0]['interfaces'][intf]
             self.assertEqual(config['interfaceStatus'], 'connected')
 
@@ -110,7 +110,7 @@ class TestResourceInterfaces(DutSystemTest):
             intf = random_interface(dut)
             result = dut.api('interfaces').set_description(intf, text)
             self.assertTrue(result)
-            config = dut.enable('show interfaces %s' % intf)
+            config = dut.run_commands('show interfaces %s' % intf)
             config = config[0]['interfaces'][intf]
             self.assertEqual(config['description'], text)
 
@@ -120,7 +120,7 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config(['interface %s' % intf, 'no sflow enable'])
             result = dut.api('interfaces').set_sflow(intf, True)
             self.assertTrue(result)
-            config = dut.enable('show running-config interfaces %s' % intf,
+            config = dut.run_commands('show running-config interfaces %s' % intf,
                                 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
@@ -130,7 +130,7 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config('default interface %s' % intf)
             result = dut.api('interfaces').set_sflow(intf, False)
             self.assertTrue(result)
-            config = dut.enable('show running-config interfaces %s' % intf,
+            config = dut.run_commands('show running-config interfaces %s' % intf,
                                 'text')
             self.assertIn('no sflow enable', config[0]['output'])
 

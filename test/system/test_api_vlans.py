@@ -44,18 +44,18 @@ class TestApiVlans(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             dut.config(['no vlan 1', 'vlan 1'])
-            result = dut.api('vlans').get('1')
+            response = dut.api('vlans').get('1')
             values = dict(vlan_id='1', name='default', state='active',
                           trunk_groups=[])
-            self.assertEqual(values, result)
+            self.assertEqual(values, response)
 
     def test_getall(self):
         for dut in self.duts:
             dut.config(['no vlan 1-4094', 'vlan 1', 'vlan 10'])
-            result = dut.api('vlans').getall()
-            self.assertIsInstance(result, dict, 'dut=%s' % dut)
+            response = dut.api('vlans').getall()
+            self.assertIsInstance(response, dict, 'dut=%s' % dut)
             for vid in ['1', '10']:
-                self.assertIn(vid, result, 'dut=%s' % dut)
+                self.assertIn(vid, response, 'dut=%s' % dut)
 
     def test_create_and_return_true(self):
         for dut in self.duts:
@@ -63,7 +63,7 @@ class TestApiVlans(DutSystemTest):
             vid = str(random_int(2, 4094))
             result = dut.api('vlans').create(vid)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertIn(vid, config[0]['vlans'], 'dut=%s' % dut)
 
     def test_create_and_return_false(self):
@@ -77,7 +77,7 @@ class TestApiVlans(DutSystemTest):
             dut.config('vlan %s' % vid)
             result = dut.api('vlans').delete(vid)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertNotIn(vid, config[0]['vlans'])
 
     def test_delete_and_return_false(self):
@@ -93,7 +93,7 @@ class TestApiVlans(DutSystemTest):
                         'vlan %s' % vid, 'name %s' % name])
             result = dut.api('vlans').default(vid)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertNotIn(vid, config[0]['vlans'], 'dut=%s' % dut)
 
     def test_set_name(self):
@@ -103,7 +103,7 @@ class TestApiVlans(DutSystemTest):
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid])
             result = dut.api('vlans').set_name(vid, name)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertEqual(name, config[0]['vlans'][vid]['name'],
                              'dut=%s' % dut)
 
@@ -113,7 +113,7 @@ class TestApiVlans(DutSystemTest):
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid, 'state suspend'])
             result = dut.api('vlans').set_state(vid, 'active')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertEqual('active', config[0]['vlans'][vid]['status'],
                              'dut=%s' % dut)
 
@@ -123,7 +123,7 @@ class TestApiVlans(DutSystemTest):
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid, 'state active'])
             result = dut.api('vlans').set_state(vid, 'suspend')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan')
+            config = dut.run_commands('show vlan')
             self.assertEqual('suspended', config[0]['vlans'][vid]['status'],
                              'dut=%s' % dut)
 
@@ -134,7 +134,7 @@ class TestApiVlans(DutSystemTest):
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid, 'no trunk group'])
             result = dut.api('vlans').add_trunk_group(vid, tg)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan trunk group')
+            config = dut.run_commands('show vlan trunk group')
             self.assertIn(tg, config[0]['trunkGroups'][vid]['names'],
                           'dut=%s' % dut)
 
@@ -146,7 +146,7 @@ class TestApiVlans(DutSystemTest):
                         'trunk group %s' % tg])
             result = dut.api('vlans').remove_trunk_group(vid, tg)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show vlan trunk group')
+            config = dut.run_commands('show vlan trunk group')
             self.assertNotIn(tg, config[0]['trunkGroups'][vid]['names'],
                              'dut=%s' % dut)
 

@@ -30,13 +30,15 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import os
-import collections
 
+from collections import namedtuple
 from ConfigParser import ConfigParser
 
-from pyeapi.utils import load_module
+from pyeapi.utils import load_module, make_iterable
+
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
+from pyeapi.eapilib import CommandError
 
 config = {'connection:localhost': dict(transport='socket')}
 
@@ -50,6 +52,7 @@ TRANSPORTS = {
 }
 
 DEFAULT_TRANSPORT = 'http'
+
 
 def load_config(filename=None):
     if 'EAPI_CONF' in os.environ:
@@ -118,36 +121,87 @@ class Node(object):
     def config(self, commands):
         """Convenience method that sends commands to config mode
         """
-        if isinstance(commands, basestring):
-            commands = [commands]
-
-        if not isinstance(commands, collections.Iterable):
-            raise TypeError('commands must be an iterable object')
+        commands = make_iterable(commands)
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure')
-        response = self.enable(commands)
+        response = self.run_commands(commands)
 
         # pop the configure command output off the stack
         response.pop(0)
 
         return response
 
-    def enable(self, commands, serialization='json'):
+    def enable(self, commands, encoding='json', strict=False):
+        """Sends the array of commands to the node in enable mode
+
+        This method will send the commands to the node and evaluate
+        the results.  If a command fails due to an encoding error,
+        then the command set will be re-issued individual with text
+        encoding.
+
+        Args:
+            commands (list): The list of commands to send to the node
+
+            encoding (str): The requested encoding of the command output.
+                Valid values for encoding are json or text
+
+            strict (bool): If False, this method will attempt to run a
+                command with text encoding if json encoding fails
+
+        Returns:
+            A dict object that includes the response for each command along
+                with the encoding
+
+        Raises:
+            TypeError: This method does not support sending configure
+                commands and will raise a TypeError if configuration commands
+                are found in the list of commands provided
+
+            CommandError: This method will raise a CommandError if any one
+                of the commands fails.
+
+        """
+        commands = make_iterable(commands)
+
+        if 'configure' in commands:
+            raise TypeError('config mode commands not supported')
+
+        results = list()
+        if strict:
+            responses = self.run_commands(commands, encoding)
+            for index, response in enumerate(responses):
+                results.append(dict(command=commands[index],
+                                    response=response,
+                                    encoding=encoding))
+        else:
+            for command in commands:
+                try:
+                    resp = self.run_commands(command, encoding)
+                    results.append(dict(command=command,
+                                        result=resp[0],
+                                        encoding=encoding))
+                except CommandError as exc:
+                    if exc.error_code == 1003:
+                        resp = self.run_commands(command, 'text')
+                        results.append(dict(command=command,
+                                            result=resp[0],
+                                            encoding='text'))
+                    else:
+                        raise
+        return results
+
+    def run_commands(self, commands, encoding='json'):
         """Convenience method that sends commands to enable mode
         """
-        if isinstance(commands, basestring):
-            commands = [commands]
-
-        if not isinstance(commands, collections.Iterable):
-            raise TypeError('commands must be an iterable object')
+        commands = make_iterable(commands)
 
         if self._exec:
             commands.insert(0, {'cmd': 'enable', 'input': self._exec})
         else:
             commands.insert(0, 'enable')
 
-        response = self._connection.execute(commands, serialization)
+        response = self._connection.execute(commands, encoding)
 
         # pop enable command from the response
         response['result'].pop(0)
@@ -158,6 +212,8 @@ class Node(object):
         """Loads the resource identified by name
         """
         module = load_module('{}.{}'.format(namespace, name))
+        if hasattr(module, 'initialize'):
+            module.initialize(self)
         if hasattr(module, 'instance'):
             return module.instance(self)
         return module
@@ -168,7 +224,7 @@ class Node(object):
         command = 'show %s' % config
         if params:
             command += ' %s' % params
-        result = self.enable(command, 'text')
+        result = self.run_commands(command, 'text')
         return str(result[0]['output']).strip()
 
 

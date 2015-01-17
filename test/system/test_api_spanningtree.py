@@ -60,7 +60,7 @@ class TestApiStpInterfaces(DutSystemTest):
             resource = dut.api('spanningtree').interfaces
             result = resource.set_bpduguard('Ethernet1', True)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.run_commands('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('spanning-tree bpduguard enable',
                           config[0]['output'], 'dut=%s' % dut)
@@ -72,7 +72,7 @@ class TestApiStpInterfaces(DutSystemTest):
             resource = dut.api('spanningtree').interfaces
             result = resource.set_bpduguard('Ethernet1', False)
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.run_commands('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('spanning-tree bpduguard disable',
                           config[0]['output'], 'dut=%s' % dut)
@@ -83,7 +83,7 @@ class TestApiStpInterfaces(DutSystemTest):
             resource = dut.api('spanningtree').interfaces
             result = resource.set_portfast('Ethernet1', 'edge')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.run_commands('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('spanning-tree portfast\n', config[0]['output'],
                           'dut=%s' % dut)
@@ -94,7 +94,7 @@ class TestApiStpInterfaces(DutSystemTest):
             resource = dut.api('spanningtree').interfaces
             result = resource.set_portfast('Ethernet1', 'network')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.run_commands('show running-config interfaces Ethernet1',
                                 'text')
             self.assertIn('spanning-tree portfast network\n',
                           config[0]['output'], 'dut=%s' % dut)
@@ -106,7 +106,7 @@ class TestApiStpInterfaces(DutSystemTest):
             resource = dut.api('spanningtree').interfaces
             result = resource.set_portfast('Ethernet1', 'disable')
             self.assertTrue(result, 'dut=%s' % dut)
-            config = dut.enable('show running-config interfaces Ethernet1',
+            config = dut.run_commands('show running-config interfaces Ethernet1',
                                 'text')
             self.assertNotIn('spanning-tree portfast', config[0]['output'],
                              'dut=%s' % dut)
