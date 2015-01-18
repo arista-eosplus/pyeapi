@@ -34,7 +34,7 @@ import random
 import string
 import unittest
 
-from mock import Mock
+from mock import Mock, PropertyMock
 
 from pyeapi.client import Node
 
@@ -70,7 +70,8 @@ class EapiConfigUnitTest(unittest.TestCase):
 
     def setUp(self):
         self.node = Mock(spec=Node)
-        self.node.get_config.return_value = self.config
+        config = PropertyMock(return_value=self.config)
+        type(self.node).running_config = config
 
         self.assertIsNotNone(self.instance)
         self.instance.node = self.node
@@ -87,6 +88,8 @@ class EapiConfigUnitTest(unittest.TestCase):
 
         if cmds is not None:
             self.node.config.assert_called_with(cmds)
+        else:
+            self.assertEqual(self.node.config.call_count, 0)
 
         return result
 

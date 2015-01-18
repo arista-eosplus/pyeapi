@@ -35,7 +35,7 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_string
+from testlib import random_string, random_int
 from systestlib import DutSystemTest, random_interface
 
 
@@ -50,6 +50,7 @@ class TestResourceInterfaces(DutSystemTest):
                         'flowcontrol send off',
                         'flowcontrol receive on',
                         'no sflow enable'])
+
             result = dut.api('interfaces').get(intf)
 
             self.assertIsInstance(result, dict)
@@ -120,8 +121,8 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config(['interface %s' % intf, 'no sflow enable'])
             result = dut.api('interfaces').set_sflow(intf, True)
             self.assertTrue(result)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                      'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
     def test_set_sflow_disable(self):
@@ -130,9 +131,119 @@ class TestResourceInterfaces(DutSystemTest):
             dut.config('default interface %s' % intf)
             result = dut.api('interfaces').set_sflow(intf, False)
             self.assertTrue(result)
-            config = dut.run_commands('show running-config interfaces %s' % intf,
-                                      'text')
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
             self.assertIn('no sflow enable', config[0]['output'])
+
+
+class TestPortchannelInterface(DutSystemTest):
+
+    def test_get(self):
+        for dut in self.duts:
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1'])
+            result = dut.api('interfaces').get('Port-Channel1')
+            self.assertIsInstance(result, dict)
+            self.assertEqual(result['type'], 'portchannel')
+            self.assertEqual(result['name'], 'Port-Channel1')
+
+    def test_get_lacp_mode_with_default(self):
+        for dut in self.duts:
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1'])
+            instance = dut.api('interfaces').get_instance('Port-Channel1')
+            result = instance.get_lacp_mode('Port-Channel1')
+            self.assertEqual(result, 'on', 'dut=%s' % dut)
+
+    def test_get_members_default(self):
+        for dut in self.duts:
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1'])
+            instance = dut.api('interfaces').get_instance('Port-Channel1')
+            result = instance.get_members('Port-Channel1')
+            self.assertEqual(result, list(), 'dut=%s' % dut)
+
+    def test_set_lacp_mode(self):
+        for dut in self.duts:
+            for mode in ['on', 'active', 'passive']:
+                cfgmode = 'on' if mode != 'on' else 'active'
+                dut.config(['no interface Port-Channel1',
+                            'default interface Ethernet1',
+                            'interface Ethernet1',
+                            'channel-group 1 mode %s' % cfgmode])
+
+                result = dut.api('interfaces').set_lacp_mode('Port-Channel1',
+                                                             mode)
+                self.assertTrue(result, 'dut=%s' % dut)
+                commands = 'show running-config interfaces Ethernet1'
+                config = dut.run_commands(commands, 'text')
+                self.assertIn('channel-group 1 mode %s' % mode,
+                              config[0]['output'], 'dut=%s' % dut)
+
+    def test_set_lacp_mode_invalid_value(self):
+        for dut in self.duts:
+            mode = random_string()
+            result = dut.api('interfaces').set_lacp_mode('Port-Channel1', mode)
+            self.assertFalse(result)
+
+    def test_set_members(self):
+        for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+            et3 = random_interface(dut, exclude=[et1, et2])
+
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et3])
+
+            api = dut.api('interfaces')
+            result = api.set_members('Port-Channel1', [et1, et3])
+            self.assertTrue(result, 'dut=%s' % dut)
+
+            cmd = 'show running-config interfaces %s'
+
+            # check to make sure et1 is still in the lag and et3 was
+            # added to the lag
+            for interface in [et1, et3]:
+                config = dut.run_commands(cmd % interface, 'text')
+                self.assertIn('channel-group 1 mode on',
+                              config[0]['output'], 'dut=%s' % dut)
+
+            # checks to  make sure et2 was remvoved form the lag
+            config = dut.run_commands(cmd % et2, 'text')
+            self.assertNotIn('channel-group 1 mode on',
+                             config[0]['output'], 'dut=%s' % dut)
+
+
+
+
+    def test_minimum_links_valid(self):
+        for dut in self.duts:
+            minlinks = random_int(1, 16)
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1'])
+            result = dut.api('interfaces').set_minimum_links('Port-Channel1',
+                                                             minlinks)
+            self.assertTrue(result, 'dut=%s' % dut)
+            commands = 'show running-config interfaces Port-Channel1'
+            config = dut.run_commands(commands, 'text')
+            self.assertIn('port-channel min-links %s' % minlinks,
+                          config[0]['output'], 'dut=%s' % dut)
+
+    def test_minimum_links_invalid_value(self):
+        for dut in self.duts:
+            minlinks = random_int(17, 128)
+            result = dut.api('interfaces').set_minimum_links('Port-Channel1',
+                                                             minlinks)
+            self.assertFalse(result)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()

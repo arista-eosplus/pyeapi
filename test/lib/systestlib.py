@@ -52,10 +52,16 @@ class DutSystemTest(unittest.TestCase):
         for connection in connections:
             self.duts.append(pyeapi.client.connect_to(connection))
 
-def random_interface(dut):
+def random_interface(dut, exclude=None):
+    exclude = [] if exclude is None else exclude
     interfaces = dut.api('interfaces')
     names = [name for name in interfaces.keys() if name.startswith('Et')]
-    return random.choice(names)
+
+    if sorted(exclude) == sorted(names):
+        raise TypeError('unable to allocate interface from dut')
+
+    choices = set(names).difference(exclude)
+    return random.choice(list(choices))
 
 
 

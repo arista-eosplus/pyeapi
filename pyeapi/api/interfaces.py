@@ -68,8 +68,11 @@ SFLOW_RE = re.compile(r'(\s{3}no sflow)', re.M)
 FLOWC_TX_RE = re.compile(r'(?<=\s{3}flowcontrol\ssend\s)(?P<value>.+)$', re.M)
 FLOWC_RX_RE = re.compile(r'(?<=\s{3}flowcontrol\sreceive\s)(?P<value>.+)$',
                          re.M)
+MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
 INSTANCE_METHODS = ['create', 'delete', 'default']
+
+DEFAULT_LACP_MODE = 'on'
 
 def isvalidinterface(value):
     matches = ['Ethernet', 'Management', 'Loopback', 'Port-Channel',
@@ -144,11 +147,11 @@ class BaseInterface(EntityCollection):
 
         response = dict(name=name, type='generic')
         response['shutdown'] = SHUTDOWN_RE.search(config) is None
-
-        value = lambda x, y: x.group('value') if x else y
-        response['description'] = value(DESCRIPTION_RE.search(config), '')
-
+        response['description'] = self.value(DESCRIPTION_RE.search(config), '')
         return response
+
+    def value(self, match, default=None):
+        return match.group('value') if match else default
 
     def create(self, name):
         """Creates a new interface on the node
@@ -199,8 +202,8 @@ class BaseInterface(EntityCollection):
         """Configures the interface description
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-               name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             value (string): The value to set the description to.
 
@@ -222,8 +225,8 @@ class BaseInterface(EntityCollection):
         """Configures the interface shutdown state
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-                name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             value (boolean): True if the interface should be in shutdown state
                 otherwise False
@@ -276,14 +279,14 @@ class EthernetInterface(BaseInterface):
         response = super(EthernetInterface, self).get(name)
         response.update(dict(name=name, type='ethernet'))
 
-        value = lambda x, y: x.group('value') if x else y
-
         response['sflow'] = SFLOW_RE.search(config) is None
 
-        response['flowcontrol_send'] = value(FLOWC_TX_RE.search(config),
-                                             'off')
-        response['flowcontrol_receive'] = value(FLOWC_RX_RE.search(config),
-                                                'off')
+        flowc_tx = FLOWC_TX_RE.search(config)
+        response['flowcontrol_send'] = self.value(flowc_tx, 'off')
+
+        flowc_rx = FLOWC_RX_RE.search(config)
+        response['flowcontrol_receive'] = self.value(flowc_rx, 'off')
+
         return response
 
     def create(self, name):
@@ -316,8 +319,8 @@ class EthernetInterface(BaseInterface):
         """Configures the interface flowcontrol send value
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-               name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             direction (string): one of either 'send' or 'receive'
 
@@ -335,8 +338,8 @@ class EthernetInterface(BaseInterface):
         """Configures the interface flowcontrol receive value
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-               name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             value (boolean): True if the interface should be in shutdown state
                           otherwise False
@@ -353,8 +356,8 @@ class EthernetInterface(BaseInterface):
         """Configures the interface flowcontrol value
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-               name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             direction (string): one of either 'send' or 'receive'
 
@@ -387,8 +390,8 @@ class EthernetInterface(BaseInterface):
         """Configures the sflow state on the interface
 
         Args:
-            name (string): The interface identifier.  It must be a full interface
-               name (ie Ethernet, not Et)
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
 
             value (boolean): True if sflow should be enabled otherwise False
 
@@ -410,9 +413,179 @@ class EthernetInterface(BaseInterface):
             commands.append('no sflow enable')
         return self.configure(commands)
 
+class PortchannelInterface(BaseInterface):
+
+    def get(self, name):
+        """Returns a Port-Channel interface as a set of key/value pairs
+
+        Example:
+            {
+                "name": <string>,
+                "type": "portchannel",
+                "members": <arrary of interface names>,
+                "minimum_links: <integer>,
+                "lacp_mode": [on, active, passive]
+            }
+
+        Args:
+            name (str): The interface identifier to retrieve from the
+                running-configuration
+
+        Returns:
+            A Python dictionary object of key/value pairs that represents
+                the interface configuration.  If the specified interface
+                does not exist, then None is returned
+        """
+        config = self.get_block('^interface %s' % name)
+        if not config:
+            return None
+
+        response = super(PortchannelInterface, self).get(name)
+        response.update(dict(name=name, type='portchannel'))
+
+        response['members'] = self.get_members(name)
+        response['lacp_mode'] = self.get_lacp_mode(name)
+        response['minimum_links'] = self.value(MIN_LINKS_RE.search(config), 0)
+        return response
+
+    def get_lacp_mode(self, name):
+        """Returns the LACP mode for the specified Port-Channel interface
+
+        Args:
+            name(str): The Port-Channel interface name to return the LACP
+                mode for from the configuration
+
+        Returns:
+            The configured LACP mode for the interface.  Valid mode values
+                are 'on', 'passive', 'active'
+
+        """
+        members = self.get_members(name)
+        if not members:
+            return DEFAULT_LACP_MODE
+
+        for member in self.get_members(name):
+            match = re.search(r'channel-group\s\d+\smode\s(?P<value>.+)',
+                              self.get_block('^interface %s' % member))
+            return match.group('value')
+
+
+
+    def get_members(self, name):
+        """Returns the member interfaces for the specified Port-Channel
+
+        Args:
+            name(str): The Port-channel interface name to return the member
+                interfaces for
+
+        Returns:
+            A list of physical interface names that belong to the specified
+                interface
+        """
+        grpid = re.search(r'(\d+)', name).group()
+        command = 'show port-channel %s all-ports' % grpid
+        config = self.node.enable(command, 'text')
+        return re.findall(r'Ethernet[\d/]*', config[0]['result']['output'])
+
+    def set_members(self, name, members):
+        """Configures the array of member interfaces for the Port-Channel
+
+        Args:
+            name(str): The Port-Channel intervae name to configure the member
+                interfaces
+
+            members(list): The list of Ethernet interfaces that should be
+                member interfaces
+
+        Returns:
+            True if the operation succeeds otherwise False
+
+        """
+        current_members = self.get_members(name)
+        lacp_mode = self.get_lacp_mode(name)
+        grpid = re.search(r'(\d+)', name).group()
+
+        commands = list()
+
+        # remove members from the current port-channel interface
+        for member in set(current_members).difference(members):
+            commands.append('interface %s' % member)
+            commands.append('no channel-group %s' % grpid)
+
+        # add new member interfaces to the port-channel interface
+        for member in set(members).difference(current_members):
+            commands.append('interface %s' % member)
+            commands.append('channel-group %s mode %s' % (grpid, lacp_mode))
+
+        return self.configure(commands) if commands else True
+
+    def set_lacp_mode(self, name, mode):
+        """Configures the LACP mode of the member interfaces
+
+        Args:
+            name(str): The Port-Channel interface name to configure the
+                LACP mode
+
+            mode(str): The LACP mode to configure the member interfaces to.
+                Valid values are 'on, 'passive', 'active'
+
+        Returns:
+            True if the operation succeeds otherwise False
+
+        """
+        if mode not in ['on', 'passive', 'active']:
+            return False
+
+        grpid = re.search(r'(\d+)', name).group()
+
+        remove_commands = list()
+        add_commands = list()
+
+        for member in self.get_members(name):
+            remove_commands.append('interface %s' % member)
+            remove_commands.append('no channel-group %s' % grpid)
+            add_commands.append('interface %s' % member)
+            add_commands.append('channel-group %s mode %s' % (grpid, mode))
+
+        return self.configure(remove_commands + add_commands)
+
+    def set_minimum_links(self, name, value=None, default=False):
+        """Configures the Port-Channel min-links value
+
+        Args:
+            name(str): The Port-Channel interface name
+
+            value(str): The value to configure the min-links
+
+            default (bool): Specifies to default the interface description
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+
+        """
+        if value is not None:
+            try:
+                value = int(value)
+                if value not in range(0, 16):
+                    return False
+            except ValueError:
+                return False
+
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default port-channel min-links')
+        elif value is not None:
+            commands.append('port-channel min-links %s' % value)
+        else:
+            commands.append('no port-channel min-links')
+
+        return self.configure(commands)
+
+
 
 INTERFACE_CLASS_MAP = {
-    'Et': EthernetInterface
+    'Et': EthernetInterface,
+    'Po': PortchannelInterface
 }
 
 

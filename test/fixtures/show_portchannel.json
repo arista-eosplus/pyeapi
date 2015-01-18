@@ -1,0 +1,8 @@
+[{
+    "command": "show port-channel 1 all-ports", 
+    "result": {
+        "output": "Port Channel Port-Channel1:\n  Active Ports: Ethernet5 Ethernet6 \n"
+    }, 
+    "encoding": "text"
+}]
+

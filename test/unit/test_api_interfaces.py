@@ -32,10 +32,11 @@
 import sys
 import os
 import unittest
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, random_string, function
+from testlib import get_fixture, random_string, function, random_int
 from testlib import EapiConfigUnitTest
 
 import pyeapi.api.interfaces
@@ -247,6 +248,81 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
         for intf in INTERFACES:
             func = function('set_sflow', intf, random_string())
             self.eapi_exception_config_test(func, ValueError)
+
+class TestApiPortchannelInterface(EapiConfigUnitTest):
+
+    def __init__(self, *args, **kwargs):
+        super(TestApiPortchannelInterface, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.api.interfaces.PortchannelInterface(None)
+        self.config = open(get_fixture('running_config.portchannel')).read()
+
+    def setUp(self):
+        super(TestApiPortchannelInterface, self).setUp()
+        response = open(get_fixture('show_portchannel.json'))
+        self.node.enable.return_value = json.load(response)
+
+    def test_get(self):
+        result = self.instance.get('Port-Channel1')
+        values = dict(name='Port-Channel1', type='portchannel',
+                      description='', shutdown=False,
+                      lacp_mode='on', minimum_links=0,
+                      members=['Ethernet5', 'Ethernet6'])
+
+        self.assertEqual(values, result)
+
+    def test_set_minimum_links_with_value(self):
+        minlinks = random_int(0, 16)
+        cmds = ['interface Port-Channel1',
+                'port-channel min-links %s' % minlinks]
+        func = function('set_minimum_links', 'Port-Channel1', minlinks)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_minimum_links_with_no_value(self):
+        cmds = ['interface Port-Channel1', 'no port-channel min-links']
+        func = function('set_minimum_links', 'Port-Channel1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_minimum_links_with_default(self):
+        cmds = ['interface Port-Channel1', 'default port-channel min-links']
+        func = function('set_minimum_links', 'Port-Channel1', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_get_lacp_mode(self):
+        result = self.instance.get_lacp_mode('Port-Channel1')
+        self.assertEqual(result, 'on')
+
+    def test_get_members(self):
+        result = self.instance.get_members('Port-Channel1')
+        self.assertEqual(result, ['Ethernet5', 'Ethernet6'])
+
+    def test_set_members(self):
+        cmds = ['interface Ethernet6', 'no channel-group 1',
+                'interface Ethernet7', 'channel-group 1 mode on']
+        func = function('set_members', 'Port-Channel1',
+                        ['Ethernet5', 'Ethernet7'])
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_members_no_changes(self):
+        func = function('set_members', 'Port-Channel1',
+                        ['Ethernet5', 'Ethernet6'])
+        self.eapi_positive_config_test(func)
+
+    def test_set_lacp_mode(self):
+        cmds = ['interface Ethernet5', 'no channel-group 1',
+                'interface Ethernet6', 'no channel-group 1',
+                'interface Ethernet5', 'channel-group 1 mode active',
+                'interface Ethernet6', 'channel-group 1 mode active']
+        func = function('set_lacp_mode', 'Port-Channel1', 'active')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_mode_invalid_mode(self):
+        func = function('set_lacp_mode', 'Port-Channel1', random_string())
+        self.eapi_negative_config_test(func)
+
+
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
