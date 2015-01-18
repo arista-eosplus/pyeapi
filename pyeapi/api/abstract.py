@@ -62,16 +62,13 @@ class BaseEntity(object):
         self.autorefresh = autorefresh
         self.properties = dict()
 
-        # runtime properties
-        self._config = None
-        self.error = None
-
     @property
     def config(self):
-        if self._config is not None:
-            return self._config
-        self._config = self.node.get_config(params='all')
-        return self._config
+        return self.node.running_config
+
+    @property
+    def error(self):
+        return self.node.connection.error
 
     def __getattr__(self, name):
         if name in self.__dict__:
@@ -99,9 +96,6 @@ class BaseEntity(object):
 
         return self.config[block_start:block_end]
 
-    def refresh(self):
-        self._config = None
-
     def configure(self, commands):
         """Sends the commands list to the node in config mode
 
@@ -119,13 +113,9 @@ class BaseEntity(object):
                 False is returned
         """
         try:
-            self.error = None
             self.node.config(commands)
-            if self.autorefresh:
-                self.refresh()
             return True
-        except CommandError as exc:
-            self.error = exc
+        except CommandError:
             return False
 
 

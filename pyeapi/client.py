@@ -96,13 +96,33 @@ class Node(object):
 
     def __init__(self, connection, **kwargs):
         self._connection = connection
-        self._exec = None
+        self._enablepwd = None
+        self._running_config = None
+        self._startup_config = None
+        self.autorefresh = kwargs.get('autorefresh', True)
+
+    def __str__(self):
+        return 'Node(connetion=%s)' % str(self._connection)
 
     @property
     def connection(self):
         return self._connection
 
-    def exec_authentication(self, password):
+    @property
+    def running_config(self):
+        if self._running_config is not None:
+            return self._running_config
+        self._running_config = self.get_config(params='all')
+        return self._running_config
+
+    @property
+    def startup_config(self):
+        if self._startup_config is not None:
+            return self._startup_config
+        self._startup_config = self.get_config('startup-config')
+        return self._startup_config
+
+    def enable_authentication(self, password):
         """Configures the executive mode authentication password
 
         EOS supports an additional password authentication mechanism for
@@ -114,8 +134,8 @@ class Node(object):
             password (str): The password string in clear text used to
                 authenticate to exec mode
         """
-        self._exec = password
-        self._exec = str(password).strip()
+        self._enablepwd = password
+        self._enablepwd = str(password).strip()
 
     def config(self, commands):
         """Convenience method that sends commands to config mode
@@ -125,6 +145,9 @@ class Node(object):
         # push the configure command onto the command stack
         commands.insert(0, 'configure')
         response = self.run_commands(commands)
+
+        if self.autorefresh:
+            self.refresh()
 
         # pop the configure command output off the stack
         response.pop(0)
@@ -195,8 +218,8 @@ class Node(object):
         """
         commands = make_iterable(commands)
 
-        if self._exec:
-            commands.insert(0, {'cmd': 'enable', 'input': self._exec})
+        if self._enablepwd:
+            commands.insert(0, {'cmd': 'enable', 'input': self._enablepwd})
         else:
             commands.insert(0, 'enable')
 
@@ -220,11 +243,19 @@ class Node(object):
     def get_config(self, config='running-config', params=None):
         """Convenience method that returns the running-config as a dict
         """
+        if config not in ['startup-config', 'running-config']:
+            raise TypeError('invalid config name specified')
         command = 'show %s' % config
         if params:
             command += ' %s' % params
         result = self.run_commands(command, 'text')
+        if self.autorefresh:
+            self.refresh()
         return str(result[0]['output']).strip()
+
+    def refresh(self):
+        self._running_config = None
+        self._startup_config = None
 
 
 def connect_to(name):

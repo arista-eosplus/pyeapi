@@ -96,7 +96,7 @@ class EapiConnection(object):
         self.error = None
         self._auth = None
 
-    def user_authentication(self, username, password):
+    def authentication(self, username, password):
         """Configures the user authentication for eAPI
 
         This method configures the username and password combination to use
@@ -291,14 +291,14 @@ class HttpEapiConnection(EapiConnection):
         super(HttpEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_PORT
         self.transport = HTTPConnection(host, port)
-        self.user_authentication(username, password)
+        self.authentication(username, password)
 
 class HttpsEapiConnection(EapiConnection):
     def __init__(self, host, port=None, username=None, password=None, **kwargs):
         super(HttpsEapiConnection, self).__init__()
         port = port or DEFAULT_HTTPS_PORT
         self.transport = HTTPSConnection(host, port)
-        self.user_authentication(username, password)
+        self.authentication(username, password)
 
 
 
