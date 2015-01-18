@@ -242,7 +242,80 @@ class TestPortchannelInterface(DutSystemTest):
                                                              minlinks)
             self.assertFalse(result)
 
+class TestApiVxlanInterface(DutSystemTest):
 
+    def test_get(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1',
+                        'interface Vxlan1'])
+            result = dut.api('interfaces').get('Vxlan1')
+            self.assertIsInstance(result, dict)
+            self.assertEqual(result['type'], 'vxlan')
+            self.assertEqual(result['name'], 'Vxlan1')
+            self.assertFalse(result['shutdown'])
+            self.assertEqual(result['description'], '')
+            self.assertEqual(result['source_interface'], '')
+            self.assertEqual(result['multicast_group'], '')
+
+    def get_config(self, dut):
+        cmd = 'show running-config all interfaces Vxlan1'
+        config = dut.run_commands(cmd, 'text')
+        return config[0]['output']
+
+    def contains(self, text, dut):
+        self.assertIn(text, self.get_config(dut), 'dut=%s' % dut)
+
+    def test_set_source_interface(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.set_source_interface('Vxlan1', 'Loopback0')
+            self.assertTrue(instance)
+            self.contains('vxlan source-interface Loopback0', dut)
+
+    def test_set_source_interface_default(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan source-interface Loopback0'])
+            api = dut.api('interfaces')
+            instance = api.set_source_interface('Vxlan1', default=True)
+            self.assertTrue(instance)
+            self.contains('no vxlan source-interface', dut)
+
+    def test_set_source_interface_negate(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan source-interface Loopback0'])
+            api = dut.api('interfaces')
+            instance = api.set_source_interface('Vxlan1')
+            self.assertTrue(instance)
+            self.contains('no vxlan source-interface', dut)
+
+    def test_set_multicast_group(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.set_multicast_group('Vxlan1', '239.10.10.10')
+            self.assertTrue(instance)
+            self.contains('vxlan multicast-group 239.10.10.10', dut)
+
+    def test_set_multicast_group_default(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan multicast-group 239.10.10.10'])
+            api = dut.api('interfaces')
+            instance = api.set_multicast_group('Vxlan1', default=True)
+            self.assertTrue(instance)
+            self.contains('no vxlan multicast-group', dut)
+
+    def test_set_multicast_group_negate(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan multicast-group 239.10.10.10'])
+            api = dut.api('interfaces')
+            instance = api.set_multicast_group('Vxlan1')
+            self.assertTrue(instance)
+            self.contains('no vxlan multicast-group', dut)
 
 
 if __name__ == '__main__':

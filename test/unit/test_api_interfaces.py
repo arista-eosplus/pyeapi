@@ -319,10 +319,51 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         func = function('set_lacp_mode', 'Port-Channel1', random_string())
         self.eapi_negative_config_test(func)
 
+class TestApiVxlanInterface(EapiConfigUnitTest):
 
+    def __init__(self, *args, **kwargs):
+        super(TestApiVxlanInterface, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.api.interfaces.VxlanInterface(None)
+        self.config = open(get_fixture('running_config.vxlan')).read()
 
+    def test_get(self):
+        result = self.instance.get()
+        values = dict(name='Vxlan1', type='vxlan',
+                      description='', shutdown=False,
+                      source_interface='Loopback0',
+                      multicast_group='239.10.10.10')
 
+        self.assertEqual(values, result)
 
+    def test_set_source_interface_with_value(self):
+        cmds = ['interface Vxlan1', 'vxlan source-interface Loopback0']
+        func = function('set_source_interface', 'Vxlan1', 'Loopback0')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_source_interface_with_no_value(self):
+        cmds = ['interface Vxlan1', 'no vxlan source-interface']
+        func = function('set_source_interface', 'Vxlan1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_source_interface_with_default(self):
+        cmds = ['interface Vxlan1', 'default vxlan source-interface']
+        func = function('set_source_interface', 'Vxlan1', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_group_with_value(self):
+        cmds = ['interface Vxlan1', 'vxlan multicast-group 239.10.10.10']
+        func = function('set_multicast_group', 'Vxlan1', '239.10.10.10')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_group_with_no_value(self):
+        cmds = ['interface Vxlan1', 'no vxlan multicast-group']
+        func = function('set_multicast_group', 'Vxlan1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_group_with_default(self):
+        cmds = ['interface Vxlan1', 'default vxlan multicast-group']
+        func = function('set_multicast_group', 'Vxlan1', default=True)
+        self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

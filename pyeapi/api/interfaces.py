@@ -581,11 +581,105 @@ class PortchannelInterface(BaseInterface):
 
         return self.configure(commands)
 
+class VxlanInterface(BaseInterface):
+
+    SRC_INTF_RE = re.compile(r'(?<=\s{3}vxlan\ssource-interface\s)'
+                             r'(?P<value>.+)$', re.M)
+    MCAST_GRP_RE = re.compile(r'(?<=\s{3}vxlan\smulticast-group\s)'
+                              r'(?P<value>.+)$', re.M)
+
+
+    def get(self, name='Vxlan1'):
+        """Returns a Vxlan interface as a set of key/value pairs
+
+        Example:
+            {
+                "name": <string>,
+                "type": "vxlan",
+                "source_interface": <string>,
+                "multicast_group": <string>
+            }
+
+        Args:
+            name (str): The interface identifier to retrieve from the
+                running-configuration
+
+        Returns:
+            A Python dictionary object of key/value pairs that represents
+                the interface configuration.  If the specified interface
+                does not exist, then None is returned
+        """
+        config = self.get_block('^interface %s' % name)
+        if not config:
+            return None
+
+        response = super(VxlanInterface, self).get(name)
+        response.update(dict(name=name, type='vxlan'))
+
+        srcintf = self.value(self.SRC_INTF_RE.search(config), '')
+        response['source_interface'] = srcintf
+
+        mcastgrp = self.value(self.MCAST_GRP_RE.search(config), '')
+        response['multicast_group'] = mcastgrp
+
+        return response
+
+    def set_source_interface(self, name='Vxlan1', value=None, default=False):
+        """Configures the Vxlan source-interface value
+
+        Args:
+            name(str): The interface identifier to configure, defaults to
+                Vxlan1
+           value(str): The value to configure the source-interface to
+           default(bool): Configures the source-interface value to default
+
+        Returns:
+            True if the operation succeeds otherwise False
+
+        """
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default vxlan source-interface')
+        elif value is not None:
+            commands.append('vxlan source-interface %s' % value)
+        else:
+            commands.append('no vxlan source-interface')
+
+        return self.configure(commands)
+
+    def set_multicast_group(self, name='Vxlan1', value=None, default=False):
+        """Configures the Vxlan multicast-group value
+
+        Args:
+            name(str): The interface identifier to configure, defaults to
+                Vxlan1
+           value(str): The value to configure the multicast-group to
+           default(bool): Configures the mulitcat-group value to default
+
+        Returns:
+            True if the operation succeeds otherwise False
+
+        """
+        commands = ['interface %s' % name]
+        if default:
+            commands.append('default vxlan multicast-group')
+        elif value is not None:
+            commands.append('vxlan multicast-group %s' % value)
+        else:
+            commands.append('no vxlan multicast-group')
+
+        return self.configure(commands)
+
+
+
+
+
 
 
 INTERFACE_CLASS_MAP = {
     'Et': EthernetInterface,
-    'Po': PortchannelInterface
+    'Po': PortchannelInterface,
+    'Vx': VxlanInterface
 }
 
 
