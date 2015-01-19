@@ -57,7 +57,12 @@ def random_interface(dut, exclude=None):
     interfaces = dut.api('interfaces')
     names = [name for name in interfaces.keys() if name.startswith('Et')]
 
-    if sorted(exclude) == sorted(names):
+    exclude_interfaces = dut.settings.get('exclude_interfaces', [])
+    if exclude_interfaces:
+        exclude_interfaces = exclude_interfaces.split(',')
+    exclude_interfaces.extend(exclude)
+
+    if sorted(exclude_interfaces) == sorted(names):
         raise TypeError('unable to allocate interface from dut')
 
     choices = set(names).difference(exclude)

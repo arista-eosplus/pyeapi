@@ -96,10 +96,12 @@ class Node(object):
 
     def __init__(self, connection, **kwargs):
         self._connection = connection
-        self._enablepwd = None
         self._running_config = None
         self._startup_config = None
+
+        self._enablepwd = kwargs.get('enablepwd')
         self.autorefresh = kwargs.get('autorefresh', True)
+        self.settings = kwargs
 
     def __str__(self):
         return 'Node(connetion=%s)' % str(self._connection)
@@ -260,10 +262,12 @@ class Node(object):
 
 def connect_to(name):
     kwargs = config_for(name)
-    connection = connect(**kwargs)
-    node = Node(connection)
-    if kwargs.get('enablepwd') is not None:
-        node.exec_authentication(kwargs['enablepwd'])
+    connection = connect(transport=kwargs.get('transport'),
+                         host=kwargs.get('host'),
+                         username=kwargs.get('username'),
+                         password=kwargs.get('password'),
+                         port=kwargs.get('port'))
+    node = Node(connection, **kwargs)
     return node
 
 
