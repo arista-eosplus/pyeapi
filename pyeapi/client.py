@@ -114,14 +114,16 @@ class Node(object):
     def running_config(self):
         if self._running_config is not None:
             return self._running_config
-        self._running_config = self.get_config(params='all')
+        self._running_config = self.get_config(params='all',
+                                               as_string=True)
         return self._running_config
 
     @property
     def startup_config(self):
         if self._startup_config is not None:
             return self._startup_config
-        self._startup_config = self.get_config('startup-config')
+        self._startup_config = self.get_config('startup-config',
+                                               as_string=True)
         return self._startup_config
 
     def enable_authentication(self, password):
@@ -242,7 +244,8 @@ class Node(object):
             return module.instance(self)
         return module
 
-    def get_config(self, config='running-config', params=None):
+    def get_config(self, config='running-config', params=None,
+                   as_string=False):
         """Convenience method that returns the running-config as a dict
         """
         if config not in ['startup-config', 'running-config']:
@@ -253,7 +256,10 @@ class Node(object):
         result = self.run_commands(command, 'text')
         if self.autorefresh:
             self.refresh()
-        return str(result[0]['output']).strip()
+
+        if as_string:
+            return str(result[0]['output']).strip()
+        return str(result[0]['output']).split('\n')
 
     def refresh(self):
         self._running_config = None

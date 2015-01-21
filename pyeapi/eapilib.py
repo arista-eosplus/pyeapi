@@ -357,23 +357,28 @@ class SocketEapiConnection(EapiConnection):
         self.transport = SocketConnection(path)
 
 class HttpLocalEapiConnection(EapiConnection):
-    def __init__(self, port=None, **kwargs):
+    def __init__(self, port=None, path=None, **kwargs):
         super(HttpLocalEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_LOCAL_PORT
-        self.transport = HttpConnection('localhost', port)
+        path = path or DEFAULT_HTTP_PATH
+        self.transport = HttpConnection(path, 'localhost', port)
 
 class HttpEapiConnection(EapiConnection):
-    def __init__(self, host, port=None, username=None, password=None, **kwargs):
+    def __init__(self, host, port=None, path=None, username=None,
+                 password=None, **kwargs):
         super(HttpEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_PORT
-        self.transport = HttpConnection(host, port)
+        path = path or DEFAULT_HTTP_PATH
+        self.transport = HttpConnection(path, host, port)
         self.authentication(username, password)
 
 class HttpsEapiConnection(EapiConnection):
-    def __init__(self, host, port=None, username=None, password=None, **kwargs):
+    def __init__(self, host, port=None, path=None, username=None,
+                 password=None, **kwargs):
         super(HttpsEapiConnection, self).__init__()
         port = port or DEFAULT_HTTPS_PORT
-        self.transport = HttpsConnection(host, port)
+        path = path or DEFAULT_HTTP_PATH
+        self.transport = HttpsConnection(path, host, port)
         self.authentication(username, password)
 
 
