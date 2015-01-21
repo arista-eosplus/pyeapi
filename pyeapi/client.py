@@ -31,7 +31,7 @@
 #
 import os
 
-from ConfigParser import ConfigParser
+from ConfigParser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
 
@@ -39,9 +39,7 @@ from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
-config = {'connection:localhost': dict(transport='socket')}
-
-CONF_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
+CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
 TRANSPORTS = {
     'socket': SocketEapiConnection,
@@ -53,30 +51,56 @@ TRANSPORTS = {
 DEFAULT_TRANSPORT = 'http'
 
 
+class Config(SafeConfigParser):
+
+    def __init__(self, filename=None):
+        SafeConfigParser.__init__(self)
+
+        self.filename = None
+
+        self._autoload(filename)
+
+    def _autoload(self, filename):
+        self.add_connection('localhost', transport='socket')
+
+        if 'EAPI_CONF' in os.environ:
+            CONFIG_SEARCH_PATH.insert(0, os.environ['EAPI_CONF'])
+
+        if filename is not None:
+            CONFIG_SEARCH_PATH.insert(0, filename)
+
+        for filename in CONFIG_SEARCH_PATH:
+            if os.path.exists(os.path.expanduser(filename)):
+                self.read(os.path.expanduser(filename))
+                self.filename = filename
+                return
+
+    def load(self, filename):
+        self.filename = filename
+        self.reload()
+
+    def reload(self):
+        for section in self.sections():
+            self.remove_section(section)
+        self._autoload(self.filename)
+
+    def get_connection(self, name):
+        name = 'connection:{}'.format(name)
+        return dict(self.items(name))
+
+    def add_connection(self, name, **kwargs):
+        name = 'connection:{}'.format(name)
+        self.add_section(name)
+        for key, value in kwargs.items():
+            self.set(name, key, value)
+
+config = Config()
+
 def load_config(filename=None):
-    if 'EAPI_CONF' in os.environ:
-        CONF_SEARCH_PATH.insert(0, os.environ['EAPI_CONF'])
-
-    if filename is not None:
-        CONF_SEARCH_PATH.insert(0, filename)
-
-    for filename in CONF_SEARCH_PATH:
-        if os.path.exists(os.path.expanduser(filename)):
-            conf = ConfigParser()
-            conf.read(os.path.expanduser(filename))
-
-            for section in conf.sections():
-                name = section.split(':')[1]
-                config[section] = dict(host=name)
-                config[section].update(dict(conf.items(section)))
-
-            return filename
+    return config.load(filename)
 
 def config_for(name):
-    _name = 'connection:{}'.format(name)
-    if _name not in config:
-        raise KeyError(name)
-    return config[_name]
+    return config.get_connection(name)
 
 def make_connection(transport, **kwargs):
     if transport not in TRANSPORTS.keys():

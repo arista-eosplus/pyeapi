@@ -45,12 +45,12 @@ class DutSystemTest(unittest.TestCase):
     def setUp(self):
         pyeapi.client.load_config(filename=get_fixture('dut.conf'))
         config = pyeapi.client.config
-        connections = [dut.replace('connection:', '').strip() for dut in
-                       config.keys() if dut.startswith('connection:') and
-                       'localhost' not in dut]
+
         self.duts = list()
-        for connection in connections:
-            self.duts.append(pyeapi.client.connect_to(connection))
+        for name in config.sections():
+            if name.startswith('connection:') and 'localhost' not in name:
+                name = name.split(':')[1]
+                self.duts.append(pyeapi.client.connect_to(name))
 
 def random_interface(dut, exclude=None):
     exclude = [] if exclude is None else exclude
