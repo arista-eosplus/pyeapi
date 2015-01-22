@@ -103,12 +103,14 @@ class ConnectionError(EapiError):
         connection_type (string): The string identifer for the connection
             object that generate the error
         message (string): The exception error message
+        response (string): The message generate from the response packet
 
     """
-    def __init__(self, connection_type, message, commands=None):
+    def __init__(self, connection_type, message, commands=None, response=None):
         self.message = message
         self.connection_type = connection_type
-        self.commans = commands
+        self.commands = commands
+        self.response = response
         super(ConnectionError, self).__init__(message)
 
 
@@ -280,13 +282,13 @@ class EapiConnection(object):
 
             if self._auth:
                 self.transport.putheader('Authorization',
-                                        'Basic %s' % (self._auth))
+                                         'Basic %s' % (self._auth))
 
             self.transport.endheaders()
             self.transport.send(data)
 
-            response = self.transport.getresponse()
-            decoded = json.loads(response.read())
+            response = self.transport.getresponse().read()
+            decoded = json.loads(response)
             debug('eapi_response: %s' % decoded)
 
             if 'error' in decoded:
@@ -296,9 +298,10 @@ class EapiConnection(object):
 
             return decoded
 
-        except socket.error as exc:
+        except (socket.error, ValueError) as exc:
             self.error = exc
-            raise ConnectionError(str(self), 'unable to connect to eAPI')
+            raise ConnectionError(str(self), 'unable to connect to eAPI',
+                                  response=response)
 
         finally:
             self.transport.close()
