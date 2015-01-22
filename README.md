@@ -1,112 +1,211 @@
 # Arista eAPI Python Library
 
-pyEAPI is a Python library for Arista's eAPI command API implementation which allows for managing Arista EOS node configurations.  The pyEAPI client library provdies a consistent interface to working with EOS resources pragmatically.
+The Python library for Arista's eAPI command API implementation provides a
+client API work using eAPI and communicating with EOS nodes.  The Python
+library can be used to communicate with EOS either locally (on-box) or remotely
+(off-box).  It uses a standard INI-style configuration file to specify one or
+more nodes and connection properites.
 
-## Getting Started
+The pyeapi library also provides an API layer for building native Python
+objects to interact with the destination nodes.  The API layer is a convienent
+implementation for working with the EOS configuration and is extensible for
+developing custom implemenations.
 
-To get started with pyEAPI, you will need an Arista EOS node running EOS 4.12 or later along with eAPI enabled.  pyEAPI can be run both locally in EOS or remotely using HTTP/S.
+This library is freely provided to the open source community for building
+robust applications using Arista EOS.  Support is provided as best effort
+through Github issues.
 
-## Installing
+## Requirements
 
-The source code for pyEAPI is provided on Github at http://github.com/arista-eosplus/pyeapi.   Development is done in the develop branch with releases tagged and provide via PyPi.
+* Arista EOS 4.12 or later
+* Arista eAPI enabled for at least one transport (see Official EOS Config Guide
+  at arista.com for details)
 
-* To install the latest offical release of pyEAPI, simply run ``pip install pyeapi`` (or ``pip install --upgrade pyeapi``)
-* To install the latest development version from Github, clone the develop branch and run ``python setup.py install``
+# Getting Started
+In order to use pyeapi, the EOS command API must be enabled using ``management
+api http-commands`` configuration mode.  This library supports eAPI calls over
+both HTTP and UNIX Domain Sockets.  Once the command API is enabled on the
+destination node, create a configuration file with the node properities. 
 
-## Enabling EOS Command API
+**Note:** The default search path for the conf file is ~/.eapi.conf followed by
+/mnt/flash/eapi.conf.  This can be overridden by setting EAPI_CONF=<path file
+conf file> in your environment.
 
-pyEAPI require the command API to be enabled and available for use to communicate with EOS.  Since eAPI is not enabled by default, it must be initially enabled before pyEAPI can be used.
+## Example eapi.conf File
+Below is an example of an eAPI conf file.  The conf file can contain more than
+one node.  Each node section must be prefaced by **connection:<name>** where
+<name> is the name of the connection.
 
+The following configuration options are available for defining node entries:
 
-The steps below provide the basic steps to enable eAPI.  For more advanced configurations, please consult the EOS User Guide.
+* host - The IP address or FQDN of the remote device.  If the host parameter is
+  omitted then the connection name is used
+* username - The eAPI username to use for authentication (only required for
+  http or https connections)
+* password - The eAPI password to use for authentication (only required for
+  http or https connections)
+* enablepwd - The enable mode password if required by the destination node
+* transport - Configures the type of transport connection to use.  The default
+  value is _http_.  Valid values are:
+    * socket
+    * http_local
+    * http
+    * https.  
+* port - Configures the port to use for the eAPI connection.  A default port is
+  used if this parameter is absent, based on the transport setting using the
+following values:
+    * transport: http, default port: 80
+    * transport: https, deafult port: 443
+    * transport: https_local, default port: 8080
+    * trasnport: socket, default port: n/a
 
-__Step 1.__ Login to the destination node and enter configuration mode
-
-```
-switch> enable
-switch# configure
-switch(config)#
-```
-
-__Step 2.__ Enable eAPI
-
-```
-switch(config)# management api http-commands
-switch(config-mgmt-api-http-cmds)# no shutdown
-```
-The configuration above enables eAPI with the default settings.  This enables eAPI to listen for connections on HTTPS port 443 by default.
-
-__Step 3.__ Create a local user
-The user is used to authenticate commands for use during eAPI calls. 
-
-```
-switch(config)# username eapi secret icanttellyou
-```
-
-The username (eapi) and password (icanttellyou) can be anything you like.  In addition, other authentication mechansims could be used such as TACACS+ or RADIUS.
-
-## Configuring pyEAPI
-
-pyEAPI uses a conf file to pass the required parameters for username and password to the API client.  The default conf file location depends on if pyEAPI is running locally on an EOS switch or remotely on a Linux host.
-
-* If running directly in EOS, then the default file location is /mnt/flash/eapi.conf.
-* If running on a Linux host, the default file location is ~/.eapi.conf,
-  followed by /etc/eapi.conf
-
-The pyEAPI conf file is an INI-style config file that supplies the basic authentication and connection parameters necessary to communicate with eAPI.
-
-### Creating a connection
-
-```
-import pyeapi
-node = pyeapi.connect(host='10.10.10.10')
-```
-
-### Using a conf file
-The library will automatically search for the config file in the following
-locations: ~/.eapi.conf, /mnt/flash/eapi.conf.  It will load the first 
-config file that it finds.   Alternatively you can pass the full path to the 
-config file in the load_config method.
+All configuration values are optional.
 
 ```
-import pyeapi
-pyeapi.load_config()
-node = pyeapi.connect_to('veos01')
-```
-
-### Example conf file
-Config files support multiple nodes.  Each node should have a connection
-section in the config file.  To create a node entry, preceed the name of the 
-node with connection: (see examples below).  
-
-```
-[connection:eos01]
+[connection:veos01]
 username: eapi
 password: password
 transport: http
 
-[connection:localhost]
+[connection:veos02]
+transport: http
+
+[connection:veos03]
 transport: socket
 
-[connection:eos02]
-host: 172.10.10.1
+[connection:veos04]
+host: 172.16.10.1
+username: eapi
+password: password
+enablepwd: itsasecret
+port: 1234
+transport: https
+
+[connection:localhost]
+transport: http_local
 ```
 
-The following configuration options are available for entries:
+The above example shows different ways to define EOS node connections.  All
+configuration options will attempt to use default values if not explicitly
+defined.  If the host parameter is not set for a given entry, then the
+connection name will be used as the host address.
 
-* host - The IP address or FQDN of the remote device.  If the host parameter
-    is omitted then the connection name is used
-* username - The eAPI username to use for authentication
-* password - The eAPI password to use for authentication
-* transport - Configures the type of transport connection to use.  Valid
-    values are socket, http_local, http, https.  The default value is http
-* port - Configures the port to use for the eAPI connection.  A default port
-    is used if this parameter is absent, based on the transport setting using
-    the following:
-        transport: http, default port: 80
-        transport: https, deafult port: 443
-        transport: https_local, default port: 8080
-        trasnport: socket, default port: n/a
+### Configuring \[connection:localhost]
 
-## License
+The pyeapi library automatically installs a single default configuration entry
+for connecting to localhost host using a transport of sockets.  If using the
+pyeapi library locally on an EOS node, simply enable the command API to use
+sockets and no further configuration is needed for pyeapi to function.  If you
+specify an entry in a conf file with the name ``[connection:localhost]``, the
+values in the conf file will overwrite the default.
+
+## Using pyeapi
+The Python client for eAPI was designed to be easy to use and implement for
+writing tools and applications that interface with the Arista EOS management
+plane.  
+
+### Creating a connection and sending commands
+Once EOS is configured properly and the config file created, getting started
+with a connection to EOS is simple.  Below demonstrates a basic connection
+using pyeapi.  For more examples, please see the examples folder.
+
+```
+# start by importing the library
+import pyeapi
+
+# create a node object by specifying the node to work with
+node = pyeapi.connect_to('veos01')
+
+# send one or more commands to the node
+node.enable('show hostname')
+[{'command': 'show hostname', 'result': {u'hostname': u'veos01', u'fqdn':
+u'veos01.arista.com'}, 'encoding': 'json'}]
+
+# use the config method to send configuration commands
+node.config('hostname veos01')
+[{}]
+
+# multiple commands can be sent by using a list (works for both enable or
+config)
+node.config(['interface Ethernet1', 'description foo'])
+[{}, {}]
+
+# return the running or startup configuration from the node (output omitted for
+brevity)
+node.running_config
+
+node.startup_config
+```
+
+### Using the API
+
+The pyeapi library provides both a client for send and receiving commands over
+eAPI as well as an API for working directly with EOS resources.   The API is
+designed to be easy and straightforward to use yet also extensible.  Below is
+an example of working with the ``vlans`` API
+
+```
+# create a connection to the node
+import pyeapi
+node = pyeapi.connect_to('veos01')
+
+# get the instance of the API (in this case vlans)
+vlans = node.api('vlans')
+
+# return all vlans from the node
+vlans.getall()
+{'1': {'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []},
+'10': {'state': 'active', 'name': 'VLAN0010', 'vlan_id': 10, 'trunk_groups':
+[]}}
+
+# return a specific vlan from the node
+vlans.get(1)
+{'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []}
+
+# add a new vlan to the node
+vlans.create(100)
+True
+
+# set the new vlan name
+vlans.set_name(100, 'foo')
+True
+```
+
+All API implementations developed by Arista EOS+ CS are found in the pyeapi/api
+folder.  See the examples folder for additional examples.
+
+# Installation
+
+The source code for pyeapi is provided on Github at
+http://github.com/arista-eosplus/pyeapi.  All current development is done in
+the develop branch.  Stable released versions are tagged in the master branch
+and uploaded to PyPi.
+
+* To install the latest stable version of pyeapi, simply run ``pip install
+  pyeapi`` (or ``pip install --upgrade pyeapi``)
+* To install the latest development version from Github, simply clone the
+  develop branch and run ``python setup.py install``
+
+# Testing
+The pyeapi library provides both unit tests and system tests.  The unit tests
+can be run without an EOS node.  To run the system tests, you will need to
+update the ``dut.conf`` file found in test/fixtures.  
+
+* To run the unit tests, simply run ``make unittest`` from the root of the
+  pyeapi source folder
+* To run the system tests, simply run ``make systest`` from the root of the
+  pyeapi source fodler
+* To run all tests, use ``make tests`` from the root of the pyeapi source
+  folder
+
+
+# Contributing
+
+Contributing pull requests are gladly welcomed for this repository.  Please
+note that all contributes that modify the library behavior require
+corresponding test cases otherwise the pull request will be rejected.  
+
+# License
+
 New BSD, See [LICENSE](LICENSE) file
+
