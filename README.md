@@ -27,9 +27,9 @@ api http-commands`` configuration mode.  This library supports eAPI calls over
 both HTTP and UNIX Domain Sockets.  Once the command API is enabled on the
 destination node, create a configuration file with the node properities. 
 
-**Note:** The default search path for the conf file is ~/.eapi.conf followed by
-/mnt/flash/eapi.conf.  This can be overridden by setting EAPI_CONF=<path file
-conf file> in your environment.
+**Note:** The default search path for the conf file is ``~/.eapi.conf``
+followed by ``/mnt/flash/eapi.conf``.  This can be overridden by setting
+``EAPI_CONF=<path file conf file>`` in your environment.
 
 ## Example eapi.conf File
 Below is an example of an eAPI conf file.  The conf file can contain more than
@@ -38,22 +38,22 @@ one node.  Each node section must be prefaced by **connection:<name>** where
 
 The following configuration options are available for defining node entries:
 
-* host - The IP address or FQDN of the remote device.  If the host parameter is
-  omitted then the connection name is used
-* username - The eAPI username to use for authentication (only required for
+* **host** - The IP address or FQDN of the remote device.  If the host
+  parameter is omitted then the connection name is used
+* **username** - The eAPI username to use for authentication (only required for
   http or https connections)
-* password - The eAPI password to use for authentication (only required for
+* **password** - The eAPI password to use for authentication (only required for
   http or https connections)
-* enablepwd - The enable mode password if required by the destination node
-* transport - Configures the type of transport connection to use.  The default
-  value is _http_.  Valid values are:
+* **enablepwd** - The enable mode password if required by the destination node
+* **transport** - Configures the type of transport connection to use.  The
+  default value is _http_.  Valid values are:
     * socket
     * http_local
     * http
-    * https.  
-* port - Configures the port to use for the eAPI connection.  A default port is
-  used if this parameter is absent, based on the transport setting using the
-following values:
+    * https  
+    * **port** - Configures the port to use for the eAPI connection.  A default
+  port is used if this parameter is absent, based on the transport setting
+using the following values:
     * transport: http, default port: 80
     * transport: https, deafult port: 443
     * transport: https_local, default port: 8080
