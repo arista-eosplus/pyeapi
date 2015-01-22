@@ -51,7 +51,7 @@ The following configuration options are available for defining node entries:
     * http_local
     * http
     * https  
-    * **port** - Configures the port to use for the eAPI connection.  A default
+* **port** - Configures the port to use for the eAPI connection.  A default
   port is used if this parameter is absent, based on the transport setting
 using the following values:
     * transport: http, default port: 80
