@@ -56,24 +56,28 @@ class Config(SafeConfigParser):
     def __init__(self, filename=None):
         SafeConfigParser.__init__(self)
 
-        self.filename = None
+        self.filename = filename
 
-        self._autoload(filename)
+        self._autoload()
 
-    def _autoload(self, filename):
-        self.add_connection('localhost', transport='socket')
+    def _autoload(self):
 
+        path = list(CONFIG_SEARCH_PATH)
         if 'EAPI_CONF' in os.environ:
-            CONFIG_SEARCH_PATH.insert(0, os.environ['EAPI_CONF'])
+            path.insert(0, os.environ['EAPI_CONF'])
 
-        if filename is not None:
-            CONFIG_SEARCH_PATH.insert(0, filename)
+        if self.filename:
+            path = [self.filename]
 
-        for filename in CONFIG_SEARCH_PATH:
+        for filename in path:
             if os.path.exists(os.path.expanduser(filename)):
-                self.read(os.path.expanduser(filename))
                 self.filename = filename
-                return
+                return self.read(os.path.expanduser(filename))
+
+    def read(self, filename):
+        SafeConfigParser.read(self, filename)
+        if not self.get_connection('localhost'):
+            self.add_connection('localhost', transport='socket')
 
     def load(self, filename):
         self.filename = filename
@@ -82,10 +86,12 @@ class Config(SafeConfigParser):
     def reload(self):
         for section in self.sections():
             self.remove_section(section)
-        self._autoload(self.filename)
+        self._autoload()
 
     def get_connection(self, name):
         name = 'connection:{}'.format(name)
+        if not self.has_section(name):
+            return None
         return dict(self.items(name))
 
     def add_connection(self, name, **kwargs):
