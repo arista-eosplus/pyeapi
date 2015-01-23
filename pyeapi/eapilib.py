@@ -106,11 +106,10 @@ class ConnectionError(EapiError):
         response (string): The message generate from the response packet
 
     """
-    def __init__(self, connection_type, message, commands=None, response=None):
+    def __init__(self, connection_type, message, commands=None):
         self.message = message
         self.connection_type = connection_type
         self.commands = commands
-        self.response = response
         super(ConnectionError, self).__init__(message)
 
 
@@ -309,8 +308,7 @@ class EapiConnection(object):
 
         except (socket.error, ValueError) as exc:
             self.error = exc
-            raise ConnectionError(str(self), 'unable to connect to eAPI',
-                                  response=response)
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
 
         finally:
             self.transport.close()
