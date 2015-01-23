@@ -29,11 +29,22 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+"""Provides an abstract implementation for building API modules
+
+This module provides a set of clases that are used to build API modules
+that work with Node objects.  Using this module will allow the API
+modules to be automatically loaded using the Node.api method.
+
+The classes in this module should not be instatiated direclty but rather
+provide parent class for API implementations.  All API modules will
+ultimately derive from BaseEntity which provides some common functions to
+make building API modules easier.
+"""
 import re
 
 from collections import Callable, Mapping
 
-from pyeapi.eapilib import CommandError
+from pyeapi.eapilib import CommandError, ConnectionError
 
 BLOCK_END_RE = re.compile(r'^[^\s]')
 
@@ -41,12 +52,9 @@ BLOCK_END_RE = re.compile(r'^[^\s]')
 class BaseEntity(object):
     """Base class for all resources to derive from
 
-    This BaseResource class should not be directly instatiated.  It is
+    This BaseEntity class should not be directly instatiated.  It is
     designed to be implemented by all resource classes to provide common
     methods.
-
-    Args:
-        node (Node): An instance of Node
 
     Attributes:
         node (Node): The node instance this resource will perform operations
@@ -56,11 +64,12 @@ class BaseEntity(object):
         error (CommandError): Holds the latest CommandError exception
             instance if raised
 
+    Args:
+        node (Node): An instance of Node
+
     """
-    def __init__(self, node, autorefresh=False):
+    def __init__(self, node):
         self.node = node
-        self.autorefresh = autorefresh
-        self.properties = dict()
 
     @property
     def config(self):
@@ -70,18 +79,19 @@ class BaseEntity(object):
     def error(self):
         return self.node.connection.error
 
-    def __getattr__(self, name):
-        if name in self.__dict__:
-            return self.__dict__[name]
-        elif name in self.__dict__['properties']:
-            return self.__dict__['properties'][name]
-        else:
-            super(BaseEntity, self).__getattr__(name)
-
-    def add_property(self, name, cls):
-        self.properties[name] = cls(self.node)
-
     def get_block(self, parent):
+        """ Scans the config and returns a block of code
+
+        Args:
+            parent (str): The parent string to search the config for and
+                return the block
+
+        Returns:
+            A string object that represents the block from the config.  If
+            the parent string is not found, then this method will
+            return None.
+
+        """
         match = re.search(r'^%s$' % parent, self.config, re.M)
         if not match:
             return None
@@ -104,6 +114,10 @@ class BaseEntity(object):
         in a try/except block and stores any exceptions in the error
         property.
 
+        Note:
+            If the return from this method is False, use the error property
+            to investigate the exception
+
         Args:
             commands (list): A list of commands to be sent to the node in
                 config mode
@@ -115,12 +129,20 @@ class BaseEntity(object):
         try:
             self.node.config(commands)
             return True
-        except CommandError:
+        except (CommandError, ConnectionError):
             return False
 
 
 class Entity(BaseEntity, Callable):
+    """Abstract class for building Entity resources
 
+    The Entity class provides an abstract implementation that allows for
+    building an API configuration resource.  The Entity class should not
+    be direclty instatiated.  It is used in instances where a single config
+    entity is appropriate in the configuration.
+
+    Examples of Entity candidates include global spanningtree
+    """
     def __call__(self):
         return self.get()
 
@@ -129,6 +151,14 @@ class Entity(BaseEntity, Callable):
 
 
 class EntityCollection(BaseEntity, Mapping):
+    """Abstract class for building EntityCollection resources
+
+    The EntityCollection class provides an abstract implementat that allows
+    for bilding API configuration resources with mutilple resources.  The
+    EntityCollection class should not be directly instatiated.
+
+    Examples of an EntityCollection candidate include vlans and interfaces
+    """
 
     def __call__(self):
         return self.getall()

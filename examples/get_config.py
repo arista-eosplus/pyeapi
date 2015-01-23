@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-# import the client library
 import pyeapi
 
-# load the conf file and connect to the node
 pyeapi.load_config('nodes.conf')
 node = pyeapi.connect_to('veos01')
 

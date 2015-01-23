@@ -29,21 +29,20 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-"""Module for working with EOS VLAN configuration
+"""Module for working with EOS VLAN resources
 
 The Vlans resource provides configuration of VLAN resources for an EOS
 node.
 
 Parameters:
+
     name (string): The name parameter maps to the VLAN name in EOS.  Valid
         values include any consecutive sequence of numbers, letters and
         underscore up to the maximum number of characters.  This parameter
-        is defaultable
-
+        is defaultable.
     state (string): The state parameter sets the operational state of
         the VLAN on the node.   It has two valid values: active or suspend.
-        The state parameter is defaultable
-
+        The state parameter is defaultable.
     trunk_groups (array): The trunk_groups parameter provides a list of
         trunk groups configured for this VLAN.  This parameter is
         defaultable.
@@ -89,7 +88,10 @@ class Vlans(EntityCollection):
     def get(self, value):
         """Returns the VLAN configuration as key/value pairs
 
-        Example:
+        Response Message
+
+        .. code-block:: json
+
             {
                 "name": <string>,
                 "state": [active, suspend],
@@ -97,11 +99,13 @@ class Vlans(EntityCollection):
             }
 
         Args:
-            vid (string): the vlan identifier to retrieve from the
-                running-config
+            vid (string): The vlan identifier to retrieve from the
+                running configuration.  Valid values are in the range
+                of 1 to 4095
 
         Returns:
-            A dict object containing the vlan key/value pairs
+            A Python dict object containing the VLAN attributes as
+                key/value pairs.
 
         """
         config = self.get_block('vlan %s' % value)
@@ -118,7 +122,10 @@ class Vlans(EntityCollection):
     def getall(self):
         """Returns a dict object of all Vlans in the running-config
 
-        Example:
+        Response Message
+
+        .. code-block:: json
+
             {
                 "1": {...},
                 "2": {...}
@@ -138,6 +145,10 @@ class Vlans(EntityCollection):
     def create(self, vid):
         """ Creates a new VLAN resource
 
+        .. code-block:: none
+
+            vlan <vlanid>
+
         Args:
             vid (str): The VLAN ID to create
 
@@ -149,6 +160,10 @@ class Vlans(EntityCollection):
 
     def delete(self, vid):
         """ Deletes a VLAN from the running configuration
+
+        .. code-block:: none
+
+            no vlan <vlanid>
 
         Args:
             vid (str): The VLAN ID to delete
@@ -162,6 +177,10 @@ class Vlans(EntityCollection):
     def default(self, vid):
         """ Defaults the VLAN configuration
 
+        .. code-block:: none
+
+            default vlan <vlanid>
+
         Args:
             vid (str): The VLAN ID to default
 
@@ -173,6 +192,11 @@ class Vlans(EntityCollection):
 
     def set_name(self, vid, name=None, default=False):
         """ Configures the VLAN name
+
+        .. code-block:: none
+
+            vlan <vlanid>
+            [no] [default] name <name>
 
         Args:
             vid (str): The VLAN ID to Configures
@@ -194,6 +218,11 @@ class Vlans(EntityCollection):
     def set_state(self, vid, value=None, default=False):
         """ Configures the VLAN state
 
+        .. code-block:: none
+
+            vlan <vlanid>
+            [no] [default] state [suspect, active]
+
         Args:
             vid (str): The VLAN ID to configure
             value (str): The value to set the vlan state to
@@ -214,6 +243,11 @@ class Vlans(EntityCollection):
     def add_trunk_group(self, vid, name):
         """ Adds a new trunk group to the Vlan in the running-config
 
+        .. code-block:: none
+
+            vlan <vlanid>
+            trunk-group <name>
+
         Args:
             vid (str): The VLAN ID to configure
             name (str): The trunk group to add to the list
@@ -227,6 +261,11 @@ class Vlans(EntityCollection):
     def remove_trunk_group(self, vid, name):
         """ Removes a trunk group from the list of configured trunk groups
         for the specified VLAN ID
+
+        .. code-block:: none
+
+            vlan <vlanid>
+            no trunk-group <name>
 
         Args:
             vid (str): The VLAN ID to configure

@@ -186,6 +186,9 @@ class EapiConnection(object):
         JSON encoding and returned to the caller.
 
         eAPI Request Object
+
+        .. code-block:: json
+
             {
                 "jsonrpc": "2.0",
                 "method": "runCmds",
@@ -226,6 +229,9 @@ class EapiConnection(object):
         message or failure message.
 
         eAPI Response - success
+
+        .. code-block:: json
+
             {
                 "jsonrpc": "2.0",
                 "result": [
@@ -241,6 +247,9 @@ class EapiConnection(object):
             }
 
         eAPI Response - failure
+
+        .. code-block:: json
+
             {
                 "jsonrpc": "2.0",
                 "error": {
