@@ -32,12 +32,26 @@
 import os
 import sys
 import imp
-import pprint
 import syslog
 import collections
 
-def import_module(name, path=None):
+def import_module(name):
+    """ Imports a module into the current runtime environment
+
+    This function emulates the Python import system that allows for
+    importing full path modules.  It will break down the module and
+    import each part (or skip if it is already loaded in cache).
+
+    Args:
+        name (str): The name of the module to import.  This should be
+            the full path of the module
+
+    Returns:
+        The module that was imported
+
+    """
     parts = name.split('.')
+    path = None
     module_name = ''
 
     for index, part in enumerate(parts):
@@ -49,10 +63,8 @@ def import_module(name, path=None):
             if module_name in sys.modules:
                 # since imp.load_module works like reload, need to be sure not
                 # to reload a previously loaded module
-                debug('returing module {} from cache'.format(module_name))
                 mod = sys.modules[module_name]
             else:
-                debug('loading new module {}'.format(module_name))
                 mod = imp.load_module(module_name, fhandle, path, descr)
         finally:
             # lets be sure to clean up after ourselves
@@ -62,13 +74,25 @@ def import_module(name, path=None):
     return mod
 
 def load_module(name):
+    """ Attempts to load a module into the current environment
+
+    This function will load a module specified by name.  The module
+    name is first checked to see if it is already loaded and will return
+    the module if it is.   If the module hasn't been previously loaded
+    it will attempt to import it
+
+    Args:
+        name (str): Specifies the full name of the module.  For instance
+            pyeapi.api.vlans
+
+    Returns:
+        The module that has been imported or retrieved from the sys modules
+
+    """
     try:
         mod = None
-        if name in sys.modules:
-            debug('returning {} from cache'.format(name))
         mod = sys.modules[name]
     except KeyError:
-        debug('importing module {}'.format(name))
         mod = import_module(name)
     finally:
         if not mod:
@@ -84,31 +108,42 @@ class ProxyCall(object):
     def __call__(self, *args, **kwargs):
         return self.proxy(self.method, *args, **kwargs)
 
-
-def parseconfig(config):
-    cfg = dict()
-    for element in config.strip().split('\n'):
-        if element[0] != ' ':
-            key = element
-            cfg[key] = []
-        elif element[0] == '!':
-            continue
-        else:
-            cfg[key].append(element.strip())
-    return cfg
-
 def islocalconnection():
+    """ Checks if running locally on EOS device or remotely
+
+    This function will return a boolean indicating if the current
+    execution environment is running locally on an EOS device (True) or
+    running remotely and communicating over HTTP/S (False)
+
+    Returns:
+        A boolean value that indicates whether or not the current
+            thread is local or remote
+    """
     return os.path.exists('/etc/Eos-release')
 
-def pp(text):
-    pprint.pprint(text)
-
 def debug(text):
+    """Prints test to syslog when on a local connection
+
+    Args:
+        text (str): The string objec to print to syslog
+
+    """
     if islocalconnection():
         syslog.openlog('pyeapi')
         syslog.syslog(syslog.LOG_NOTICE, str(text))
 
 def make_iterable(value):
+    """ Converts the supplied value to a list object
+
+    This function will inspect the supplied value and return an
+    iterable in the form of a list.
+
+    Args:
+        value (object): An valid Python object
+
+    Returns:
+        An iterable object of type list
+    """
     if isinstance(value, basestring):
         value = [value]
 
@@ -117,13 +152,3 @@ def make_iterable(value):
 
     return value
 
-
-def convert(data):
-    if isinstance(data, basestring):
-        return str(data)
-    elif isinstance(data, collections.Mapping):
-        return dict(map(convert, data.iteritems()))
-    elif isinstance(data, collections.Iterable):
-        return type(data)(map(convert, data))
-    else:
-        return data
