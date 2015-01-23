@@ -84,6 +84,8 @@ class TestNode(unittest.TestCase):
 class TestClient(unittest.TestCase):
 
     def setUp(self):
+        if 'EAPI_CONF' in os.environ:
+            del os.environ['EAPI_CONF']
         reload(pyeapi.client)
 
     def test_load_config_for_connection_with_filename(self):
@@ -96,7 +98,7 @@ class TestClient(unittest.TestCase):
 
     def test_load_config_for_connection_with_env(self):
         os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
-        pyeapi.client.load_config()
+        pyeapi.client.load_config(random_string())
         cfg = pyeapi.client.config.get_connection('test1')
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')

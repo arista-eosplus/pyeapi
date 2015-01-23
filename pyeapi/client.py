@@ -147,10 +147,11 @@ class Config(SafeConfigParser):
         """
         path = list(CONFIG_SEARCH_PATH)
         if 'EAPI_CONF' in os.environ:
-            path.insert(0, os.environ['EAPI_CONF'])
+            path = os.environ['EAPI_CONF']
+        elif self.filename:
+            path = self.filename
 
-        if self.filename:
-            path = [self.filename]
+        path = make_iterable(path)
 
         for filename in path:
             if os.path.exists(os.path.expanduser(filename)):
