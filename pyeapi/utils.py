@@ -125,7 +125,7 @@ def debug(text):
     """Prints test to syslog when on a local connection
 
     Args:
-        text (str): The string objec to print to syslog
+        text (str): The string object to print to syslog
 
     """
     if islocalconnection():
@@ -133,7 +133,7 @@ def debug(text):
         syslog.syslog(syslog.LOG_NOTICE, str(text))
 
 def make_iterable(value):
-    """ Converts the supplied value to a list object
+    """Converts the supplied value to a list object
 
     This function will inspect the supplied value and return an
     iterable in the form of a list.

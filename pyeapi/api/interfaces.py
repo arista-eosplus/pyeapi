@@ -46,7 +46,7 @@ Parameters:
     description (string): The interface description string.  This value is
         an arbitrary operator defined value.
 
-    sflow (boolean): True if sflow is enabled on the interface otherwise
+    sflow (boolean): True if sFlow is enabled on the interface otherwise
         False
 
     flowcontrol_send (string): The flowcontrol send configuration value for
@@ -74,14 +74,18 @@ INSTANCE_METHODS = ['create', 'delete', 'default']
 
 DEFAULT_LACP_MODE = 'on'
 
+VALID_INTERFACES = frozenset([
+    'Ethernet',
+    'Management',
+    'Loopback',
+    'Port-Channel',
+    'Vlan',
+    'Vxlan',
+])
+
 def isvalidinterface(value):
-    matches = ['Ethernet', 'Management', 'Loopback', 'Port-Channel',
-               'Vlan', 'Vxlan']
     match = re.match(r'([EPVLM][a-z-C]+)', value)
-    if match:
-        return match.group() in matches
-    else:
-        return False
+    return match and match.group() in VALID_INTERFACES
 
 
 class Interfaces(EntityCollection):
@@ -210,7 +214,7 @@ class BaseInterface(EntityCollection):
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
+            True if the operation succeeds otherwise False is returned
         """
         commands = ['interface %s' % name]
         if default:
@@ -234,7 +238,7 @@ class BaseInterface(EntityCollection):
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
+            True if the operation succeeds otherwise False is returned
         """
         if value not in [True, False, None]:
             raise ValueError('invalid value for shutdown')
@@ -263,11 +267,11 @@ class EthernetInterface(BaseInterface):
             }
 
         Args:
-            name (string): the interface identifier to retrive the from
+            name (string): the interface identifier to retrieve the from
                 the configuration
 
         Returns:
-            A Python dictionary object of key/value pairs that respresent
+            A Python dictionary object of key/value pairs that represent
             the current configuration for the specified node.  If the
             specified interface name does not exist, then None is returned.
         """
@@ -329,8 +333,7 @@ class EthernetInterface(BaseInterface):
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
-
+            True if the operation succeeds otherwise False is returned
         """
         return self.set_flowcontrol(name, 'send', value, default)
 
@@ -347,8 +350,7 @@ class EthernetInterface(BaseInterface):
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
-
+            True if the operation succeeds otherwise False is returned
         """
         return self.set_flowcontrol(name, 'receive', value, default)
 
@@ -367,8 +369,7 @@ class EthernetInterface(BaseInterface):
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
-
+            True if the operation succeeds otherwise False is returned
         """
         if value is not None:
             if value not in ['on', 'off']:
@@ -387,19 +388,18 @@ class EthernetInterface(BaseInterface):
         return self.configure(commands)
 
     def set_sflow(self, name, value=None, default=False):
-        """Configures the sflow state on the interface
+        """Configures the sFlow state on the interface
 
         Args:
             name (string): The interface identifier.  It must be a full
                 interface name (ie Ethernet, not Et)
 
-            value (boolean): True if sflow should be enabled otherwise False
+            value (boolean): True if sFlow should be enabled otherwise False
 
-            default (boolean): Specifies the default value for sflow
+            default (boolean): Specifies the default value for sFlow
 
         Returns:
-            True if the operation succeeds otherwise Fals is returned
-
+            True if the operation succeeds otherwise False is returned
         """
         if value not in [True, False, None]:
             raise ValueError
@@ -491,7 +491,7 @@ class PortchannelInterface(BaseInterface):
         """Configures the array of member interfaces for the Port-Channel
 
         Args:
-            name(str): The Port-Channel intervae name to configure the member
+            name(str): The Port-Channel interface name to configure the member
                 interfaces
 
             members(list): The list of Ethernet interfaces that should be
@@ -499,7 +499,6 @@ class PortchannelInterface(BaseInterface):
 
         Returns:
             True if the operation succeeds otherwise False
-
         """
         current_members = self.get_members(name)
         lacp_mode = self.get_lacp_mode(name)
@@ -531,7 +530,6 @@ class PortchannelInterface(BaseInterface):
 
         Returns:
             True if the operation succeeds otherwise False
-
         """
         if mode not in ['on', 'passive', 'active']:
             return False
@@ -561,12 +559,11 @@ class PortchannelInterface(BaseInterface):
 
         Returns:
             True if the operation succeeds otherwise False is returned
-
         """
         if value is not None:
             try:
                 value = int(value)
-                if value not in range(0, 16):
+                if not 0 <= value <= 16:
                     return False
             except ValueError:
                 return False
@@ -635,7 +632,6 @@ class VxlanInterface(BaseInterface):
 
         Returns:
             True if the operation succeeds otherwise False
-
         """
         commands = ['interface %s' % name]
         if default:
@@ -658,7 +654,6 @@ class VxlanInterface(BaseInterface):
 
         Returns:
             True if the operation succeeds otherwise False
-
         """
         commands = ['interface %s' % name]
         if default:

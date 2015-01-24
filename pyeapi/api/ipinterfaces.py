@@ -58,7 +58,7 @@ MTU_RE = re.compile(r'(?<=\s{3}mtu\s)(?P<value>\d+)$', re.M)
 class Ipinterfaces(EntityCollection):
 
     def get(self, name):
-        """Returns the specific IP interface properities
+        """Returns the specific IP interface properties
 
         Example
             {
@@ -122,8 +122,8 @@ class Ipinterfaces(EntityCollection):
 
         Args:
             name (string): The interface identifier to create the logical
-                layer 3 IP interface for.  The anme must be the full interface
-                name and not an abbreviated interfe name (eg Ethernet1, not
+                layer 3 IP interface for.  The name must be the full interface
+                name and not an abbreviated interface name (eg Ethernet1, not
                 Et1).
 
         Returns:
@@ -143,8 +143,8 @@ class Ipinterfaces(EntityCollection):
 
         Args:
             name (string): The interface identifier to create the logical
-                layer 3 IP interface for.  The anme must be the full interface
-                name and not an abbreviated interfe name (eg Ethernet1, not
+                layer 3 IP interface for.  The name must be the full interface
+                name and not an abbreviated interface name (eg Ethernet1, not
                 Et1).
 
         Returns:

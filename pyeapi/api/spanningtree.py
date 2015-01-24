@@ -61,7 +61,7 @@ class Stp(Entity):
     """The Stp class implements global configuration for spanning-tree
 
     The spanning-tree protocol provides both global and interface
-    configuratin options.  This class is the top-level class that provides
+    configuration options.  This class is the top-level class that provides
     access to all spanning-tree configuration options supported.
 
     Example:
@@ -109,7 +109,7 @@ class Stp(Entity):
             See the individual classes for detailed message structures
 
         Returns:
-            A Python dictionary object of key/value paris the represent
+            A Python dictionary object of key/value pairs the represent
                 the entire supported spanning-tree configuration
 
         """
@@ -134,7 +134,7 @@ class Stp(Entity):
         """Configures the global spanning-tree mode
 
         Note:
-            This configuratio parameter is not defaultable
+            This configuration parameter is not defaultable
 
         Args:
             value (string): The value to configure the global spanning-tree
@@ -167,7 +167,7 @@ class StpInstances(EntityCollection):
         return dict()
 
 class StpInterfaces(EntityCollection):
-    """Provides a configuration resource for spaning-tree interfaces
+    """Provides a configuration resource for spanning-tree interfaces
 
     This class provides an API for working with spanning-tree interface
     configurations.  It provides access to managing specific interface
@@ -191,7 +191,7 @@ class StpInterfaces(EntityCollection):
                 Ethernet and Port-Channel interfaces
 
         Returns:
-            A Python dictionary object of key/value parise that represent
+            A Python dictionary object of key/value pairs that represent
                 the spanning-tree interface configuration
             If the requested interface is not a valid spanning-tree
                 interface, then None is returned
@@ -294,7 +294,7 @@ class StpInterfaces(EntityCollection):
         Raises:
             ValueError: Rasied if an invalid interface name is specified
 
-            TypeError: Raised if the value keyword argument does not evalute
+            TypeError: Raised if the value keyword argument does not evaluate
                 to a valid boolean
 
         """
