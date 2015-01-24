@@ -29,8 +29,6 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from glob import glob
-
 try:
     from setuptools import setup
 except ImportError:
@@ -41,12 +39,13 @@ from pyeapi import __version__, __author__
 setup(
     name='pyeapi',
     version=__version__,
-    description = 'Python client for Arista EOS command API (eAPI)',
+    description='Python client for Arista EOS command API (eAPI)',
     author=__author__,
     author_email='eosplus-dev@aristanetworks.com',
     url='https://github.com/arista-eosplus/pyeapi',
     download_url='https://github.com/arista-eosplus/pyeapi/tarball/v0.1.0',
     license='BSD-3',
-    packages=['pyeapi',
-              'pyeapi.api']
+    packages=['pyeapi', 'pyeapi.api']
 )
+
+
