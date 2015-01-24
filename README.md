@@ -1,5 +1,8 @@
 # Arista eAPI Python Library
 
+[![Build
+Status](https://travis-ci.org/arista-eosplus/pyeapi.svg?branch=develop)](https://travis-ci.org/arista-eosplus/pyeapi)
+
 The Python library for Arista's eAPI command API implementation provides a
 client API work using eAPI and communicating with EOS nodes.  The Python
 library can be used to communicate with EOS either locally (on-box) or remotely
