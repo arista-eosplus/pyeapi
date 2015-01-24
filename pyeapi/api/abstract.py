@@ -31,11 +31,11 @@
 #
 """Provides an abstract implementation for building API modules
 
-This module provides a set of clases that are used to build API modules
+This module provides a set of classes that are used to build API modules
 that work with Node objects.  Using this module will allow the API
 modules to be automatically loaded using the Node.api method.
 
-The classes in this module should not be instatiated direclty but rather
+The classes in this module should not be instantiated directly but rather
 provide parent class for API implementations.  All API modules will
 ultimately derive from BaseEntity which provides some common functions to
 make building API modules easier.
@@ -66,7 +66,6 @@ class BaseEntity(object):
 
     Args:
         node (Node): An instance of Node
-
     """
     def __init__(self, node):
         self.node = node
@@ -138,10 +137,10 @@ class Entity(BaseEntity, Callable):
 
     The Entity class provides an abstract implementation that allows for
     building an API configuration resource.  The Entity class should not
-    be direclty instatiated.  It is used in instances where a single config
+    be directly instantiated.  It is used in instances where a single config
     entity is appropriate in the configuration.
 
-    Examples of Entity candidates include global spanningtree
+    Examples of Entity candidates include global spanning tree
     """
     def __call__(self):
         return self.get()
@@ -154,10 +153,10 @@ class EntityCollection(BaseEntity, Mapping):
     """Abstract class for building EntityCollection resources
 
     The EntityCollection class provides an abstract implementat that allows
-    for bilding API configuration resources with mutilple resources.  The
-    EntityCollection class should not be directly instatiated.
+    for building API configuration resources with multiple resources.  The
+    EntityCollection class should not be directly instantiated.
 
-    Examples of an EntityCollection candidate include vlans and interfaces
+    Examples of an EntityCollection candidate include VLANs and interfaces
     """
 
     def __call__(self):

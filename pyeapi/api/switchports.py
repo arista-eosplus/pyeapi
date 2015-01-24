@@ -36,7 +36,7 @@ This module provides an API for working with logical layer 2 interfaces
 physical Ethernet and bundled Port-Channel interfaces.
 
 Parameters:
-    name (string): The name of interface the configuration is in referenece
+    name (string): The name of interface the configuration is in reference
         to.  The interface name is the full interface identifier
 
     mode (string): The operating mode of the switchport.  Supported values
@@ -89,12 +89,12 @@ class Switchports(EntityCollection):
             }
 
         Args:
-            name (string): The interface identifer to get.  Note: Switchports
+            name (string): The interface identifier to get.  Note: Switchports
                 are only supported on Ethernet and Port-Channel interfaces
 
         Returns:
             A Python dictionary object of key/value pairs that represent
-                the switchport configuraiton for the interface specified
+                the switchport configuration for the interface specified
             If the specified argument is not a switchport then None is
                 returned
         """
@@ -112,7 +112,7 @@ class Switchports(EntityCollection):
             return resp
 
     def getall(self):
-        """Returns a dict objec to all Switchports
+        """Returns a dict object to all Switchports
 
         This method will return all of the configured switchports as a
         dictionary object keyed by the interface identifier.
@@ -145,7 +145,7 @@ class Switchports(EntityCollection):
 
         Returns:
             True if the create operation succeeds otherwise False.  If the
-                interface specified in args is alreay a switchport then this
+                interface specified in args is already a switchport then this
                 method will have no effect but will still return True
         """
         commands = ['interface %s' % name, 'no ip address',
@@ -167,7 +167,7 @@ class Switchports(EntityCollection):
 
         Returns:
             True if the create operation succeeds otherwise False.  If the
-                interface specified in args is alreay a switchport then this
+                interface specified in args is already a switchport then this
                 method will have no effect but will still return True
         """
         commands = ['interface %s' % name, 'no switchport']
@@ -187,7 +187,7 @@ class Switchports(EntityCollection):
 
         Returns:
             True if the create operation succeeds otherwise False.  If the
-                interface specified in args is alreay a switchport then this
+                interface specified in args is already a switchport then this
                 method will have no effect but will still return True
         """
         commands = ['interface %s' % name, 'no ip address',
@@ -307,7 +307,7 @@ def instance(node):
     """Returns an instance of Switchports
 
     This method will create and return an instance of the Switchports object
-    passwing the value of node to the instance.  The module method is
+    passing the value of node to the instance.  The module method is
     required for the resource to be autoloaded by the Node object
 
     Args:

@@ -33,7 +33,7 @@
 
 This module provides the client for eAPI.  It provides to primary functions
 for building applications that work with Arista EOS eAPI-enabled nodes.  The
-first function is to provide a client for sending and receiveing eAPI
+first function is to provide a client for sending and receiving eAPI
 request and response objects on a per node basis.  The second function
 provides a library for building API enabled data models for configuring
 EOS nodes.
@@ -117,14 +117,14 @@ class Config(SafeConfigParser):
 
     This class provides an instance for handling the configuration file.  It
     should normally need to be instantiated.  A single config object is
-    instiated by the module for working with the config.
+    instantiated by the module for working with the config.
 
     Attributes:
         filename (str): The full path to the loaded filename
 
     Args:
         filename(str): The full path to the filename to be loaded when the
-            object is instatiated.
+            object is instantiated.
 
     """
     def __init__(self, filename=None):
@@ -141,7 +141,7 @@ class Config(SafeConfigParser):
         configured.   This method will load the first eapi.conf file it
         finds and then return.
 
-        The CONFIG_SEARCH_PATH can be overridden using an environment varialbe
+        The CONFIG_SEARCH_PATH can be overridden using an environment variable
         by setting EAPI_CONF.
 
         """
@@ -154,9 +154,10 @@ class Config(SafeConfigParser):
         path = make_iterable(path)
 
         for filename in path:
-            if os.path.exists(os.path.expanduser(filename)):
+            filename = os.path.expanduser(filename)
+            if os.path.exists(filename):
                 self.filename = filename
-                return self.read(os.path.expanduser(filename))
+                return self.read(filename)
 
     def read(self, filename):
         """Reads the file specified by filename
@@ -167,7 +168,6 @@ class Config(SafeConfigParser):
 
         Args:
             filename (str): The full path to the file to load
-
         """
         SafeConfigParser.read(self, filename)
         if not self.get_connection('localhost'):
@@ -176,7 +176,7 @@ class Config(SafeConfigParser):
     def load(self, filename):
         """Loads the file specified by filename
 
-        This method works in conjection with the autoload method to load the
+        This method works in conjunction with the autoload method to load the
         file specified by filename.
 
         Args:
@@ -190,7 +190,7 @@ class Config(SafeConfigParser):
 
         This method will reload the configuration instance using the last
         known filename.  Note this method will initially clear the
-        configuation and reload all entries.
+        configuration and reload all entries.
 
         """
         for section in self.sections():
@@ -210,7 +210,7 @@ class Config(SafeConfigParser):
             [connection:veos01]
             transport: http
 
-        The name to use to retrieve the confguration would be veos01
+        The name to use to retrieve the configuration would be veos01
 
             >>> pyeapi.client.config.get_connection('veos01')
 
@@ -221,7 +221,6 @@ class Config(SafeConfigParser):
             A Python dictionary object of key/value pairs that represent
                 the node configuration.  If the name provided in the argument
                 is not found, then None is returned.
-
         """
         name = 'connection:{}'.format(name)
         if not self.has_section(name):
@@ -232,24 +231,24 @@ class Config(SafeConfigParser):
         """Adds a connection to the configuration
 
         This method will add a connection to the configuration.  The connection
-        added is only avaliable for the lifetime of the object and is not
-        persistented.
+        added is only available for the lifetime of the object and is not
+        persisted.
 
         Note:
             If a call is made to load() or reload(), any connections added
-            with this method must be readded to the config instance
+            with this method must be re-added to the config instance
 
         Args:
             name (str): The name of the connection to add to the config.  The
                 name provided will automatically be prepended with the string
                 connection:
-            **kwargs (dict); The set of properities used to provide the node
+            **kwargs (dict); The set of properties used to provide the node
                 configuration
 
         """
         name = 'connection:{}'.format(name)
         self.add_section(name)
-        for key, value in kwargs.items():
+        for key, value in kwargs.iteritems():
             self.set(name, key, value)
 
 config = Config()
@@ -258,20 +257,19 @@ def load_config(filename):
     """Function method that loads a conf file
 
     This function will load the file specified by filename into the config
-    instance.   Its a convience function that calls load on the config
+    instance.   Its a convenience function that calls load on the config
     instance
 
     Args:
         filename (str): The full path to the filename to load
-
     """
     return config.load(filename)
 
 def config_for(name):
     """ Function to get settings for named config
 
-    This function will return the setings for a specific connection as
-    specified by name.  Its a convience function that calls get_connection
+    This function will return the settings for a specific connection as
+    specified by name.  Its a convenience function that calls get_connection
     on the global config instance
 
     Args:
@@ -281,7 +279,6 @@ def config_for(name):
     Returns:
         A Python dictionary object of key/value pairs that represent the
             nodes configuration settings from the config instance
-
     """
     return config.get_connection(name)
 
@@ -293,7 +290,7 @@ def make_connection(transport, **kwargs):
     dictionary.
 
     Args:
-        transport (string): The transport to use to create the an instance.
+        transport (string): The transport to use to create the instance.
         **kwargs: Arbitrary keyword arguments.
 
     Returns:
@@ -303,9 +300,9 @@ def make_connection(transport, **kwargs):
         TypeError: A TypeError is raised if the transport keyword is not
             found in the list (keys) of available transports.
     """
-    if transport not in TRANSPORTS.keys():
+    if transport not in TRANSPORTS:
         raise TypeError('invalid transport specified')
-    klass = TRANSPORTS.get(transport)
+    klass = TRANSPORTS[transport]
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
@@ -334,14 +331,14 @@ def connect(transport=None, host='localhost', username='admin',
 
     """
     transport = transport or DEFAULT_TRANSPORT
-    kwargs = dict(host=host, username=username, password=password, port=port)
-    return make_connection(transport, **kwargs)
+    return make_connection(transport, host=host, username=username,
+                           password=password, port=port)
 
 
 class Node(object):
     """Represents a single device for sending and receiving eAPI messages
 
-    The Node object provides an instance for communicting with Arista EOS
+    The Node object provides an instance for communicating with Arista EOS
     devices.  The Node object provides easy to use methods for sending both
     enable and config commands to the device using a specific transport.  This
     object forms the base for communicating with devices.
@@ -351,22 +348,21 @@ class Node(object):
             underlying transport used by the Node object to communicate
             with the device using eAPI.
         running_config (str): The running-config from the device.  This
-            property is lazily loaded and refreshed over the lifecycle of
+            property is lazily loaded and refreshed over the life cycle of
             the instance.
         startup_config (str): The startup-config from the device.  This
-            property is laziliy loaded and refreshed over the lifecycle of
+            property is lazily loaded and refreshed over the life cycle of
             the instance.
         autorefresh (bool): If True, the running-config and startup-config are
             refreshed on config events.  If False, then the config properties
             must be manually refreshed.
-        settings (dict): Provides acces to the settings used to create the
+        settings (dict): Provides access to the settings used to create the
             Node instance.
 
     Args:
         connection (EapiConnection): An instance of EapiConnection used as the
-            transport for sending and receiveing eAPI requests and responses.
+            transport for sending and receiving eAPI requests and responses.
         **kwargs: An arbitrary list of keyword arguments
-
     """
     def __init__(self, connection, **kwargs):
         self._connection = connection
@@ -411,13 +407,11 @@ class Node(object):
         Args:
             password (str): The password string in clear text used to
                 authenticate to exec mode
-
         """
-        self._enablepwd = password
         self._enablepwd = str(password).strip()
 
     def config(self, commands):
-        """ Configures the node with the specified commands
+        """Configures the node with the specified commands
 
         This method is used to send configuration commands to the node.  It
         will take either a string or a list and prepend the necessary commands
@@ -430,7 +424,7 @@ class Node(object):
                 necessary commands to put the session in config mode.
 
         Returns:
-            The config method will returna  list of dictionaries with the
+            The config method will return a list of dictionaries with the
                 output from each command.  The function will strip the
                 response from any commands it prepends.
         """
@@ -460,10 +454,10 @@ class Node(object):
             commands (list): The list of commands to send to the node
 
             encoding (str): The requested encoding of the command output.
-                Valid values for encoding are json or text
+                Valid values for encoding are JSON or text
 
             strict (bool): If False, this method will attempt to run a
-                command with text encoding if json encoding fails
+                command with text encoding if JSON encoding fails
 
         Returns:
             A dict object that includes the response for each command along
@@ -480,7 +474,6 @@ class Node(object):
 
             CommandError: This method will raise a CommandError if any one
                 of the commands fails.
-
         """
         commands = make_iterable(commands)
 

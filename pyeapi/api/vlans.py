@@ -60,7 +60,7 @@ TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
 def isvlan(value):
     """Checks if the argument is a valid VLAN
 
-    A valid VLAN is an integeer value in the range of 1 to 4094.  This
+    A valid VLAN is an integer value in the range of 1 to 4094.  This
     function will test if the argument falls into the specified range and
     is considered a valid VLAN
 
