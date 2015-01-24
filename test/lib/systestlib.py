@@ -28,24 +28,45 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+import unittest
+import random
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from testlib import get_fixture
 
-from pyeapi import __version__, __author__
+import pyeapi.client
 
-setup(
-    name='pyeapi',
-    version=__version__,
-    description='Python client for Arista EOS command API (eAPI)',
-    author=__author__,
-    author_email='eosplus-dev@aristanetworks.com',
-    url='https://github.com/arista-eosplus/pyeapi',
-    download_url='https://github.com/arista-eosplus/pyeapi/tarball/v0.1.0',
-    license='BSD-3',
-    packages=['pyeapi', 'pyeapi.api']
-)
+class DutSystemTest(unittest.TestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(DutSystemTest, self).__init__(*args, **kwargs)
+        self.longMessage = True
+
+    def setUp(self):
+        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapi.client.config
+
+        self.duts = list()
+        for name in config.sections():
+            if name.startswith('connection:') and 'localhost' not in name:
+                name = name.split(':')[1]
+                self.duts.append(pyeapi.client.connect_to(name))
+
+def random_interface(dut, exclude=None):
+    exclude = [] if exclude is None else exclude
+    interfaces = dut.api('interfaces')
+    names = [name for name in interfaces.keys() if name.startswith('Et')]
+
+    exclude_interfaces = dut.settings.get('exclude_interfaces', [])
+    if exclude_interfaces:
+        exclude_interfaces = exclude_interfaces.split(',')
+    exclude_interfaces.extend(exclude)
+
+    if sorted(exclude_interfaces) == sorted(names):
+        raise TypeError('unable to allocate interface from dut')
+
+    choices = set(names).difference(exclude)
+    return random.choice(list(choices))
+
 
 

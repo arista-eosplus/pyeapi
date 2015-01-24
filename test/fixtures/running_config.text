@@ -1,0 +1,1607 @@
+! Command: show running-config all
+! device: veos01 (vEOS, EOS-4.13.7M)
+!
+! boot system flash:/vEOS.swi
+!
+bfd interval 300 min_rx 300 multiplier 3 default
+!
+prompt %H%R%v%P
+no terminal length
+no terminal width
+alias pa bash sudo puppet agent --confdir /persist/local/puppet
+alias pr bash sudo puppet resource --confdir /persist/local/puppet
+!
+schedule tech-support interval 60 max-log-files 100 command show tech-support
+!
+cvx
+   shutdown
+   port 9979
+   heartbeat-interval 20
+   heartbeat-timeout 60
+   no service vxlan
+   service openstack
+      shutdown
+      name-resolution interval 21600
+   no service debug
+   service debug interval 1
+!
+no dcbx application
+!
+no ip dhcp relay information option
+no ip dhcp relay always-on
+no ip dhcp smart-relay global
+!
+no ip dhcp snooping
+no ip dhcp snooping information option
+!
+directflow
+   shutdown
+!
+default switch forwarding-mode
+!
+vlan internal allocation policy ascending
+!
+email
+   no from-user
+   no server
+   no auth username
+   no auth password
+   no tls
+!
+errdisable detect cause link-flap
+no errdisable recovery cause bpduguard
+no errdisable recovery cause link-flap
+no errdisable recovery cause no-internal-vlan
+no errdisable recovery cause portchannelguard
+no errdisable recovery cause portsec
+no errdisable recovery cause tapagg
+no errdisable recovery cause uplink-failure-detection
+no errdisable recovery cause xcvr-unsupported
+errdisable recovery interval 300
+!
+ip igmp snooping
+no ip igmp snooping report-flooding
+ip igmp snooping robustness-variable 2
+default ip igmp snooping vlan 1
+default ip igmp snooping vlan 1 querier
+no ip igmp snooping vlan 1 querier address
+no ip igmp snooping vlan 1 querier query-interval
+no ip igmp snooping vlan 1 querier max-response-time
+no ip igmp snooping vlan 1 querier last-member-query-interval
+no ip igmp snooping vlan 1 querier version
+no ip igmp snooping vlan 1 max-groups
+ip igmp snooping vlan 1 immediate-leave
+default ip igmp snooping vlan 10
+default ip igmp snooping vlan 10 querier
+no ip igmp snooping vlan 10 querier address
+no ip igmp snooping vlan 10 querier query-interval
+no ip igmp snooping vlan 10 querier max-response-time
+no ip igmp snooping vlan 10 querier last-member-query-interval
+no ip igmp snooping vlan 10 querier version
+no ip igmp snooping vlan 10 max-groups
+ip igmp snooping vlan 10 immediate-leave
+default ip igmp snooping vlan 100
+default ip igmp snooping vlan 100 querier
+no ip igmp snooping vlan 100 querier address
+no ip igmp snooping vlan 100 querier query-interval
+no ip igmp snooping vlan 100 querier max-response-time
+no ip igmp snooping vlan 100 querier last-member-query-interval
+no ip igmp snooping vlan 100 querier version
+no ip igmp snooping vlan 100 max-groups
+ip igmp snooping vlan 100 immediate-leave
+default ip igmp snooping vlan 300
+default ip igmp snooping vlan 300 querier
+no ip igmp snooping vlan 300 querier address
+no ip igmp snooping vlan 300 querier query-interval
+no ip igmp snooping vlan 300 querier max-response-time
+no ip igmp snooping vlan 300 querier last-member-query-interval
+no ip igmp snooping vlan 300 querier version
+no ip igmp snooping vlan 300 max-groups
+ip igmp snooping vlan 300 immediate-leave
+no ip igmp snooping querier
+no ip igmp snooping querier address
+ip igmp snooping querier query-interval 125
+ip igmp snooping querier max-response-time 10
+ip igmp snooping querier last-member-query-interval 1
+no ip igmp snooping querier version
+!
+default logging event congestion-drops
+!
+default load-interval default
+!
+transceiver qsfp default-mode 4x10G
+!
+no ip pim rp-candidate
+no ip pim register-source
+no ip pim ssm range
+ip pim sparse-mode sg-expiry-timer 210
+ip pim spt-threshold 0
+ip pim log-neighbor-changes
+no ip pim bsr-holdtime
+no ip pim bsr-candidate
+no ip pim bfd
+!
+ip msdp timer 30
+!
+lacp system-priority 32768
+!
+no queue-monitor length
+!
+queue-monitor length global-buffer thresholds 512 256
+no queue-monitor length mirror
+!
+queue-monitor length global-buffer
+!
+errdisable flap-setting cause link-flap max-flaps 5 time 10
+!
+lldp timer 30
+lldp holdtime 120
+lldp reinit 2
+lldp tlv-select link-aggregation
+lldp tlv-select management-address
+lldp tlv-select max-frame-size
+lldp tlv-select port-description
+lldp tlv-select port-vlan
+lldp tlv-select system-capabilities
+lldp tlv-select system-description
+lldp tlv-select system-name
+lldp run
+no lldp management-address
+!
+logging on
+logging buffered 32 debugging
+logging trap informational
+logging console errors
+no logging synchronous
+logging format timestamp traditional
+no logging format hostname fqdn
+logging facility local4
+no logging source-interface
+!
+logging level AAA debugging
+logging level ACCOUNTING debugging
+logging level ACL debugging
+logging level AGENT debugging
+logging level BFD debugging
+logging level BGP debugging
+logging level BRIDGING debugging
+logging level CAPI debugging
+logging level CLEAR debugging
+logging level DOT1X debugging
+logging level ENVMON debugging
+logging level ETH debugging
+logging level EVENTMON debugging
+logging level EXTENSION debugging
+logging level FHRP debugging
+logging level FLOW debugging
+logging level FRU debugging
+logging level FWK debugging
+logging level GMP debugging
+logging level HARDWARE debugging
+logging level IGMPSNOOPING debugging
+logging level INTF debugging
+logging level IP6ROUTING debugging
+logging level LACP debugging
+logging level LAG debugging
+logging level LAUNCHER debugging
+logging level LINEPROTO debugging
+logging level LLDP debugging
+logging level LOGMGR debugging
+logging level MAPREDUCEMONITOR debugging
+logging level MDIO debugging
+logging level MIRRORING debugging
+logging level MLAG debugging
+logging level MROUTE debugging
+logging level MRP debugging
+logging level MSDP debugging
+logging level MSRP debugging
+logging level MVRP debugging
+logging level NTP debugging
+logging level OPENFLOW debugging
+logging level OSPF debugging
+logging level OSPF3 debugging
+logging level PORTSECURITY debugging
+logging level PTP debugging
+logging level PWRMGMT debugging
+logging level QOS debugging
+logging level QUEUEMONITOR debugging
+logging level REACHABILITYMONITOR debugging
+logging level REDUNDANCY debugging
+logging level ROUTING debugging
+logging level SECURITY debugging
+logging level SPANTREE debugging
+logging level STAGEMGR debugging
+logging level SYS debugging
+logging level SYSDB debugging
+logging level TAPAGG debugging
+logging level TCP debugging
+logging level TRANSCEIVER debugging
+logging level VM debugging
+logging level VMTRACERSESS debugging
+logging level VMWAREVI debugging
+logging level VMWAREVS debugging
+logging level VRF debugging
+logging level VRRP debugging
+logging level VXLAN debugging
+logging level XMPP debugging
+logging level ZTP debugging
+!
+logging event link-status global
+!
+default mrp leave-timer
+default mrp leave-all-timer
+!
+no msrp streams load-file
+!
+hostname veos01
+no ip domain lookup source-interface
+ip name-server vrf default 192.168.1.32
+ip domain-name stormcontrol.net
+ip host puppet 192.168.1.130
+!
+no ntp trusted-key
+no ntp authenticate
+ntp server 192.168.1.32 iburst
+no ntp serve all
+!
+power poll-interval 5
+!
+no radius-server key
+radius-server timeout 5
+radius-server retransmit 3
+no radius-server deadtime
+no radius-server attribute 32 include-in-access-req format
+!
+sflow sample 1048576
+sflow polling-interval 2
+no sflow source
+no sflow source-interface
+sflow sample output interface
+no sflow run
+!
+no snmp-server engineID local
+no snmp-server chassis-id
+no snmp-server contact
+no snmp-server location
+no snmp-server source-interface
+default snmp-server enable traps
+default snmp-server enable traps bgp
+default snmp-server enable traps bgp arista-backward-transition
+default snmp-server enable traps bgp arista-established
+default snmp-server enable traps bgp backward-transition
+default snmp-server enable traps bgp established
+default snmp-server enable traps entity
+default snmp-server enable traps entity arista-ent-sensor-alarm
+default snmp-server enable traps entity ent-config-change
+default snmp-server enable traps entity ent-state-oper-disabled
+default snmp-server enable traps entity ent-state-oper-enabled
+default snmp-server enable traps lldp
+default snmp-server enable traps lldp rem-tables-change
+default snmp-server enable traps msdp
+default snmp-server enable traps msdp backward-transition
+default snmp-server enable traps msdp established
+default snmp-server enable traps ospf
+default snmp-server enable traps ospf if-auth-failure
+default snmp-server enable traps ospf if-config-error
+default snmp-server enable traps ospf if-state-change
+default snmp-server enable traps ospf nbr-state-change
+default snmp-server enable traps pim
+default snmp-server enable traps pim neighbor-loss
+default snmp-server enable traps snmp
+default snmp-server enable traps snmp authentication
+default snmp-server enable traps snmp link-down
+default snmp-server enable traps snmp link-up
+default snmp-server enable traps snmpConfigManEvent
+default snmp-server enable traps snmpConfigManEvent arista-config-man-event
+default snmp-server enable traps switchover
+default snmp-server enable traps switchover arista-redundancy-switch-over-notif
+default snmp-server enable traps test
+default snmp-server enable traps test arista-test-notification
+default snmp-server enable traps vrrp
+default snmp-server enable traps vrrp trap-new-master
+snmp-server vrf default
+!
+spanning-tree mode mstp
+spanning-tree hello-time 2000
+spanning-tree max-age 20
+spanning-tree forward-time 15
+spanning-tree transmit hold-count 6
+spanning-tree max-hops 20
+no spanning-tree portfast bpduguard default
+no spanning-tree portfast bpdufilter default
+spanning-tree bridge assurance
+no spanning-tree loopguard default
+no spanning-tree portchannel guard misconfig
+spanning-tree bpduguard rate-limit default
+logging event spanning-tree global
+spanning-tree mst 0 priority 32768
+!
+spanning-tree mst configuration
+   no name
+   revision 0
+!
+no service sequence-numbers
+no service running-config timestamp
+!
+no tacacs-server key
+tacacs-server timeout 5
+!
+aaa authentication login default local
+no aaa authentication login console
+aaa authentication enable default local
+no aaa authentication policy on-success log
+no aaa authentication policy on-failure log
+no aaa authorization console
+no aaa authorization exec default
+no aaa authorization commands all default
+aaa authorization config-commands
+no aaa accounting exec console
+no aaa accounting commands all console
+no aaa accounting exec default
+no aaa accounting system default
+no aaa accounting dot1x default
+no aaa accounting commands all default
+!
+no enable secret
+no aaa root
+aaa authentication policy local allow-nopassword-remote-login
+no aaa authorization policy local default-role
+!
+username admin privilege 1 role network-admin nopassword
+username eapi privilege 1 secret 5 $1$eCurfHLe$JCbuUNM7Xwy6i6/zknYha.
+username sprygada privilege 1 nopassword
+!
+role network-admin
+   10 permit command .*
+!
+role network-operator
+   10 deny mode exec command configure|bash|python-shell|\|
+   20 permit mode exec command .*
+!
+tap aggregation
+   no mode
+!
+environment overheat action shutdown
+environment insufficient-fans action shutdown
+environment fan-speed auto
+!
+clock timezone US/Eastern
+!
+no virtual-cable
+!
+vlan 1
+   name default
+   state active
+   no private-vlan
+!
+vlan 10
+   name VLAN0010
+   state active
+   no private-vlan
+!
+vlan 100
+   name mytest
+   state active
+   no private-vlan
+!
+vlan 300
+   name VLAN0300
+   state active
+   no private-vlan
+!
+interface Ethernet1
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet2
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet3
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet4
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet5
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet6
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Ethernet7
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no storm-control broadcast
+   no storm-control multicast
+   no storm-control all
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+!
+interface Loopback0
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   snmp trap link-status
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval 200
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 1.1.1.1/32
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   default ntp serve
+!
+interface Management1
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   default logging event congestion-drops
+   default unidirectional
+   snmp trap link-status
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   ipv6 nd ra suppress all
+   ipv6 nd ra interval 200
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 192.168.1.16/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   lldp transmit
+   lldp receive
+   default ntp serve
+!
+interface Vlan10
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   autostate
+   no private-vlan mapping
+   snmp trap link-status
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval 200
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 6.7.5.6/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Vlan10
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp host-proxy
+   no ip igmp host-proxy report-interval
+   no ip igmp host-proxy
+   ip mfib fastdrop
+   default ntp serve
+   no ip pim sparse-mode
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   no ip pim bsr-border
+   default ip pim bfd-instance
+!
+mac address-table aging-time 300
+!
+monitor hadoop
+   shutdown
+!
+no ip fhrp accept-mode
+!
+no ip virtual-router mac-address
+ip virtual-router mac-address advertisement-interval 30
+!
+no ipv6 hardware fib nexthop-index
+!
+ip route 0.0.0.0/0 192.68.1.254 1 tag 0
+!
+ip icmp redirect
+ip routing
+!
+no ip multicast-routing
+no ip multicast-routing static
+no ip multicast multipath none
+ip mfib activity polling-interval 60
+ip mfib max-fastdrops 1024
+ip mfib cache-entries unresolved max 4000
+ip mfib packet-buffers unresolved max 3
+!
+ip as-path regex-mode asn
+!
+no ipv6 unicast-routing
+!
+control-plane
+   ip access-group default-control-plane-acl in
+   ipv6 access-group default-control-plane-acl in
+!
+mac address-table notification host-flap logging
+mac address-table notification host-flap detection window 15
+!
+mlag configuration
+   no domain-id
+   heartbeat-interval 2000
+   no local-interface
+   no peer-address
+   no peer-link
+   reload-delay 300
+   no reload-delay non-mlag
+   no reload-delay mode
+   no shutdown
+!
+no mpls routing
+!
+no ip ftp client source-interface
+no ip http client source-interface
+no ip ssh client source-interface
+no ip tftp client source-interface
+!
+no qos random-detect ecn global-buffer
+qos map cos 0 1 2 3 4 5 6 7 to traffic-class 8
+qos map dscp 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 to traffic-class 9
+qos map traffic-class 0 1 2 3 4 5 6 7 8 9 10 11 to cos 3
+qos map traffic-class 0 1 2 3 4 5 6 7 8 9 10 11 to uc-tx-queue 4
+qos map traffic-class 0 1 2 3 4 5 6 7 8 9 10 11 to mc-tx-queue 16
+!
+policy-map type control-plane copp-system-policy
+   class copp-system-bpdu
+      shape pps 6000
+      bandwidth pps 5000
+   class copp-system-arp
+      shape pps 25000
+      bandwidth pps 1000
+   class copp-system-igmp
+      shape pps 5000
+      bandwidth pps 4000
+   class copp-system-default
+      no shape
+      no bandwidth
+!
+no ip radius source-interface
+!
+monitor reachability
+   shutdown
+   probe receiver max-streams 50000
+   probe checkpoint-interval 60
+   destination port 49152
+   default ignore-checksum
+   default preserve-streams
+!
+no ip tacacs source-interface
+!
+no vxlan vni notation dotted
+!
+banner login
+this 
+is the loging ban
+that would b emult
+EOF
+banner motd
+this text
+can be multine
+EOF
+!
+system coredump compressed
+!
+no dot1x system-auth-control
+!
+management api http-commands
+   vrf default
+      default shutdown
+!
+management api http-commands
+   no protocol https
+   protocol http
+   default protocol https certificate
+   default cors allowed-origin
+   default protocol https cipher
+   default protocol https key-exchange
+   default protocol https mac
+   no shutdown
+!
+management cim-provider
+   shutdown
+   http 7778
+   https 7779
+   idle-timeout 90
+   default live-time
+   default trace
+   default ssl certificate
+   default ssl key
+!
+management console
+   idle-timeout 0
+!
+management cvx
+   shutdown
+   no server host
+   no source-interface
+   no server port
+   heartbeat-interval 20
+   heartbeat-timeout 60
+   no service debug
+   service debug interval 1
+!
+management defaults
+   secret hash md5
+!
+management security
+   no entropy source hardware
+   no password minimum length
+!
+management ssh
+   idle-timeout 0
+   authentication mode keyboard-interactive
+   server-port 22
+   no fips restrictions
+   no hostkey client strict-checking
+   no shutdown
+   login timeout 120
+   log-level info
+!
+management telnet
+   shutdown
+   idle-timeout 0
+!
+management xmpp
+   shutdown
+   vrf default
+   session privilege 1
+!
+!
+end

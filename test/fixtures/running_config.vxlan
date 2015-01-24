@@ -1,0 +1,47 @@
+interface Vxlan1
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no switchport port-security
+   switchport port-security maximum 1
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+   vxlan multicast-group 239.10.10.10
+   vxlan source-interface Loopback0
+   no vxlan controller-client
+   vxlan udp-port 4789
+   no vxlan flood vtep
+   no vxlan vlan flood vtep
+   no vxlan learn-restrict vtep
+   no vxlan vlan learn-restrict vtep
+!

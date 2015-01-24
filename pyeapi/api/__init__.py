@@ -28,24 +28,7 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+from .abstract import Entity, EntityCollection
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
-from pyeapi import __version__, __author__
-
-setup(
-    name='pyeapi',
-    version=__version__,
-    description='Python client for Arista EOS command API (eAPI)',
-    author=__author__,
-    author_email='eosplus-dev@aristanetworks.com',
-    url='https://github.com/arista-eosplus/pyeapi',
-    download_url='https://github.com/arista-eosplus/pyeapi/tarball/v0.1.0',
-    license='BSD-3',
-    packages=['pyeapi', 'pyeapi.api']
-)
-
-
+__all__ = ['Entity', 'EntityCollection']

@@ -31,62 +31,115 @@
 #
 import sys
 import os
-import os
 import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import patch
+from mock import Mock, patch
 
-from testlib import get_fixture, random_string
+from testlib import get_fixture, random_string, random_int
 
 import pyeapi.client
+
+DEFAULT_CONFIG = {'connection:localhost': dict(transport='socket')}
+
+
+class TestNode(unittest.TestCase):
+
+    def setUp(self):
+        self.connection = Mock()
+        self.node = pyeapi.client.Node(self.connection)
+
+    def test_enable_with_single_command(self):
+        command = random_string()
+        response = ['enable', command]
+
+        self.connection.execute.return_value = {'result': list(response)}
+        result = self.node.enable(command)
+
+        self.connection.execute.assert_called_once_with(response, 'json')
+        self.assertEqual(command, result[0]['result'])
+
+    def test_enable_with_multiple_commands(self):
+        commands = list()
+        for i in range(0, random_int(2, 5)):
+            commands.append(random_string())
+
+        def execute_response(cmds, *args):
+            return {'result': [x for x in cmds]}
+
+        self.connection.execute.side_effect = execute_response
+
+        responses = self.node.enable(commands)
+
+
+        self.assertEqual(self.connection.execute.call_count, len(commands))
+
+        for cmd in commands:
+            self.connection.execute.assert_call_with(['enable', cmd], 'json')
+
+        for index, response in enumerate(responses):
+            self.assertEqual(commands[index], response['result'])
 
 class TestClient(unittest.TestCase):
 
     def setUp(self):
+        if 'EAPI_CONF' in os.environ:
+            del os.environ['EAPI_CONF']
         reload(pyeapi.client)
-        self.assertEqual(pyeapi.client.config, dict())
 
     def test_load_config_for_connection_with_filename(self):
-        conf = get_fixture('pyeapi.conf')
-        result = pyeapi.client.load_config(filename=conf)
-        cfg = pyeapi.client.config['connection:test1']
+        conf = get_fixture('eapi.conf')
+        pyeapi.client.load_config(filename=conf)
+        cfg = pyeapi.client.config.get_connection('test1')
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
 
     def test_load_config_for_connection_with_env(self):
-        os.environ['PYEAPI_CONF'] = get_fixture('pyeapi.conf')
-        result = pyeapi.client.load_config()
-        cfg = pyeapi.client.config['connection:test1']
+        os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
+        pyeapi.client.load_config(random_string())
+        cfg = pyeapi.client.config.get_connection('test1')
         self.assertEqual(cfg['host'], '192.168.1.16')
         self.assertEqual(cfg['username'], 'eapi')
         self.assertEqual(cfg['password'], 'password')
 
     def test_load_config(self):
-        conf = get_fixture('pyeapi.conf')
-        result = pyeapi.client.load_config(conf)
-        self.assertEqual(len(pyeapi.client.config), 3)
+        conf = get_fixture('eapi.conf')
+        pyeapi.client.load_config(conf)
+        self.assertEqual(len(pyeapi.client.config.sections()), 3)
         for name in ['localhost', 'test1', 'test2']:
             name = 'connection:%s' % name
-            self.assertIn(name, pyeapi.client.config)
+            self.assertIn(name, pyeapi.client.config.sections())
 
-    @patch('pyeapi.client.Connection')
-    def test_connect(self, connection):
-        result = pyeapi.client.connect()
+    @patch('pyeapi.client.make_connection')
+    def test_connect_types(self, connection):
+        transports = pyeapi.client.TRANSPORTS.keys()
         kwargs = dict(host='localhost', username='admin', password='',
-                      enablepwd='', use_ssl=True, port=None)
-        connection.assert_called_once_with(**kwargs)
+                      port=None)
 
-    @patch('pyeapi.client.Connection')
-    def test_connect_to_with_config(self, connection):
-        conf = get_fixture('pyeapi.conf')
-        pyeapi.client.load_config(filename=conf)
-        result = pyeapi.client.connect_to('test1')
-        kwargs = dict(host='192.168.1.16', username='eapi', password='password',
-                      enablepwd='', use_ssl=False, port=None)
-        connection.assert_called_once_with(**kwargs)
+        for transport in transports:
+            pyeapi.client.connect(transport)
+            connection.assert_called_with(transport, **kwargs)
+
+    def test_connect_default_type(self):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
+            pyeapi.client.connect()
+            kwargs = dict(host='localhost', username='admin', password='',
+                          port=None)
+            transport.assert_called_once_with(**kwargs)
+
+    def test_connect_to_with_config(self):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
+            conf = get_fixture('eapi.conf')
+            pyeapi.client.load_config(filename=conf)
+            pyeapi.client.connect_to('test1')
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None)
+            transport.assert_called_once_with(**kwargs)
+
 
 
 

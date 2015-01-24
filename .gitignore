@@ -53,5 +53,8 @@ docs/_build/
 # PyBuilder
 target/
 
-local/
+# OSX crud
 .DS_Store
+
+# allow unittest lib
+!/test/lib

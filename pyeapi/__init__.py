@@ -32,3 +32,7 @@
 __version__ = '0.1.0'
 __author__ = 'Arista EOS+'
 
+
+from .client import load_config, connect, connect_to, config_for
+
+__all__ = ['load_config', 'connect', 'connect_to', 'config_for']

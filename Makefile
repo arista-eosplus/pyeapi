@@ -50,5 +50,5 @@ unittest: clean
 	$(PYTHON) -m unittest discover test/unit -v
 
 systest: clean
-	$(PYTHON) -m unittest discover test/integration -v
+	$(PYTHON) -m unittest discover test/system -v
 

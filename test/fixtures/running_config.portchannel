@@ -1,0 +1,384 @@
+! Command: show running-config all
+!
+interface Port-Channel1
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no port-channel min-links
+   no port-channel lacp fallback
+   port-channel lacp fallback timeout 90
+   no l2 mtu
+   no mlag
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+!
+interface Ethernet5
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   no l2 mtu
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   channel-group 1 mode on
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+!
+interface Ethernet6
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   no l2 mtu
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   channel-group 1 mode on
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+!
+end
