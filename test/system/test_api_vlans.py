@@ -127,6 +127,33 @@ class TestApiVlans(DutSystemTest):
             self.assertEqual('suspended', config[0]['vlans'][vid]['status'],
                              'dut=%s' % dut)
 
+    def test_set_trunk_groups_default(self):
+        for dut in self.duts:
+            vid = str(random_int(2, 4094))
+            tg = random_string()
+            dut.config(['no vlan %s' % vid, 'vlan %s' % vid,
+                        'trunk group %s' % tg])
+            result = dut.api('vlans').set_trunk_groups(vid, default=True)
+            self.assertTrue(result, 'dut=%s' % dut)
+            cmd = 'show running-config section vlan %s' % vid
+            config = dut.run_commands(cmd, 'text')
+            self.assertNotIn('trunk group', config[0]['output'])
+
+    def test_set_trunk_groups(self):
+        for dut in self.duts:
+            vid = str(random_int(2, 4094))
+            tg1 = random_string(maxchar=10)
+            tg2 = random_string(maxchar=10)
+            tg3 = random_string(maxchar=10)
+            dut.config(['no vlan %s' % vid, 'vlan %s' % vid,
+                        'trunk group %s' % tg1, 'trunk group %s' % tg2])
+            result = dut.api('vlans').set_trunk_groups(vid, [tg1, tg3])
+            self.assertTrue(result, 'dut=%s' % dut)
+            config = dut.run_commands('show vlan %s trunk group' % vid)
+            config = sorted(config[0]['trunkGroups'][vid]['names'])
+            self.assertEqual(sorted([tg1, tg3]), config)
+
+
     def test_add_trunk_group(self):
         for dut in self.duts:
             tg = random_string(maxchar=32)

@@ -103,6 +103,12 @@ class TestApiVlans(EapiConfigUnitTest):
                 func = function('set_state', vid, default=True)
                 self.eapi_positive_config_test(func, cmds)
 
+    def test_set_trunk_groups_default(self):
+        vid = random_vlan()
+        cmds = ['vlan %s' % vid, 'default trunk group']
+        func = function('set_trunk_groups', vid, default=True)
+        self.eapi_positive_config_test(func, cmds)
+
     def test_add_trunk_group(self):
         vid = random_vlan()
         tg = random_string()

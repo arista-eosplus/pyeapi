@@ -52,6 +52,7 @@ Parameters:
 import re
 
 from pyeapi.api import EntityCollection
+from pyeapi.utils import make_iterable
 
 NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
@@ -240,13 +241,56 @@ class Vlans(EntityCollection):
             commands.append('no state')
         return self.configure(commands)
 
+    def set_trunk_groups(self, vid, value=None, default=False):
+        """ Configures the list of trunk groups support on a vlan
+
+        This method handles configuring the vlan trunk group value to default
+        if the default flag is set to True.  If the default flag is set
+        to False, then this method will calculate the set of trunk
+        group names to be added and to be removed.
+
+        .. code-block:: none
+
+            vlan <vid.
+            default trunk group
+
+        Args:
+            vid (str): The VLAN ID to configure
+            value (str): The list of trunk groups that should be configured
+                for this vlan id.
+            default (bool): Configures the trunk group value to default if
+                this value is true
+
+        Returns:
+            True if the operation was successful otherwise False
+
+        """
+        if default:
+            return self.configure(['vlan %s' % vid, 'default trunk group'])
+
+        current_value = self.get(vid)['trunk_groups']
+        failure = False
+
+        value = make_iterable(value)
+
+        for name in set(value).difference(current_value):
+            if not self.add_trunk_group(vid, name):
+                failure = True
+
+        for name in set(current_value).difference(value):
+            if not self.remove_trunk_group(vid, name):
+                failure = True
+
+        return not failure
+
+
     def add_trunk_group(self, vid, name):
         """ Adds a new trunk group to the Vlan in the running-config
 
         .. code-block:: none
 
             vlan <vlanid>
-            trunk-group <name>
+            trunk group <name>
 
         Args:
             vid (str): The VLAN ID to configure
@@ -265,7 +309,7 @@ class Vlans(EntityCollection):
         .. code-block:: none
 
             vlan <vlanid>
-            no trunk-group <name>
+            no trunk group <name>
 
         Args:
             vid (str): The VLAN ID to configure
