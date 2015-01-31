@@ -39,7 +39,7 @@ provides a library for building API enabled data models for configuring
 EOS nodes.
 
 This library allows for creating connections to EOS eAPI enabled nodes using
-the connect or connect_for function.  Both functions will return an instance
+the connect or connect_to function.  Both functions will return an instance
 of a Node object that can be used to send and receive eAPI commands.  The
 Node object can autoload API modules for a structured object oriented
 approach to configuring the EOS node with native Python objects.
@@ -374,7 +374,10 @@ class Node(object):
         self.settings = kwargs
 
     def __str__(self):
-        return 'Node(connetion=%s)' % str(self._connection)
+        return 'Node(connection=%s)' % str(self._connection)
+
+    def __repr__(self):
+        return 'Node(connection=%s)' % repr(self._connection)
 
     @property
     def connection(self):

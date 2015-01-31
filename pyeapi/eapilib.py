@@ -123,6 +123,9 @@ class SocketConnection(HTTPConnection):
     def __str__(self):
         return 'unix:%s' % self.path
 
+    def __repr__(self):
+        return 'unix:%s' % self.path
+
     def connect(self):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.sock.connect(self.path)
@@ -136,6 +139,9 @@ class HttpConnection(HTTPConnection):
     def __str__(self):
         return 'http://%s:%s/%s' % (self.host, self.port, self.path)
 
+    def __repr__(self):
+        return 'http://%s:%s/%s' % (self.host, self.port, self.path)
+
 class HttpsConnection(HTTPSConnection):
 
     def __init__(self, path, *args, **kwargs):
@@ -143,7 +149,10 @@ class HttpsConnection(HTTPSConnection):
         self.path = path
 
     def __str__(self):
-        return 'https://%s:%s/command-api' % (self.host, self.port)
+        return 'https://%s:%s/%s' % (self.host, self.port, self.path)
+
+    def __repr__(self):
+        return 'https://%s:%s/%s' % (self.host, self.port, self.path)
 
 class EapiConnection(object):
     """Creates a connection to eAPI for sending and receiving eAPI requests
@@ -159,7 +168,10 @@ class EapiConnection(object):
         self._auth = None
 
     def __str__(self):
-        return 'EapiConnection(transport=%s)' % self.transport
+        return 'EapiConnection(transport=%s)' % str(self.transport)
+
+    def __repr__(self):
+        return 'EapiConnection(transport=%s)' % repr(self.transport)
 
     def authentication(self, username, password):
         """Configures the user authentication for eAPI
