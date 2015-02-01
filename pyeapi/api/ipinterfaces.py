@@ -82,8 +82,12 @@ class Ipinterfaces(EntityCollection):
             return None
 
         resp = dict(name=name)
-        resp['address'] = IPADDR_RE.search(config, re.M).group('value')
+
+        value = lambda x,y: x.group('value') if x else y
+
+        resp['address'] = value(IPADDR_RE.search(config, re.M), '0.0.0.0')
         resp['mtu'] = int(MTU_RE.search(config, re.M).group('value'))
+
         return resp
 
     def getall(self):
@@ -203,7 +207,7 @@ class Ipinterfaces(EntityCollection):
         """
         if value is not None:
             value = int(value)
-            if value not in range(68, 65536):
+            if not 68 <= value <= 65535:
                 raise ValueError('invalid mtu value')
 
         commands = ['interface %s' % name]

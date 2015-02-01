@@ -51,6 +51,14 @@ class TestResourceIpinterfaces(DutSystemTest):
                           mtu=1800)
             self.assertEqual(values, result, 'dut=%s' % dut)
 
+    def test_get_interface_wo_ip_adddress(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'no switchport'])
+            result = dut.api('ipinterfaces').get(intf)
+            self.assertEqual(result['address'], '0.0.0.0')
+
     def test_getall(self):
         for dut in self.duts:
             result = dut.api('interfaces').getall()
@@ -104,6 +112,19 @@ class TestResourceIpinterfaces(DutSystemTest):
                         'ip address 111.111.111.111/24'])
             resource = dut.api('ipinterfaces')
             result = resource.set_mtu(intf, 2000)
+            self.assertTrue(result, 'dut=%s' % dut)
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
+            self.assertIn('mtu 2000', config[0]['output'], 'dut=%s' % dut)
+            dut.config('default interface %s' % intf)
+
+    def test_set_mtu_value_as_string(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'ip address 111.111.111.111/24'])
+            resource = dut.api('ipinterfaces')
+            result = resource.set_mtu(intf, '2000')
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.run_commands('show running-config interfaces %s' %
                                       intf, 'text')
