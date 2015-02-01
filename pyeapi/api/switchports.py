@@ -100,7 +100,7 @@ class Switchports(EntityCollection):
         """
         config = self.get_block('interface %s' % name)
 
-        if not re.match(r'\s{3}no\sswitchport', config, re.M):
+        if not re.search(r'\s{3}no\sswitchport$', config, re.M):
             resp = dict(name=name)
             resp['mode'] = MODE_RE.search(config, re.M).group('value')
             resp['access_vlan'] = \
