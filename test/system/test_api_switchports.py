@@ -51,6 +51,13 @@ class TestApiSwitchports(DutSystemTest):
             self.assertEqual(result['trunk_native_vlan'], '1')
             self.assertEqual(result['trunk_allowed_vlans'], '1-4094')
 
+    def test_get_returns_none(self):
+        for dut in self.duts:
+            intf  = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'no switchport'])
+            result = dut.api('switchports').get(intf)
+            self.assertIsNone(result)
 
     def test_getall(self):
         for dut in self.duts:
