@@ -124,7 +124,7 @@ class TestClient(unittest.TestCase):
 
     def test_connect_default_type(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
+        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None)
@@ -132,7 +132,7 @@ class TestClient(unittest.TestCase):
 
     def test_connect_to_with_config(self):
         transport = Mock()
-        with patch.dict(pyeapi.client.TRANSPORTS, {'http': transport}):
+        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
             pyeapi.client.load_config(filename=conf)
             pyeapi.client.connect_to('test1')

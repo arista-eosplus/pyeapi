@@ -109,7 +109,7 @@ TRANSPORTS = {
     'https': HttpsEapiConnection
 }
 
-DEFAULT_TRANSPORT = 'http'
+DEFAULT_TRANSPORT = 'https'
 
 
 class Config(SafeConfigParser):

@@ -49,7 +49,7 @@ The following configuration options are available for defining node entries:
   http or https connections)
 * **enablepwd** - The enable mode password if required by the destination node
 * **transport** - Configures the type of transport connection to use.  The
-  default value is _http_.  Valid values are:
+  default value is _https_.  Valid values are:
     * socket
     * http_local
     * http
