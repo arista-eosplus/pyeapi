@@ -170,8 +170,15 @@ class Config(SafeConfigParser):
             filename (str): The full path to the file to load
         """
         SafeConfigParser.read(self, filename)
+
         if not self.get_connection('localhost'):
             self.add_connection('localhost', transport='socket')
+
+        for name in self.sections():
+            if name.startswith('connection:') and \
+               'host' not in dict(self.items(name)):
+
+                self.set(name, 'host', name.split(':')[1])
 
     def load(self, filename):
         """Loads the file specified by filename

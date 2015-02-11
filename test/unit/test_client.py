@@ -81,6 +81,7 @@ class TestNode(unittest.TestCase):
         for index, response in enumerate(responses):
             self.assertEqual(commands[index], response['result'])
 
+
 class TestClient(unittest.TestCase):
 
     def setUp(self):
@@ -111,6 +112,12 @@ class TestClient(unittest.TestCase):
         for name in ['localhost', 'test1', 'test2']:
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config.sections())
+
+    def test_config_for_replaces_host_w_name(self):
+        conf = get_fixture('nohost.conf')
+        pyeapi.client.load_config(conf)
+        cfg = pyeapi.config_for('test')
+        self.assertEqual(cfg['host'], 'test')
 
     @patch('pyeapi.client.make_connection')
     def test_connect_types(self, connection):
