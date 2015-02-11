@@ -83,12 +83,35 @@ class CommandError(EapiError):
         message (string): The exception error message which is a concatenation
             of the error_code and error_text
     """
-    def __init__(self, code, message, commands=None):
+    def __init__(self, code, message, **kwargs):
         self.error_code = code
         self.error_text = message
-        self.commands = commands
+        self.command_error = kwargs.get('command_error')
+        self.commands = kwargs.get('commands')
+        self.output = kwargs.get('output')
         self.message = 'Error [{}]: {}'.format(code, message)
         super(CommandError, self).__init__(message)
+
+    @property
+    def trace(self):
+        return self.get_trace()
+
+    def get_trace(self):
+        trace = list()
+        index = None
+
+        for index, out in enumerate(self.output):
+            _entry = {'command': self.commands[index], 'output': out}
+            trace.append(_entry)
+
+        if index:
+            index += 1
+            for cmd in self.commands[index:]:
+                _entry = {'command': cmd, 'output': None}
+                trace.append(_entry)
+
+        return trace
+
 
 class ConnectionError(EapiError):
     """Base exception raised for connection errors
@@ -314,7 +337,10 @@ class EapiConnection(object):
             if 'error' in decoded:
                 _message = decoded['error']['message']
                 _code = decoded['error']['code']
-                raise CommandError(_code, _message)
+                _error = ' '.join(decoded['error']['data'][-1]['errors'])
+                _output = decoded['error']['data']
+                raise CommandError(_code, _message, command_error=_error,
+                                   output=_output)
 
             return decoded
 
@@ -362,7 +388,7 @@ class EapiConnection(object):
             response = self.send(request)
             return response
 
-        except (ConnectionError, CommandError) as exc:
+        except(ConnectionError, CommandError) as exc:
             exc.commands = commands
             self.error = exc
             raise

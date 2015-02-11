@@ -95,5 +95,33 @@ class TestClient(unittest.TestCase):
                 self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
 
+class TestNode(unittest.TestCase):
+
+    def setUp(self):
+        pyeapi.client.load_config(filename=get_fixture('dut.conf'))
+        config = pyeapi.client.config
+
+        self.duts = list()
+        for name in config.sections():
+            if name.startswith('connection:') and 'localhost' not in name:
+                name = name.split(':')[1]
+                self.duts.append(pyeapi.client.connect_to(name))
+
+    def test_exception_trace(self):
+        for dut in self.duts:
+            try:
+                dut.enable(['show version', 'show run', 'show hostname'],
+                           strict=True)
+                self.fail('A CommandError should have been raised')
+            except pyeapi.eapilib.CommandError as exc:
+                self.assertEqual(len(exc.trace), 4)
+                self.assertIsNotNone(exc.command_error)
+                self.assertIsNotNone(exc.output)
+                self.assertIsNotNone(exc.commands)
+
+
+
+
+
 if __name__ == '__main__':
     unittest.main()
