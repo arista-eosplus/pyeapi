@@ -346,7 +346,7 @@ class EapiConnection(object):
 
         except (socket.error, ValueError) as exc:
             self.error = exc
-            raise ConnectionError(str(self), 'unable to connect to eAPI')
+            raise ConnectionError(str(self), exc)
 
         finally:
             self.transport.close()
