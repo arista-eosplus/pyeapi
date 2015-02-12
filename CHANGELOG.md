@@ -3,6 +3,7 @@ Python client for eAPI
 
 ## v0.1.1, IN PROGRESS
 
+- adds introspection properties to CommandError for more details (#4)
 - changed the default transport from HTTP to HTTPS to align with EOS
 - fixes connection name not copied to host parameter if host not configured
 - fixes an issue where an ipinterface wasnt properly recognized
