@@ -37,8 +37,8 @@ followed by ``/mnt/flash/eapi.conf``.  This can be overridden by setting
 
 ## Example eapi.conf File
 Below is an example of an eAPI conf file.  The conf file can contain more than
-one node.  Each node section must be prefaced by **connection:<name>** where
-<name> is the name of the connection.
+one node.  Each node section must be prefaced by **connection:\<name\>** where
+\<name\> is the name of the connection.
 
 The following configuration options are available for defining node entries:
 
@@ -51,8 +51,8 @@ The following configuration options are available for defining node entries:
 * **enablepwd** - The enable mode password if required by the destination node
 * **transport** - Configures the type of transport connection to use.  The
   default value is _https_.  Valid values are:
-    * socket
-    * http_local
+    * socket (available in EOS 4.14.5 or later)
+    * http_local (available in EOS 4.14.5 or later)
     * http
     * https  
 * **port** - Configures the port to use for the eAPI connection.  A default
@@ -61,9 +61,13 @@ using the following values:
     * transport: http, default port: 80
     * transport: https, deafult port: 443
     * transport: https_local, default port: 8080
-    * trasnport: socket, default port: n/a
+    * transport: socket, default port: n/a
 
-All configuration values are optional.
+
+_Note:_ See the EOS User Manual found at arista.com for more details on
+configuring eAPI values.
+
+All configuration values are optional. 
 
 ```
 [connection:veos01]
@@ -206,7 +210,7 @@ update the ``dut.conf`` file found in test/fixtures.
 # Contributing
 
 Contributing pull requests are gladly welcomed for this repository.  Please
-note that all contributes that modify the library behavior require
+note that all contributions that modify the library behavior require
 corresponding test cases otherwise the pull request will be rejected.  
 
 # License
