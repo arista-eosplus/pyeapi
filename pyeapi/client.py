@@ -638,8 +638,16 @@ def connect_to(name):
         This function will return an instance of Node with the settings
             from the config instance.
 
+    Raises:
+        AttributeError: raised if the specified configuration name is not
+            found in the loaded configuration
+
     """
     kwargs = config_for(name)
+
+    if not kwargs:
+        raise AttributeError('connection profile not found in config')
+
     connection = connect(transport=kwargs.get('transport'),
                          host=kwargs.get('host'),
                          username=kwargs.get('username'),
