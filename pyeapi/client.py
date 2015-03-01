@@ -439,6 +439,7 @@ class Node(object):
                 response from any commands it prepends.
         """
         commands = make_iterable(commands)
+        commands = list(commands)
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure')
