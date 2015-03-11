@@ -265,6 +265,9 @@ class TestApiVxlanInterface(DutSystemTest):
     def contains(self, text, dut):
         self.assertIn(text, self.get_config(dut), 'dut=%s' % dut)
 
+    def notcontains(self, text, dut):
+        self.assertNotIn(text, self.get_config(dut), 'dut=%s' % dut)
+
     def test_set_source_interface(self):
         for dut in self.duts:
             dut.config(['no interface Vxlan1', 'interface Vxlan1'])
@@ -317,6 +320,64 @@ class TestApiVxlanInterface(DutSystemTest):
             self.assertTrue(instance)
             self.contains('no vxlan multicast-group', dut)
 
+    def test_set_udp_port(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan udp-port 1024'])
+            api = dut.api('interfaces')
+            instance = api.set_udp_port('Vxlan1', '1024')
+            self.assertTrue(instance)
+            self.contains('vxlan udp-port 1024', dut)
+
+    def test_set_udp_port_default(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan udp-port 1024'])
+            api = dut.api('interfaces')
+            instance = api.set_udp_port('Vxlan1', default=True)
+            self.assertTrue(instance)
+            self.contains('vxlan udp-port 4789', dut)
+
+    def test_set_udp_port_negate(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1',
+                        'vxlan udp-port 1024'])
+            api = dut.api('interfaces')
+            instance = api.set_udp_port('Vxlan1')
+            self.assertTrue(instance)
+            self.contains('vxlan udp-port 4789', dut)
+
+    def test_add_vtep(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.add_vtep('Vxlan1', '1.1.1.1')
+            self.assertTrue(instance)
+            self.contains('vxlan flood vtep 1.1.1.1')
+
+    def test_remove_vtep(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.remove_vtep('Vxlan1', '1.1.1.1')
+            self.assertTrue(instance)
+            self.contains('no vxlan flood vtep')
+
+    def test_update_vlan(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.update_vlan('Vxlan1', '10', '10')
+            self.assertTrue(instance)
+            self.contains('vxlan vlan 10 vni 10')
+
+    def test_remove_vlan(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.remove_vtep('Vxlan1', '10')
+            self.assertTrue(instance)
+            self.notcontains('vxlan vlan 10 vni 10')
 
 if __name__ == '__main__':
     unittest.main()
