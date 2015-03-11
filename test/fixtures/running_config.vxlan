@@ -40,7 +40,8 @@ interface Vxlan1
    vxlan source-interface Loopback0
    no vxlan controller-client
    vxlan udp-port 4789
-   no vxlan flood vtep
+   vxlan vlan 10 vni 10
+   vxlan flood vtep 1.1.1.1 2.2.2.2
    no vxlan vlan flood vtep
    no vxlan learn-restrict vtep
    no vxlan vlan learn-restrict vtep

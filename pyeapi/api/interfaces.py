@@ -580,13 +580,10 @@ class PortchannelInterface(BaseInterface):
 
 class VxlanInterface(BaseInterface):
 
-    SRC_INTF_RE = re.compile(r'(?<=\s{3}vxlan\ssource-interface\s)'
-                             r'(?P<value>.+)$', re.M)
-    MCAST_GRP_RE = re.compile(r'(?<=\s{3}vxlan\smulticast-group\s)'
-                              r'(?P<value>.+)$', re.M)
+    DEFAULT_SRC_INTF = ''
+    DEFAULT_MCAST_GRP = ''
 
-
-    def get(self, name='Vxlan1'):
+    def get(self, name):
         """Returns a Vxlan interface as a set of key/value pairs
 
         Example:
@@ -613,16 +610,49 @@ class VxlanInterface(BaseInterface):
         response = super(VxlanInterface, self).get(name)
         response.update(dict(name=name, type='vxlan'))
 
-        srcintf = self.value(self.SRC_INTF_RE.search(config), '')
-        response['source_interface'] = srcintf
-
-        mcastgrp = self.value(self.MCAST_GRP_RE.search(config), '')
-        response['multicast_group'] = mcastgrp
+        response.update(self._parse_source_interface(config))
+        response.update(self._parse_multicast_group(config))
+        response.update(self._parse_udp_port(config))
+        response.update(self._parse_vlans(config))
+        response.update(self._parse_flood_list(config))
 
         return response
 
-    def set_source_interface(self, name='Vxlan1', value=None, default=False):
+    def _parse_source_interface(self, config):
+        match = re.search('vxlan source-interface ([^\s]+)', config)
+        value = match.group(1) if match else self.DEFAULT_SRC_INTF
+        return dict(source_interface=value)
+
+    def _parse_multicast_group(self, config):
+        match = re.search('vxlan multicast-group ([^\s]+)', config)
+        value = match.group(1) if match else self.DEFAULT_MCAST_GRP
+        return dict(multicast_group=value)
+
+    def _parse_udp_port(self, config):
+        match = re.search('vxlan udp-port (\d+)', config)
+        value = int(match.group(1))
+        return dict(udp_port=value)
+
+    def _parse_vlans(self, config):
+        match = re.findall('vxlan vlan (\d+) vni (\d+)', config)
+        values = dict()
+        if match:
+            for vid, vni in match:
+                values[vid] = dict(vni=vni)
+        return dict(vlans=values)
+
+    def _parse_flood_list(self, config):
+        match = re.search('vxlan flood vtep ([^\s]+)$', config)
+        values = list()
+        if match:
+            values = match.group(1).split(' ')
+        return dict(flood_list=values)
+
+    def set_source_interface(self, name, value=None, default=False):
         """Configures the Vxlan source-interface value
+
+        EosVersion:
+            4.13.7M
 
         Args:
             name(str): The interface identifier to configure, defaults to
@@ -633,18 +663,15 @@ class VxlanInterface(BaseInterface):
         Returns:
             True if the operation succeeds otherwise False
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default vxlan source-interface')
-        elif value is not None:
-            commands.append('vxlan source-interface %s' % value)
-        else:
-            commands.append('no vxlan source-interface')
+        string = 'vxlan source-interface'
+        cmds = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, cmds)
 
-        return self.configure(commands)
-
-    def set_multicast_group(self, name='Vxlan1', value=None, default=False):
+    def set_multicast_group(self, name, value=None, default=False):
         """Configures the Vxlan multicast-group value
+
+        EosVersion:
+            4.13.7M
 
         Args:
             name(str): The interface identifier to configure, defaults to
@@ -655,15 +682,92 @@ class VxlanInterface(BaseInterface):
         Returns:
             True if the operation succeeds otherwise False
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default vxlan multicast-group')
-        elif value is not None:
-            commands.append('vxlan multicast-group %s' % value)
-        else:
-            commands.append('no vxlan multicast-group')
+        string = 'vxlan multicast-group'
+        cmds = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, cmds)
 
-        return self.configure(commands)
+    def set_udp_port(self, name, value=None, default=False):
+        """Configures vxlan udp-port value
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            name(str): The name of the interface to configure
+            value(str): The value to set udp-port to
+            default(bool): Configure using the default keyword
+
+        Returns:
+            True if the operation succeeds otherwise False
+        """
+        string = 'vxlan udp-port'
+        cmds = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, cmds)
+
+    def add_vtep(self, name, vtep):
+        """Adds a new VTEP endpoint to the global flood list
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            name (str): The name of the interface to configure
+            vtep (str): The IP address of the remote VTEP endpoint to add
+
+        Returns:
+            True if the command completes successfully
+        """
+        cmd = 'vxlan flood vtep add %s' % vtep
+        return self.configure_interface(name, cmd)
+
+    def remove_vtep(self, name, vtep):
+        """Removes a VTEP endpoint from the global flood list
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            name (str): The name of the interface to configure
+            vtep (str): The IP address of the remote VTEP endpoint to remove
+
+        Returns:
+            True if the command completes successfully
+        """
+        cmd = 'vxlan flood vtep remove %s' % vtep
+        return self.configure_interface(name, cmd)
+
+    def update_vlan(self, name, vid, vni):
+        """Adds a new vlan to vni mapping for the interface
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            vlan (str, int): The vlan id to map to the vni
+            vni (str, int): The vni value to use
+
+        Returns:
+            True if the command completes successfully
+
+        """
+        cmd = 'vxlan vlan %s vni %s' % (vid, vni)
+        return self.configure_interface(name, cmd)
+
+    def remove_vlan(self, name, vid):
+        """Removes a vlan to vni mapping for the interface
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            vlan (str, int): The vlan id to map to the vni
+
+        Returns:
+            True if the command completes successfully
+
+        """
+        return self.configure_interface(name, 'no vxlan vlan %s vni' % vid)
+
 
 
 

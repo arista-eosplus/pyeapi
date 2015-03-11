@@ -165,7 +165,7 @@ class BaseEntity(object):
         """
         commands = make_iterable(commands)
         commands.insert(0, 'interface %s' % name)
-        self.configure(commands)
+        return self.configure(commands)
 
 
 class Entity(BaseEntity, Callable):
