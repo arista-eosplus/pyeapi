@@ -353,7 +353,7 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.add_vtep('Vxlan1', '1.1.1.1')
             self.assertTrue(instance)
-            self.contains('vxlan flood vtep 1.1.1.1')
+            self.contains('vxlan flood vtep 1.1.1.1', dut)
 
     def test_remove_vtep(self):
         for dut in self.duts:
@@ -361,7 +361,7 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.remove_vtep('Vxlan1', '1.1.1.1')
             self.assertTrue(instance)
-            self.contains('no vxlan flood vtep')
+            self.contains('no vxlan flood vtep', dut)
 
     def test_update_vlan(self):
         for dut in self.duts:
@@ -369,15 +369,15 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.update_vlan('Vxlan1', '10', '10')
             self.assertTrue(instance)
-            self.contains('vxlan vlan 10 vni 10')
+            self.contains('vxlan vlan 10 vni 10', dut)
 
     def test_remove_vlan(self):
         for dut in self.duts:
             dut.config(['no interface Vxlan1', 'interface Vxlan1'])
             api = dut.api('interfaces')
-            instance = api.remove_vtep('Vxlan1', '10')
+            instance = api.remove_vlan('Vxlan1', '10')
             self.assertTrue(instance)
-            self.notcontains('vxlan vlan 10 vni 10')
+            self.notcontains('vxlan vlan 10 vni 10', dut)
 
 if __name__ == '__main__':
     unittest.main()

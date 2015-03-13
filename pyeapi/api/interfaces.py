@@ -70,8 +70,6 @@ FLOWC_RX_RE = re.compile(r'(?<=\s{3}flowcontrol\sreceive\s)(?P<value>.+)$',
                          re.M)
 MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
-INSTANCE_METHODS = ['create', 'delete', 'default']
-
 DEFAULT_LACP_MODE = 'on'
 
 VALID_INTERFACES = frozenset([
@@ -120,8 +118,7 @@ class Interfaces(EntityCollection):
         return response
 
     def __getattr__(self, name):
-        if name.startswith('set_') or name in INSTANCE_METHODS:
-            return ProxyCall(self.marshall, name)
+        return ProxyCall(self.marshall, name)
 
     def get_instance(self, interface):
         cls = INTERFACE_CLASS_MAP.get(interface[0:2]) or BaseInterface
@@ -138,10 +135,16 @@ class Interfaces(EntityCollection):
             raise ValueError('invalid interface {}'.format(interface))
 
         instance = self.get_instance(interface)
+        if not hasattr(instance, name):
+            raise AttributeError("'%s' object has no attribute '%s'" % \
+                                 (instance, name))
         method = getattr(instance, name)
         return method(*args, **kwargs)
 
 class BaseInterface(EntityCollection):
+
+    def __str__(self):
+        return 'Interface'
 
     def get(self, name):
         config = self.get_block('^interface %s' % name)
@@ -253,6 +256,9 @@ class BaseInterface(EntityCollection):
         return self.configure(commands)
 
 class EthernetInterface(BaseInterface):
+
+    def __str__(self):
+        return 'EthernetInterface'
 
     def get(self, name):
         """Returns an interface as a set of key/value pairs
@@ -414,6 +420,9 @@ class EthernetInterface(BaseInterface):
         return self.configure(commands)
 
 class PortchannelInterface(BaseInterface):
+
+    def __str__(self):
+        return 'PortchannelInterface'
 
     def get(self, name):
         """Returns a Port-Channel interface as a set of key/value pairs
@@ -582,6 +591,9 @@ class VxlanInterface(BaseInterface):
 
     DEFAULT_SRC_INTF = ''
     DEFAULT_MCAST_GRP = ''
+
+    def __str__(self):
+        return 'VxlanInterface'
 
     def get(self, name):
         """Returns a Vxlan interface as a set of key/value pairs
