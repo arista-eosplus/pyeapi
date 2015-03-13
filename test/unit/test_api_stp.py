@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import get_fixture, random_string, function
 from testlib import EapiConfigUnitTest
 
-import pyeapi.api.spanningtree
+import pyeapi.api.stp
 
 def get_running_config():
     return get_fixture('running_config.text')
@@ -47,7 +47,7 @@ class TestApiStp(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStp, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.spanningtree.Stp(None)
+        self.instance = pyeapi.api.stp.Stp(None)
         self.config = open(get_running_config()).read()
 
     def test_set_mode_with_value(self):
@@ -72,7 +72,7 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
         super(TestApiStpInterfaces, self).__init__(*args, **kwargs)
-        self.instance = pyeapi.api.spanningtree.StpInterfaces(None)
+        self.instance = pyeapi.api.stp.StpInterfaces(None)
         self.config = open(get_running_config()).read()
 
     def test_getall(self):
