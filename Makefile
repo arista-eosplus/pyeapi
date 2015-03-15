@@ -18,6 +18,7 @@
 NAME = "pyeapi"
 
 PYTHON=python
+COVERAGE=coverage
 SITELIB = $(shell $(PYTHON) -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")
 
 VERSION := $(shell cat VERSION)
@@ -47,8 +48,8 @@ sdist: clean
 tests: unittest systest
 
 unittest: clean
-	$(PYTHON) -m unittest discover test/unit -v
+	$(COVERAGE) run -m unittest discover test/unit -v
 
 systest: clean
-	$(PYTHON) -m unittest discover test/system -v
+	$(COVERAGE) run -m unittest discover test/system -v
 
