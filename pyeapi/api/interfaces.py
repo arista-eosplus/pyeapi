@@ -454,8 +454,16 @@ class PortchannelInterface(BaseInterface):
 
         response['members'] = self.get_members(name)
         response['lacp_mode'] = self.get_lacp_mode(name)
-        response['minimum_links'] = self.value(MIN_LINKS_RE.search(config), 0)
+        response.update(self._parse_minimum_links(config))
         return response
+
+    def _parse_minimum_links(self, config):
+        value = 0
+        match = re.search(r'port-channel min-links (\d+)', config)
+        if match:
+            value = int(match.group(1))
+        return dict(minimum_links=value)
+
 
     def get_lacp_mode(self, name):
         """Returns the LACP mode for the specified Port-Channel interface
@@ -569,14 +577,6 @@ class PortchannelInterface(BaseInterface):
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        if value is not None:
-            try:
-                value = int(value)
-                if not 0 <= value <= 16:
-                    return False
-            except ValueError:
-                return False
-
         commands = ['interface %s' % name]
         if default:
             commands.append('default port-channel min-links')
@@ -598,13 +598,15 @@ class VxlanInterface(BaseInterface):
     def get(self, name):
         """Returns a Vxlan interface as a set of key/value pairs
 
-        Example:
-            {
-                "name": <string>,
-                "type": "vxlan",
-                "source_interface": <string>,
-                "multicast_group": <string>
-            }
+        The Vxlan interface resource returns the following:
+
+            * name (str): The name of the interface
+            * type (str): Always returns 'vxlan'
+            * source_interface (str): The vxlan source-interface value
+            * multicast_group (str): The vxlan multicast-group value
+            * udp_port (int): The vxlan udp-port value
+            * vlans (dict): The vlan to vni mappings
+            * flood_list (list): The list of global VTEP flood list
 
         Args:
             name (str): The interface identifier to retrieve from the
@@ -631,22 +633,34 @@ class VxlanInterface(BaseInterface):
         return response
 
     def _parse_source_interface(self, config):
-        match = re.search('vxlan source-interface ([^\s]+)', config)
+        """ Parses the conf block and returns the vxlan source-interface value
+
+        Parses the provided configuration block and returns the value of
+        vxlan source-interface.  If the value is not configured, this method
+        will return DEFAULT_SRC_INTF instead.
+
+        Args:
+            config (str): The Vxlan config block to scan
+
+        Return:
+            dict: A dict object intended to be merged into the resource dict
+        """
+        match = re.search(r'vxlan source-interface ([^\s]+)', config)
         value = match.group(1) if match else self.DEFAULT_SRC_INTF
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search('vxlan multicast-group ([^\s]+)', config)
+        match = re.search(r'vxlan multicast-group ([^\s]+)', config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)
 
     def _parse_udp_port(self, config):
-        match = re.search('vxlan udp-port (\d+)', config)
+        match = re.search(r'vxlan udp-port (\d+)', config)
         value = int(match.group(1))
         return dict(udp_port=value)
 
     def _parse_vlans(self, config):
-        match = re.findall('vxlan vlan (\d+) vni (\d+)', config)
+        match = re.findall(r'vxlan vlan (\d+) vni (\d+)', config)
         values = dict()
         if match:
             for vid, vni in match:
@@ -654,7 +668,7 @@ class VxlanInterface(BaseInterface):
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
-        match = re.search('vxlan flood vtep ([^\s]+)$', config)
+        match = re.search(r'vxlan flood vtep (.+)$', config, re.M)
         values = list()
         if match:
             values = match.group(1).split(' ')
