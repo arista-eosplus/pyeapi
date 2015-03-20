@@ -1,7 +1,7 @@
 Python Client for eAPI
 ======================
 
-## v0.2.0, IN PROGRESS
+## v0.2.0, 3/19/2015
 
 - adds udp_port, vlans and flood_list attributes to vxlan interfaces
 - renames spanningtree api module to stp for consistency
