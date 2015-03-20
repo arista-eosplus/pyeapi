@@ -129,6 +129,38 @@ class TestClient(unittest.TestCase):
             pyeapi.client.connect(transport)
             connection.assert_called_with(transport, **kwargs)
 
+    def test_make_connection_raises_typeerror(self):
+        with self.assertRaises(TypeError):
+            pyeapi.client.make_connection('invalid')
+
+    def test_node_str_returns(self):
+        node = pyeapi.client.Node(None)
+        self.assertIsNotNone(str(node))
+
+    def test_node_repr_returns(self):
+        node = pyeapi.client.Node(None)
+        self.assertIsNotNone(repr(node))
+
+    def test_node_hasattr_connection(self):
+        node = pyeapi.client.Node(None)
+        self.assertTrue(hasattr(node, 'connection'))
+
+    def test_node_returns_running_config(self):
+        node = pyeapi.client.Node(None)
+        get_config_mock = Mock(name='get_config')
+        config = open(get_fixture('running_config.text')).read()
+        get_config_mock.return_value = config
+        node.get_config = get_config_mock
+        self.assertIsInstance(node.running_config, str)
+
+    def test_node_returns_startup_config(self):
+        node = pyeapi.client.Node(None)
+        get_config_mock = Mock(name='get_config')
+        config = open(get_fixture('running_config.text')).read()
+        get_config_mock.return_value = config
+        node.get_config = get_config_mock
+        self.assertIsInstance(node.startup_config, str)
+
     def test_connect_default_type(self):
         transport = Mock()
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):

@@ -80,14 +80,65 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
         self.assertIsInstance(result, dict)
         self.assertEqual(len(result), 7)
 
+    def test_set_portfast_type_with_value(self):
+        for intf in self.INTERFACES:
+            for value in ['edge', 'network', 'normal']:
+                cmds = ['interface %s' % intf]
+                cmds.append('spanning-tree portfast %s' % value)
+                func = function('set_portfast_type', intf, value)
+                self.eapi_positive_config_test(func, cmds)
+
+    def test_set_portfast_type_with_no_value(self):
+        for intf in self.INTERFACES:
+            cmds = ['interface %s' % intf, 'spanning-tree portfast normal']
+            func = function('set_portfast_type', intf)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_portfast_type_invalid_value_raises_value_error(self):
+        for intf in self.INTERFACES:
+            value = random_string()
+            func = function('set_portfast_type', intf, value)
+            self.eapi_exception_config_test(func, ValueError)
+
+    def test_set_portfast_type_invalid_intf_raises_value_error(self):
+        intf = random_string()
+        func = function('set_portfast_type', intf)
+        self.eapi_exception_config_test(func, ValueError)
+
+    def test_set_bpduguard_with_value(self):
+        for intf in self.INTERFACES:
+            for value in ['enable', 'disable']:
+                cfgvalue = value == 'enable'
+                cmds = ['interface %s' % intf,
+                        'spanning-tree bpduguard %s' % value]
+                func = function('set_bpduguard', intf, cfgvalue)
+                self.eapi_positive_config_test(func, cmds)
+
+    def test_set_bpduguard_with_no_value(self):
+        for intf in self.INTERFACES:
+            cmds = ['interface %s' % intf, 'spanning-tree bpduguard disable']
+            func = function('set_bpduguard', intf)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_bpduguard_with_default(self):
+        for intf in self.INTERFACES:
+            cmds = ['interface %s' % intf, 'default spanning-tree bpduguard']
+            func = function('set_bpduguard', intf, default=True)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_bpduguard_invalid_intf_raises_value_error(self):
+        intf = random_string()
+        func = function('set_bpduguard', intf)
+        self.eapi_exception_config_test(func, ValueError)
+
     def test_set_portfast_with_value(self):
         for intf in self.INTERFACES:
-            for value in ['edge', 'network', 'disable']:
+            for value in [True, False]:
                 cmds = ['interface %s' % intf]
-                if value is 'disable':
-                    cmds.append('no spanning-tree portfast')
+                if value:
+                    cmds.append('spanning-tree portfast')
                 else:
-                    cmds.append('spanning-tree portfast %s' % value)
+                    cmds.append('no spanning-tree portfast')
                 func = function('set_portfast', intf, value)
                 self.eapi_positive_config_test(func, cmds)
 
@@ -103,47 +154,9 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
             func = function('set_portfast', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
-    def test_set_portfast_invalid_value_raises_value_error(self):
-        for intf in self.INTERFACES:
-            value = random_string()
-            func = function('set_portfast', intf, value)
-            self.eapi_exception_config_test(func, ValueError)
-
     def test_set_portfast_invalid_intf_raises_value_error(self):
         intf = random_string()
         func = function('set_portfast', intf)
-        self.eapi_exception_config_test(func, ValueError)
-
-    def test_set_bpduguard_with_value(self):
-        for intf in self.INTERFACES:
-            for value in ['enable', 'disable']:
-                cfgvalue = value == 'enable'
-                cmds = ['interface %s' % intf,
-                        'spanning-tree bpduguard %s' % value]
-                func = function('set_bpduguard', intf, cfgvalue)
-                self.eapi_positive_config_test(func, cmds)
-
-    def test_set_bpduguard_with_no_value(self):
-        for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'no spanning-tree bpduguard']
-            func = function('set_bpduguard', intf)
-            self.eapi_positive_config_test(func, cmds)
-
-    def test_set_bpduguard_with_default(self):
-        for intf in self.INTERFACES:
-            cmds = ['interface %s' % intf, 'default spanning-tree bpduguard']
-            func = function('set_bpduguard', intf, default=True)
-            self.eapi_positive_config_test(func, cmds)
-
-    def test_set_bpduguard_invalid_value_raises_type_error(self):
-        for intf in self.INTERFACES:
-            value = random_string()
-            func = function('set_bpduguard', intf, value)
-            self.eapi_exception_config_test(func, TypeError)
-
-    def test_set_bpduguard_invalid_intf_raises_value_error(self):
-        intf = random_string()
-        func = function('set_bpduguard', intf)
         self.eapi_exception_config_test(func, ValueError)
 
 

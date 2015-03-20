@@ -176,14 +176,15 @@ class StpInterfaces(EntityCollection):
     """
 
     def get(self, name):
-        """Returns a dict object for the specified interface configuration
+        """Returns the specified interfaces STP configuration resource
 
-        Example
-            {
-                "name": <string>,
-                "portfast": [network, edge, disable],
-                "bpduguard": [true, false]
-            }
+        The STP interface resource contains the following
+
+            * name (str): The interface name
+            * portfast (bool): The spanning-tree portfast admin state
+            * bpduguard (bool): The spanning-tree bpduguard admin state
+            * portfast_type (str): The spanning-tree portfast <type> value.
+                Valid values include "edge", "network", "normal"
 
         Args:
             name (string): The interface identifier to retrieve the config
@@ -191,40 +192,43 @@ class StpInterfaces(EntityCollection):
                 Ethernet and Port-Channel interfaces
 
         Returns:
-            A Python dictionary object of key/value pairs that represent
-                the spanning-tree interface configuration
-            If the requested interface is not a valid spanning-tree
-                interface, then None is returned
+            dict: A resource dict object that represents the interface
+                configuration.
+
+            None: If the specified interace is not a STP port
         """
         if not isvalidinterface(name):
             return None
 
         config = self.get_block(r'^interface\s%s$' % name)
-
         resp = dict()
-
-        resp['bpduguard'] = 'spanning-tree bpduguard enable' in config
-
-        if 'spanning-tree portfast network' in config:
-            resp['portfast'] = 'network'
-        elif 'spanning-tree portfast\n' in config:
-            resp['portfast'] = 'edge'
-        else:
-            resp['portfast'] = 'disable'
-
+        resp.update(self._parse_bpduguard(config))
+        resp.update(self._parse_portfast(config))
+        resp.update(self._parse_portfast_type(config))
         return resp
 
+    def _parse_bpduguard(self, config):
+        value = 'spanning-tree bpduguard enable' in config
+        return dict(bpduguard=value)
+
+    def _parse_portfast(self, config):
+        value = not 'no spanning-tree portfast' in config
+        return dict(portfast=value)
+
+    def _parse_portfast_type(self, config):
+        if 'spanning-tree portfast network' in config:
+            value = 'network'
+        elif 'no spanning-tree portfast' in config:
+            value = 'normal'
+        else:
+            value = 'edge'
+        return dict(portfast_type=value)
+
     def getall(self):
-        """Returns a dict object of all spanning-tree interfaces
+        """Returns the collection of STP interfaces
 
         This method will return all of the configured spanning-tree
         interfaces from the current nodes configuration.
-
-        Example:
-            {
-                "Ethernet1": {...},
-                "Ethernet2": {...}
-            }
 
         Returns:
             A Python dictionary object that represents all configured
@@ -240,7 +244,13 @@ class StpInterfaces(EntityCollection):
                     response[name] = interface
         return response
 
-    def set_portfast(self, name, value=None, default=False):
+    def configure_interface(self, name, cmds):
+        if not isvalidinterface(name):
+            raise ValueError('invalid interface value specified')
+        return super(StpInterfaces, self).configure_interface(name, cmds)
+
+
+    def set_portfast_type(self, name, value='normal'):
         """Configures the portfast value for the specified interface
 
         Args:
@@ -248,10 +258,8 @@ class StpInterfaces(EntityCollection):
                 must be the full interface name (eg Ethernet1, not Et1).
 
             value (string): The value to configure the portfast setting to.
-                Valid values include 'edge', 'network', 'none'
-
-            default (bool): Configures the portfast parameter to its default
-                value using the EOS CLI default configuration command
+                Valid values include "edge", "network", "normal".  The
+                default value is "normal"
 
         Returns:
             True if the command succeeds, otherwise False
@@ -261,20 +269,37 @@ class StpInterfaces(EntityCollection):
                 specified
 
         """
-        if value not in ['network', 'edge', 'disable', None]:
-            raise ValueError('invalid portfast value specified')
+        if value not in ['network', 'edge', 'normal', None]:
+            raise ValueError('invalid portfast type value specified')
 
-        if not isvalidinterface(name):
-            raise ValueError('invalid interface value specified')
+        cmd = 'spanning-tree portfast %s' % value
+        return self.configure_interface(name, cmd)
 
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default spanning-tree portfast')
-        elif value in [None, 'disable']:
-            commands.append('no spanning-tree portfast')
-        else:
-            commands.append('spanning-tree portfast %s' % value)
-        return self.configure(commands)
+    def set_portfast(self, name, value=None, default=False):
+        """Configures the portfast value for the specified interface
+
+        Args:
+            name (string): The interface identifier to configure.  The name
+                must be the full interface name (eg Ethernet1, not Et1)
+
+            value (bool): True if portfast is enabled otherwise False
+
+            default (bool): Configures the portfast parameter to its default
+                value using the EOS CLI default config command
+
+        Returns:
+            True if the command succeeds, otherwise False
+
+        Raises:
+            ValueError: Rasied if an invalid interface name is specified
+
+            TypeError: Raised if the value keyword argument does not evaluate
+                to a valid boolean
+
+        """
+        string = 'spanning-tree portfast'
+        cmds = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, cmds)
 
     def set_bpduguard(self, name, value=None, default=False):
         """Configures the bpduguard value for the specified interface
@@ -298,21 +323,10 @@ class StpInterfaces(EntityCollection):
                 to a valid boolean
 
         """
-        if not isvalidinterface(name):
-            raise ValueError('invalid interface name specified')
-
-        if value not in [True, False, None]:
-            raise TypeError('value must be a boolean value')
-
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default spanning-tree bpduguard')
-        elif value is None:
-            commands.append('no spanning-tree bpduguard')
-        else:
-            value = 'enable' if value else 'disable'
-            commands.append('spanning-tree bpduguard %s' % value)
-        return self.configure(commands)
+        value = 'enable' if value else 'disable'
+        string = 'spanning-tree bpduguard'
+        cmds = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, cmds)
 
 
 def isvalidinterface(value):
