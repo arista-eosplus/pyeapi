@@ -1,0 +1,14 @@
+include *.md
+include *.txt
+include .coveragerc
+include LICENSE
+include Makefile
+include VERSION
+recursive-include examples *.conf
+recursive-include examples *.py
+recursive-include test *.conf
+recursive-include test *.json
+recursive-include test *.portchannel
+recursive-include test *.py
+recursive-include test *.text
+recursive-include test *.vxlan
