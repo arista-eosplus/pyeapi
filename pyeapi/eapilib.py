@@ -40,6 +40,7 @@ import json
 import socket
 import base64
 
+# TODO: make it Python 2.7/3.x compatible
 from http.client import HTTPConnection, HTTPSConnection
 
 from pyeapi.utils import debug

@@ -92,6 +92,7 @@ contains the settings for nodes used by the connect_to function.
 """
 import os
 
+# TODO: make it Python 2.7/3.x compatible
 from configparser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
