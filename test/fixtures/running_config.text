@@ -378,6 +378,7 @@ vlan 10
    name VLAN0010
    state active
    no private-vlan
+   trunk group tg1
 !
 vlan 100
    name mytest
