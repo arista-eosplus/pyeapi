@@ -131,7 +131,16 @@ class Config(SafeConfigParser):
         SafeConfigParser.__init__(self)
 
         self.filename = filename
+        self.tags = dict()
+
         self.autoload()
+
+    @property
+    def profiles(self):
+        """ Returns all of the loaded profile names as a list
+        """
+        profile = lambda x: str(x).replace('connection:', '')
+        return [profile(name) for name in self.sections()]
 
     def autoload(self):
         """ Loads the eapi.conf file
@@ -179,6 +188,19 @@ class Config(SafeConfigParser):
                'host' not in dict(self.items(name)):
 
                 self.set(name, 'host', name.split(':')[1])
+        self.generate_tags()
+
+    def generate_tags(self):
+        """ Generates the tags with collection with hosts
+        """
+        self.tags = dict()
+        for section in self.sections():
+            if self.has_option(section, 'tags'):
+                tags = self.get(section, 'tags')
+                for tag in [str(t).strip() for t in tags.split(',')]:
+                    if tag not in self.tags:
+                        self.tags[tag] = list()
+                    self.tags[tag].append(section.split(':')[1])
 
     def load(self, filename):
         """Loads the file specified by filename
@@ -257,6 +279,7 @@ class Config(SafeConfigParser):
         self.add_section(name)
         for key, value in kwargs.iteritems():
             self.set(name, key, value)
+        self.generate_tags()
 
 config = Config()
 
@@ -288,6 +311,22 @@ def config_for(name):
             nodes configuration settings from the config instance
     """
     return config.get_connection(name)
+
+def hosts_for_tag(tag):
+    """ Returns the hosts assocated with the specified tag
+
+    This function will return the hosts assoicated with the tag specified
+    in the argument.  It will return an array of connecition names.
+
+    Args:
+        tag (str): The name of the tag to retrieve the list of hosts for
+
+    Returns:
+        list: A Python list object that includes the list of hosts assoicated
+            with the specified tag.
+        None: If the specified tag does not exist, then None is returned.
+    """
+    return config.tags.get(tag)
 
 def make_connection(transport, **kwargs):
     """ Creates a connection instance based on the transport

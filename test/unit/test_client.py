@@ -119,6 +119,16 @@ class TestClient(unittest.TestCase):
         cfg = pyeapi.config_for('test')
         self.assertEqual(cfg['host'], 'test')
 
+    def test_hosts_for_tag_returns_none(self):
+        result = pyeapi.client.hosts_for_tag(random_string())
+        self.assertIsNone(result)
+
+    def test_hosts_for_tag_returns_names(self):
+        conf = get_fixture('eapi.conf')
+        pyeapi.client.load_config(conf)
+        result = pyeapi.client.hosts_for_tag('tag1')
+        self.assertEqual(sorted(['test1', 'test2']), sorted(result))
+
     @patch('pyeapi.client.make_connection')
     def test_connect_types(self, connection):
         transports = pyeapi.client.TRANSPORTS.keys()
@@ -144,6 +154,10 @@ class TestClient(unittest.TestCase):
     def test_node_hasattr_connection(self):
         node = pyeapi.client.Node(None)
         self.assertTrue(hasattr(node, 'connection'))
+
+    def test_node_profiles(self):
+        profiles = pyeapi.client.config.profiles
+        self.assertIsInstance(profiles, list)
 
     def test_node_returns_running_config(self):
         node = pyeapi.client.Node(None)
