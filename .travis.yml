@@ -2,14 +2,11 @@ language: python
 
 python:
   - '2.7'
-
+  - '3.4'
+  
 install: pip install -r dev-requirements.txt
 
 script: make unittest
-
-notifications:
-  email:
-    - eosplus-dev@arista.com
 
 after_success:
   coveralls
