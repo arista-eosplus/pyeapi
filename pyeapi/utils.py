@@ -144,7 +144,7 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         value = [value]
 
     if not isinstance(value, collections.Iterable):

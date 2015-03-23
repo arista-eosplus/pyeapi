@@ -92,7 +92,7 @@ contains the settings for nodes used by the connect_to function.
 """
 import os
 
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
 
@@ -255,7 +255,7 @@ class Config(SafeConfigParser):
         """
         name = 'connection:{}'.format(name)
         self.add_section(name)
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             self.set(name, key, value)
 
 config = Config()

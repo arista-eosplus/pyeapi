@@ -40,7 +40,7 @@ import json
 import socket
 import base64
 
-from httplib import HTTPConnection, HTTPSConnection
+from http.client import HTTPConnection, HTTPSConnection
 
 from pyeapi.utils import debug
 
