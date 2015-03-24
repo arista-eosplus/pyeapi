@@ -45,7 +45,6 @@ setup(
     url='https://github.com/arista-eosplus/pyeapi',
     download_url='https://github.com/arista-eosplus/pyeapi/tarball/v0.1.0',
     license='BSD-3',
-    packages=['pyeapi', 'pyeapi.api']
+    packages=['pyeapi', 'pyeapi.api'],
+    install_requires=['six'],   # needed for Python2/3 compatibility
 )
-
-
