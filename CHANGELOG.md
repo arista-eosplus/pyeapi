@@ -1,6 +1,10 @@
 Python Client for eAPI
 ======================
 
+## v0.3.0, IN PROGRESS
+
+- added tag feature to eapi.conf 
+
 ## v0.2.0, 3/19/2015
 
 - adds udp_port, vlans and flood_list attributes to vxlan interfaces
