@@ -42,7 +42,7 @@ class TestApiStpInterfaces(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             dut.config(['default interface Ethernet1'])
-            keys = ['name', 'portfast', 'portfast_type', 'bpduguard']
+            keys = ['portfast', 'portfast_type', 'bpduguard']
             result = dut.api('stp').interfaces.get('Ethernet1')
             self.assertEqual(sorted(keys), sorted(result.keys()),
                              'dut=%s' % dut)
