@@ -32,8 +32,15 @@
 import os
 import sys
 import imp
-import syslog
+import logging
+import logging.handlers
 import collections
+
+logger = logging.getLogger(__name__)
+
+_syslog_handler = logging.handlers.SysLogHandler()
+logger.addHandler(_syslog_handler)
+logger.setLevel(logging.INFO)
 
 def import_module(name):
     """ Imports a module into the current runtime environment
@@ -129,8 +136,7 @@ def debug(text):
 
     """
     if islocalconnection():
-        syslog.openlog('pyeapi')
-        syslog.syslog(syslog.LOG_NOTICE, str(text))
+        logger.debug(text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
