@@ -259,7 +259,7 @@ class EapiConnection(object):
         """
 
         reqid = id(self) if reqid is None else reqid
-        params = {"version": 1, "cmds": commands, "format": encoding}
+        params = {"version": 1, "cmds": [commands], "format": encoding}
         return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
                            "params": params, "id": str(reqid)})
 
