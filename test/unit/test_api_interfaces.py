@@ -97,7 +97,7 @@ class TestApiBaseInterface(EapiConfigUnitTest):
     def test_get(self):
         result = self.instance.get('Loopback0')
         values = dict(name='Loopback0', type='generic',
-                      shutdown=False, description='')
+                      shutdown=False, description=None)
         self.assertEqual(result, values)
 
     def test_set_description_with_value(self):
@@ -161,7 +161,7 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
     def test_get(self):
         result = self.instance.get('Ethernet1')
         values = dict(name='Ethernet1', type='ethernet',
-                      description='', shutdown=False,
+                      description=None, shutdown=False,
                       sflow=True, flowcontrol_send='off',
                       flowcontrol_receive='off')
         self.assertEqual(values, result)
@@ -264,7 +264,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
     def test_get(self):
         result = self.instance.get('Port-Channel1')
         values = dict(name='Port-Channel1', type='portchannel',
-                      description='', shutdown=False,
+                      description=None, shutdown=False,
                       lacp_mode='on', minimum_links=0,
                       members=['Ethernet5', 'Ethernet6'])
 

@@ -81,6 +81,34 @@ class TestNode(unittest.TestCase):
         for index, response in enumerate(responses):
             self.assertEqual(commands[index], response['result'])
 
+    def test_config_with_single_command(self):
+        command = random_string()
+        self.node.run_commands = Mock(return_value=[{}, {}])
+        result = self.node.config(command)
+        self.assertEqual(result, [{}])
+
+    def test_config_with_multiple_commands(self):
+        commands = [random_string(), random_string()]
+        self.node.run_commands = Mock(return_value=[{}, {}, {}])
+        result = self.node.config(commands)
+        self.assertEqual(result, [{}, {}])
+
+    def test_get_config(self):
+        config = [dict(output='test\nconfig')]
+        self.node.run_commands = Mock(return_value=config)
+        result = self.node.get_config()
+        self.assertIsInstance(result, list)
+
+    def test_get_config_as_string(self):
+        config = [dict(output='test\nconfig')]
+        self.node.run_commands = Mock(return_value=config)
+        result = self.node.get_config(as_string=True)
+        self.assertIsInstance(result, basestring)
+
+    def test_get_config_raises_type_error(self):
+        with self.assertRaises(TypeError):
+            self.node.get_config('invalid-config')
+
 
 class TestClient(unittest.TestCase):
 

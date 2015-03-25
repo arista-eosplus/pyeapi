@@ -62,12 +62,6 @@ import re
 from pyeapi.api import EntityCollection
 from pyeapi.utils import ProxyCall
 
-DESCRIPTION_RE = re.compile(r'(?<=\s{3}description\s)(?P<value>.+)$', re.M)
-SHUTDOWN_RE = re.compile(r'\s{3}(no\sshutdown)$', re.M)
-SFLOW_RE = re.compile(r'(\s{3}no sflow)', re.M)
-FLOWC_TX_RE = re.compile(r'(?<=\s{3}flowcontrol\ssend\s)(?P<value>.+)$', re.M)
-FLOWC_RX_RE = re.compile(r'(?<=\s{3}flowcontrol\sreceive\s)(?P<value>.+)$',
-                         re.M)
 MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
 DEFAULT_LACP_MODE = 'on'
@@ -147,18 +141,69 @@ class BaseInterface(EntityCollection):
         return 'Interface'
 
     def get(self, name):
-        config = self.get_block('^interface %s' % name)
+        """Returns a generic interface as a set of key/value pairs
 
+        This class is should normally serve as a  base class for building more
+        specific interface resources.  The attributes of this resource are
+        common to all interfaces regardless of type in EOS.
+
+        The generic interface resource returns the following:
+
+            * name (str): The name of the interface
+            * type (str): Always returns 'generic'
+            * shutdown (bool): True if the interface is shutdown
+            * description (str): The interface description value
+
+        Args:
+            name (str): The interface identifier to retrieve from the
+                running-configuration
+
+        Returns:
+            A Python dictionary object of key/value pairs that represents
+                the interface configuration.  If the specified interface
+                does not exist, then None is returned
+        """
+        config = self.get_block('^interface %s' % name)
         if not config:
             return None
 
-        response = dict(name=name, type='generic')
-        response['shutdown'] = SHUTDOWN_RE.search(config) is None
-        response['description'] = self.value(DESCRIPTION_RE.search(config), '')
-        return response
+        resource = dict(name=name, type='generic')
+        resource.update(self._parse_shutdown(config))
+        resource.update(self._parse_description(config))
+        return resource
 
-    def value(self, match, default=None):
-        return match.group('value') if match else default
+
+    def _parse_shutdown(self, config):
+        """Scans the specified config block and returns the shutdown value
+
+        Args:
+            config (str): The interface config block to scan
+
+        Returns:
+            dict: Returns a dict object with the shutdown value retrieved
+                from the config block.  The returned dict object is intended
+                to be merged into the interface resource dict
+        """
+        value = not 'no shutdown' in config
+        return dict(shutdown=value)
+
+    def _parse_description(self, config):
+        """Scans the specified config block and returns the description value
+
+        Args:
+            config (str): The interface config block to scan
+
+        Returns:
+            dict: Returns a dict object with the description value retrieved
+                from the config block.  If the description value is not
+                configured, None is returned as the value.  The returned dict
+                is intended to be merged into the interface resource dict.
+        """
+        value = None
+        match = re.search(r'description (.+)$', config, re.M)
+        if match:
+            value = match.group(1)
+        return dict(description=value)
 
     def create(self, name):
         """Creates a new interface on the node
@@ -208,25 +253,21 @@ class BaseInterface(EntityCollection):
     def set_description(self, name, value=None, default=False):
         """Configures the interface description
 
+        EosVersion:
+            4.13.7M
+
         Args:
             name (string): The interface identifier.  It must be a full
                 interface name (ie Ethernet, not Et)
-
             value (string): The value to set the description to.
-
             default (boolean): Specifies to default the interface description
 
         Returns:
-            True if the operation succeeds otherwise False is returned
+            True if the operation succeeds otherwise False
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default description')
-        elif value is not None:
-            commands.append('description %s' % value)
-        else:
-            commands.append('no description')
-        return self.configure(commands)
+        string = 'description'
+        commands = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, commands)
 
     def set_shutdown(self, name, value=None, default=False):
         """Configures the interface shutdown state
@@ -286,18 +327,62 @@ class EthernetInterface(BaseInterface):
         if not config:
             return None
 
-        response = super(EthernetInterface, self).get(name)
-        response.update(dict(name=name, type='ethernet'))
+        resource = super(EthernetInterface, self).get(name)
+        resource.update(dict(name=name, type='ethernet'))
+        resource.update(self._parse_sflow(config))
+        resource.update(self._parse_flowcontrol_send(config))
+        resource.update(self._parse_flowcontrol_receive(config))
+        return resource
 
-        response['sflow'] = SFLOW_RE.search(config) is None
 
-        flowc_tx = FLOWC_TX_RE.search(config)
-        response['flowcontrol_send'] = self.value(flowc_tx, 'off')
+    def _parse_sflow(self, config):
+        """Scans the specified config block and returns the sflow value
 
-        flowc_rx = FLOWC_RX_RE.search(config)
-        response['flowcontrol_receive'] = self.value(flowc_rx, 'off')
+        Args:
+            config (str): The interface config block to scan
 
-        return response
+        Returns:
+            dict: Returns a dict object with the sflow value retrieved
+                from the config block.  The returned dict object is intended
+                to be merged into the interface resource dict
+        """
+        value = not 'no sflow' in config
+        return dict(sflow=value)
+
+    def _parse_flowcontrol_send(self, config):
+        """Scans the config block and returns the flowcontrol send value
+
+        Args:
+            config (str): The interface config block to scan
+
+        Returns:
+            dict: Returns a dict object with the flowcontrol send value
+                retrieved from the config block.  The returned dict object
+                is intended to be merged into the interface resource dict
+        """
+        value = 'off'
+        match = re.search(r'flowcontrol send (\w+)$', config, re.M)
+        if match:
+            value = match.group(1)
+        return dict(flowcontrol_send=value)
+
+    def _parse_flowcontrol_receive(self, config):
+        """Scans the config block and returns the flowcontrol receive value
+
+        Args:
+            config (str): The interface config block to scan
+
+        Returns:
+            dict: Returns a dict object with the flowcontrol receive value
+                retrieved from the config block.  The returned dict object
+                is intended to be merged into the interface resource dict
+        """
+        value = 'off'
+        match = re.search(r'flowcontrol receive (\w+)$', config, re.M)
+        if match:
+            value = match.group(1)
+        return dict(flowcontrol_receive=value)
+
 
     def create(self, name):
         """Creating Ethernet interfaces is currently not supported

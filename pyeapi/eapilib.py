@@ -84,13 +84,13 @@ class CommandError(EapiError):
             of the error_code and error_text
     """
     def __init__(self, code, message, **kwargs):
+        super(CommandError, self).__init__(message)
         self.error_code = code
         self.error_text = message
         self.command_error = kwargs.get('command_error')
         self.commands = kwargs.get('commands')
         self.output = kwargs.get('output')
         self.message = 'Error [{}]: {}'.format(code, message)
-        super(CommandError, self).__init__(message)
 
     @property
     def trace(self):

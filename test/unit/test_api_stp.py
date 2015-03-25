@@ -50,6 +50,14 @@ class TestApiStp(EapiConfigUnitTest):
         self.instance = pyeapi.api.stp.Stp(None)
         self.config = open(get_running_config()).read()
 
+    def test_interfaces(self):
+        result = self.instance.interfaces
+        self.assertIsInstance(result, pyeapi.api.stp.StpInterfaces)
+
+    def test_instances(self):
+        result = self.instance.instances
+        self.assertIsInstance(result, pyeapi.api.stp.StpInstances)
+
     def test_set_mode_with_value(self):
         for value in ['mstp', 'none']:
             cmds = 'spanning-tree mode %s' % value
