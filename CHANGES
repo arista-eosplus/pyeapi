@@ -1,0 +1,4 @@
+Version 0.2.1:
+ - fixes https_connection_factory function to make context a keyword argument
+ - adds support for py2.7.9 default certification verification
+
