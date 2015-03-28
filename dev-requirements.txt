@@ -1,3 +1,10 @@
 mock
 coveralls
+twine
+check-manifest
+pep8
+pyflakes
+coverage
+sphinx
+sphinxcontrib-napoleon
 
