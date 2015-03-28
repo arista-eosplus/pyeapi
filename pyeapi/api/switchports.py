@@ -35,35 +35,11 @@ This module provides an API for working with logical layer 2 interfaces
 (switchports) in EOS.  Switchports are interfaces built on top of
 physical Ethernet and bundled Port-Channel interfaces.
 
-Parameters:
-    name (string): The name of interface the configuration is in reference
-        to.  The interface name is the full interface identifier
-
-    mode (string): The operating mode of the switchport.  Supported values
-        are access or trunk.
-
-    access_vlan (string): The VLAN identifier for untagged VLAN traffic when
-        the interface is operating in 'access' mode
-
-    trunk_native_vlan (string): The VLAN identifier for untagged VLAN traffic
-        when the interface is operating in 'trunk' mode
-
-    trunk_allowed_vlans (array): The list of VLAN identifiers that are allowed
-        on the interface when the interface is in 'trunk' mode
 """
 
 import re
 
 from pyeapi.api import EntityCollection
-
-MODE_RE = re.compile(r'(?<=\s{3}switchport\smode\s)(?P<value>.+)$', re.M)
-ACCESS_VLAN_RE = re.compile(r'(?<=\s{3}switchport\saccess\svlan\s)'
-                            r'(?P<value>\d+)$', re.M)
-TRUNK_VLAN_RE = re.compile(r'(?<=\s{3}switchport\strunk\snative\svlan\s)'
-                           r'(?P<value>\d+)$', re.M)
-TRUNKING_VLANS_RE = re.compile(r'(?<=\s{3}switchport\strunk\sallowed\svlan\s)'
-                               r'(?P<value>.*)$', re.M)
-
 
 class Switchports(EntityCollection):
     """The Switchports class provides a configuration resource for swichports
@@ -79,37 +55,90 @@ class Switchports(EntityCollection):
     def get(self, name):
         """Returns a dictionary object that represents a switchport
 
-        Example
-            {
-                "name": <string>,
-                "mode": [access, trunk],
-                "access_vlan": <string>
-                "trunk_native_vlan": <string>,
-                "trunk_allowed_vlans": <string>
-            }
+        The Switchport resource returns the following:
+
+            * name (str): The name of the interface
+            * mode (str): The switchport mode value
+            * access_vlan (str): The switchport access vlan value
+            * trunk_native_vlan (str): The switchport trunk native vlan vlaue
+            * trunk_allowed_vlans (str): The trunk allowed vlans value
 
         Args:
             name (string): The interface identifier to get.  Note: Switchports
                 are only supported on Ethernet and Port-Channel interfaces
 
         Returns:
-            A Python dictionary object of key/value pairs that represent
-                the switchport configuration for the interface specified
-            If the specified argument is not a switchport then None is
-                returned
+            dict: A Python dictionary object of key/value pairs that represent
+                the switchport configuration for the interface specified  If
+                the specified argument is not a switchport then None
+                is returned
         """
         config = self.get_block('interface %s' % name)
+        if 'no switchport\n' in config:
+            return
 
-        if not re.search(r'\s{3}no\sswitchport$', config, re.M):
-            resp = dict(name=name)
-            resp['mode'] = MODE_RE.search(config, re.M).group('value')
-            resp['access_vlan'] = \
-                ACCESS_VLAN_RE.search(config, re.M).group('value')
-            resp['trunk_native_vlan'] = \
-                TRUNK_VLAN_RE.search(config, re.M).group('value')
-            resp['trunk_allowed_vlans'] = \
-                TRUNKING_VLANS_RE.search(config, re.M).group('value')
-            return resp
+        resource = dict(name=name)
+        resource.update(self._parse_mode(config))
+        resource.update(self._parse_access_vlan(config))
+        resource.update(self._parse_trunk_native_vlan(config))
+        resource.update(self._parse_trunk_allowed_vlans(config))
+        return resource
+
+
+    def _parse_mode(self, config):
+        """Scans the specified config and parses the switchport mode value
+
+        Args:
+            config (str): The interface configuration block to scan
+
+        Returns:
+            dict: A Python dict object with the value of switchport mode.
+                The dict returned is intended to be merged into the resource
+                dict
+        """
+        value = re.search(r'switchport mode (\w+)', config, re.M)
+        return dict(mode=value.group(1))
+
+    def _parse_access_vlan(self, config):
+        """Scans the specified config and parse the access-vlan value
+        Args:
+            config (str): The interface configuration block to scan
+
+        Returns:
+            dict: A Python dict object with the value of switchport access
+                value.  The dict returned is intended to be merged into the
+                resource dict
+        """
+        value = re.search(r'switchport access vlan (\d+)', config)
+        return dict(access_vlan=value.group(1))
+
+    def _parse_trunk_native_vlan(self, config):
+        """Scans the specified config and parse the trunk native vlan value
+
+        Args:
+            config (str): The interface configuration block to scan
+
+        Returns:
+            dict: A Python dict object with the value of switchport trunk
+                native vlan value.  The dict returned is intended to be
+                merged into the resource dict
+        """
+        match = re.search(r'switchport trunk native vlan (\d+)', config)
+        return dict(trunk_native_vlan=match.group(1))
+
+    def _parse_trunk_allowed_vlans(self, config):
+        """Scans the specified config and parse the trunk allowed vlans value
+
+        Args:
+            config (str): The interface configuration block to scan
+
+        Returns:
+            dict: A Python dict object with the value of switchport trunk
+                allowed vlans value.  The dict returned is intended to be
+                merged into the resource dict
+        """
+        match = re.search(r'switchport trunk allowed vlan (.+)$', config, re.M)
+        return dict(trunk_allowed_vlans=match.group(1))
 
     def getall(self):
         """Returns a dict object to all Switchports
@@ -212,14 +241,9 @@ class Switchports(EntityCollection):
         Returns:
             True if the create operation succeeds otherwise False.
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default switchport mode')
-        elif value is None:
-            commands.append('no switchport mode')
-        else:
-            commands.append('switchport mode %s' % value)
-        return self.configure(commands)
+        string = 'switchport mode'
+        command = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, command)
 
     def set_access_vlan(self, name, value=None, default=False):
         """Configures the switchport access vlan
@@ -239,14 +263,9 @@ class Switchports(EntityCollection):
         Returns:
             True if the create operation succeeds otherwise False.
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default switchport access vlan')
-        elif value is None:
-            commands.append('no switchport access vlan')
-        else:
-            commands.append('switchport access vlan %s' % value)
-        return self.configure(commands)
+        string = 'switchport access vlan'
+        command = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, command)
 
     def set_trunk_native_vlan(self, name, value=None, default=False):
         """Configures the switchport trunk native vlan value
@@ -266,14 +285,9 @@ class Switchports(EntityCollection):
         Returns:
             True if the create operation succeeds otherwise False.
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default switchport trunk native vlan')
-        elif value is None:
-            commands.append('no switchport trunk native vlan')
-        else:
-            commands.append('switchport trunk native vlan %s' % value)
-        return self.configure(commands)
+        string = 'switchport trunk native vlan'
+        command = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, command)
 
     def set_trunk_allowed_vlans(self, name, value=None, default=False):
         """Configures the switchport trunk allowed vlans value
@@ -293,15 +307,9 @@ class Switchports(EntityCollection):
         Returns:
             True if the create operation succeeds otherwise False.
         """
-        commands = ['interface %s' % name]
-        if default:
-            commands.append('default switchport trunk allowed vlan')
-        elif value is None:
-            commands.append('no switchport trunk allowed vlan')
-        else:
-            commands.append('switchport trunk allowed vlan %s' % value)
-        return self.configure(commands)
-
+        string = 'switchport trunk allowed vlan'
+        command = self.command_builder(string, value=value, default=default)
+        return self.configure_interface(name, command)
 
 def instance(node):
     """Returns an instance of Switchports
