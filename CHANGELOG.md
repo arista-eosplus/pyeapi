@@ -1,6 +1,10 @@
 Python Client for eAPI
 ======================
 
+## v0.2.1, 03/28/2015
+
+- restores default certificate validation behavior for py2.7.9
+
 ## v0.2.0, 3/19/2015
 
 - adds udp_port, vlans and flood_list attributes to vxlan interfaces
