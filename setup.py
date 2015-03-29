@@ -5,7 +5,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the relevant file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'docs/description.rst'), encoding='utf-8') as f:
         long_description = f.read()
 
 with open(path.join(here, 'VERSION')) as version_file:
@@ -59,7 +59,7 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['paramiko', 'pyeapi'],
+    # install_requires=[],
 
     # List additional dependencies here (e.g. development dependencies).
     # You can install these using the following syntax, for example:
