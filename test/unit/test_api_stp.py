@@ -93,6 +93,8 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
             for value in ['edge', 'network', 'normal']:
                 cmds = ['interface %s' % intf]
                 cmds.append('spanning-tree portfast %s' % value)
+                if value == 'edge':
+                    cmds.append('spanning-tree portfast auto')
                 func = function('set_portfast_type', intf, value)
                 self.eapi_positive_config_test(func, cmds)
 

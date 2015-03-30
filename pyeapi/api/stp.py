@@ -272,8 +272,10 @@ class StpInterfaces(EntityCollection):
         if value not in ['network', 'edge', 'normal', None]:
             raise ValueError('invalid portfast type value specified')
 
-        cmd = 'spanning-tree portfast %s' % value
-        return self.configure_interface(name, cmd)
+        cmds = ['spanning-tree portfast %s' % value]
+        if value == 'edge':
+            cmds.append('spanning-tree portfast auto')
+        return self.configure_interface(name, cmds)
 
     def set_portfast(self, name, value=None, default=False):
         """Configures the portfast value for the specified interface
