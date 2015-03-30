@@ -74,8 +74,11 @@ class System(Entity):
             dict: The configured value for hostname.  The returned dict
                 object is intended to be merged into the resource dict
         """
-        value = re.search(r'hostname (\w+)$', self.config, re.M)
-        return dict(hostname=value.group(1))
+        value = 'localhost'
+        match = re.search(r'^hostname (\w+)$', self.config, re.M)
+        if match:
+            value = match.group(1)
+        return dict(hostname=value)
 
     def set_hostname(self, value=None, default=False):
         """Configures the global system hostname setting
