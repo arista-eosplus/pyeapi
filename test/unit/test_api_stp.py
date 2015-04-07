@@ -86,7 +86,6 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
     def test_getall(self):
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 7)
 
     def test_set_portfast_type_with_value(self):
         for intf in self.INTERFACES:
