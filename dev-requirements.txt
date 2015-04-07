@@ -1,3 +1,4 @@
+netaddr
 mock
 coveralls
 twine
