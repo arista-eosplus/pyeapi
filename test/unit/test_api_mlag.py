@@ -49,11 +49,18 @@ class TestApiMlag(EapiConfigUnitTest):
 
     def test_get(self):
         result = self.instance.get()
+
         keys = ['config', 'interfaces']
+
+        intfkeys = ['mlag_id']
+        interfaces = result['interfaces']['Port-Channel10']
+
         cfgkeys = ['domain_id', 'local_interface', 'peer_address',
                    'peer_link', 'shutdown']
+
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(sorted(cfgkeys), sorted(result['config'].keys()))
+        self.assertEqual(sorted(intfkeys), sorted(interfaces.keys()))
 
     def test_set_domain_id(self):
         for state in ['config', 'negate', 'default']:

@@ -190,7 +190,7 @@ class Mlag(Entity):
             config = self.get_block('interface %s' % name)
             match = re.search(r'mlag (\d+)', config)
             if match:
-                interfaces[name] = match.group(1)
+                interfaces[name] = dict(mlag_id=match.group(1))
         return dict(interfaces=interfaces)
 
 
