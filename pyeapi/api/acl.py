@@ -110,7 +110,7 @@ class StandardAcls(EntityCollection):
                 entry['action'] = act
                 entry['srcaddr'] = ip or '0.0.0.0'
                 entry['srclen'] = masklen or mask_to_prefixlen(mask)
-                entry['log'] = log != None
+                entry['log'] = log is not None
                 entries[seq] = entry
         return dict(entries=entries)
 
@@ -147,5 +147,5 @@ class StandardAcls(EntityCollection):
         return self.configure(cmds)
 
 def instance(node):
-   return StandardAcls(node)
+    return StandardAcls(node)
 

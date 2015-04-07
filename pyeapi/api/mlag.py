@@ -69,7 +69,6 @@ Interface Parameters:
 import re
 
 from pyeapi.api import Entity
-from pyeapi.utils import make_iterable
 
 
 class Mlag(Entity):

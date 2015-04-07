@@ -130,7 +130,7 @@ class Interfaces(EntityCollection):
 
         instance = self.get_instance(interface)
         if not hasattr(instance, name):
-            raise AttributeError("'%s' object has no attribute '%s'" % \
+            raise AttributeError("'%s' object has no attribute '%s'" %
                                  (instance, name))
         method = getattr(instance, name)
         return method(*args, **kwargs)
@@ -184,7 +184,7 @@ class BaseInterface(EntityCollection):
                 from the config block.  The returned dict object is intended
                 to be merged into the interface resource dict
         """
-        value = not 'no shutdown' in config
+        value = 'no shutdown' not in config
         return dict(shutdown=value)
 
     def _parse_description(self, config):
@@ -346,7 +346,7 @@ class EthernetInterface(BaseInterface):
                 from the config block.  The returned dict object is intended
                 to be merged into the interface resource dict
         """
-        value = not 'no sflow' in config
+        value = 'no sflow' not in config
         return dict(sflow=value)
 
     def _parse_flowcontrol_send(self, config):

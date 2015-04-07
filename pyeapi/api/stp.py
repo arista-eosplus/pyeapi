@@ -212,7 +212,7 @@ class StpInterfaces(EntityCollection):
         return dict(bpduguard=value)
 
     def _parse_portfast(self, config):
-        value = not 'no spanning-tree portfast' in config
+        value = 'no spanning-tree portfast' not in config
         return dict(portfast=value)
 
     def _parse_portfast_type(self, config):
