@@ -32,7 +32,7 @@ class TestEapiConnection(unittest.TestCase):
         instance.send = mock_send
 
         with self.assertRaises(pyeapi.eapilib.ConnectionError):
-            instance.execute(None)
+            instance.execute('test')
 
     def test_execute_raises_comand_error(self):
         mock_send = Mock(name='send')
@@ -42,7 +42,7 @@ class TestEapiConnection(unittest.TestCase):
         instance.send = mock_send
 
         with self.assertRaises(pyeapi.eapilib.CommandError):
-            instance.execute(None)
+            instance.execute('test')
 
     def test_create_socket_connection(self):
         instance = pyeapi.eapilib.SocketEapiConnection()

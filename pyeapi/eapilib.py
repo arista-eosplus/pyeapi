@@ -44,7 +44,7 @@ import ssl
 
 from httplib import HTTPConnection, HTTPSConnection
 
-from pyeapi.utils import debug
+from pyeapi.utils import debug, make_iterable
 
 DEFAULT_HTTP_PORT = 80
 DEFAULT_HTTPS_PORT = 443
@@ -257,7 +257,7 @@ class EapiConnection(object):
             A JSON encoding request structure that can be send over eAPI
 
         """
-
+        commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         params = {"version": 1, "cmds": commands, "format": encoding}
         return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
@@ -397,7 +397,7 @@ class EapiConnection(object):
             response = self.send(request)
             return response
 
-        except(ConnectionError, CommandError) as exc:
+        except(ConnectionError, CommandError, TypeError) as exc:
             exc.commands = commands
             self.error = exc
             raise
