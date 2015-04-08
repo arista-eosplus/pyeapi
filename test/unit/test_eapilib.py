@@ -80,8 +80,7 @@ class TestEapiConnection(unittest.TestCase):
 
         instance = pyeapi.eapilib.EapiConnection()
         instance.transport = mock_transport
-
-        result = instance.send('test')
+        instance.send('test')
 
         self.assertTrue(mock_transport.close.called)
 
@@ -96,8 +95,7 @@ class TestEapiConnection(unittest.TestCase):
         instance = pyeapi.eapilib.EapiConnection()
         instance.authentication('username', 'password')
         instance.transport = mock_transport
-
-        result = instance.send('test')
+        instance.send('test')
 
         self.assertTrue(mock_transport.close.called)
 
@@ -126,7 +124,7 @@ class TestEapiConnection(unittest.TestCase):
         instance.transport = mock_transport
 
         with self.assertRaises(pyeapi.eapilib.CommandError):
-            result = instance.send('test')
+            instance.send('test')
 
 class TestCommandError(unittest.TestCase):
 

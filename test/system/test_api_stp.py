@@ -78,7 +78,7 @@ class TestApiStpInterfaces(DutSystemTest):
             result = resource.set_portfast(intf, True)
             self.assertTrue(result, 'dut=%s' % dut)
 
-    def test_set_bpdugard_to_false(self):
+    def test_set_portfast_to_false(self):
         for dut in self.duts:
             intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,

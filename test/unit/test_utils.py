@@ -18,7 +18,7 @@ class TestUtils(unittest.TestCase):
     def test_load_module_raises_import_error(self, mock_import_module):
         mock_import_module.return_value = None
         with self.assertRaises(ImportError):
-            result = pyeapi.utils.load_module('test')
+            pyeapi.utils.load_module('test')
 
     def test_make_iterable_from_string(self):
         result = pyeapi.utils.make_iterable('test')
