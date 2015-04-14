@@ -349,7 +349,10 @@ no aaa authorization policy local default-role
 !
 username admin privilege 1 role network-admin nopassword
 username eapi privilege 1 secret 5 $1$eCurfHLe$JCbuUNM7Xwy6i6/zknYha.
-username sprygada privilege 1 nopassword
+username test privilege 10 nopassword
+username test1 privilege 1 secret 5 $1$o/po05ru$92uegC/GGu3i4MS7MH9AE0
+username test2 privilege 9 role ops secret 5 $1$Kraw0Knu$dfIURYuRCxzDDcyyKnAD1/
+username test3 privilege 9 role ops nopassword
 !
 role network-admin
    10 permit command .*
