@@ -1,6 +1,10 @@
 Python Client for eAPI
 ======================
 
+## v0.2.2, IN PROGRESS
+
+- fixes an issue with eAPI error messages that do not return a data key
+
 ## v0.2.1, 03/28/2015
 
 - restores default certificate validation behavior for py2.7.9
