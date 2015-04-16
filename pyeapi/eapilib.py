@@ -344,12 +344,8 @@ class EapiConnection(object):
             debug('eapi_response: %s' % decoded)
 
             if 'error' in decoded:
-                _message = decoded['error']['message']
-                _code = decoded['error']['code']
-                _error = ' '.join(decoded['error']['data'][-1]['errors'])
-                _output = decoded['error']['data']
-                raise CommandError(_code, _message, command_error=_error,
-                                   output=_output)
+                (code, msg, err, out) = self._parse_error_message(decoded)
+                raise CommandError(code, msg, command_error=err, output=out)
 
             return decoded
 
@@ -359,6 +355,37 @@ class EapiConnection(object):
 
         finally:
             self.transport.close()
+
+    def _parse_error_message(self, message):
+        """Parses the eAPI failure response message
+
+        This method accepts an eAPI failure message and parses the necesary
+        parts in order to generate a CommandError.
+
+        Args:
+            message (str): The error message to parse
+
+        Returns:
+            tuple: A tuple that consists of the following:
+                * code: The error code specified in the failure message
+                * message: The error text specified in the failure message
+                * error: The error text from the command that generated the
+                    error (the last command that ran)
+                * output: A list of all output from all commands
+        """
+        msg = message['error']['message']
+        code = message['error']['code']
+
+        err = None
+        out = None
+
+        if 'data' in message['error']:
+            err = ' '.join(message['error']['data'][-1]['errors'])
+            out = message['error']['data']
+
+        return (code, msg, err, out)
+
+
 
 
     def execute(self, commands, encoding='json', **kwargs):

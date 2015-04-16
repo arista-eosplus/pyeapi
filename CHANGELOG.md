@@ -9,6 +9,10 @@ Python Client for eAPI
 - added initial api support for mlag configuration
 - added tag feature to eapi.conf 
 
+## v0.2.2, 04/15/2015
+
+- fixes an issue with eAPI error messages that do not return a data key
+
 ## v0.2.1, 03/28/2015
 
 - restores default certificate validation behavior for py2.7.9
