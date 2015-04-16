@@ -1,7 +1,7 @@
 Python Client for eAPI
 ======================
 
-## v0.2.2, IN PROGRESS
+## v0.2.2, 04/15/2015
 
 - fixes an issue with eAPI error messages that do not return a data key
 
