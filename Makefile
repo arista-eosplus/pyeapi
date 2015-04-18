@@ -36,7 +36,8 @@ pyflakes:
 	pyflakes pyeapi/ test/
 
 flake8:
-	flake8 --ignore=E302,E303,W391 pyeapi/ test/
+	flake8 --ignore=E302,E303,W391 --exit-zero pyeapi/
+	flake8 --ignore=E302,E303,W391,N802 --max-line-length=100 test/
 
 check:
 	check-manifest

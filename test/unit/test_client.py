@@ -109,6 +109,20 @@ class TestNode(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.node.get_config('invalid-config')
 
+    def test_api_autoloader(self):
+        result = self.node.api('system')
+        self.assertIsNotNone(result)
+
+    def test_enable_authentication(self):
+        self.assertIsNone(self.node._enablepwd)
+        self.node.enable_authentication('test')
+        self.assertEqual(self.node._enablepwd, 'test')
+
+    def test_enable_with_config_statement(self):
+        cmds = ['show version', 'configure', 'hostname foo']
+        with self.assertRaises(TypeError):
+            self.node.enable(cmds)
+
 
 class TestClient(unittest.TestCase):
 
@@ -140,6 +154,17 @@ class TestClient(unittest.TestCase):
         for name in ['localhost', 'test1', 'test2']:
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config.sections())
+
+    def test_connections_property(self):
+        conf = get_fixture('eapi.conf')
+        pyeapi.client.load_config(conf)
+        connections = ['test1', 'test2', 'localhost']
+        result = pyeapi.client.config.connections
+        self.assertEqual(sorted(connections), sorted(result))
+
+    def test_missing_connection_raises_attribute_error(self):
+        with self.assertRaises(AttributeError):
+            pyeapi.client.connect_to('invalid')
 
     def test_config_for_replaces_host_w_name(self):
         conf = get_fixture('nohost.conf')
@@ -183,10 +208,6 @@ class TestClient(unittest.TestCase):
         node = pyeapi.client.Node(None)
         self.assertTrue(hasattr(node, 'connection'))
 
-    def test_node_profiles(self):
-        profiles = pyeapi.client.config.profiles
-        self.assertIsInstance(profiles, list)
-
     def test_node_returns_running_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')
@@ -202,6 +223,13 @@ class TestClient(unittest.TestCase):
         get_config_mock.return_value = config
         node.get_config = get_config_mock
         self.assertIsInstance(node.startup_config, str)
+
+    def test_node_returns_cached_startup_confgi(self):
+        node = pyeapi.client.Node(None)
+        config = open(get_fixture('running_config.text')).read()
+        node._startup_config = config
+        self.assertEqual(node.startup_config, config)
+
 
     def test_connect_default_type(self):
         transport = Mock()

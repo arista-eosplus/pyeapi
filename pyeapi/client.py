@@ -137,11 +137,11 @@ class Config(SafeConfigParser):
         self.autoload()
 
     @property
-    def profiles(self):
-        """ Returns all of the loaded profile names as a list
+    def connections(self):
+        """ Returns all of the loaded connections names as a list
         """
-        profile = lambda x: str(x).replace('connection:', '')
-        return [profile(name) for name in self.sections()]
+        conn = lambda x: str(x).replace('connection:', '')
+        return [conn(name) for name in self.sections()]
 
     def autoload(self):
         """ Loads the eapi.conf file

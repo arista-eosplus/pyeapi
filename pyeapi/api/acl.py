@@ -105,11 +105,11 @@ class StandardAcls(EntityCollection):
         for item in re.finditer(r'\d+ [p|d].*$', config, re.M):
             match = self.entry_re.match(item.group(0))
             if match:
-                (seq, act, anyip, host, ip, masklen, mask, log) = match.groups()
+                (seq, act, anyip, host, ip, mlen, mask, log) = match.groups()
                 entry = dict()
                 entry['action'] = act
                 entry['srcaddr'] = ip or '0.0.0.0'
-                entry['srclen'] = masklen or mask_to_prefixlen(mask)
+                entry['srclen'] = mlen or mask_to_prefixlen(mask)
                 entry['log'] = log is not None
                 entries[seq] = entry
         return dict(entries=entries)

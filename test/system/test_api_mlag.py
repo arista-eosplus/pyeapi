@@ -115,7 +115,8 @@ class TestApiMlag(DutSystemTest):
 
     def test_set_peer_address_with_no_value(self):
         for dut in self.duts:
-            dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24', 'mlag configuration', 'peer-address 1.2.3.4'])
+            dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24',
+                        'mlag configuration', 'peer-address 1.2.3.4'])
             api = dut.api('mlag')
             self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
             result = api.set_peer_address()
@@ -124,7 +125,8 @@ class TestApiMlag(DutSystemTest):
 
     def test_set_peer_address_with_default(self):
         for dut in self.duts:
-            dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24', 'mlag configuration', 'peer-address 1.2.3.4'])
+            dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24',
+                        'mlag configuration', 'peer-address 1.2.3.4'])
             api = dut.api('mlag')
             self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
             result = api.set_peer_address(default=True)
@@ -211,7 +213,7 @@ class TestApiMlag(DutSystemTest):
             self.assertIn('mlag 100', api.get_block('interface Port-Channel10'))
             result = api.set_mlag_id('Port-Channel10')
             self.assertTrue(result)
-            self.assertIn('no mlag',api.get_block('interface Port-Channel10'))
+            self.assertIn('no mlag', api.get_block('interface Port-Channel10'))
 
     def test_set_mlag_id_with_default(self):
         for dut in self.duts:
@@ -221,7 +223,7 @@ class TestApiMlag(DutSystemTest):
             self.assertIn('mlag 100', api.get_block('interface Port-Channel10'))
             result = api.set_mlag_id('Port-Channel10', default=True)
             self.assertTrue(result)
-            self.assertIn('no mlag',api.get_block('interface Port-Channel10'))
+            self.assertIn('no mlag', api.get_block('interface Port-Channel10'))
 
 
 if __name__ == '__main__':

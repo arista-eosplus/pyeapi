@@ -35,7 +35,6 @@ import unittest
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import random_int, random_string
 from systestlib import DutSystemTest
 
 
@@ -92,7 +91,7 @@ class TestApiUsers(DutSystemTest):
             api = dut.api('users')
             self.assertIn('username test nopassword', api.config)
             result = api.set_privilege('test', 8)
-            self.assertTrue(response)
+            self.assertTrue(result)
             self.assertNotIn('username test privilege 8', api.config)
 
     def set_privilege_with_no_value(self):
@@ -102,7 +101,7 @@ class TestApiUsers(DutSystemTest):
             api = dut.api('users')
             self.assertIn('username test privilege 8', api.config)
             result = api.set_privilege('test')
-            self.assertTrue(response)
+            self.assertTrue(result)
             self.assertNotIn('username test privilege 1', api.config)
 
 

@@ -50,6 +50,10 @@ class TestApiStp(EapiConfigUnitTest):
         self.instance = pyeapi.api.stp.Stp(None)
         self.config = open(get_running_config()).read()
 
+    def test_instance(self):
+        result = pyeapi.api.stp.instance(None)
+        self.assertIsInstance(result, pyeapi.api.stp.Stp)
+
     def test_interfaces(self):
         result = self.instance.interfaces
         self.assertIsInstance(result, pyeapi.api.stp.StpInterfaces)

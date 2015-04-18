@@ -31,7 +31,6 @@
 #
 import unittest
 import random
-import collections
 
 from testlib import get_fixture
 
