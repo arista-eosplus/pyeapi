@@ -53,7 +53,6 @@ Parameters:
 import re
 
 from pyeapi.api import EntityCollection
-from pyeapi.utils import make_iterable
 
 DEFAULT_ENCRYPTION = 'cleartext'
 ENCRYPTION_MAP = {'cleartext': 0, 'md5': 5, 'sha512': 'sha512'}

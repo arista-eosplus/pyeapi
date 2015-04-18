@@ -83,7 +83,7 @@ class Ipinterfaces(EntityCollection):
 
         resp = dict(name=name)
 
-        value = lambda x,y: x.group('value') if x else y
+        value = lambda x, y: x.group('value') if x else y
 
         resp['address'] = value(IPADDR_RE.search(config, re.M), '0.0.0.0')
         resp['mtu'] = int(MTU_RE.search(config, re.M).group('value'))

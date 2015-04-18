@@ -91,6 +91,7 @@ contains the settings for nodes used by the connect_to function.
 
 """
 import os
+import re
 
 from ConfigParser import SafeConfigParser
 
@@ -491,6 +492,33 @@ class Node(object):
         response.pop(0)
 
         return response
+
+    def section(self, regex, config='running_config'):
+        """Returns a section of the config
+
+        Args:
+            regex (str): A valid regular expression used to select sections
+                of configuration to return
+            config (str): The configuration to return.  Valid values for config
+                are "running_config" or "startup_config".  The default value
+                is "running_config"
+
+        Returns:
+            The configuration section as a string object.
+        """
+        config = getattr(self, config)
+        match = re.search(regex, config, re.M)
+        if not match:
+            raise TypeError('config section not found')
+        block_start, line_end = match.regs[0]
+
+        match = re.search(r'^[^\s]', config[line_end:], re.M)
+        if not match:
+            raise TypeError('could not find end block')
+        _, block_end = match.regs[0]
+
+        block_end = line_end + block_end
+        return config[block_start:block_end]
 
     def enable(self, commands, encoding='json', strict=False):
         """Sends the array of commands to the node in enable mode

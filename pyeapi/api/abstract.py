@@ -40,8 +40,6 @@ provide parent class for API implementations.  All API modules will
 ultimately derive from BaseEntity which provides some common functions to
 make building API modules easier.
 """
-import re
-
 from collections import Callable, Mapping
 
 from pyeapi.eapilib import CommandError, ConnectionError
@@ -90,19 +88,11 @@ class BaseEntity(object):
             return None.
 
         """
-        match = re.search(r'^%s$' % parent, self.config, re.M)
-        if not match:
+        try:
+            parent = r'^%s$' % parent
+            return self.node.section(parent)
+        except TypeError:
             return None
-        block_start, line_end = match.regs[0]
-
-        match = re.search(r'^[^\s]', self.config[line_end:], re.M)
-        if not match:
-            return None
-        _, block_end = match.regs[0]
-
-        block_end = line_end + block_end
-
-        return self.config[block_start:block_end]
 
     def configure(self, commands):
         """Sends the commands list to the node in config mode

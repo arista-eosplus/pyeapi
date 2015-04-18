@@ -7,6 +7,7 @@
 #	make sdist -- build python source distribution
 #	make pep8 -- pep8 checks
 #	make pyflakes -- pyflakes checks
+#	make flake8 -- flake8 checks
 #	make check -- manifest checks
 #	make tests -- run all of the tests
 #	make unittest -- runs the unit tests
@@ -33,6 +34,9 @@ pep8:
 
 pyflakes:
 	pyflakes pyeapi/ test/
+
+flake8:
+	flake8 --ignore=E302,E303,W391 pyeapi/ test/
 
 check:
 	check-manifest
