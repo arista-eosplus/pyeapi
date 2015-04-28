@@ -1,6 +1,10 @@
 Python Client for eAPI
 ======================
 
+## v0.2.3, IN PROGESS
+
+- fixes issue with importing syslog module on Windows
+
 ## v0.2.2, 04/15/2015
 
 - fixes an issue with eAPI error messages that do not return a data key
