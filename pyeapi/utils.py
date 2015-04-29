@@ -32,8 +32,13 @@
 import os
 import sys
 import imp
-import syslog
 import collections
+
+try:
+    import syslog
+    SYSLOG_AVAILABLE = True
+except ImportError:
+    SYSLOG_AVAILABLE = False
 
 def import_module(name):
     """ Imports a module into the current runtime environment
@@ -129,7 +134,7 @@ def debug(text):
         text (str): The string object to print to syslog
 
     """
-    if islocalconnection():
+    if islocalconnection() and SYSLOG_AVAILABLE:
         syslog.openlog('pyeapi')
         syslog.syslog(syslog.LOG_NOTICE, str(text))
 
