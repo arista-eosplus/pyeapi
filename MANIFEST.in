@@ -12,3 +12,4 @@ recursive-include test *.portchannel
 recursive-include test *.py
 recursive-include test *.text
 recursive-include test *.vxlan
+recursive-include docs description.rst
