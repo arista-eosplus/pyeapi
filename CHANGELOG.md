@@ -9,6 +9,10 @@ Python Client for eAPI
 - added initial api support for mlag configuration
 - added tag feature to eapi.conf 
 
+## v0.2.4, 4/30/2015
+
+- adds required docs/description.rst for setup.py
+
 ## v0.2.3, 4/29/2015
 
 - fixes issue with importing syslog module on Windows
