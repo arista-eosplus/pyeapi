@@ -15,3 +15,4 @@ recursive-include test *.vxlan
 recursive-include docs *.py
 recursive-include docs *.rst
 recursive-include docs Makefile
+recursive-include docs description.rst

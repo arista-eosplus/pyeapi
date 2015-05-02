@@ -7,7 +7,7 @@ Python Client for eAPI
 - added initial support for system api module
 - added initial support for acl api module (standard)
 - added initial api support for mlag configuration
-- added tag feature to eapi.conf 
+- added tag feature to eapi.conf
 
 ## v0.2.4, 4/30/2015
 
