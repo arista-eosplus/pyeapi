@@ -212,7 +212,7 @@ class StpInterfaces(EntityCollection):
         return dict(bpduguard=value)
 
     def _parse_portfast(self, config):
-        value = not 'no spanning-tree portfast' in config
+        value = 'no spanning-tree portfast' not in config
         return dict(portfast=value)
 
     def _parse_portfast_type(self, config):
@@ -272,8 +272,10 @@ class StpInterfaces(EntityCollection):
         if value not in ['network', 'edge', 'normal', None]:
             raise ValueError('invalid portfast type value specified')
 
-        cmd = 'spanning-tree portfast %s' % value
-        return self.configure_interface(name, cmd)
+        cmds = ['spanning-tree portfast %s' % value]
+        if value == 'edge':
+            cmds.append('spanning-tree portfast auto')
+        return self.configure_interface(name, cmds)
 
     def set_portfast(self, name, value=None, default=False):
         """Configures the portfast value for the specified interface

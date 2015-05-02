@@ -47,11 +47,23 @@ class TestApiVlans(EapiConfigUnitTest):
         self.instance = pyeapi.api.vlans.instance(None)
         self.config = open(get_fixture('running_config.text')).read()
 
+    def test_isvlan_with_string(self):
+        self.assertFalse(pyeapi.api.vlans.isvlan(random_string()))
+
+    def test_isvlan_valid_value(self):
+        self.assertTrue(pyeapi.api.vlans.isvlan('1234'))
+
+    def test_isvlan_invalid_value(self):
+        self.assertFalse(pyeapi.api.vlans.isvlan('5000'))
+
     def test_get(self):
         result = self.instance.get('1')
         vlan = dict(vlan_id='1', name='default', state='active',
                     trunk_groups=[])
         self.assertEqual(vlan, result)
+
+    def test_get_not_configured(self):
+        self.assertIsNone(self.instance.get('1000'))
 
     def test_getall(self):
         result = self.instance.getall()
@@ -107,6 +119,16 @@ class TestApiVlans(EapiConfigUnitTest):
         vid = random_vlan()
         cmds = ['vlan %s' % vid, 'default trunk group']
         func = function('set_trunk_groups', vid, default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_trunk_groups_add_value(self):
+        cmds = ['vlan 10', 'trunk group tg2']
+        func = function('set_trunk_groups', '10', ['tg1', 'tg2'])
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_trunk_groups_remove_value(self):
+        cmds = ['vlan 10', 'no trunk group tg1']
+        func = function('set_trunk_groups', '10', 'tg2')
         self.eapi_positive_config_test(func, cmds)
 
     def test_add_trunk_group(self):

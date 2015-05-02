@@ -3,6 +3,7 @@
 branch = True
 omit = *mock*
        *test*
+       *netaddr*
 
 [report]
 # Regexes for lines to exclude from consideration

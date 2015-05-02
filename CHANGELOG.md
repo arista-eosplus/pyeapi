@@ -1,6 +1,30 @@
 Python Client for eAPI
 ======================
 
+## v0.3.0, IN PROGRESS
+
+- fixes an issue with configuring stp portfast edge correctly
+- added initial support for system api module
+- added initial support for acl api module (standard)
+- added initial api support for mlag configuration
+- added tag feature to eapi.conf 
+
+## v0.2.4, 4/30/2015
+
+- adds required docs/description.rst for setup.py
+
+## v0.2.3, 4/29/2015
+
+- fixes issue with importing syslog module on Windows
+
+## v0.2.2, 04/15/2015
+
+- fixes an issue with eAPI error messages that do not return a data key
+
+## v0.2.1, 03/28/2015
+
+- restores default certificate validation behavior for py2.7.9
+
 ## v0.2.0, 3/19/2015
 
 - adds udp_port, vlans and flood_list attributes to vxlan interfaces

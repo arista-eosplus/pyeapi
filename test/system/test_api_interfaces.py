@@ -253,7 +253,7 @@ class TestApiVxlanInterface(DutSystemTest):
             self.assertEqual(result['type'], 'vxlan')
             self.assertEqual(result['name'], 'Vxlan1')
             self.assertFalse(result['shutdown'])
-            self.assertEqual(result['description'], '')
+            self.assertEqual(result['description'], None)
             self.assertEqual(result['source_interface'], '')
             self.assertEqual(result['multicast_group'], '')
 

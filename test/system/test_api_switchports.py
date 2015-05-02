@@ -53,7 +53,7 @@ class TestApiSwitchports(DutSystemTest):
 
     def test_get_returns_none(self):
         for dut in self.duts:
-            intf  = random_interface(dut)
+            intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'no switchport'])
             result = dut.api('switchports').get(intf)

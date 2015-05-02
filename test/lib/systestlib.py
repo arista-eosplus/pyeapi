@@ -52,6 +52,11 @@ class DutSystemTest(unittest.TestCase):
                 name = name.split(':')[1]
                 self.duts.append(pyeapi.client.connect_to(name))
 
+    def sort_dict_by_keys(self, d):
+        keys = sorted(d.keys())
+        return dict([(k, d[k]) for k in keys])
+
+
 def random_interface(dut, exclude=None):
     exclude = [] if exclude is None else exclude
     interfaces = dut.api('interfaces')

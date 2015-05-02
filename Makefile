@@ -7,6 +7,7 @@
 #	make sdist -- build python source distribution
 #	make pep8 -- pep8 checks
 #	make pyflakes -- pyflakes checks
+#	make flake8 -- flake8 checks
 #	make check -- manifest checks
 #	make tests -- run all of the tests
 #	make unittest -- runs the unit tests
@@ -26,13 +27,17 @@ VERSION := $(shell cat VERSION)
 
 ########################################################
 
-all: clean pep8 pyflakes tests check
+all: clean check pep8 pyflakes tests 
 
 pep8:
 	-pep8 -r --ignore=E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 pyeapi/ test/
 
 pyflakes:
 	pyflakes pyeapi/ test/
+
+flake8:
+	flake8 --ignore=E302,E303,W391 --exit-zero pyeapi/
+	flake8 --ignore=E302,E303,W391,N802 --max-line-length=100 test/
 
 check:
 	check-manifest

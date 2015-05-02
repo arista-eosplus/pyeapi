@@ -60,6 +60,7 @@ def import_module(name):
     parts = name.split('.')
     path = None
     module_name = ''
+    fhandle = None
 
     for index, part in enumerate(parts):
         module_name = part if index == 0 else '%s.%s' % (module_name, part)
@@ -135,6 +136,7 @@ def debug(text):
         text (str): The string object to print to syslog
 
     """
+
     if islocalconnection():
         LOGGER.debug(text)
 
