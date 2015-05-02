@@ -473,21 +473,6 @@ class HttpsEapiConnection(EapiConnection):
         super(HttpsEapiConnection, self).__init__()
         port = port or DEFAULT_HTTPS_PORT
         path = path or DEFAULT_HTTP_PATH
-        # SSL/TLS certificate verification is enabled by default in latest
-        # Python releases and causes self-signed certificates generated
-        # on EOS to fail validation (unless explicitely imported).
-        # Disable the SSL/TLS certificate verification for now.
-        # Use the approach in PEP476 to disable certificate validation.
-        # TODO:
-        # ************************** WARNING *****************************
-        # This behaviour is considered a *security risk*, so use it
-        # temporary until a proper fix is implemented.
-        self.context = context
-        if context is None:
-            self.context = ssl._create_unverified_context()
-
-        self.transport = HttpsConnection(path, host, port,
-                                         context=self.context)
 
         enforce_verification = kwargs.get('enforce_verification')
 
