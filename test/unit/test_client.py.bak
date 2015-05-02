@@ -104,7 +104,7 @@ class TestNode(unittest.TestCase):
         config = [dict(output='test\nconfig')]
         self.node.run_commands = Mock(return_value=config)
         result = self.node.get_config(as_string=True)
-        self.assertIsInstance(result, str)
+        self.assertIsInstance(result, basestring)
 
     def test_get_config_raises_type_error(self):
         with self.assertRaises(TypeError):

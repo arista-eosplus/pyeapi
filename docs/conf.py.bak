@@ -48,8 +48,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Python Client for eAPI'
-copyright = '2015, Arista EOS+ CS'
+project = u'Python Client for eAPI'
+copyright = u'2015, Arista EOS+ CS'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -201,8 +201,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'PythonClientforeAPI.tex', 'Python Client for eAPI Documentation',
-   'Arista EOS+ CS', 'manual'),
+  ('index', 'PythonClientforeAPI.tex', u'Python Client for eAPI Documentation',
+   u'Arista EOS+ CS', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -231,8 +231,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pythonclientforeapi', 'Python Client for eAPI Documentation',
-     ['Arista EOS+ CS'], 1)
+    ('index', 'pythonclientforeapi', u'Python Client for eAPI Documentation',
+     [u'Arista EOS+ CS'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -245,8 +245,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PythonClientforeAPI', 'Python Client for eAPI Documentation',
-   'Arista EOS+ CS', 'PythonClientforeAPI', 'One line description of project.',
+  ('index', 'PythonClientforeAPI', u'Python Client for eAPI Documentation',
+   u'Arista EOS+ CS', 'PythonClientforeAPI', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -266,10 +266,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = 'Python Client for eAPI'
-epub_author = 'Arista EOS+ CS'
-epub_publisher = 'Arista EOS+ CS'
-epub_copyright = '2015, Arista EOS+ CS'
+epub_title = u'Python Client for eAPI'
+epub_author = u'Arista EOS+ CS'
+epub_publisher = u'Arista EOS+ CS'
+epub_copyright = u'2015, Arista EOS+ CS'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Python Client for eAPI'

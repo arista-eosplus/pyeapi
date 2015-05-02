@@ -46,7 +46,7 @@ class TestApiSystem(DutSystemTest):
             dut.config('default hostname')
             response = dut.api('system').get()
             keys = ['hostname']
-            self.assertEqual(keys, list(response.keys()))
+            self.assertEqual(keys, response.keys())
             self.assertEqual(response['hostname'], 'localhost')
 
     def test_get_check_hostname(self):

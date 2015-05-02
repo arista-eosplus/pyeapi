@@ -7,4 +7,4 @@ node = pyeapi.connect_to('veos01')
 
 output = node.enable('show version')
 
-print(('My System MAC address is', output[0]['result']['systemMacAddress']))
+print('My System MAC address is', output[0]['result']['systemMacAddress'])

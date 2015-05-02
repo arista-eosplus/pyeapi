@@ -22,9 +22,9 @@ print('Setting Vlan 123 name to "test_vlan"')
 vlans.set_name(123, 'test_vlan')
 
 print('\nDisplaying all vlans on the node')
-print(('-'*30))
+print('-'*30)
 for vlan in list(vlans.values()):
-    print(("   Vlan Id: {vlan_id}, Name: {name}".format(**vlan)))
+    print("   Vlan Id: {vlan_id}, Name: {name}".format(**vlan))
 
 if vlans.get(123):
     print('\nDeleting Vlan 123')

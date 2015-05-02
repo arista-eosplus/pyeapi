@@ -282,7 +282,7 @@ class Config(SafeConfigParser):
         """
         name = 'connection:{}'.format(name)
         self.add_section(name)
-        for key, value in list(kwargs.items()):
+        for key, value in kwargs.items():
             self.set(name, key, value)
         self.generate_tags()
 
