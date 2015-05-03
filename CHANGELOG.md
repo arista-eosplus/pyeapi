@@ -4,6 +4,7 @@ Python Client for eAPI
 ## v0.3.0, IN PROGRESS
 
 - fixes an issue with configuring stp portfast edge correctly
+- fixes #13
 - added initial support for system api module
 - added initial support for acl api module (standard)
 - added initial api support for mlag configuration
