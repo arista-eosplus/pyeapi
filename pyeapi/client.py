@@ -91,6 +91,7 @@ contains the settings for nodes used by the connect_to function.
 
 """
 import os
+import re
 
 from ConfigParser import SafeConfigParser
 
@@ -131,7 +132,16 @@ class Config(SafeConfigParser):
         SafeConfigParser.__init__(self)
 
         self.filename = filename
+        self.tags = dict()
+
         self.autoload()
+
+    @property
+    def connections(self):
+        """ Returns all of the loaded connections names as a list
+        """
+        conn = lambda x: str(x).replace('connection:', '')
+        return [conn(name) for name in self.sections()]
 
     def autoload(self):
         """ Loads the eapi.conf file
@@ -159,6 +169,8 @@ class Config(SafeConfigParser):
                 self.filename = filename
                 return self.read(filename)
 
+        self._add_default_connection()
+
     def read(self, filename):
         """Reads the file specified by filename
 
@@ -171,14 +183,35 @@ class Config(SafeConfigParser):
         """
         SafeConfigParser.read(self, filename)
 
-        if not self.get_connection('localhost'):
-            self.add_connection('localhost', transport='socket')
+        self._add_default_connection()
 
         for name in self.sections():
             if name.startswith('connection:') and \
                'host' not in dict(self.items(name)):
 
                 self.set(name, 'host', name.split(':')[1])
+        self.generate_tags()
+
+    def _add_default_connection(self):
+        """Checks the loaded config and adds the localhost profile if needed
+
+        This method wil load the connection:localhost profile into the client
+        configuration if it is not already present.
+        """
+        if not self.get_connection('localhost'):
+            self.add_connection('localhost', transport='socket')
+
+    def generate_tags(self):
+        """ Generates the tags with collection with hosts
+        """
+        self.tags = dict()
+        for section in self.sections():
+            if self.has_option(section, 'tags'):
+                tags = self.get(section, 'tags')
+                for tag in [str(t).strip() for t in tags.split(',')]:
+                    if tag not in self.tags:
+                        self.tags[tag] = list()
+                    self.tags[tag].append(section.split(':')[1])
 
     def load(self, filename):
         """Loads the file specified by filename
@@ -257,6 +290,7 @@ class Config(SafeConfigParser):
         self.add_section(name)
         for key, value in kwargs.iteritems():
             self.set(name, key, value)
+        self.generate_tags()
 
 config = Config()
 
@@ -288,6 +322,22 @@ def config_for(name):
             nodes configuration settings from the config instance
     """
     return config.get_connection(name)
+
+def hosts_for_tag(tag):
+    """ Returns the hosts assocated with the specified tag
+
+    This function will return the hosts assoicated with the tag specified
+    in the argument.  It will return an array of connecition names.
+
+    Args:
+        tag (str): The name of the tag to retrieve the list of hosts for
+
+    Returns:
+        list: A Python list object that includes the list of hosts assoicated
+            with the specified tag.
+        None: If the specified tag does not exist, then None is returned.
+    """
+    return config.tags.get(tag)
 
 def make_connection(transport, **kwargs):
     """ Creates a connection instance based on the transport
@@ -452,6 +502,33 @@ class Node(object):
         response.pop(0)
 
         return response
+
+    def section(self, regex, config='running_config'):
+        """Returns a section of the config
+
+        Args:
+            regex (str): A valid regular expression used to select sections
+                of configuration to return
+            config (str): The configuration to return.  Valid values for config
+                are "running_config" or "startup_config".  The default value
+                is "running_config"
+
+        Returns:
+            The configuration section as a string object.
+        """
+        config = getattr(self, config)
+        match = re.search(regex, config, re.M)
+        if not match:
+            raise TypeError('config section not found')
+        block_start, line_end = match.regs[0]
+
+        match = re.search(r'^[^\s]', config[line_end:], re.M)
+        if not match:
+            raise TypeError('could not find end block')
+        _, block_end = match.regs[0]
+
+        block_end = line_end + block_end
+        return config[block_start:block_end]
 
     def enable(self, commands, encoding='json', strict=False):
         """Sends the array of commands to the node in enable mode

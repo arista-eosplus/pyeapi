@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2015, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,44 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-__version__ = '0.3.0'
-__author__ = 'Arista EOS+'
+import sys
+import os
+import unittest
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
+
+from testlib import get_fixture, random_string, function
+from testlib import EapiConfigUnitTest
+
+import pyeapi.api.system
+
+class TestApiSystem(EapiConfigUnitTest):
+
+    def __init__(self, *args, **kwargs):
+        super(TestApiSystem, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.api.system.instance(None)
+        self.config = open(get_fixture('running_config.text')).read()
+
+    def test_get(self):
+        keys = ['hostname']
+        result = self.instance.get()
+        self.assertEqual(keys, result.keys())
+
+    def test_set_hostname(self):
+        for state in ['config', 'negate', 'default']:
+            value = random_string()
+            if state == 'config':
+                cmds = 'hostname %s' % value
+                func = function('set_hostname', value)
+            elif state == 'negate':
+                cmds = 'no hostname'
+                func = function('set_hostname')
+            elif state == 'default':
+                cmds = 'default hostname'
+                func = function('set_hostname', value=value, default=True)
+            self.eapi_positive_config_test(func, cmds)
+
+if __name__ == '__main__':
+    unittest.main()
 
 
-from .client import load_config, connect, connect_to, config_for
-
-__all__ = ['load_config', 'connect', 'connect_to', 'config_for']

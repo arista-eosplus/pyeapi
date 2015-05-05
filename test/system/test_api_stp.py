@@ -42,8 +42,8 @@ class TestApiStpInterfaces(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             dut.config(['default interface Ethernet1'])
-            keys = ['name', 'portfast', 'portfast_type', 'bpduguard']
-            result = dut.api('stp').get('Ethernet1')
+            keys = ['portfast', 'portfast_type', 'bpduguard']
+            result = dut.api('stp').interfaces.get('Ethernet1')
             self.assertEqual(sorted(keys), sorted(result.keys()),
                              'dut=%s' % dut)
 
@@ -78,7 +78,7 @@ class TestApiStpInterfaces(DutSystemTest):
             result = resource.set_portfast(intf, True)
             self.assertTrue(result, 'dut=%s' % dut)
 
-    def test_set_bpdugard_to_false(self):
+    def test_set_portfast_to_false(self):
         for dut in self.duts:
             intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,

@@ -50,6 +50,18 @@ class TestApiStp(EapiConfigUnitTest):
         self.instance = pyeapi.api.stp.Stp(None)
         self.config = open(get_running_config()).read()
 
+    def test_instance(self):
+        result = pyeapi.api.stp.instance(None)
+        self.assertIsInstance(result, pyeapi.api.stp.Stp)
+
+    def test_interfaces(self):
+        result = self.instance.interfaces
+        self.assertIsInstance(result, pyeapi.api.stp.StpInterfaces)
+
+    def test_instances(self):
+        result = self.instance.instances
+        self.assertIsInstance(result, pyeapi.api.stp.StpInstances)
+
     def test_set_mode_with_value(self):
         for value in ['mstp', 'none']:
             cmds = 'spanning-tree mode %s' % value
@@ -78,13 +90,14 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
     def test_getall(self):
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 7)
 
     def test_set_portfast_type_with_value(self):
         for intf in self.INTERFACES:
             for value in ['edge', 'network', 'normal']:
                 cmds = ['interface %s' % intf]
                 cmds.append('spanning-tree portfast %s' % value)
+                if value == 'edge':
+                    cmds.append('spanning-tree portfast auto')
                 func = function('set_portfast_type', intf, value)
                 self.eapi_positive_config_test(func, cmds)
 

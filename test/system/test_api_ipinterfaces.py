@@ -57,7 +57,7 @@ class TestResourceIpinterfaces(DutSystemTest):
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'no switchport'])
             result = dut.api('ipinterfaces').get(intf)
-            self.assertEqual(result['address'], '0.0.0.0')
+            self.assertIsNone(result['address'])
 
     def test_getall(self):
         for dut in self.duts:
