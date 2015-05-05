@@ -1,7 +1,7 @@
 Python Client for eAPI
 ======================
 
-## v0.3.0, IN PROGRESS
+## v0.3.0, 5/4/2015
 
 - fixes an issue with configuring stp portfast edge correctly
 - fixes #13
