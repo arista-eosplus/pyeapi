@@ -94,8 +94,12 @@ import os
 import logging
 import re
 
-# TODO: make it Python 2.7/3.x compatible
-from configparser import SafeConfigParser
+try:
+    # Try Python 3.x import first
+    from configparser import SafeConfigParser
+except ImportError:
+    # Use Python 2.7 import as a fallback
+    from ConfigParser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
 
