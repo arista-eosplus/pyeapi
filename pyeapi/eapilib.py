@@ -230,7 +230,7 @@ class EapiConnection(object):
         if int(sys.version[0]) > 2:
             # For Python 3.x
             _auth_text = '{}:{}'.format(username, password)
-            _auth_bin = base64.encodestring(_auth_text.encode())
+            _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
             _auth = _auth.replace('\n', '')
             self._auth = _auth
