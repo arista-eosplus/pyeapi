@@ -350,7 +350,7 @@ class EapiConnection(object):
 
             response = self.transport.getresponse()
             response_content = response.read()
-            response_content = response_content.decode() # PY2/3 bytes/str conversion
+            #response_content = response_content.decode() # PY2/3 bytes/str conversion
             _LOGGER.debug("Response: status: {status}, reason: {reason}".format(
                           status=response.status,
                           reason=response.reason))

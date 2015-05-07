@@ -40,8 +40,17 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ImportError):
             pyeapi.utils.import_module('fake.module.test')
 
-    @patch('pyeapi.utils.syslog')
-    def test_debug(self, mock_syslog):
+    # Do not use syslog directly, instead use the 'logging' module
+    # facility and select the logging target (syslog, log file, stderr)
+    # externally.
+#    @patch('pyeapi.utils.syslog')
+#    def test_debug(self, mock_syslog):
+#        pyeapi.utils.islocalconnection = Mock(return_value=True)
+#        pyeapi.utils.debug('test')
+#        mock_syslog.syslog.assert_called_with(mock_syslog.LOG_NOTICE, 'test')
+
+    @patch('pyeapi.utils._LOGGER')
+    def test_debug(self, mock_logger):
         pyeapi.utils.islocalconnection = Mock(return_value=True)
         pyeapi.utils.debug('test')
-        mock_syslog.syslog.assert_called_with(mock_syslog.LOG_NOTICE, 'test')
+        mock_logger.debug.assert_called_with('test')
