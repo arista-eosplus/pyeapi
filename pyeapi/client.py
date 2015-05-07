@@ -96,7 +96,8 @@ import re
 
 try:
     # Try Python 3.x import first
-    from configparser import SafeConfigParser
+    # Note: SafeConfigParser is deprecated and replaced by ConfigParser
+    from configparser import ConfigParser as SafeConfigParser
 except ImportError:
     # Use Python 2.7 import as a fallback
     from ConfigParser import SafeConfigParser
