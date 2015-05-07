@@ -12,7 +12,7 @@ with open(path.join(here, 'VERSION'), mode='rt', encoding='utf-8') as version_fi
         version = version_file.read().strip()
 
 setup(
-    name='pyeapi-py3',
+    name='pyeapi',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
@@ -45,6 +45,8 @@ setup(
 
         'License :: OSI Approved :: BSD License',
 
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
     ],

@@ -95,10 +95,10 @@ import logging
 import re
 
 try:
-    # Try Python 3 version first
+    # Try Python 3.x import first
     from configparser import SafeConfigParser
 except ImportError:
-    # Python 2.7 version as a fallback
+    # Use Python 2.7 import as a fallback
     from ConfigParser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
