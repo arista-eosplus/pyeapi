@@ -260,6 +260,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         super(TestApiPortchannelInterface, self).setUp()
         response = open(get_fixture('show_portchannel.json'))
         self.node.enable.return_value = json.load(response)
+        response.close()
 
     def test_get(self):
         result = self.instance.get('Port-Channel1')
