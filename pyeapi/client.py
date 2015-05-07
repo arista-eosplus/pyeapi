@@ -142,7 +142,8 @@ class Config(SafeConfigParser):
 
     @property
     def connections(self):
-        """ Returns all of the loaded connections names as a list
+        """
+        Returns all of the loaded connections names as a list
         """
         conn = lambda x: str(x).replace('connection:', '')
         return [conn(name) for name in self.sections()]
@@ -296,6 +297,8 @@ class Config(SafeConfigParser):
             self.set(name, key, value)
         self.generate_tags()
 
+# TODO: This is a global variable (in the module) - to review the impact on
+# having a shared state for the config file.
 config = Config()
 
 def load_config(filename):

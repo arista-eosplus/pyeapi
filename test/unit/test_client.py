@@ -219,7 +219,9 @@ class TestClient(unittest.TestCase):
     def test_node_returns_running_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
         self.assertIsInstance(node.running_config, str)
@@ -227,14 +229,18 @@ class TestClient(unittest.TestCase):
     def test_node_returns_startup_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
         self.assertIsInstance(node.startup_config, str)
 
     def test_node_returns_cached_startup_confgi(self):
         node = pyeapi.client.Node(None)
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         node._startup_config = config
         self.assertEqual(node.startup_config, config)
 

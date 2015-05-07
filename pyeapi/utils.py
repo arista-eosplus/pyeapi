@@ -36,11 +36,11 @@ import logging
 import logging.handlers
 import collections
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 _syslog_handler = logging.handlers.SysLogHandler()
-LOGGER.addHandler(_syslog_handler)
-LOGGER.setLevel(logging.INFO)
+_LOGGER.addHandler(_syslog_handler)
+_LOGGER.setLevel(logging.INFO)
 
 def import_module(name):
     """ Imports a module into the current runtime environment
@@ -138,7 +138,7 @@ def debug(text):
     """
 
     if islocalconnection():
-        LOGGER.debug(text)
+        _LOGGER.debug(text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
