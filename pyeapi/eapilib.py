@@ -46,7 +46,7 @@ import ssl
 from http.client import HTTPConnection, HTTPSConnection
 from pyeapi.utils import debug, make_iterable
 
-LOGGER = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_HTTP_PORT = 80
 DEFAULT_HTTPS_PORT = 443
@@ -227,7 +227,7 @@ class EapiConnection(object):
         _auth = _auth_bin.decode()
         _auth = _auth.replace('\n', '')
         self._auth = _auth
-        LOGGER.debug('Autentication string is: {}'.format(_auth))
+        _LOGGER.debug('Autentication string is: {}'.format(_auth))
 
     def request(self, commands, encoding=None, reqid=None):
         """Generates an eAPI request object
@@ -333,7 +333,7 @@ class EapiConnection(object):
                 code and error message from the eAPI response.
         """
         try:
-            LOGGER.debug("Request content: {}".format(data))
+            _LOGGER.debug("Request content: {}".format(data))
             debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
@@ -351,10 +351,10 @@ class EapiConnection(object):
             response = self.transport.getresponse()
             response_content = response.read()
             response_content = response_content.decode() # PY2/3 bytes/str conversion
-            LOGGER.debug("Response: status: {status}, reason: {reason}".format(
+            _LOGGER.debug("Response: status: {status}, reason: {reason}".format(
                           status=response.status,
                           reason=response.reason))
-            LOGGER.debug("Response content: {}".format(response_content))
+            _LOGGER.debug("Response content: {}".format(response_content))
             decoded = json.loads(response_content)
             debug('eapi_response: %s' % decoded)
 
@@ -365,7 +365,7 @@ class EapiConnection(object):
             return decoded
 
         except (socket.error, ValueError) as exc:
-            LOGGER.exception(exc)
+            _LOGGER.exception(exc)
             self.error = exc
             raise ConnectionError(str(self), 'unable to connect to eAPI')
 
