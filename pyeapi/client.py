@@ -174,6 +174,8 @@ class Config(SafeConfigParser):
                 self.filename = filename
                 return self.read(filename)
 
+        self._add_default_connection()
+
     def read(self, filename):
         """Reads the file specified by filename
 
@@ -186,8 +188,7 @@ class Config(SafeConfigParser):
         """
         SafeConfigParser.read(self, filename)
 
-        if not self.get_connection('localhost'):
-            self.add_connection('localhost', transport='socket')
+        self._add_default_connection()
 
         for name in self.sections():
             if name.startswith('connection:') and \
@@ -195,6 +196,15 @@ class Config(SafeConfigParser):
 
                 self.set(name, 'host', name.split(':')[1])
         self.generate_tags()
+
+    def _add_default_connection(self):
+        """Checks the loaded config and adds the localhost profile if needed
+
+        This method wil load the connection:localhost profile into the client
+        configuration if it is not already present.
+        """
+        if not self.get_connection('localhost'):
+            self.add_connection('localhost', transport='socket')
 
     def generate_tags(self):
         """ Generates the tags with collection with hosts
