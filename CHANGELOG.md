@@ -1,6 +1,9 @@
 Python Client for eAPI
 ======================
 
+## v0.3.1, 5/7/2015
+- make pyeapi compatible under Python 3.4 with all unit tests passing ok
+
 ## v0.3.0, 5/4/2015
 
 - fixes an issue with configuring stp portfast edge correctly

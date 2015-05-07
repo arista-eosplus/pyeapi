@@ -8,5 +8,9 @@ install: pip install -r dev-requirements.txt
 
 script: make unittest
 
+notifications:
+  email:
+    - eosplus-dev@arista.com
+
 after_success:
   coveralls
