@@ -40,11 +40,19 @@ import sys
 import json
 import socket
 import base64
+import logging
 import ssl
 
-from httplib import HTTPConnection, HTTPSConnection
+try:
+     # Try Python 3.x import first
+    from http.client import HTTPConnection, HTTPSConnection
+except ImportError:
+    # Use Python 2.7 import as a fallback
+    from httplib import HTTPConnection, HTTPSConnection
 
 from pyeapi.utils import debug, make_iterable
+
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_HTTP_PORT = 80
 DEFAULT_HTTPS_PORT = 443
@@ -218,8 +226,21 @@ class EapiConnection(object):
                 the eAPI connection with
 
         """
-        _auth = base64.encodestring('{}:{}'.format(username, password))
-        self._auth = str(_auth).replace('\n', '')
+        # Work around for Python 2.7/3.x compatibility
+        if int(sys.version[0]) > 2:
+            # For Python 3.x
+            _auth_text = '{}:{}'.format(username, password)
+            _auth_bin = base64.encodebytes(_auth_text.encode())
+            _auth = _auth_bin.decode()
+            _auth = _auth.replace('\n', '')
+            self._auth = _auth
+        else:
+            # For Python 2.7
+            _auth = base64.encodestring('{}:{}'.format(username, password))
+            self._auth = str(_auth).replace('\n', '')
+
+        _LOGGER.debug('Autentication string is: {}'.format(self._auth))
+
 
     def request(self, commands, encoding=None, reqid=None):
         """Generates an eAPI request object
@@ -325,7 +346,8 @@ class EapiConnection(object):
                 code and error message from the eAPI response.
         """
         try:
-            debug('eapi_request: %s' % data)
+            _LOGGER.debug("Request content: {}".format(data))
+            #debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
 
@@ -337,10 +359,24 @@ class EapiConnection(object):
                                          'Basic %s' % (self._auth))
 
             self.transport.endheaders()
+            if int(sys.version[0]) > 2:
+                # For Python 3.x compatibility
+                data = data.encode()
+
             self.transport.send(data)
 
-            response = self.transport.getresponse().read()
-            decoded = json.loads(response)
+            response = self.transport.getresponse()
+            response_content = response.read()
+            _LOGGER.debug("Response: status: {status}, reason: {reason}".format(
+                          status=response.status,
+                          reason=response.reason))
+            _LOGGER.debug("Response content: {}".format(response_content))
+
+            # Work around for Python 2.7/3.x compatibility
+            if int(sys.version[0]) > 2:
+                # For Python 3.x
+                response_content = response_content.decode()
+            decoded = json.loads(response_content)
             debug('eapi_response: %s' % decoded)
 
             if 'error' in decoded:
@@ -350,6 +386,7 @@ class EapiConnection(object):
             return decoded
 
         except (socket.error, ValueError) as exc:
+            _LOGGER.exception(exc)
             self.error = exc
             raise ConnectionError(str(self), 'unable to connect to eAPI')
 

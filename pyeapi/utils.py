@@ -32,13 +32,15 @@
 import os
 import sys
 import imp
+import logging
+import logging.handlers
 import collections
 
-try:
-    import syslog
-    SYSLOG_AVAILABLE = True
-except ImportError:
-    SYSLOG_AVAILABLE = False
+_LOGGER = logging.getLogger(__name__)
+
+_syslog_handler = logging.handlers.SysLogHandler()
+_LOGGER.addHandler(_syslog_handler)
+_LOGGER.setLevel(logging.INFO)
 
 def import_module(name):
     """ Imports a module into the current runtime environment
@@ -134,9 +136,9 @@ def debug(text):
         text (str): The string object to print to syslog
 
     """
-    if islocalconnection() and SYSLOG_AVAILABLE:
-        syslog.openlog('pyeapi')
-        syslog.syslog(syslog.LOG_NOTICE, str(text))
+
+    if islocalconnection():
+        _LOGGER.debug(text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
@@ -150,7 +152,7 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         value = [value]
 
     if not isinstance(value, collections.Iterable):
