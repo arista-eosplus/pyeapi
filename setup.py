@@ -8,7 +8,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'docs/description.rst'), encoding='utf-8') as f:
         long_description = f.read()
 
-with open(path.join(here, 'VERSION'), mode='rt', encoding='utf-8') as version_file:
+with open(path.join(here, 'VERSION'), mode='r', encoding='utf-8') as version_file:
         version = version_file.read().strip()
 
 setup(
