@@ -373,8 +373,8 @@ class EapiConnection(object):
             _LOGGER.debug("Response content: {}".format(response_content))
 
             # Work around for Python 2.7/3.x compatibility
-            if int(sys.version[0]) > 2:
-                # For Python 3.x
+            if not type(response_content) == str:
+                # For Python 3.x - decode bytes into string
                 response_content = response_content.decode()
             decoded = json.loads(response_content)
             debug('eapi_response: %s' % decoded)
