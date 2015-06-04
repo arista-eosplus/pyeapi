@@ -197,6 +197,7 @@ class EapiConnection(object):
     def __init__(self):
         self.transport = None
         self.error = None
+        self.socket_error = None
         self._auth = None
 
     def __str__(self):
@@ -350,7 +351,8 @@ class EapiConnection(object):
             return decoded
 
         except (socket.error, ValueError) as exc:
-            self.error = exc
+            if isinstance(exc, socket.error):
+                self.socket_error = exc
             raise ConnectionError(str(self), 'unable to connect to eAPI')
 
         finally:
