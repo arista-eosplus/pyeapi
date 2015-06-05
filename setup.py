@@ -8,7 +8,7 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'docs/description.rst'), encoding='utf-8') as f:
         long_description = f.read()
 
-with open(path.join(here, 'VERSION')) as version_file:
+with open(path.join(here, 'VERSION'), mode='r', encoding='utf-8') as version_file:
         version = version_file.read().strip()
 
 setup(
@@ -47,6 +47,8 @@ setup(
 
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
     ],
 
     keywords='networking arista eos eapi',
