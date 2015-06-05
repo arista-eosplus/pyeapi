@@ -3,7 +3,7 @@ Python Client for eAPI
 
 The Python Client for eAPI (pyeapi) is a native Python library wrapper around
 Arista EOS eAPI.  It provides a set of Python language bindings for configuring
-Arista EOS nodes.  
+Arista EOS nodes.
 
 The Python library can be used to communicate with EOS either locally
 (on-box) or remotely (off-box). It uses a standard INI-style configuration file
@@ -17,5 +17,3 @@ developing custom implemenations.
 This library is freely provided to the open source community for building
 robust applications using Arista EOS. Support is provided as best effort
 through Github issues.
-
-

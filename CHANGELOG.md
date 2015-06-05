@@ -1,6 +1,11 @@
 Python Client for eAPI
 ======================
 
+## v0.3.1, IN PROGRESS
+
+- make pyeapi compatible under Python 3.4 with all unit tests passing ok
+- added socket_error property to connection to capture socket errors
+
 ## v0.3.0, 5/4/2015
 
 - fixes an issue with configuring stp portfast edge correctly
@@ -9,7 +14,7 @@ Python Client for eAPI
 - added initial support for system api module
 - added initial support for acl api module (standard)
 - added initial api support for mlag configuration
-- added tag feature to eapi.conf 
+- added tag feature to eapi.conf
 
 ## v0.2.4, 4/30/2015
 

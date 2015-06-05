@@ -87,7 +87,7 @@ class EapiConfigUnitTest(unittest.TestCase):
         func = getattr(self.instance, func)
 
         if cmds is not None:
-            lcmds = len([cmds]) if isinstance(cmds, basestring) else len(cmds)
+            lcmds = len([cmds]) if isinstance(cmds, str) else len(cmds)
             self.mock_config.return_value = [{} for i in range(0, lcmds)]
 
         result = func(*fargs, **fkwargs)
