@@ -750,6 +750,10 @@ class VxlanInterface(BaseInterface):
         if match:
             for vid, vni in match:
                 values[vid] = dict(vni=vni)
+                cfg = r'vxlan vlan {} flood vtep (.*)$'.format(vid)
+                matches = re.search(cfg, config, re.M)
+                flood_list = matches.group(1).split(' ') if matches else []
+                values[vid]['flood_list'] = flood_list
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
@@ -815,8 +819,8 @@ class VxlanInterface(BaseInterface):
         cmds = self.command_builder(string, value=value, default=default)
         return self.configure_interface(name, cmds)
 
-    def add_vtep(self, name, vtep):
-        """Adds a new VTEP endpoint to the global flood list
+    def add_vtep(self, name, vtep, vlan=None):
+        """Adds a new VTEP endpoint to the global or local flood list
 
         EosVersion:
             4.13.7M
@@ -824,27 +828,39 @@ class VxlanInterface(BaseInterface):
         Args:
             name (str): The name of the interface to configure
             vtep (str): The IP address of the remote VTEP endpoint to add
+            vlan (str): The VLAN ID associated with this VTEP.  If the VLAN
+            keyword is used, then the VTEP is configured as a local flood
+            endpoing
 
         Returns:
             True if the command completes successfully
         """
-        cmd = 'vxlan flood vtep add %s' % vtep
+        if not vlan:
+            cmd = 'vxlan flood vtep add {}'.format(vtep)
+        else:
+            cmd = 'vxlan vlan {} flood vtep add {}'.format(vlan, vtep)
         return self.configure_interface(name, cmd)
 
-    def remove_vtep(self, name, vtep):
-        """Removes a VTEP endpoint from the global flood list
+    def remove_vtep(self, name, vtep, vlan=None):
+        """Removes a VTEP endpoint from the global or local flood list
 
         EosVersion:
             4.13.7M
 
         Args:
             name (str): The name of the interface to configure
-            vtep (str): The IP address of the remote VTEP endpoint to remove
+            vtep (str): The IP address of the remote VTEP endpoint to add
+            vlan (str): The VLAN ID associated with this VTEP.  If the VLAN
+            keyword is used, then the VTEP is configured as a local flood
+            endpoing
 
         Returns:
             True if the command completes successfully
         """
-        cmd = 'vxlan flood vtep remove %s' % vtep
+        if not vlan:
+            cmd = 'vxlan flood vtep remove {}'.format(vtep)
+        else:
+            cmd = 'vxlan vlan {} flood vtep remove {}'.format(vlan, vtep)
         return self.configure_interface(name, cmd)
 
     def update_vlan(self, name, vid, vni):

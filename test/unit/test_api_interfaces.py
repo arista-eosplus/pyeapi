@@ -393,9 +393,19 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         func = function('add_vtep', 'Vxlan1', '1.1.1.1')
         self.eapi_positive_config_test(func, cmds)
 
+    def test_add_vtep_to_vlan(self):
+        cmds = ['interface Vxlan1', 'vxlan vlan 10 flood vtep add 1.1.1.1']
+        func = function('add_vtep', 'Vxlan1', '1.1.1.1', vlan='10')
+        self.eapi_positive_config_test(func, cmds)
+
     def test_remove_vtep(self):
         cmds = ['interface Vxlan1', 'vxlan flood vtep remove 1.1.1.1']
         func = function('remove_vtep', 'Vxlan1', '1.1.1.1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_remove_vtep_from_vlan(self):
+        cmds = ['interface Vxlan1', 'vxlan vlan 10 flood vtep remove 1.1.1.1']
+        func = function('remove_vtep', 'Vxlan1', '1.1.1.1', vlan='10')
         self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ interface Vxlan1
    no vxlan controller-client
    vxlan udp-port 4789
    vxlan vlan 10 vni 10
+   vxlan vlan 10 flood vtep 3.3.3.3 4.4.4.4
    vxlan flood vtep 1.1.1.1 2.2.2.2
    no vxlan vlan flood vtep
    no vxlan learn-restrict vtep
