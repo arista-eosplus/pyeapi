@@ -745,15 +745,21 @@ class VxlanInterface(BaseInterface):
         return dict(udp_port=value)
 
     def _parse_vlans(self, config):
-        match = re.findall(r'vxlan vlan (\d+) vni (\d+)', config)
+        vlans = frozenset(re.findall(r'vxlan vlan (\d+)', config))
         values = dict()
-        if match:
-            for vid, vni in match:
-                values[vid] = dict(vni=vni)
-                cfg = r'vxlan vlan {} flood vtep (.*)$'.format(vid)
-                matches = re.search(cfg, config, re.M)
-                flood_list = matches.group(1).split(' ') if matches else []
-                values[vid]['flood_list'] = flood_list
+
+        for vid in vlans:
+            values[vid] = dict()
+
+            regexp = r'vxlan vlan {} vni (\d+)'.format(vid)
+            match = re.search(regexp, config)
+            values[vid]['vni'] = match.group(1) if match else None
+
+            regexp = r'vxlan vlan {} flood vtep (.*)$'.format(vid)
+            matches = re.search(regexp, config, re.M)
+            flood_list = matches.group(1).split(' ') if matches else []
+            values[vid]['flood_list'] = flood_list
+
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
