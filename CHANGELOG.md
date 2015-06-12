@@ -5,6 +5,7 @@ Python Client for eAPI
 
 - make pyeapi compatible under Python 3.4 with all unit tests passing ok
 - added socket_error property to connection to capture socket errors
+- adds function to create per vlan vtep flood lists
 
 ## v0.3.0, 5/4/2015
 
