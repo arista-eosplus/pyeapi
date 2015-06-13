@@ -91,9 +91,9 @@ class Bgp(Entity):
         networks = list()
         regexp = r'network (.+)/(\d+)(?: route-map (\w+))*'
         matches = re.findall(regexp, config)
-        for (prefix, length, rmap) in matches:
+        for (prefix, mask, rmap) in matches:
             rmap = None if rmap == '' else rmap
-            networks.append(dict(prefix=prefix, length=length, route_map=rmap))
+            networks.append(dict(prefix=prefix, masklen=mask, route_map=rmap))
         return dict(networks=networks)
 
     def configure_bgp(self, cmd):
