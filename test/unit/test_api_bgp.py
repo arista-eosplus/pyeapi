@@ -49,7 +49,7 @@ class TestApiBgp(EapiConfigUnitTest):
 
     def test_get(self):
         result = self.instance.get()
-        keys = ['bgp_as', 'router_id', 'shutdown', 'neighbors']
+        keys = ['bgp_as', 'router_id', 'shutdown', 'neighbors', 'networks']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
     def test_create(self):
@@ -71,6 +71,16 @@ class TestApiBgp(EapiConfigUnitTest):
     def test_default(self):
         func = function('default')
         cmds = 'default router bgp 65000'
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_add_network(self):
+        func = function('add_network', '172.16.10.1', '24', 'test')
+        cmds = ['router bgp 65000', 'network 172.16.10.1/24 route-map test']
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_remove_network(self):
+        func = function('remove_network', '172.16.10.1', '24', 'test')
+        cmds = ['router bgp 65000', 'no network 172.16.10.1/24 route-map test']
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_router_id(self):
@@ -214,6 +224,22 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} out'.format(cmd)]
                 func = function('set_route_map_out', name, route_map, True)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_description(self):
+        for state in ['config', 'negate', 'default']:
+            value = 'this is a test'
+            name = 'test'
+            cmd = 'neighbor {} description'.format(name)
+            if state == 'config':
+                cmds = ['router bgp 65000', '{} {}'.format(cmd, value)]
+                func = function('set_description', name, value)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no {}'.format(cmd)]
+                func = function('set_description', name)
+            elif state == 'default':
+                cmds = ['router bgp 65000', 'default {}'.format(cmd)]
+                func = function('set_description', name, value, True)
             self.eapi_positive_config_test(func, cmds)
 
 

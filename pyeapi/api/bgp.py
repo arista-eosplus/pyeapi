@@ -34,8 +34,12 @@
 
 import re
 
+from collections import namedtuple
+
 from pyeapi.api import Entity, EntityCollection
 from pyeapi.utils import make_iterable
+
+Network = namedtuple('Network', 'prefix length route_map')
 
 
 class Bgp(Entity):
@@ -64,6 +68,7 @@ class Bgp(Entity):
         response.update(self._parse_bgp_as(config))
         response.update(self._parse_router_id(config))
         response.update(self._parse_shutdown(config))
+        response.update(self._parse_networks(config))
 
         response['neighbors'] = self.neighbors.getall()
 
@@ -81,6 +86,15 @@ class Bgp(Entity):
     def _parse_shutdown(self, config):
         value = 'no shutdown' in config
         return dict(shutdown=not value)
+
+    def _parse_networks(self, config):
+        networks = list()
+        regexp = r'network (.+)/(\d+)(?: route-map (\w+))*'
+        matches = re.findall(regexp, config)
+        for (prefix, length, rmap) in matches:
+            rmap = None if rmap == '' else rmap
+            networks.append(dict(prefix=prefix, length=length, route_map=rmap))
+        return dict(networks=networks)
 
     def configure_bgp(self, cmd):
         config = self.get()
@@ -115,6 +129,18 @@ class Bgp(Entity):
 
     def set_shutdown(self, value=None, default=False):
         cmd = self.command_builder('shutdown', value=value, default=default)
+        return self.configure_bgp(cmd)
+
+    def add_network(self, prefix, length, route_map=None):
+        cmd = 'network {}/{}'.format(prefix, length)
+        if route_map:
+            cmd += ' route-map {}'.format(route_map)
+        return self.configure_bgp(cmd)
+
+    def remove_network(self, prefix, length, route_map=None):
+        cmd = 'no network {}/{}'.format(prefix, length)
+        if route_map:
+            cmd += ' route-map {}'.format(route_map)
         return self.configure_bgp(cmd)
 
 
@@ -191,36 +217,38 @@ class BgpNeighbors(EntityCollection):
         cmds = ['router bgp {}'.format(match.group(1)), cmd]
         return super(BgpNeighbors, self).configure(cmds)
 
+    def command_builder(self, name, cmd, value, default):
+        string = 'neighbor {} {}'.format(name, cmd)
+        return super(BgpNeighbors, self).command_builder(string, value, default)
+
     def set_remote_as(self, name, value=None, default=False):
-        string = 'neighbor {} remote-as'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'remote-as', value, default)
         return self.configure(cmd)
 
     def set_shutdown(self, name, value=None, default=False):
-        string = 'neighbor {} shutdown'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'shutdown', value, default)
         return self.configure(cmd)
 
     def set_send_community(self, name, value=None, default=False):
-        string = 'neighbor {} send-community'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'send-community', value, default)
         return self.configure(cmd)
 
     def set_next_hop_self(self, name, value=None, default=False):
-        string = 'neighbor {} next-hop-self'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'next-hop-self', value, default)
         return self.configure(cmd)
 
     def set_route_map_in(self, name, value=None, default=False):
-        string = 'neighbor {} route-map'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'route-map', value, default)
         cmd += ' in'
         return self.configure(cmd)
 
     def set_route_map_out(self, name, value=None, default=False):
-        string = 'neighbor {} route-map'.format(name)
-        cmd = self.command_builder(string, value=value, default=default)
+        cmd = self.command_builder(name, 'route-map', value, default)
         cmd += ' out'
+        return self.configure(cmd)
+
+    def set_description(self, name, value=None, default=False):
+        cmd = self.command_builder(name, 'description', value, default)
         return self.configure(cmd)
 
 def instance(api):
