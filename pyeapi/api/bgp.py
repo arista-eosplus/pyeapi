@@ -36,6 +36,8 @@ import re
 
 from collections import namedtuple
 
+import netaddr
+
 from pyeapi.api import Entity, EntityCollection
 from pyeapi.utils import make_iterable
 
@@ -149,6 +151,7 @@ class BgpNeighbors(EntityCollection):
     def get(self, name):
         config = self.get_block('^router bgp .*')
         response = dict(name=name)
+        response.update(self._parse_peer_group(config, name))
         response.update(self._parse_remote_as(config, name))
         response.update(self._parse_send_community(config, name))
         response.update(self._parse_shutdown(config, name))
@@ -167,6 +170,12 @@ class BgpNeighbors(EntityCollection):
         for neighbor in re.findall(r'neighbor ([^\s]+)', config):
             collection[neighbor] = self.get(neighbor)
         return collection
+
+    def _parse_peer_group(self, config, name):
+        regexp = r'neighbor {} peer-group (\s+)'.format(name)
+        match = re.search(regexp, config)
+        value = match.group(1) if match else None
+        return dict(peer_group=value)
 
     def _parse_remote_as(self, config, name):
         regexp = r'neighbor {} remote-as (\d+)'.format(name)
@@ -207,6 +216,13 @@ class BgpNeighbors(EntityCollection):
         value = match.group(1) if match else None
         return dict(route_map_out=value)
 
+    def ispeergroup(self, name):
+        try:
+            netaddr.IPAddress(name)
+            return False
+        except netaddr.core.AddrFormatError:
+            return True
+
     def create(self, name):
         return self.set_shutdown(name, True)
 
@@ -226,6 +242,12 @@ class BgpNeighbors(EntityCollection):
     def command_builder(self, name, cmd, value, default):
         string = 'neighbor {} {}'.format(name, cmd)
         return super(BgpNeighbors, self).command_builder(string, value, default)
+
+    def set_peer_group(self, name, value=None, default=False):
+        if not self.ispeergroup(name):
+            cmd = self.command_builder(name, 'peer-group', value, default)
+            return self.configure(cmd)
+        return False
 
     def set_remote_as(self, name, value=None, default=False):
         cmd = self.command_builder(name, 'remote-as', value, default)

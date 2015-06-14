@@ -12,6 +12,7 @@ router bgp 65000
    neighbor test1 maximum-routes 12000
    neighbor 172.16.10.1 remote-as 65000
    neighbor 172.16.10.1 maximum-routes 12000
+   neighbor 172.16.10.1 peer-group test
    network 172.16.10.0/24
    network 172.17.0.0/16
 !

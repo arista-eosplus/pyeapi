@@ -125,13 +125,30 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
     def test_get(self):
         result = self.instance.get('test')
         keys = ['name', 'send_community', 'shutdown', 'description',
-                'remote_as', 'next_hop_self', 'route_map_in', 'route_map_out']
+                'remote_as', 'next_hop_self', 'route_map_in', 'route_map_out',
+                'peer_group']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
     def test_delete(self):
         cmds = ['router bgp 65000', 'no neighbor test']
         func = function('delete', 'test')
         self.eapi_positive_config_test(func, cmds)
+
+    def test_set_peer_group(self):
+        for state in ['config', 'negate', 'default']:
+            peer_group = 'test'
+            name = '172.16.10.1'
+            cmd = 'neighbor {} peer-group'.format(name)
+            if state == 'config':
+                cmds = ['router bgp 65000', '{} {}'.format(cmd, peer_group)]
+                func = function('set_peer_group', name, peer_group)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no {}'.format(cmd)]
+                func = function('set_peer_group', name)
+            elif state == 'default':
+                cmds = ['router bgp 65000', 'default {}'.format(cmd)]
+                func = function('set_peer_group', name, peer_group, True)
+            self.eapi_positive_config_test(func, cmds)
 
     def test_set_remote_as(self):
         for state in ['config', 'negate', 'default']:
