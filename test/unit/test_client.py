@@ -32,6 +32,7 @@
 import sys
 import os
 import unittest
+import imp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
@@ -103,7 +104,7 @@ class TestNode(unittest.TestCase):
         config = [dict(output='test\nconfig')]
         self.node.run_commands = Mock(return_value=config)
         result = self.node.get_config(as_string=True)
-        self.assertIsInstance(result, basestring)
+        self.assertIsInstance(result, str)
 
     def test_get_config_raises_type_error(self):
         with self.assertRaises(TypeError):
@@ -129,7 +130,7 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         if 'EAPI_CONF' in os.environ:
             del os.environ['EAPI_CONF']
-        reload(pyeapi.client)
+        imp.reload(pyeapi.client)
 
     def test_load_config_for_connection_with_filename(self):
         conf = get_fixture('eapi.conf')
@@ -191,7 +192,7 @@ class TestClient(unittest.TestCase):
 
     @patch('pyeapi.client.make_connection')
     def test_connect_types(self, connection):
-        transports = pyeapi.client.TRANSPORTS.keys()
+        transports = list(pyeapi.client.TRANSPORTS.keys())
         kwargs = dict(host='localhost', username='admin', password='',
                       port=None)
 
@@ -218,7 +219,9 @@ class TestClient(unittest.TestCase):
     def test_node_returns_running_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
         self.assertIsInstance(node.running_config, str)
@@ -226,14 +229,18 @@ class TestClient(unittest.TestCase):
     def test_node_returns_startup_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         get_config_mock.return_value = config
         node.get_config = get_config_mock
         self.assertIsInstance(node.startup_config, str)
 
     def test_node_returns_cached_startup_confgi(self):
         node = pyeapi.client.Node(None)
-        config = open(get_fixture('running_config.text')).read()
+        config_file = open(get_fixture('running_config.text'))
+        config = config_file.read()
+        config_file.close()
         node._startup_config = config
         self.assertEqual(node.startup_config, config)
 

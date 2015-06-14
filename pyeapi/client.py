@@ -91,15 +91,24 @@ contains the settings for nodes used by the connect_to function.
 
 """
 import os
+import logging
 import re
 
-from ConfigParser import SafeConfigParser
+try:
+    # Try Python 3.x import first
+    # Note: SafeConfigParser is deprecated and replaced by ConfigParser
+    from configparser import ConfigParser as SafeConfigParser
+except ImportError:
+    # Use Python 2.7 import as a fallback
+    from ConfigParser import SafeConfigParser
 
 from pyeapi.utils import load_module, make_iterable
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
+
+LOGGER = logging.getLogger(__name__)
 
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
@@ -138,7 +147,8 @@ class Config(SafeConfigParser):
 
     @property
     def connections(self):
-        """ Returns all of the loaded connections names as a list
+        """
+        Returns all of the loaded connections names as a list
         """
         conn = lambda x: str(x).replace('connection:', '')
         return [conn(name) for name in self.sections()]
@@ -288,10 +298,12 @@ class Config(SafeConfigParser):
         """
         name = 'connection:{}'.format(name)
         self.add_section(name)
-        for key, value in kwargs.iteritems():
+        for key, value in list(kwargs.items()):
             self.set(name, key, value)
         self.generate_tags()
 
+# TODO: This is a global variable (in the module) - to review the impact on
+# having a shared state for the config file.
 config = Config()
 
 def load_config(filename):

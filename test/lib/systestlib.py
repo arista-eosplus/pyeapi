@@ -60,7 +60,7 @@ class DutSystemTest(unittest.TestCase):
 def random_interface(dut, exclude=None):
     exclude = [] if exclude is None else exclude
     interfaces = dut.api('interfaces')
-    names = [name for name in interfaces.keys() if name.startswith('Et')]
+    names = [name for name in list(interfaces.keys()) if name.startswith('Et')]
 
     exclude_interfaces = dut.settings.get('exclude_interfaces', [])
     if exclude_interfaces:
