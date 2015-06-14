@@ -1,7 +1,7 @@
 Python Client for eAPI
 ======================
 
-## v0.3.1, IN PROGRESS
+## v0.3.1, 6/14/2015
 
 - make pyeapi compatible under Python 3.4 with all unit tests passing ok
 - added socket_error property to connection to capture socket errors
