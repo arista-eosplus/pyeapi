@@ -1,6 +1,8 @@
 Python Client for eAPI
 ======================
 
+## IN PROGRESS
+
 ## v0.3.1, 6/14/2015
 
 - make pyeapi compatible under Python 3.4 with all unit tests passing ok
