@@ -207,8 +207,14 @@ class BgpNeighbors(EntityCollection):
         value = match.group(1) if match else None
         return dict(route_map_out=value)
 
+    def create(self, name):
+        return self.set_shutdown(name, True)
+
     def delete(self, name):
-        return self.configure('no neighbor {}'.format(name))
+        response = self.configure('no neighbor {}'.format(name))
+        if not response:
+            response = self.configure('no neighbor {} peer-group'.format(name))
+        return response
 
     def configure(self, cmd):
         match = re.search(r'router bgp (\d+)', self.config)
