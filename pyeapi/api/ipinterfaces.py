@@ -50,7 +50,7 @@ import re
 from pyeapi.api import EntityCollection
 
 
-SWITCHPORT_RE = re.compile(r'^\s{3}switchport$', re.M)
+SWITCHPORT_RE = re.compile(r'switchport$', re.M)
 
 class Ipinterfaces(EntityCollection):
 
