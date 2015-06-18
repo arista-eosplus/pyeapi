@@ -172,7 +172,7 @@ class BgpNeighbors(EntityCollection):
         return collection
 
     def _parse_peer_group(self, config, name):
-        regexp = r'neighbor {} peer-group (\s+)'.format(name)
+        regexp = r'neighbor {} peer-group ([^\s]+)'.format(name)
         match = re.search(regexp, config)
         value = match.group(1) if match else None
         return dict(peer_group=value)
