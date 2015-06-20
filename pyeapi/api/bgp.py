@@ -139,8 +139,8 @@ class Bgp(Entity):
             cmd += ' route-map {}'.format(route_map)
         return self.configure_bgp(cmd)
 
-    def remove_network(self, prefix, length, route_map=None):
-        cmd = 'no network {}/{}'.format(prefix, length)
+    def remove_network(self, prefix, masklen, route_map=None):
+        cmd = 'no network {}/{}'.format(prefix, masklen)
         if route_map:
             cmd += ' route-map {}'.format(route_map)
         return self.configure_bgp(cmd)
