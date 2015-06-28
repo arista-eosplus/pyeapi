@@ -76,11 +76,12 @@ class Ipinterfaces(EntityCollection):
         """
         config = self.get_block('interface %s' % name)
 
-        resource = None
-        if SWITCHPORT_RE.search(config, re.M):
-            resource = dict(name=name)
-            resource.update(self._parse_address(config))
-            resource.update(self._parse_mtu(config))
+        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config, re.M):
+            return None
+
+        resource = dict(name=name)
+        resource.update(self._parse_address(config))
+        resource.update(self._parse_mtu(config))
         return resource
 
     def _parse_address(self, config):
