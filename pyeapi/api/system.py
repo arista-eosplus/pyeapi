@@ -65,6 +65,7 @@ class System(Entity):
         """
         resource = dict()
         resource.update(self._parse_hostname())
+        resource.update(self._parse_iprouting())
         return resource
 
     def _parse_hostname(self):
@@ -80,6 +81,16 @@ class System(Entity):
             value = match.group(1)
         return dict(hostname=value)
 
+    def _parse_iprouting(self):
+        """Parses the global config and returns the ip routing value
+
+        Returns:
+            dict: The configure value for ip routing.  The returned dict
+                object is intendd to be merged into the resource dict
+        """
+        value = 'no ip routing' not in self.config
+        return dict(iprouting=value)
+
     def set_hostname(self, value=None, default=False):
         """Configures the global system hostname setting
 
@@ -94,6 +105,24 @@ class System(Entity):
             bool: True if the commands are completed successfully
         """
         cmd = self.command_builder('hostname', value=value, default=default)
+        return self.configure(cmd)
+
+    def set_iprouting(self, value=None, default=False):
+        """Configures the state of global ip routing
+
+        EosVersion:
+            4.13.7M
+
+        Args:
+            value(bool): True if ip routing should be enabled or False if
+                ip routing should be disabled
+
+            default (bool): Controls the use of the default keyword
+
+        Returns:
+            bool: True if the commands completed successfully otherwise False
+        """
+        cmd = self.command_builder('ip routing', value=value, default=default)
         return self.configure(cmd)
 
 

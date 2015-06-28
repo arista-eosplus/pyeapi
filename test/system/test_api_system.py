@@ -44,10 +44,9 @@ class TestApiSystem(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             dut.config('default hostname')
-            response = dut.api('system').get()
-            keys = ['hostname']
-            self.assertEqual(keys, list(response.keys()))
-            self.assertEqual(response['hostname'], 'localhost')
+            resp = dut.api('system').get()
+            keys = ['hostname', 'iprouting']
+            self.assertEqual(sorted(keys), sorted(resp.keys()))
 
     def test_get_check_hostname(self):
         for dut in self.duts:
@@ -87,6 +86,20 @@ class TestApiSystem(DutSystemTest):
             self.assertTrue(response, 'dut=%s' % dut)
             value = 'no hostname'
             self.assertIn(value, dut.running_config)
+
+    def test_set_iprouting_to_true(self):
+        for dut in self.duts:
+            dut.config('no ip routing')
+            resp = dut.api('system').set_iprouting(True)
+            self.assertTrue(resp, 'dut=%s' % dut)
+            self.assertNotIn('no ip rotuing', dut.running_config)
+
+    def test_set_iprouting_to_false(self):
+        for dut in self.duts:
+            dut.config('ip routing')
+            resp = dut.api('system').set_iprouting(False)
+            self.assertTrue(resp, 'dut=%s' % dut)
+            self.assertIn('no ip routing', dut.running_config)
 
 
 if __name__ == '__main__':
