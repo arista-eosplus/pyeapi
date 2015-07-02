@@ -50,7 +50,7 @@ class TestApiSystem(EapiConfigUnitTest):
     def test_get(self):
         keys = ['hostname', 'iprouting']
         result = self.instance.get()
-        self.assertEqual(keys, list(result.keys()))
+        self.assertEqual(sorted(keys), sorted(list(result.keys())))
 
     def test_set_hostname(self):
         for state in ['config', 'negate', 'default']:
