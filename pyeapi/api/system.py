@@ -75,7 +75,7 @@ class System(Entity):
                 object is intended to be merged into the resource dict
         """
         value = 'localhost'
-        match = re.search(r'^hostname (\w+)$', self.config, re.M)
+        match = re.search(r'^hostname ([^\s]+)$', self.config, re.M)
         if match:
             value = match.group(1)
         return dict(hostname=value)
