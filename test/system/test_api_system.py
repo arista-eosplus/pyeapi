@@ -49,6 +49,12 @@ class TestApiSystem(DutSystemTest):
             self.assertEqual(keys, list(response.keys()))
             self.assertEqual(response['hostname'], 'localhost')
 
+    def test_get_with_period(self):
+        for dut in self.duts:
+            dut.config('hostname host.domain.net')
+            response = dut.api('system').get()
+            self.assertEqual(response['hostname'], 'host.domain.net')
+
     def test_get_check_hostname(self):
         for dut in self.duts:
             dut.config('hostname teststring')
@@ -86,6 +92,14 @@ class TestApiSystem(DutSystemTest):
             response = dut.api('system').set_hostname(value='foo', default=True)
             self.assertTrue(response, 'dut=%s' % dut)
             value = 'no hostname'
+            self.assertIn(value, dut.running_config)
+
+    def test_set_hostname_with_period(self):
+        for dut in self.duts:
+            dut.config('hostname localhost')
+            response = dut.api('system').set_hostname(value='host.domain.net')
+            self.assertTrue(response, 'dut=%s' % dut)
+            value = 'hostname host.domain.net'
             self.assertIn(value, dut.running_config)
 
 
