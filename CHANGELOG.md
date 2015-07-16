@@ -1,7 +1,10 @@
 Python Client for eAPI
 ======================
 
-=======
+## v0.3.2, 7/16/2015
+
+- fixes a problem with parsing the hostname value in the system module
+
 ## v0.3.1, 6/14/2015
 
 - make pyeapi compatible under Python 3.4 with all unit tests passing ok
