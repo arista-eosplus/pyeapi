@@ -40,6 +40,7 @@ physical Ethernet and bundled Port-Channel interfaces.
 import re
 
 from pyeapi.api import EntityCollection
+from pyeapi.utils import make_iterable
 
 class Switchports(EntityCollection):
     """The Switchports class provides a configuration resource for swichports
@@ -62,6 +63,7 @@ class Switchports(EntityCollection):
             * access_vlan (str): The switchport access vlan value
             * trunk_native_vlan (str): The switchport trunk native vlan vlaue
             * trunk_allowed_vlans (str): The trunk allowed vlans value
+            * trunk_groups (list): The list of trunk groups configured
 
         Args:
             name (string): The interface identifier to get.  Note: Switchports
@@ -82,6 +84,7 @@ class Switchports(EntityCollection):
         resource.update(self._parse_access_vlan(config))
         resource.update(self._parse_trunk_native_vlan(config))
         resource.update(self._parse_trunk_allowed_vlans(config))
+        resource.update(self._parse_trunk_groups(config))
         return resource
 
 
@@ -98,6 +101,19 @@ class Switchports(EntityCollection):
         """
         value = re.search(r'switchport mode (\w+)', config, re.M)
         return dict(mode=value.group(1))
+
+    def _parse_trunk_groups(self, config):
+        """Scans the specified config and parses the trunk group values
+
+        Args:
+            config (str): The interface configuraiton blcok
+
+        Returns:
+            A dict object with the trunk group values that can be merged
+                into the resource dict
+        """
+        values = re.findall(r'switchport trunk group ([^\s]+)', config, re.M)
+        return dict(trunk_groups=values)
 
     def _parse_access_vlan(self, config):
         """Scans the specified config and parse the access-vlan value
@@ -310,6 +326,63 @@ class Switchports(EntityCollection):
         string = 'switchport trunk allowed vlan'
         command = self.command_builder(string, value=value, default=default)
         return self.configure_interface(name, command)
+
+    def set_trunk_groups(self, intf, value=None, default=False):
+        """Configures the switchport trunk group value
+
+        Args:
+            intf (str): The interface identifier to configure.
+            value (str): The set of values to configure the trunk group
+            default (bool): Configures the trunk group default value
+
+        Returns:
+            True if the config operation succeeds otherwise False
+        """
+        if default:
+            cmd = 'default switchport trunk group'
+            return self.configure_interface(intf, cmd)
+
+        current_value = self.get(intf)['trunk_groups']
+        failure = False
+
+        value = make_iterable(value)
+
+        for name in set(value).difference(current_value):
+            if not self.add_trunk_group(intf, name):
+                failure = True
+
+        for name in set(current_value).difference(value):
+            if not self.remove_trunk_group(intf, name):
+                failure = True
+
+        return not failure
+
+    def add_trunk_group(self, intf, value):
+        """Adds the specified trunk group to the interface
+
+        Args:
+            intf (str): The interface name to apply the trunk group to
+            value (str): The trunk group value to apply to the interface
+
+        Returns:
+            True if the operation as successfully applied otherwise false
+        """
+        string = 'switchport trunk group {}'.format(value)
+        return self.configure_interface(intf, string)
+
+    def remove_trunk_group(self, intf, value):
+        """Removes a specified trunk group to the interface
+
+        Args:
+            intf (str): The interface name to remove the trunk group from
+            value (str): The trunk group value
+
+        Returns:
+            True if the operation as successfully applied otherwise false
+        """
+        string = 'no switchport trunk group {}'.format(value)
+        return self.configure_interface(intf, string)
+
 
 def instance(node):
     """Returns an instance of Switchports
