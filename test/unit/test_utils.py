@@ -40,14 +40,37 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(ImportError):
             pyeapi.utils.import_module('fake.module.test')
 
-    # Do not use syslog directly, instead use the 'logging' module
-    # facility and select the logging target (syslog, log file, stderr)
-    # externally.
-#    @patch('pyeapi.utils.syslog')
-#    def test_debug(self, mock_syslog):
-#        pyeapi.utils.islocalconnection = Mock(return_value=True)
-#        pyeapi.utils.debug('test')
-#        mock_syslog.syslog.assert_called_with(mock_syslog.LOG_NOTICE, 'test')
+    def test_expand_singles(self):
+        vlans = '1,2,3'
+        result = pyeapi.utils.expand_range(vlans)
+        result = ','.join(result)
+        self.assertTrue(vlans == result)
+
+    def test_expand_range(self):
+        vlans = '1-15'
+        expected = [str(x) for x in range(1, 16)]
+        result = pyeapi.utils.expand_range(vlans)
+        self.assertEqual(result, expected)
+
+    def test_expand_mixed(self):
+        vlans = '1,3,5-7,9'
+        result = pyeapi.utils.expand_range(vlans)
+        self.assertEqual(result, ['1','3','5','6','7','9'])
+
+    def test_collapse_singles(self):
+        vlans = '1,3,5,7'
+        result = pyeapi.utils.collapse_range(vlans)
+        self.assertEqual(result, ['1','3','5','7'])
+
+    def test_collapse_range(self):
+        vlans = '1,2,3,4,5'
+        result = pyeapi.utils.collapse_range(vlans)
+        self.assertEqual(result, ['1-5'])
+
+    def test_collapse_mixed(self):
+        vlans = '1,3,5,6,7,9'
+        result = pyeapi.utils.collapse_range(vlans)
+        self.assertEqual(result, ['1','3','5-7','9'])
 
     @patch('pyeapi.utils._LOGGER')
     def test_debug(self, mock_logger):

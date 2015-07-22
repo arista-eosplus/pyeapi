@@ -36,6 +36,8 @@ import logging
 import logging.handlers
 import collections
 
+from itertools import tee, izip_longest
+
 _LOGGER = logging.getLogger(__name__)
 
 _syslog_handler = logging.handlers.SysLogHandler()
@@ -159,4 +161,67 @@ def make_iterable(value):
         raise TypeError('value must be an iterable object')
 
     return value
+
+def lookahead(it):
+    it1, it2 = tee(iter(it))
+    next(it2)
+    return izip_longest(it1, it2)
+
+def expand_range(arg, value_delimiter=',', range_delimiter='-'):
+    """
+    Expands a delimited string of ranged integers into a list of strings
+
+    :param arg: The string range to expand
+    :param value_delimiter: The delimiter that separates values
+    :param range_delimiter: The delimiter that signifies a range of values
+
+    :return: An array of expanded string values
+    :rtype: list
+    """
+    values = list()
+    expanded = arg.split(value_delimiter)
+    for item in expanded:
+        if range_delimiter in item:
+            start, end = item.split(range_delimiter)
+            _expand = range(int(start), int(end)+1)
+            values.extend([str(x) for x in _expand])
+        else:
+            values.extend([item])
+    return [str(x) for x in values]
+
+def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
+    """
+    Collapses a list of values into a range set
+
+    :param arg: The list of values to collapse
+    :param value_delimiter: The delimiter that separates values
+    :param range_delimiter: The delimiter that separates a value range
+
+    :return: An array of collapsed string values
+    :rtype: list
+    """
+    values = list()
+    expanded = arg.split(value_delimiter)
+    range_start = None
+
+    for v1, v2 in lookahead(expanded):
+        if v2:
+            v1 = int(v1)
+            v2 = int(v2)
+            if (v1 + 1) == v2:
+                if not range_start:
+                    range_start = v1
+            elif range_start:
+                item = '{}{}{}'.format(range_start, range_delimiter, v1)
+                values.extend([item])
+                range_start = None
+            else:
+                values.extend([v1])
+        elif range_start:
+            item = '{}{}{}'.format(range_start, range_delimiter, v1)
+            values.extend([item])
+            range_start = None
+        else:
+            values.extend([v1])
+    return [str(x) for x in values]
 
