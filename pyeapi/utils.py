@@ -36,7 +36,14 @@ import logging
 import logging.handlers
 import collections
 
-from itertools import tee, izip_longest
+from itertools import tee
+
+try:
+    # Try Python 3.x import first
+    from itertools import zip_longest
+except ImportError:
+    # Use Python 2.7 import as a fallback
+    from itertools import izip_longest as zip_longest
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -165,7 +172,7 @@ def make_iterable(value):
 def lookahead(it):
     it1, it2 = tee(iter(it))
     next(it2)
-    return izip_longest(it1, it2)
+    return zip_longest(it1, it2)
 
 def expand_range(arg, value_delimiter=',', range_delimiter='-'):
     """
