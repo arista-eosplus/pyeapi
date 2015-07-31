@@ -50,7 +50,7 @@ import re
 from pyeapi.api import EntityCollection
 
 
-SWITCHPORT_RE = re.compile(r'^\s{3}switchport$', re.M)
+SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
 class Ipinterfaces(EntityCollection):
 
@@ -76,7 +76,7 @@ class Ipinterfaces(EntityCollection):
         """
         config = self.get_block('interface %s' % name)
 
-        if SWITCHPORT_RE.search(config, re.M):
+        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config, re.M):
             return None
 
         resource = dict(name=name)

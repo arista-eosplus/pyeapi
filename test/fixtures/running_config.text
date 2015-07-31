@@ -531,6 +531,8 @@ interface Ethernet1
    switchport trunk allowed vlan 1-4094
    switchport mode access
    switchport mac address learning
+   switchport trunk group foo
+   switchport trunk group bar
    no switchport private-vlan mapping
    switchport
    default encapsulation dot1q vlan
@@ -1441,6 +1443,7 @@ interface Loopback0
    no shutdown
    default load-interval
    mtu 1500
+   no switchport
    logging event link-status use-global
    snmp trap link-status
    no ipv6 enable

@@ -1,0 +1,19 @@
+!
+ip routing
+!
+router bgp 65000
+   router-id 1.1.1.1
+   neighbor test peer-group
+   neighbor test remote-as 65001
+   neighbor test maximum-routes 12000
+   neighbor test1 peer-group
+   neighbor test1 route-map RM-IN in
+   neighbor test1 route-map RM-OUT out
+   neighbor test1 maximum-routes 12000
+   neighbor 172.16.10.1 remote-as 65000
+   neighbor 172.16.10.1 maximum-routes 12000
+   neighbor 172.16.10.1 peer-group test
+   network 172.16.10.0/24
+   network 172.17.0.0/16
+!
+!

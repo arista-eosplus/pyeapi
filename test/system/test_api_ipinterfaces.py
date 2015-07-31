@@ -44,10 +44,10 @@ class TestResourceIpinterfaces(DutSystemTest):
         for dut in self.duts:
             intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
-                        'no switchport', 'ip address 99.99.99.99/24',
+                        'no switchport', 'ip address 99.98.99.99/24',
                         'mtu 1800'])
             result = dut.api('ipinterfaces').get(intf)
-            values = dict(name=intf, address='99.99.99.99/24',
+            values = dict(name=intf, address='99.98.99.99/24',
                           mtu=1800)
             self.assertEqual(values, result, 'dut=%s' % dut)
 

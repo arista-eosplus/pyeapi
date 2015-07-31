@@ -48,9 +48,9 @@ class TestApiSystem(EapiConfigUnitTest):
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        keys = ['hostname']
+        keys = ['hostname', 'iprouting']
         result = self.instance.get()
-        self.assertEqual(keys, list(result.keys()))
+        self.assertEqual(sorted(keys), sorted(list(result.keys())))
 
     def test_set_hostname(self):
         for state in ['config', 'negate', 'default']:
@@ -65,6 +65,22 @@ class TestApiSystem(EapiConfigUnitTest):
                 cmds = 'default hostname'
                 func = function('set_hostname', value=value, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+    def test_set_iprouting(self):
+        for state in ['config', 'negate', 'default']:
+            if state == 'config':
+                cmds = 'ip routing'
+                func = function('set_iprouting', True)
+            elif state == 'negate':
+                cmds = 'no ip routing'
+                func = function('set_iprouting', False)
+            elif state == 'default':
+                cmds = 'default ip routing'
+                func = function('set_iprouting', default=True)
+            self.eapi_positive_config_test(func, cmds)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
