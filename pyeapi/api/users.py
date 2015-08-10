@@ -80,7 +80,7 @@ class Users(EntityCollection):
     users_re = re.compile(r'username ([^\s]+) privilege (\d+)'
                           r'(?: role ([^\s]+))?'
                           r'(?: (nopassword))?'
-                          r'(?: secret ([0,5,7]) (.+))?', re.M)
+                          r'(?: secret (0|5|7|sha512) (.+))?', re.M)
 
     def get(self, name):
         """Returns the local user configuration as a resource dict
