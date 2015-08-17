@@ -142,6 +142,15 @@ class TestApiMlag(DutSystemTest):
             self.assertTrue(result)
             self.assertIn('peer-link Ethernet1', api.get_block('mlag configuration'))
 
+    def test_set_peer_link_with_value_portchannel(self):
+        for dut in self.duts:
+            dut.config(['default mlag configuration','interface Port-Channel5'])
+            api = dut.api('mlag')
+            self.assertIn('no peer-link', api.get_block('mlag configuration'))
+            result = dut.api('mlag').set_peer_link('Port-Channel5')
+            self.assertTrue(result)
+            self.assertIn('peer-link Port-Channel5', api.get_block('mlag configuration'))
+
     def test_set_peer_link_with_no_value(self):
         for dut in self.duts:
             dut.config(['mlag configuration', 'peer-link Ethernet1'])
