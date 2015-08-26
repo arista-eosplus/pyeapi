@@ -587,7 +587,8 @@ class PortchannelInterface(BaseInterface):
         grpid = re.search(r'(\d+)', name).group()
         command = 'show port-channel %s all-ports' % grpid
         config = self.node.enable(command, 'text')
-        return re.findall(r'Ethernet[\d/]*', config[0]['result']['output'])
+        return re.findall(r'\b(?!Peer)Ethernet[\d/]*\b',
+                          config[0]['result']['output'])
 
     def set_members(self, name, members):
         """Configures the array of member interfaces for the Port-Channel
@@ -917,7 +918,3 @@ INTERFACE_CLASS_MAP = {
 
 def instance(api):
     return Interfaces(api)
-
-
-
-
