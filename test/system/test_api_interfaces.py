@@ -163,6 +163,28 @@ class TestPortchannelInterface(DutSystemTest):
             result = instance.get_members('Port-Channel1')
             self.assertEqual(result, list(), 'dut=%s' % dut)
 
+    def test_get_members_one_member(self):
+        for dut in self.duts:
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1',
+                        'default interface Ethernet1',
+                        'interface Ethernet1',
+                        'channel-group 1 mode active'])
+            instance = dut.api('interfaces').get_instance('Port-Channel1')
+            result = instance.get_members('Port-Channel1')
+            self.assertEqual(result, ['Ethernet1'], 'dut=%s' % dut)
+
+    def test_get_members_two_members(self):
+        for dut in self.duts:
+            dut.config(['no interface Port-Channel1',
+                        'interface Port-Channel1',
+                        'default interface Ethernet1-2',
+                        'interface Ethernet1-2',
+                        'channel-group 1 mode active'])
+            instance = dut.api('interfaces').get_instance('Port-Channel1')
+            result = instance.get_members('Port-Channel1')
+            self.assertEqual(result, ['Ethernet1', 'Ethernet2'], 'dut=%s' % dut)
+
     def test_set_lacp_mode(self):
         for dut in self.duts:
             for mode in ['on', 'active', 'passive']:
