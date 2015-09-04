@@ -52,7 +52,7 @@ class TestApiUsers(EapiConfigUnitTest):
         self.assertFalse(result)
 
     def test_get(self):
-        keys = ['nopassword', 'privilege', 'role', 'secret', 'format']
+        keys = ['nopassword', 'privilege', 'role', 'secret', 'format', 'sshkey']
         result = self.instance.get('test')
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
@@ -123,12 +123,5 @@ class TestApiUsers(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
 
-
-
-
-
-
 if __name__ == '__main__':
     unittest.main()
-
-
