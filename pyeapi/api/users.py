@@ -282,7 +282,7 @@ class Users(EntityCollection):
             True if the operation was successful otherwise False
         """
         cmd = 'username %s' % name
-        if value is not None:
+        if value:
             cmd += ' sshkey %s' % value
         else:
             cmd = 'no username %s sshkey' % name
