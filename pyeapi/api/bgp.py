@@ -138,6 +138,9 @@ class Bgp(Entity):
 
     def set_maximum_paths(self, max_path=None, max_ecmp_path=None, default=False):
         # You cannot configure max_ecmp_path without max_paths
+        if not max_path and max_ecmp_path:
+            raise TypeError('Cannot use maximum_ecmp_paths without'
+                            'providing max_path')
         if default:
             cmd = 'default maximum-paths'
         elif max_path:
@@ -145,7 +148,7 @@ class Bgp(Entity):
             if max_ecmp_path:
                 cmd += ' ecmp {}'.format(max_ecmp_path)
         else:
-            cmd = 'default maximum-paths'
+            cmd = 'no maximum-paths'
         return self.configure_bgp(cmd)
 
     def set_shutdown(self, value=None, default=False):
