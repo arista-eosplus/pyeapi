@@ -99,23 +99,29 @@ class TestApiBgp(EapiConfigUnitTest):
             self.eapi_positive_config_test(func, cmds)
 
     def test_maximum_paths_just_max_path(self):
-        for state in ['config', 'default']:
+        for state in ['config', 'negate', 'default']:
             max_paths = 20
             if state == 'config':
                 cmds = ['router bgp 65000', 'maximum-paths 20']
                 func = function('set_maximum_paths', max_paths)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no maximum-paths']
+                func = function('set_maximum_paths')
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_maximum_paths_max_path_and_ecmp(self):
-        for state in ['config', 'default']:
+        for state in ['config', 'negate', 'default']:
             max_paths = 20
             max_ecmp_path = 20
             if state == 'config':
                 cmds = ['router bgp 65000', 'maximum-paths 20 ecmp 20']
                 func = function('set_maximum_paths', max_paths, max_ecmp_path)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no maximum-paths']
+                func = function('set_maximum_paths')
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
