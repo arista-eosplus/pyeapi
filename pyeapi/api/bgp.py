@@ -87,7 +87,7 @@ class Bgp(Entity):
         return dict(router_id=value)
 
     def _parse_max_paths(self, config):
-        match = re.search(r'/maximum-paths\s+(\d+)\s+ecmp\s+(\d+)/', config)
+        match = re.search(r'maximum-paths\s+(\d+)\s+ecmp\s+(\d+)', config)
         paths = int(match.group(1)) if match else None
         ecmp_paths = int(match.group(2)) if match else None
         return dict(maximum_paths=paths, maximum_ecmp_paths=ecmp_paths)
