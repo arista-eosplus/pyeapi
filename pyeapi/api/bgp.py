@@ -69,6 +69,7 @@ class Bgp(Entity):
         response = dict()
         response.update(self._parse_bgp_as(config))
         response.update(self._parse_router_id(config))
+        response.update(self._parse_max_paths(config))
         response.update(self._parse_shutdown(config))
         response.update(self._parse_networks(config))
 
@@ -84,6 +85,12 @@ class Bgp(Entity):
         match = re.search(r'router-id ([^\s]+)', config)
         value = match.group(1) if match else None
         return dict(router_id=value)
+
+    def _parse_max_paths(self, config):
+        match = re.search(r'maximum-paths\s+(\d+)\s+ecmp\s+(\d+)', config)
+        paths = int(match.group(1)) if match else None
+        ecmp_paths = int(match.group(2)) if match else None
+        return dict(maximum_paths=paths, maximum_ecmp_paths=ecmp_paths)
 
     def _parse_shutdown(self, config):
         value = 'no shutdown' in config
@@ -127,6 +134,20 @@ class Bgp(Entity):
 
     def set_router_id(self, value=None, default=False):
         cmd = self.command_builder('router-id', value=value, default=default)
+        return self.configure_bgp(cmd)
+
+    def set_maximum_paths(self, max_path=None, max_ecmp_path=None, default=False):
+        if not max_path and max_ecmp_path:
+            raise TypeError('Cannot use maximum_ecmp_paths without '
+                            'providing max_path')
+        if default:
+            cmd = 'default maximum-paths'
+        elif max_path:
+            cmd = 'maximum-paths {}'.format(max_path)
+            if max_ecmp_path:
+                cmd += ' ecmp {}'.format(max_ecmp_path)
+        else:
+            cmd = 'no maximum-paths'
         return self.configure_bgp(cmd)
 
     def set_shutdown(self, value=None, default=False):
