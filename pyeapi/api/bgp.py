@@ -137,9 +137,8 @@ class Bgp(Entity):
         return self.configure_bgp(cmd)
 
     def set_maximum_paths(self, max_path=None, max_ecmp_path=None, default=False):
-        # You cannot configure max_ecmp_path without max_paths
         if not max_path and max_ecmp_path:
-            raise TypeError('Cannot use maximum_ecmp_paths without'
+            raise TypeError('Cannot use maximum_ecmp_paths without '
                             'providing max_path')
         if default:
             cmd = 'default maximum-paths'
