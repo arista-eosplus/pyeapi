@@ -31,7 +31,7 @@
 #
 """API Module for working with EOS local user resources
 
-The Users resource provides configuraiton of local user resources for
+The Users resource provides configuration of local user resources for
 an EOS node.
 
 Parameters:
@@ -102,14 +102,10 @@ class Users(EntityCollection):
         return self.getall().get(name)
 
     def getall(self):
-        """Returns the local user configuration as a resource dict
-
-        Args:
-            name (str): The username to return from the nodes global running-
-                config.
+        """Returns all local users configuration as a resource dict
 
         Returns:
-            dict: A resource dict object
+            dict: A dict of usernames with a nested resource dict object
         """
         users = self.users_re.findall(self.config, re.M)
         resources = dict()
@@ -140,7 +136,7 @@ class Users(EntityCollection):
     def create(self, name, nopassword=None, secret=None, encryption=None):
         """Creates a new user on the local system.
 
-        Creating users require either a secret (password) or the nopassword
+        Creating users requires either a secret (password) or the nopassword
         keyword to be specified.
 
         Args:
@@ -256,7 +252,7 @@ class Users(EntityCollection):
         """Configures the user role vale in EOS
 
         Args:
-            name (str): The name of the user to craete
+            name (str): The name of the user to create
 
             value (str): The value to configure for the user role
 
