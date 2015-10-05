@@ -31,7 +31,7 @@
 #
 """API Module for working with EOS local user resources
 
-The Users resource provides configuraiton of local user resources for
+The Users resource provides configuration of local user resources for
 an EOS node.
 
 Parameters:
@@ -140,7 +140,7 @@ class Users(EntityCollection):
     def create(self, name, nopassword=None, secret=None, encryption=None):
         """Creates a new user on the local system.
 
-        Creating users require either a secret (password) or the nopassword
+        Creating users requires either a secret (password) or the nopassword
         keyword to be specified.
 
         Args:
@@ -256,7 +256,7 @@ class Users(EntityCollection):
         """Configures the user role vale in EOS
 
         Args:
-            name (str): The name of the user to craete
+            name (str): The name of the user to create
 
             value (str): The value to configure for the user role
 
