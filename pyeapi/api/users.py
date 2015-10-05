@@ -102,11 +102,7 @@ class Users(EntityCollection):
         return self.getall().get(name)
 
     def getall(self):
-        """Returns the local user configuration as a resource dict
-
-        Args:
-            name (str): The username to return from the nodes global running-
-                config.
+        """Returns the all local users configuration as a resource dict
 
         Returns:
             dict: A resource dict object
