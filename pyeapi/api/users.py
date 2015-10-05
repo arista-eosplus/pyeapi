@@ -102,10 +102,10 @@ class Users(EntityCollection):
         return self.getall().get(name)
 
     def getall(self):
-        """Returns the all local users configuration as a resource dict
+        """Returns all local users configuration as a resource dict
 
         Returns:
-            dict: A resource dict object
+            dict: A dict of usernames with a nested resource dict object
         """
         users = self.users_re.findall(self.config, re.M)
         resources = dict()
