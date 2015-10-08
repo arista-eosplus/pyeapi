@@ -76,14 +76,15 @@ class TestApiRoutemaps(EapiConfigUnitTest):
 
     def test_set_set_statement_clean(self):
         cmds = ['route-map new permit 100', 'set weight 100']
-        func = function('set_set_statements', 'new', 'permit', 10,
+        func = function('set_set_statements', 'new', 'permit', 100,
                         ['weight 100'])
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_set_statement_remove_extraneous(self):
         # Review fixtures/running_config.routemaps to see the default
         # running-config that is the basis for this test
-        cmds = ['route-map TEST permit 10', 'no set tag 50', 'set weight 100']
+        cmds = ['route-map TEST permit 10', 'no set tag 50',
+                'route-map TEST permit 10', 'set weight 100']
         func = function('set_set_statements', 'TEST', 'permit', 10,
                         ['weight 100'])
         self.eapi_positive_config_test(func, cmds)
@@ -98,7 +99,7 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         # Review fixtures/running_config.routemaps to see the default
         # running-config that is the basis for this test
         cmds = ['route-map TEST permit 10', 'no match interface Ethernet1',
-                'match as 1000']
+                'route-map TEST permit 10', 'match as 1000']
         func = function('set_match_statements', 'TEST', 'permit', 10,
                         ['as 1000'])
         self.eapi_positive_config_test(func, cmds)
