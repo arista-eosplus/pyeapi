@@ -29,41 +29,26 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-"""Module for working with EOS MLAG resources
+"""Module for working with EOS routemap resources
 
-The Mlag resource provides configuration management of global and interface
-MLAG settings on an EOS node.
+The Routemap resource provides configuration management of global route-map
+resources on an EOS node. It provides the following class implementations:
 
-Parameters:
+    * Routemaps - Configures routemaps in EOS
 
-    config (dict): The global MLAG configuration values
+Routemaps Attributes:
+    name (string): The name given to the routemap clause
+    action (choices: permit/deny): How the clause will filter the route
+    seqno (integer): The sequence number of this clause
+    set (list): The list of set statements present in this clause
+    match (list): The list of match statements present in this clause.
+    continue (integer): The next sequence number to evaluate if the criteria
+                        in this clause are met.
 
-    interfaces (dict): The configured MLAG interfaces
-
-Config Parameters:
-    domain_id (str): The domain_id parameter  is parsed from the nodes
-        mlag configuration.  The domain id is an alphanumeric string that
-        names the MLAG domain
-
-    local_interface (str): The local VLAN interface used as the control
-        plane endpoint between MLAG peers.  Valid values include any
-        VLAN SVI
-
-    peer_address (str): The IP address of the MLAG peer used to send MLAG
-        control traffic.  The peer address must be reachable from the
-        local interface.  Valid values include any IPv4 unicast address
-
-    peer_link (str): The physical link that connects the node to its MLAG
-        peer.  Valid values for the peer link include layer 2 Ethernet or
-        Port-Channel interfaces
-
-    shutdown (bool): The administrative state of the global MLAG process.
-
-Interface Parameters:
-    mlag_id (str): The interface mlag parameter parsed from the nodes
-        interface configuration.  Valid values for the mlag id are in
-        the range of 1 to 2000
-
+Notes:
+    The \'set\' and \'match\' attributes produce a list of strings with The
+    corresponding configuration. These strings will omit the preceeding
+    \'set\' or \'match\' words, respectively.
 """
 
 import re
