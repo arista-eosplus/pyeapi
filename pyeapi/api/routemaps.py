@@ -110,7 +110,7 @@ class Routemaps(Entity):
         return {'continue': value}
 
     def _parse_description(self, config):
-        desc_re = re.compile(r'^\s+description\s\'(.+)\'$', re.M)
+        desc_re = re.compile(r'^\s+description\s(.+)$', re.M)
         match = desc_re.search(config)
         value = match.group(1) if match else None
         return dict(description=value)
