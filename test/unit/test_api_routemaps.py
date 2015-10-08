@@ -112,7 +112,8 @@ class TestApiRoutemaps(EapiConfigUnitTest):
 
     def test_set_description_with_value(self):
         value = random_string()
-        cmds = ['route-map TEST permit 10', 'description %s' % value]
+        cmds = ['route-map TEST permit 10', 'no description',
+                'description %s' % value]
         func = function('set_description', 'TEST', 'permit', 10, value)
         self.eapi_positive_config_test(func, cmds)
 

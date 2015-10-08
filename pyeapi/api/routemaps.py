@@ -299,6 +299,7 @@ class Routemaps(Entity):
         if default:
             commands.append('default description')
         elif value is not None:
+            commands.append('no description')
             commands.append('description %s' % value)
         else:
             commands.append('no description')
