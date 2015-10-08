@@ -71,7 +71,7 @@ class TestApiRoutemaps(EapiConfigUnitTest):
                 cmds = 'no route-map new permit 100'
             elif name == 'default':
                 cmds = 'default route-map new permit 100'
-            func = function(name, 'test')
+            func = function(name, 'new', 'permit', 100)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_set_statement_clean(self):
@@ -99,13 +99,13 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         # running-config that is the basis for this test
         cmds = ['route-map TEST permit 10', 'no match interface Ethernet1',
                 'match as 1000']
-        func = function('set_set_statements', 'TEST', 'permit', 10,
+        func = function('set_match_statements', 'TEST', 'permit', 10,
                         ['as 1000'])
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_continue(self):
         cmds = ['route-map TEST permit 10', 'continue 100']
-        func = function('set_continue', 'TESt', 'permit', 10, 100)
+        func = function('set_continue', 'TEST', 'permit', 10, 100)
         self.eapi_positive_config_test(func, cmds)
 
 
