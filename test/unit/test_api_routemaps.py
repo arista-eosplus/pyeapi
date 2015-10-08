@@ -35,7 +35,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, function
+from testlib import get_fixture, function, random_string
 from testlib import EapiConfigUnitTest
 
 import pyeapi.api.routemaps
@@ -53,7 +53,8 @@ class TestApiRoutemaps(EapiConfigUnitTest):
 
     def test_get(self):
         result = self.instance.get('TEST', 'permit', 10)
-        keys = ['name', 'action', 'seqno', 'set', 'match', 'continue']
+        keys = ['name', 'action', 'seqno', 'set', 'match', 'continue',
+                'description']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
     def test_get_not_configured(self):
@@ -109,6 +110,11 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         func = function('set_continue', 'TEST', 'permit', 10, 100)
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_description_with_value(self):
+        value = random_string()
+        cmds = ['route-map TEST permit 10', 'description %s' % value]
+        func = function('set_description', 'TEST', 'permit', 10, value)
+        self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

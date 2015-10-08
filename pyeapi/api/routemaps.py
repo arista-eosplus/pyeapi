@@ -40,15 +40,16 @@ Routemaps Attributes:
     name (string): The name given to the routemap clause
     action (choices: permit/deny): How the clause will filter the route
     seqno (integer): The sequence number of this clause
+    description (string): A description for the routemap clause
     set (list): The list of set statements present in this clause
     match (list): The list of match statements present in this clause.
     continue (integer): The next sequence number to evaluate if the criteria
                         in this clause are met.
 
 Notes:
-    The \'set\' and \'match\' attributes produce a list of strings with The
+    The set and match attributes produce a list of strings with The
     corresponding configuration. These strings will omit the preceeding
-    \'set\' or \'match\' words, respectively.
+    set or match words, respectively.
 """
 
 import re
@@ -91,14 +92,15 @@ class Routemaps(Entity):
         resource.update(self._parse_match_statements(routemap))
         resource.update(self._parse_set_statements(routemap))
         resource.update(self._parse_continue_statement(routemap))
+        resource.update(self._parse_description(routemap))
         return resource
 
     def _parse_match_statements(self, config):
-        match_re = re.compile(r'^\s+match\s(.*)$', re.M)
+        match_re = re.compile(r'^\s+match\s(.+)$', re.M)
         return dict(match=match_re.findall(config))
 
     def _parse_set_statements(self, config):
-        set_re = re.compile(r'^\s+set\s(.*)$', re.M)
+        set_re = re.compile(r'^\s+set\s(.+)$', re.M)
         return dict(set=set_re.findall(config))
 
     def _parse_continue_statement(self, config):
@@ -106,6 +108,12 @@ class Routemaps(Entity):
         match = continue_re.search(config)
         value = int(match.group(1)) if match else None
         return {'continue': value}
+
+    def _parse_description(self, config):
+        desc_re = re.compile(r'^\s+description\s\'(.+)\'$', re.M)
+        match = desc_re.search(config)
+        value = match.group(1) if match else None
+        return dict(description=value)
 
     def create(self, name, action, seqno):
         """Creates a new routemap on the node
@@ -247,7 +255,7 @@ class Routemaps(Entity):
         return self.configure(commands) if commands else True
 
     def set_continue(self, name, action, seqno, value=None, default=False):
-        """Configures the routemap \'continue\' value
+        """Configures the routemap continue value
 
         Args:
             name (string): The full name of the routemap.
@@ -270,6 +278,30 @@ class Routemaps(Entity):
             commands.append('continue %s' % value)
         else:
             commands.append('no continue')
+
+        return self.configure(commands)
+
+    def set_description(self, name, action, seqno, value=None, default=False):
+        """Configures the routemap description
+
+        Args:
+            name (string): The full name of the routemap.
+            action (choices: permit,deny): The action to take for this routemap
+                                           clause.
+            seqno (integer): The sequence number for the routemap clause.
+            value (string): The value to configure for the routemap description
+            default (bool): Specifies to default the routemap continue value
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        commands = ['route-map %s %s %s' % (name, action, seqno)]
+        if default:
+            commands.append('default description')
+        elif value is not None:
+            commands.append('description %s' % value)
+        else:
+            commands.append('no description')
 
         return self.configure(commands)
 

@@ -36,6 +36,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from systestlib import DutSystemTest
+from testlib import random_string
 
 
 class TestApiRoutemaps(DutSystemTest):
@@ -118,6 +119,20 @@ class TestApiRoutemaps(DutSystemTest):
             result = dut.api('routemaps').default('TEST', 'deny', 10)
             self.assertTrue(result)
             self.assertIsNone(api.get('TEST', 'deny', 10))
+
+    def test_set_description(self):
+        for dut in self.duts:
+            text = random_string()
+            dut.config(['no route-map TEST deny 10',
+                        'route-map TEST deny 10'])
+            api = dut.api('routemaps')
+            self.assertNotIn('description %s' % text,
+                             api.get_block('route-map TEST deny 10'))
+            result = dut.api('routemaps').set_description('TEST', 'deny', 10,
+                                                          text)
+            self.assertTrue(result)
+            self.assertIn('description %s' % text,
+                          api.get_block('route-map TEST deny 10'))
 
     def test_set_match_statements(self):
         for dut in self.duts:
