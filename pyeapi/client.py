@@ -375,7 +375,7 @@ def make_connection(transport, **kwargs):
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None):
+            password='', port=None, timeout=60):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -401,7 +401,7 @@ def connect(transport=None, host='localhost', username='admin',
     """
     transport = transport or DEFAULT_TRANSPORT
     return make_connection(transport, host=host, username=username,
-                           password=password, port=port)
+                           password=password, port=port, timeout=timeout)
 
 
 class Node(object):
@@ -745,7 +745,3 @@ def connect_to(name):
                          port=kwargs.get('port'))
     node = Node(connection, **kwargs)
     return node
-
-
-
-
