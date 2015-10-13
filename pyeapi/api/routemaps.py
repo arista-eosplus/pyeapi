@@ -38,7 +38,8 @@ resources on an EOS node. It provides the following class implementations:
 
 Routemaps Attributes:
     name (string): The name given to the routemap clause
-    action (choices: permit/deny): How the clause will filter the route
+    action (string): How the clause will filter the route. Typically
+                     permit or deny.
     seqno (integer): The sequence number of this clause
     description (string): A description for the routemap clause
     set (list): The list of set statements present in this clause
@@ -125,18 +126,13 @@ class Routemaps(Entity):
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
 
         Returns:
             True if the routemap could be created otherwise False (see Note)
 
         """
-        if action not in ['permit', 'deny']:
-            raise ValueError('action must be permit or deny')
-        if seqno < 1 or seqno > 16777215:
-            raise ValueError('seqno must be an integer between 1 and 16777215')
         return self.configure('route-map %s %s %s' % (name, action, seqno))
 
     def delete(self, name, action, seqno):
@@ -149,8 +145,7 @@ class Routemaps(Entity):
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
 
         Returns:
@@ -172,8 +167,7 @@ class Routemaps(Entity):
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
 
         Returns:
@@ -184,18 +178,19 @@ class Routemaps(Entity):
                               % (name, action, seqno))
 
     def set_match_statements(self, name, action, seqno, statements):
-        """Configures the match statements that are found within the
-        routemap clause. Match statements found in the routemap that
-        are not specified in the \'statements\' list will be removed.
+        """Configures the match statements within the routemap clause.
+        The final configuration of match statements will reflect the list
+        of statements passed into the statements attribute. This implies
+        match statements found in the routemap that are not specified in the
+        statements attribute will be removed.
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
             statements (list): A list of the match-related statements. Note
                                that the statements should omit the leading
-                               \'match\'.
+                               match.
 
         Returns:
             True if the operation succeeds otherwise False
@@ -220,17 +215,18 @@ class Routemaps(Entity):
         return self.configure(commands) if commands else True
 
     def set_set_statements(self, name, action, seqno, statements):
-        """Configures the set statements that are found within the
-        routemap clause. Set statements found in the routemap that
-        are not specified in the \'statements\' list will be removed.
+        """Configures the set statements within the routemap clause.
+        The final configuration of set statements will reflect the list
+        of statements passed into the statements attribute. This implies
+        set statements found in the routemap that are not specified in the
+        statements attribute will be removed.
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
             statements (list): A list of the set-related statements. Note that
-                               the statements should omit the leading \'set\'.
+                               the statements should omit the leading set.
 
         Returns:
             True if the operation succeeds otherwise False
@@ -259,8 +255,7 @@ class Routemaps(Entity):
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
             value (integer): The value to configure for the routemap continue
             default (bool): Specifies to default the routemap continue value
@@ -272,9 +267,8 @@ class Routemaps(Entity):
         if default:
             commands.append('default continue')
         elif value is not None:
-            if value < 1 or value > 16777215:
-                raise ValueError('seqno must be an integer between '
-                                 '1 and 16777215')
+            if value < 1:
+                raise ValueError('seqno must be a positive integer')
             commands.append('continue %s' % value)
         else:
             commands.append('no continue')
@@ -286,8 +280,7 @@ class Routemaps(Entity):
 
         Args:
             name (string): The full name of the routemap.
-            action (choices: permit,deny): The action to take for this routemap
-                                           clause.
+            action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
             value (string): The value to configure for the routemap description
             default (bool): Specifies to default the routemap continue value
