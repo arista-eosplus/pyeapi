@@ -1,0 +1,19 @@
+interface Vlan4001
+   ip address 1.1.1.1/24
+   ip virtual-router address 1.1.1.2
+   ip virtual-router address 1.1.1.3
+   ip virtual-router address 1.1.1.4
+   ip virtual-router address 1.1.1.5
+   ip virtual-router address 1.1.1.6
+!
+interface Vlan4002
+   ip address 1.1.2.1/24
+   ip virtual-router address 1.1.2.2
+   ip virtual-router address 1.1.2.3
+   ip virtual-router address 1.1.2.4
+   ip virtual-router address 1.1.2.5
+   ip virtual-router address 1.1.2.6
+!
+interface Vlan4003
+   ip address 1.1.2.1/24
+!
