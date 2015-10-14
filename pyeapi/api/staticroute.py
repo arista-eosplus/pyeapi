@@ -29,9 +29,8 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# XXX fix the documentation below
 """Module for working with EOS static routes
-XXX
+
 The staticroute resource provides configuration management of static
 route resources on an EOS node. It provides the following class
 implementations:
@@ -58,15 +57,32 @@ import re
 from pyeapi.api import EntityCollection
 
 # Create the regular expression for matching ip route strings
-ROUTES_RE = re.compile(r'''(?<=^ip\sroute\s)
-                           (?P<ip_dest>[^\s]+)\s
-                           (?P<next_hop>[^\s$]+)
-                           [\s|$]{0,1}(?P<next_hop_ip>\d+\.\d+\.\d+\.\d+)?
-                           [\s|$](?P<distance>\d+)
-                           [\s|$]{1}(?:tag\s(?P<tag>\d+))?
-                           [\s|$]{1}(?:name\s(?P<name>.+))?
-                        ''', re.X)
+# ROUTES_RE = re.compile(r'''(?<=^ip\sroute\s)
+#                            (?P<ip_dest>[^\s]+)\s
+#                            (?P<next_hop>[^\s$]+)
+#                            [\s|$]{0,1}(?P<next_hop_ip>\d+\.\d+\.\d+\.\d+)?
+#                            [\s|$](?P<distance>\d+)
+#                            [\s|$]{1}(?:tag\s(?P<tag>\d+))?
+#                            [\s|$]{1}(?:name\s(?P<name>.+))?
+#                         ''', re.X)
+# Define the regex to match ip route lines (by lines in regex):
+#   'ip route' header
+#   ip_dest
+#   next_hop
+#   next_hop_ip
+#   distance
+#   tag
+#   name
+ROUTES_RE = re.compile(r'(?<=^ip route)'
+                       r' (\d+\.\d+\.\d+\.\d+\/\d+)'
+                       r' (\d+\.\d+\.\d+\.\d+|\S+)'
+                       r'(?: (\d+\.\d+\.\d+\.\d+))?'
+                       r' (\d+)'
+                       r'(?: tag (\d+))?'
+                       r'(?: name (\S+))?', re.M)
+# (?<=^ip route )(\d+\.\d+\.\d+\.\d+\/\d+) (\d+\.\d+\.\d+\.\d+|[^\s]+)(?: (\d+\.\d+\.\d+\.\d+))?( \d+)(?: tag (\d+))?(?: name (\S+))?
 
+ROUTE_ID = "%s--%s--%s"
 
 class StaticRoute(EntityCollection):
     """The StaticRoute class provides a configuration instance
@@ -77,131 +93,67 @@ class StaticRoute(EntityCollection):
     def __str__(self):
         return 'StaticRoute'
 
-    def get(self, ip_dest, next_hop, next_hop_ip=None,
-            distance=None, tag=None, route_name=None):
-        """Check the running config for a route that matches the input
-            values exactly.
-
-        This may be used as a route_exists function.
+    def get(self, ip_dest, next_hop, distance):
+        """Retrieves the ip route information for the route specified
+            by the ip_dest, next_hop, and distance parameters
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
             distance (int): Administrative distance for this route
-            tag (int): Route tag
-            route_name (string): Route name
 
-        Returns the matched ip route string if the route entry exists,
-        otherwise returns False.
+        Returns:
+            dict: An ip route dict object
+
+            If the unique route specified by the ip_dest, next_hop, and
+            distance does not exist, then None is returned.
         """
 
-        # If distance is None, then distance on the switch is 1 by default
+        # If distance is None, then set to 1 to match what EOS will
+        # do when distance is not specified.
         if distance is None:
             distance = 1
 
-        # If tag is None, then tag on the switch is 0 by default
-        if tag is None:
-            tag = 0
+        # Make the unique route_id for the requested route
+        route_id = ROUTE_ID % (ip_dest, next_hop, distance)
 
-        # Create the match string based on the parameters received
-        match_str = self._build_commands(ip_dest, next_hop,
-                                         next_hop_ip=next_hop_ip,
-                                         distance=distance,
-                                         tag=tag,
-                                         route_name=route_name)
-        ip_route_re = re.compile(r'^%s$' % match_str, re.M)
+        # Return the route configuration if found, or return None
+        return self.getall().get(route_id)
 
-        # Search the configuration for the match string
-        config = ip_route_re.search(self.config)
+    def getall(self):
+        """Return all ip routes configured on the switch as a resource dict
 
-        # Return the matched string from the config if found, otherwise
-        # will return None
-        return config.group(0)
-
-    def get_all(self, ip_dest, next_hop, next_hop_ip=None,
-                distance=None, tag=None, route_name=None):
-        # XXX documentation
-        """Return a list of all static route strings that contain
-        exact matches for each of the specified parameters. If a
-        parameter is not specified, then static routes with or without
-        that parameter can be matched
-
-        Args:
-            ip_dest (string): The ip address of the destination in the
-                form of A.B.C.D/E
-            next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
-            route_name (string): Route name
-
-        Returns a list of the routes on the list that match all the
-        specified parameters exactly, or None if no matches are found.
+        Returns:
+            dict: A dict of unique ip route names with a nested route
+                dict object. The unique name is built with the ip destination,
+                next hop, and distance values for the route.
         """
 
-        # Initialize the return array
-        match_list = []
+        # Find all the ip routes in the config
+        matches = ROUTES_RE.findall(self.config)
 
-        # Initialize the match string with the required parameters
-        # and the 'ip route' label
-        match_str = "ip route %s %s" % (ip_dest, next_hop)
+        # Parse the routes and add them to the routes dict
+        routes = dict()
+        for match in matches:
+            # Set the route dict to the returned values, replacing
+            # empty strings with None
+            route = dict()
+            route['ip_dest'] = match[0]
+            route['next_hop'] = match[1]
+            route['next_hop_ip'] = None if match[2] is '' else match[2]
+            route['distance'] = match[3]
+            route['tag'] = None if match[4] is '' else match[4]
+            route['route_name'] = None if match[5] is '' else match[5]
 
-        # Each segment should match a specific value if passed in as
-        # a parameter, or if not specified, it should match any value
-        # in that place or an empty string where that toke should be.
-        # The name and tag negation prevents matching tag and name
-        # to an earlier regex which would prevent the exact match
-        # later in the string.
+            # Build a unique route_id from the ip_dest, next_hop, and distance
+            route_id = ROUTE_ID % \
+                (route['ip_dest'], route['next_hop'], route['distance'])
 
-        # If next_hop_ip is specified, look for an exact match,
-        # otherwise allow any or no next_hop_ip to match
-        if next_hop_ip is not None:
-            match_str += " %s" % next_hop_ip
-        else:
-            match_str += "( (?!name)(?!tag)[^\s]*)?"
+            # Update the routes dict
+            routes.update({route_id: route})
 
-        # If distance is specified, look for an exact match,
-        # otherwise allow any or no distance to match
-        if distance is not None:
-            match_str += " %s" % distance
-        else:
-            match_str += "( (?!name)(?!tag)[^\s]*)?"
-
-        # If tag is specified, look for an exact match,
-        # otherwise allow any or no tag to match
-        if tag is not None:
-            match_str += " tag %s" % tag
-        else:
-            match_str += "( (?!name)[^\s]*)?( (?!name)[^\s]*)?"
-
-        # If route_name is specified, look for an exact match,
-        # otherwise allow any or no route_name to match
-        if route_name is not None:
-            match_str += " name %s" % route_name
-        else:
-            match_str += "( [^\s]*)?( [^\s]*)?"
-
-        # Enclose the entire string in parenthesis to capture
-        # the whole string as well as any groups from above
-        match_str = "^(%s)$" % match_str
-
-        ip_route_re = re.compile(r'%s' % match_str, re.M)
-
-        # Add the matching full strings to the match_list, using
-        # the first entry when the result has other groups that
-        # match (when one or more parameters is unspecified), or
-        # using the single string when only the entire string matches.
-        for route in ip_route_re.findall(self.config):
-            if type(route).__name__ == 'str':
-                match_list.append(route)
-            else:
-                match_list.append(route[0])
-
-        return match_list
+        return routes
 
     def create(self, ip_dest, next_hop, next_hop_ip=None,
                distance=None, tag=None, route_name=None):
