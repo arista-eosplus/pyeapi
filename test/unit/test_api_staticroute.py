@@ -57,11 +57,11 @@ class TestApiStaticroute(EapiConfigUnitTest):
     def test_get(self):
         # Test retrieval of a specific static route entry
         # Assumes running_config.text file contains the ip route lines:
-        # ip route 0.0.0.0/0 192.168.1.254 1 tag 0
+        # ip route 0.0.0.0/0 192.68.1.254 1 tag 0
         # ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 tag 1 name test1
 
         ip_dest = '0.0.0.0/0'
-        next_hop = '192.168.1.254'
+        next_hop = '192.68.1.254'
         distance = '1'
         route = dict(ip_dest=ip_dest,
                      next_hop=next_hop,
@@ -90,15 +90,15 @@ class TestApiStaticroute(EapiConfigUnitTest):
         # ip route specifications, and that no additional routes
         # are specified.
 
-        # ip route 0.0.0.0/0 192.168.1.254 1 tag 0
+        # ip route 0.0.0.0/0 192.68.1.254 1 tag 0
         # ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 tag 1 name test1
         # ip route 1.2.3.0/24 Ethernet1 1.1.1.1 10 tag 1 name test1
         # ip route 1.2.3.0/24 Ethernet1 10.1.1.1 20 tag 1 name test1
 
         routes = {
-            '0.0.0.0/0--192.168.1.254--1':
+            '0.0.0.0/0--192.68.1.254--1':
                 {'ip_dest': '0.0.0.0/0',
-                 'next_hop': '192.168.1.254',
+                 'next_hop': '192.68.1.254',
                  'next_hop_ip': None,
                  'distance': '1',
                  'tag': '0',
