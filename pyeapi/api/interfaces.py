@@ -590,7 +590,7 @@ class PortchannelInterface(BaseInterface):
         return re.findall(r'\b(?!Peer)Ethernet[\d/]*\b',
                           config[0]['result']['output'])
 
-    def set_members(self, name, members):
+    def set_members(self, name, members, mode=None):
         """Configures the array of member interfaces for the Port-Channel
 
         Args:
@@ -600,11 +600,17 @@ class PortchannelInterface(BaseInterface):
             members(list): The list of Ethernet interfaces that should be
                 member interfaces
 
+            mode(str): The LACP mode to configure the member interfaces to.
+                Valid values are 'on, 'passive', 'active'
+
         Returns:
             True if the operation succeeds otherwise False
         """
         current_members = self.get_members(name)
-        lacp_mode = self.get_lacp_mode(name)
+        if mode:
+            lacp_mode = mode
+        else:
+            lacp_mode = self.get_lacp_mode(name)
         grpid = re.search(r'(\d+)', name).group()
 
         commands = list()
