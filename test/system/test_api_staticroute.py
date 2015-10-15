@@ -164,21 +164,21 @@ class TestApiStaticroute(DutSystemTest):
             dut.config([route1, route2, route3])
 
             routes = {
-                '1.2.3.0/24--Ethernet1--1.1.1.1--10':
+                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", "10"):
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',
                      'distance': '10',
                      'tag': '1',
                      'route_name': 'test1'},
-                '1.2.3.0/24--Ethernet1--1.1.1.1--1':
+                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", "1"):
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',
                      'distance': '1',
                      'tag': '1',
                      'route_name': 'test10'},
-                '1.2.3.0/24--Ethernet1--1.1.1.1--2':
+                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", "2"):
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',

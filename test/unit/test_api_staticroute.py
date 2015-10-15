@@ -100,28 +100,28 @@ class TestApiStaticroute(EapiConfigUnitTest):
         # ip route 1.2.3.0/24 Ethernet1 10.1.1.1 20 tag 1 name test1
 
         routes = {
-            '0.0.0.0/0--192.68.1.254--None--1':
+            ("0.0.0.0/0", "192.68.1.254", None, "1"):
                 {'ip_dest': '0.0.0.0/0',
                  'next_hop': '192.68.1.254',
                  'next_hop_ip': None,
                  'distance': '1',
                  'tag': '0',
                  'route_name': None},
-            '1.2.3.0/24--Ethernet1--1.1.1.1--1':
+            ("1.2.3.0/24", "Ethernet1", "1.1.1.1", "1"):
                 {'ip_dest': '1.2.3.0/24',
                  'next_hop': 'Ethernet1',
                  'next_hop_ip': '1.1.1.1',
                  'distance': '1',
                  'tag': '1',
                  'route_name': 'test1'},
-            '1.2.3.0/24--Ethernet1--1.1.1.1--10':
+            ("1.2.3.0/24", "Ethernet1", "1.1.1.1", "10"):
                 {'ip_dest': '1.2.3.0/24',
                  'next_hop': 'Ethernet1',
                  'next_hop_ip': '1.1.1.1',
                  'distance': '10',
                  'tag': '1',
                  'route_name': 'test1'},
-            '1.2.3.0/24--Ethernet1--10.1.1.1--20':
+            ("1.2.3.0/24", "Ethernet1", "10.1.1.1", "20"):
                 {'ip_dest': '1.2.3.0/24',
                  'next_hop': 'Ethernet1',
                  'next_hop_ip': '10.1.1.1',
@@ -130,6 +130,7 @@ class TestApiStaticroute(EapiConfigUnitTest):
                  'route_name': 'test1'}
         }
 
+        self.maxDiff = None
         result = self.instance.getall()
         self.assertEqual(result, routes)
 

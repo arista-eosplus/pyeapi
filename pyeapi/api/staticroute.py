@@ -72,9 +72,9 @@ ROUTES_RE = re.compile(r'(?<=^ip route)'
                        r'(?: tag (\d+))?'
                        r'(?: name (\S+))?', re.M)
 
-# Define a format for the unique route id
-# The four parts in order are ip_dest, next_hop, next_hop_ip, and distance
-ROUTE_ID = "%s--%s--%s--%s"
+# # Define a format for the unique route id
+# # The four parts in order are ip_dest, next_hop, next_hop_ip, and distance
+# ROUTE_ID = "%s--%s--%s--%s"
 
 
 class StaticRoute(EntityCollection):
@@ -94,7 +94,7 @@ class StaticRoute(EntityCollection):
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            distance (int): Administrative distance for this route
+            distance (string): Administrative distance for this route
 
         Returns:
             dict: An ip route dict object
@@ -108,8 +108,8 @@ class StaticRoute(EntityCollection):
         if distance is None:
             distance = 1
 
-        # Make the unique route_id for the requested route
-        route_id = ROUTE_ID % (ip_dest, next_hop, next_hop_ip, distance)
+        # Make the unique route_id tuple for the requested route
+        route_id = (ip_dest, next_hop, next_hop_ip, distance)
 
         # Return the route configuration if found, or return None
         return self.getall().get(route_id)
@@ -139,10 +139,10 @@ class StaticRoute(EntityCollection):
             route['tag'] = None if match[4] is '' else match[4]
             route['route_name'] = None if match[5] is '' else match[5]
 
-            # Build a unique route_id from the ip_dest, next_hop, and distance
-            route_id = ROUTE_ID % \
-                (route['ip_dest'], route['next_hop'],
-                 route['next_hop_ip'], route['distance'])
+            # Build a unique route_id tuple from the ip_dest,
+            # next_hop, and distance
+            route_id = (route['ip_dest'], route['next_hop'],
+                        route['next_hop_ip'], route['distance'])
 
             # Update the routes dict
             routes.update({route_id: route})
@@ -159,8 +159,8 @@ class StaticRoute(EntityCollection):
             next_hop (string): The next hop interface or ip address
             next_hop_ip (string): The next hop address on destination
                 interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
             route_name (string): Route name
 
         Returns:
@@ -182,8 +182,8 @@ class StaticRoute(EntityCollection):
             next_hop (string): The next hop interface or ip address
             next_hop_ip (string): The next hop address on destination
                 interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
             route_name (string): Route name
 
         Returns:
@@ -205,8 +205,8 @@ class StaticRoute(EntityCollection):
             next_hop (string): The next hop interface or ip address
             next_hop_ip (string): The next hop address on destination
                 interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
             route_name (string): Route name
 
         Returns:
@@ -228,8 +228,8 @@ class StaticRoute(EntityCollection):
             next_hop (string): The next hop interface or ip address
             next_hop_ip (string): The next hop address on destination
                 interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
             route_name (string): Route name
 
         Returns the ip route command string to be sent to the switch for
@@ -260,8 +260,8 @@ class StaticRoute(EntityCollection):
             next_hop (string): The next hop interface or ip address
             next_hop_ip (string): The next hop address on destination
                 interface
-            distance (int): Administrative distance for this route
-            tag (int): Route tag
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
             route_name (string): Route name
             delete (boolean): If true, deletes the specified route
                 instead of creating or setting values for the route
