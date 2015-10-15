@@ -56,15 +56,6 @@ import re
 
 from pyeapi.api import EntityCollection
 
-# Create the regular expression for matching ip route strings
-# ROUTES_RE = re.compile(r'''(?<=^ip\sroute\s)
-#                            (?P<ip_dest>[^\s]+)\s
-#                            (?P<next_hop>[^\s$]+)
-#                            [\s|$]{0,1}(?P<next_hop_ip>\d+\.\d+\.\d+\.\d+)?
-#                            [\s|$](?P<distance>\d+)
-#                            [\s|$]{1}(?:tag\s(?P<tag>\d+))?
-#                            [\s|$]{1}(?:name\s(?P<name>.+))?
-#                         ''', re.X)
 # Define the regex to match ip route lines (by lines in regex):
 #   'ip route' header
 #   ip_dest
@@ -80,9 +71,11 @@ ROUTES_RE = re.compile(r'(?<=^ip route)'
                        r' (\d+)'
                        r'(?: tag (\d+))?'
                        r'(?: name (\S+))?', re.M)
-# (?<=^ip route )(\d+\.\d+\.\d+\.\d+\/\d+) (\d+\.\d+\.\d+\.\d+|[^\s]+)(?: (\d+\.\d+\.\d+\.\d+))?( \d+)(?: tag (\d+))?(?: name (\S+))?
 
-ROUTE_ID = "%s--%s--%s"
+# Define a format for the unique route id
+# The four parts in order are ip_dest, next_hop, next_hop_ip, and distance
+ROUTE_ID = "%s--%s--%s--%s"
+
 
 class StaticRoute(EntityCollection):
     """The StaticRoute class provides a configuration instance
@@ -93,7 +86,7 @@ class StaticRoute(EntityCollection):
     def __str__(self):
         return 'StaticRoute'
 
-    def get(self, ip_dest, next_hop, distance):
+    def get(self, ip_dest, next_hop, distance, next_hop_ip=None):
         """Retrieves the ip route information for the route specified
             by the ip_dest, next_hop, and distance parameters
 
@@ -116,7 +109,7 @@ class StaticRoute(EntityCollection):
             distance = 1
 
         # Make the unique route_id for the requested route
-        route_id = ROUTE_ID % (ip_dest, next_hop, distance)
+        route_id = ROUTE_ID % (ip_dest, next_hop, next_hop_ip, distance)
 
         # Return the route configuration if found, or return None
         return self.getall().get(route_id)
@@ -148,7 +141,8 @@ class StaticRoute(EntityCollection):
 
             # Build a unique route_id from the ip_dest, next_hop, and distance
             route_id = ROUTE_ID % \
-                (route['ip_dest'], route['next_hop'], route['distance'])
+                (route['ip_dest'], route['next_hop'],
+                 route['next_hop_ip'], route['distance'])
 
             # Update the routes dict
             routes.update({route_id: route})

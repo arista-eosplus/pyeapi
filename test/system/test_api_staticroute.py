@@ -65,25 +65,15 @@ def _next_hop():
 
 
 def _distance():
-    # XXX
-    # distance = choice(DISTANCES)
-    # if distance:
-        return random_int(1, 255)
-    # return distance
+    return random_int(1, 255)
 
 
 def _tag():
-    # tag = choice(TAGS)
-    # if tag:
-        return random_int(0, 255)
-    # return tag
+    return random_int(0, 255)
 
 
 def _route_name():
-    # route_name = choice(ROUTE_NAMES)
-    # if route_name:
-        return random_string(minchar=4, maxchar=10)
-    # return route_name
+    return random_string(minchar=4, maxchar=10)
 
 
 class TestApiStaticroute(DutSystemTest):
@@ -141,7 +131,8 @@ class TestApiStaticroute(DutSystemTest):
                      'tag': tag,
                      'route_name': route_name}
 
-            result = dut.api('staticroute').get(ip_dest, next_hop, distance)
+            result = dut.api('staticroute').get(ip_dest, next_hop, distance,
+                                                next_hop_ip=next_hop_ip)
 
             # Make sure the funtion returns a true result (match found)
             self.assertTrue(result)
@@ -173,21 +164,21 @@ class TestApiStaticroute(DutSystemTest):
             dut.config([route1, route2, route3])
 
             routes = {
-                '1.2.3.0/24--Ethernet1--10':
+                '1.2.3.0/24--Ethernet1--1.1.1.1--10':
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',
                      'distance': '10',
                      'tag': '1',
                      'route_name': 'test1'},
-                '1.2.3.0/24--Ethernet1--1':
+                '1.2.3.0/24--Ethernet1--1.1.1.1--1':
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',
                      'distance': '1',
                      'tag': '1',
                      'route_name': 'test10'},
-                '1.2.3.0/24--Ethernet1--2':
+                '1.2.3.0/24--Ethernet1--1.1.1.1--2':
                     {'ip_dest': '1.2.3.0/24',
                      'next_hop': 'Ethernet1',
                      'next_hop_ip': '1.1.1.1',
@@ -201,53 +192,6 @@ class TestApiStaticroute(DutSystemTest):
 
             # Assert that the result dict is equivalent to the routes dict
             self.assertEqual(result, routes)
-
-    #         # Check that all three routes are returned when only using
-    #         # the ip dest and next hop for the search
-    #         exp_size = 3
-    #         result = dut.api('staticroute').get_all('1.2.3.0/24', 'Ethernet1')
-    #         size = len(result)
-    #         # Assert that size of returned list is as expected
-    #         self.assertEqual(size, exp_size)
-    #         # Assert each expected route is in the list correctly
-    #         self.assertTrue(route1 in result)
-    #         self.assertTrue(route2 in result)
-    #         self.assertTrue(route3 in result)
-    #
-    #         # Check that routes 1 and 3 are returned when specifying
-    #         # route name as 'test1'
-    #         exp_size = 2
-    #         result = dut.api('staticroute').get_all('1.2.3.0/24', 'Ethernet1',
-    #                                                 route_name='test1')
-    #         size = len(result)
-    #         # Assert that size of returned list is as expected
-    #         self.assertEqual(size, exp_size)
-    #         # Assert each expected route is in the list correctly
-    #         self.assertTrue(route1 in result)
-    #         self.assertTrue(route3 in result)
-    #
-    #         # Check that routes 1 and 2 are returned when specifying
-    #         # tag as '1'
-    #         exp_size = 2
-    #         result = dut.api('staticroute').get_all('1.2.3.0/24', 'Ethernet1',
-    #                                                 tag='1')
-    #         size = len(result)
-    #         # Assert that size of returned list is as expected
-    #         self.assertEqual(size, exp_size)
-    #         # Assert each expected route is in the list correctly
-    #         self.assertTrue(route1 in result)
-    #         self.assertTrue(route2 in result)
-    #
-    #         # Check that only route 1 is returned when specifying the
-    #         # distance as 10
-    #         exp_size = 1
-    #         result = dut.api('staticroute').get_all('1.2.3.0/24', 'Ethernet1',
-    #                                                 distance='10')
-    #         size = len(result)
-    #         # Assert that size of returned list is as expected
-    #         self.assertEqual(size, exp_size)
-    #         # Assert each expected route is in the list correctly
-    #         self.assertTrue(route1 in result)
 
     def test_delete(self):
         # Validate the delete function returns without an error
