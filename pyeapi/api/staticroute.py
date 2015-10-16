@@ -72,10 +72,6 @@ ROUTES_RE = re.compile(r'(?<=^ip route)'
                        r'(?: tag (\d+))?'
                        r'(?: name (\S+))?', re.M)
 
-# # Define a format for the unique route id
-# # The four parts in order are ip_dest, next_hop, next_hop_ip, and distance
-# ROUTE_ID = "%s--%s--%s--%s"
-
 
 class StaticRoute(EntityCollection):
     """The StaticRoute class provides a configuration instance
@@ -94,7 +90,7 @@ class StaticRoute(EntityCollection):
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            distance (string): Administrative distance for this route
+            distance (int): Administrative distance for this route
 
         Returns:
             dict: An ip route dict object
@@ -108,8 +104,15 @@ class StaticRoute(EntityCollection):
         if distance is None:
             distance = 1
 
+        # Distance may have been passed in as a string. Convert it
+        # to an integer if possible.
+        try:
+            distance = int(distance)
+        except ValueError:
+            return False
+
         # Make the unique route_id tuple for the requested route
-        route_id = (ip_dest, next_hop, next_hop_ip, int(distance))
+        route_id = (ip_dest, next_hop, next_hop_ip, distance)
 
         # Return the route configuration if found, or return None
         return self.getall().get(route_id)
