@@ -109,7 +109,7 @@ class StaticRoute(EntityCollection):
             distance = 1
 
         # Make the unique route_id tuple for the requested route
-        route_id = (ip_dest, next_hop, next_hop_ip, distance)
+        route_id = (ip_dest, next_hop, next_hop_ip, int(distance))
 
         # Return the route configuration if found, or return None
         return self.getall().get(route_id)
@@ -142,7 +142,7 @@ class StaticRoute(EntityCollection):
             # Build a unique route_id tuple from the ip_dest,
             # next_hop, and distance
             route_id = (route['ip_dest'], route['next_hop'],
-                        route['next_hop_ip'], route['distance'])
+                        route['next_hop_ip'], int(route['distance']))
 
             # Update the routes dict
             routes.update({route_id: route})
