@@ -109,6 +109,7 @@ class StaticRoute(EntityCollection):
         try:
             distance = int(distance)
         except ValueError:
+            # XXX what should be done here?
             return False
 
         # Make the unique route_id tuple for the requested route
