@@ -109,8 +109,7 @@ class StaticRoute(EntityCollection):
         try:
             distance = int(distance)
         except ValueError:
-            # XXX what should be done here?
-            return False
+            raise ValueError("distance parameter must be numerical or None")
 
         # Make the unique route_id tuple for the requested route
         route_id = (ip_dest, next_hop, next_hop_ip, distance)
