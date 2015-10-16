@@ -171,7 +171,7 @@ class StaticRoute(EntityCollection):
             True if the operation succeeds, otherwise False.
         """
 
-        # Call _set_route with the delete flag set to True
+        # Call _set_route with delete and default set to False
         return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
                                distance=distance, tag=tag,
                                route_name=route_name)
@@ -217,10 +217,66 @@ class StaticRoute(EntityCollection):
             True if the operation succeeds, otherwise False.
         """
 
-        # Call _set_route with the delete flag set to True
+        # Call _set_route with the default flag set to True
         return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
                                distance=distance, tag=tag,
                                route_name=route_name, default=True)
+
+    def set_tag(self, ip_dest, next_hop, next_hop_ip=None,
+                distance=None, tag=None, route_name=None):
+        """Set the tag value for the specified route
+
+        Args:
+            ip_dest (string): The ip address of the destination in the
+                form of A.B.C.D/E
+            next_hop (string): The next hop interface or ip address
+            next_hop_ip (string): The next hop address on destination
+                interface
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
+            route_name (string): Route name
+
+        Returns:
+            True if the operation succeeds, otherwise False.
+
+        Notes:
+            Any existing route_name value must be included in call to
+                set_tag, otherwise the tag will be reset
+                by the call to EOS.
+        """
+
+        # Call _set_route with the delete flag set to True
+        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                               distance=distance, tag=tag,
+                               route_name=route_name)
+
+    def set_route_name(self, ip_dest, next_hop, next_hop_ip=None,
+                       distance=None, tag=None, route_name=None):
+        """Set the route_name value for the specified route
+
+        Args:
+            ip_dest (string): The ip address of the destination in the
+                form of A.B.C.D/E
+            next_hop (string): The next hop interface or ip address
+            next_hop_ip (string): The next hop address on destination
+                interface
+            distance (string): Administrative distance for this route
+            tag (string): Route tag
+            route_name (string): Route name
+
+        Returns:
+            True if the operation succeeds, otherwise False.
+
+        Notes:
+            Any existing tag value must be included in call to
+                set_route_name, otherwise the tag will be reset
+                by the call to EOS.
+        """
+
+        # Call _set_route with the delete flag set to True
+        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                               distance=distance, tag=tag,
+                               route_name=route_name)
 
     def _build_commands(self, ip_dest, next_hop, next_hop_ip=None,
                         distance=None, tag=None, route_name=None):
