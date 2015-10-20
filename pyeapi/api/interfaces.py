@@ -108,7 +108,7 @@ class Interfaces(EntityCollection):
         for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
-                response[name] = interface
+                response['name'] = interface
         return response
 
     def __getattr__(self, name):
@@ -171,7 +171,6 @@ class BaseInterface(EntityCollection):
         resource.update(self._parse_shutdown(config))
         resource.update(self._parse_description(config))
         return resource
-
 
     def _parse_shutdown(self, config):
         """Scans the specified config block and returns the shutdown value
@@ -334,7 +333,6 @@ class EthernetInterface(BaseInterface):
         resource.update(self._parse_flowcontrol_receive(config))
         return resource
 
-
     def _parse_sflow(self, config):
         """Scans the specified config block and returns the sflow value
 
@@ -382,7 +380,6 @@ class EthernetInterface(BaseInterface):
         if match:
             value = match.group(1)
         return dict(flowcontrol_receive=value)
-
 
     def create(self, name):
         """Creating Ethernet interfaces is currently not supported
@@ -549,7 +546,6 @@ class PortchannelInterface(BaseInterface):
             value = int(match.group(1))
         return dict(minimum_links=value)
 
-
     def get_lacp_mode(self, name):
         """Returns the LACP mode for the specified Port-Channel interface
 
@@ -570,8 +566,6 @@ class PortchannelInterface(BaseInterface):
             match = re.search(r'channel-group\s\d+\smode\s(?P<value>.+)',
                               self.get_block('^interface %s' % member))
             return match.group('value')
-
-
 
     def get_members(self, name):
         """Returns the member interfaces for the specified Port-Channel

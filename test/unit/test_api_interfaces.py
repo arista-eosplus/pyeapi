@@ -77,6 +77,10 @@ class TestApiInterfaces(EapiConfigUnitTest):
         result = self.instance.get('Ethernet1')
         self.assertEqual(result['type'], 'ethernet')
 
+    def test_get_invalid_interface(self):
+        result = self.instance.get('Foo1')
+        self.assertEqual(result, None)
+
     def test_proxy_method_success(self):
         result = self.instance.set_sflow('Ethernet1', True)
         self.assertTrue(result)
