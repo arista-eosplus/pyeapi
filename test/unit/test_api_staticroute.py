@@ -261,6 +261,40 @@ class TestApiStaticroute(EapiConfigUnitTest):
 
             self.eapi_positive_config_test(func, cmds)
 
+    def test_set_tag(self):
+        # Test passing in a new tag to the set_tag function
+        ip_dest = '1.2.3.0/24'
+        next_hop = 'Ethernet1'
+        next_hop_ip = '1.1.1.1'
+        distance = 10
+        tag = '99'
+
+        func = function('set_tag', ip_dest, next_hop,
+                        next_hop_ip=next_hop_ip,
+                        distance=distance, tag=tag)
+
+        cmd = "ip route %s %s %s %s tag %s" % \
+            (ip_dest, next_hop, next_hop_ip, distance, tag)
+
+        self.eapi_positive_config_test(func, cmd)
+
+    def test_set_route_name(self):
+        # Test passing in a new tag to the set_tag function
+        ip_dest = '1.2.3.0/24'
+        next_hop = 'Ethernet1'
+        next_hop_ip = '1.1.1.1'
+        distance = 10
+        route_name = 'test99'
+
+        func = function('set_route_name', ip_dest, next_hop,
+                        next_hop_ip=next_hop_ip,
+                        distance=distance, route_name=route_name)
+
+        cmd = "ip route %s %s %s %s name %s" % \
+            (ip_dest, next_hop, next_hop_ip, distance, route_name)
+
+        self.eapi_positive_config_test(func, cmd)
+
 
 if __name__ == '__main__':
     unittest.main()
