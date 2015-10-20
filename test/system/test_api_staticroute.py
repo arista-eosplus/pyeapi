@@ -257,6 +257,33 @@ class TestApiStaticroute(DutSystemTest):
 
                         self.assertTrue(result)
 
+    def test_set_tag(self):
+        # Validate the set_tag function returns without an error
+        # when modifying the tag on an existing route
+
+        for dut in self.duts:
+            dut.config(['no ip routing delete-static-routes',
+                        'ip routing',
+                        'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 10 tag 99'])
+
+            result = dut.api('staticroute').set_tag(
+                        '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
+                        distance=10, tag=3)
+            self.assertTrue(result)
+
+    def test_set_route_name(self):
+        # Validate the set_route_name function returns without an error
+        # when modifying the tag on an existing route
+
+        for dut in self.duts:
+            dut.config(['no ip routing delete-static-routes',
+                        'ip routing',
+                        'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 name test99'])
+
+            result = dut.api('staticroute').set_route_name(
+                        '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
+                        distance=1, route_name='test3')
+            self.assertTrue(result)
 
 if __name__ == '__main__':
     unittest.main()

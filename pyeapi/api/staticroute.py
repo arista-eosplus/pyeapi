@@ -348,11 +348,11 @@ class StaticRoute(EntityCollection):
 
 
 def instance(node):
-    """Returns an instance of Vlans
+    """Returns an instance of StaticRoute
 
-    This method will create and return an instance of the Vlans object passing
-    the value of API to the object.  The instance method is required for the
-    resource to be autoloaded by the Node object
+    This method will create and return an instance of the StaticRoute
+    object passing the value of API to the object. The instance method
+    is required for the resource to be autoloaded by the Node object
 
     Args:
         node (Node): The node argument passes an instance of Node to the

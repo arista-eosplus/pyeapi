@@ -54,6 +54,15 @@ class TestApiStaticroute(EapiConfigUnitTest):
         self.instance = pyeapi.api.staticroute.StaticRoute(None)
         self.config = open(get_fixture('running_config.text')).read()
 
+    def test_instance(self):
+        result = pyeapi.api.staticroute.instance(None)
+        self.assertIsInstance(result, pyeapi.api.staticroute.StaticRoute)
+
+    def test_get_with_invalid_distance(self):
+        with self.assertRaises(ValueError):
+            self.instance.get('1.2.3.0/24', 'Ethernet1', 'z',
+                              next_hop_ip='1.1.1.1')
+
     def test_get(self):
         # Test retrieval of a specific static route entry
         # Assumes running_config.text file contains the ip route lines:
