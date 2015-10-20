@@ -108,7 +108,7 @@ class Interfaces(EntityCollection):
         for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
-                response[name] = interface
+                response['name'] = interface
         return response
 
     def __getattr__(self, name):
@@ -171,7 +171,6 @@ class BaseInterface(EntityCollection):
         resource.update(self._parse_shutdown(config))
         resource.update(self._parse_description(config))
         return resource
-
 
     def _parse_shutdown(self, config):
         """Scans the specified config block and returns the shutdown value
@@ -334,7 +333,6 @@ class EthernetInterface(BaseInterface):
         resource.update(self._parse_flowcontrol_receive(config))
         return resource
 
-
     def _parse_sflow(self, config):
         """Scans the specified config block and returns the sflow value
 
@@ -382,7 +380,6 @@ class EthernetInterface(BaseInterface):
         if match:
             value = match.group(1)
         return dict(flowcontrol_receive=value)
-
 
     def create(self, name):
         """Creating Ethernet interfaces is currently not supported
@@ -549,7 +546,6 @@ class PortchannelInterface(BaseInterface):
             value = int(match.group(1))
         return dict(minimum_links=value)
 
-
     def get_lacp_mode(self, name):
         """Returns the LACP mode for the specified Port-Channel interface
 
@@ -571,8 +567,6 @@ class PortchannelInterface(BaseInterface):
                               self.get_block('^interface %s' % member))
             return match.group('value')
 
-
-
     def get_members(self, name):
         """Returns the member interfaces for the specified Port-Channel
 
@@ -590,7 +584,7 @@ class PortchannelInterface(BaseInterface):
         return re.findall(r'\b(?!Peer)Ethernet[\d/]*\b',
                           config[0]['result']['output'])
 
-    def set_members(self, name, members):
+    def set_members(self, name, members, mode=None):
         """Configures the array of member interfaces for the Port-Channel
 
         Args:
@@ -600,14 +594,24 @@ class PortchannelInterface(BaseInterface):
             members(list): The list of Ethernet interfaces that should be
                 member interfaces
 
+            mode(str): The LACP mode to configure the member interfaces to.
+                Valid values are 'on, 'passive', 'active'. When there are
+                existing channel-group members and their lacp mode differs
+                from this attribute, all of those members will be removed and
+                then re-added using the specified lacp mode. If this attribute
+                is omitted, the existing lacp mode will be used for new
+                member additions.
+
         Returns:
             True if the operation succeeds otherwise False
         """
+        commands = list()
+        grpid = re.search(r'(\d+)', name).group()
         current_members = self.get_members(name)
         lacp_mode = self.get_lacp_mode(name)
-        grpid = re.search(r'(\d+)', name).group()
-
-        commands = list()
+        if mode and mode != lacp_mode:
+            lacp_mode = mode
+            self.set_lacp_mode(grpid, lacp_mode)
 
         # remove members from the current port-channel interface
         for member in set(current_members).difference(members):
