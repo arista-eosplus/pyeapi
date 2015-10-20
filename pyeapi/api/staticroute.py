@@ -244,10 +244,11 @@ class StaticRoute(EntityCollection):
                 by the call to EOS.
         """
 
-        # Call _set_route with the delete flag set to True
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name)
+        # Call _set_route with the new tag information
+        res = self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                              distance=distance, tag=tag,
+                              route_name=route_name)
+        return res
 
     def set_route_name(self, ip_dest, next_hop, next_hop_ip=None,
                        distance=None, tag=None, route_name=None):
@@ -272,10 +273,11 @@ class StaticRoute(EntityCollection):
                 by the call to EOS.
         """
 
-        # Call _set_route with the delete flag set to True
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name)
+        # Call _set_route with the new route_name information
+        res = self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                              distance=distance, tag=tag,
+                              route_name=route_name)
+        return res
 
     def _build_commands(self, ip_dest, next_hop, next_hop_ip=None,
                         distance=None, tag=None, route_name=None):
