@@ -617,15 +617,7 @@ class PortchannelInterface(BaseInterface):
         lacp_mode = self.get_lacp_mode(name)
         if mode and mode != lacp_mode:
             lacp_mode = mode
-            # remove all members from the current port-channel interface
-            # so that we can change the mode below
-            for member in current_members:
-                commands.append('interface %s' % member)
-                commands.append('no channel-group %s' % grpid)
-            # add all members back with the specified lacp_mode
-            for member in current_members:
-                commands.append('interface %s' % member)
-                commands.append('channel-group %s mode %s' % (grpid, lacp_mode))
+            self.set_lacp_mode(grpid, lacp_mode)
 
         # remove members from the current port-channel interface
         for member in set(current_members).difference(members):
