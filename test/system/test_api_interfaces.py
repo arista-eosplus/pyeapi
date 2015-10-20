@@ -242,6 +242,38 @@ class TestPortchannelInterface(DutSystemTest):
                              config[0]['output'], 'dut=%s' % dut)
 
 
+    def test_set_members_with_mode(self):
+        for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+            et3 = random_interface(dut, exclude=[et1, et2])
+
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et3])
+
+            api = dut.api('interfaces')
+            result = api.set_members('Port-Channel1', [et1, et3], mode='active')
+            self.assertTrue(result, 'dut=%s' % dut)
+
+            cmd = 'show running-config interfaces %s'
+
+            # check to make sure et1 is still in the lag and et3 was
+            # added to the lag
+            for interface in [et1, et3]:
+                config = dut.run_commands(cmd % interface, 'text')
+                self.assertIn('channel-group 1 mode active',
+                              config[0]['output'], 'dut=%s' % dut)
+
+            # checks to  make sure et2 was remvoved form the lag
+            config = dut.run_commands(cmd % et2, 'text')
+            self.assertNotIn('channel-group 1 mode on',
+                             config[0]['output'], 'dut=%s' % dut)
 
 
     def test_minimum_links_valid(self):
