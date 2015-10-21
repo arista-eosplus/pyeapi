@@ -52,13 +52,12 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         self.assertIsInstance(result, pyeapi.api.routemaps.Routemaps)
 
     def test_get(self):
-        result = self.instance.get('TEST', 'permit', 10)
-        keys = ['name', 'action', 'seqno', 'set', 'match', 'continue',
-                'description']
+        result = self.instance.get('TEST')
+        keys = ['deny', 'permit']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
     def test_get_not_configured(self):
-        self.assertIsNone(self.instance.get('blah', 'blah', 1))
+        self.assertIsNone(self.instance.get('blah'))
 
     def test_getall(self):
         result = self.instance.getall()
@@ -110,11 +109,37 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         func = function('set_continue', 'TEST', 'permit', 10, 100)
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_continue_with_invalid_integer(self):
+        with self.assertRaises(ValueError):
+            self.instance.set_continue('TEST', 'permit', 10, -1)
+
+    def test_set_continue_to_default(self):
+        cmds = ['route-map TEST permit 10', 'default continue']
+        func = function('set_continue', 'TEST', 'permit', 10, default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_negate_continue(self):
+        cmds = ['route-map TEST permit 10', 'no continue']
+        func = function('set_continue', 'TEST', 'permit', 10)
+        self.eapi_positive_config_test(func, cmds)
+
     def test_set_description_with_value(self):
         value = random_string()
         cmds = ['route-map TEST permit 10', 'no description',
                 'description %s' % value]
         func = function('set_description', 'TEST', 'permit', 10, value)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_negate_description(self):
+        value = random_string()
+        cmds = ['route-map TEST permit 10', 'no description']
+        func = function('set_description', 'TEST', 'permit', 10)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_description_with_default(self):
+        value = random_string()
+        cmds = ['route-map TEST permit 10', 'default description']
+        func = function('set_description', 'TEST', 'permit', 10, default=True)
         self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
