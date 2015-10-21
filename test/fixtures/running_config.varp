@@ -1,0 +1,17 @@
+ip virtual-router mac-address 00:11:22:33:44:55
+
+interface Vlan4001
+   ip address 1.1.1.1/24
+   ip virtual-router address 1.1.1.2
+!
+interface Vlan4002
+   ip address 1.1.2.1/24
+   ip virtual-router address 1.1.2.2
+   ip virtual-router address 1.1.2.3
+   ip virtual-router address 1.1.2.4
+   ip virtual-router address 1.1.2.5
+   ip virtual-router address 1.1.2.6
+!
+interface Vlan4003
+   ip address 1.1.2.1/24
+!

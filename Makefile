@@ -27,7 +27,7 @@ VERSION := $(shell cat VERSION)
 
 ########################################################
 
-all: clean check pep8 pyflakes tests 
+all: clean check pep8 pyflakes tests
 
 pep8:
 	-pep8 -r --ignore=E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 pyeapi/ test/
@@ -62,3 +62,5 @@ unittest: clean
 systest: clean
 	$(COVERAGE) run -m unittest discover test/system -v
 
+coverage_report:
+	$(COVERAGE) report -m
