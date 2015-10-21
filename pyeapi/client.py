@@ -581,10 +581,15 @@ class Node(object):
             raise TypeError('config mode commands not supported')
 
         results = list()
+        # IMPORTANT: There are two keys (response, result) that both
+        # return the same value. 'response' was originally placed
+        # there in error and both are now present to avoid breaking
+        # existing scripts. 'response' will be removed in a future release.
         if strict:
             responses = self.run_commands(commands, encoding)
             for index, response in enumerate(responses):
                 results.append(dict(command=commands[index],
+                                    result=response,
                                     response=response,
                                     encoding=encoding))
         else:
