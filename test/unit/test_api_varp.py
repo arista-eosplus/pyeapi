@@ -58,6 +58,16 @@ class TestApiVarp(EapiConfigUnitTest):
         self.assertIsNotNone(self.instance.get()['mac_address'])
         self.assertIsNotNone(self.instance.get()['interfaces'])
 
+    def test_get_interfaces_none(self):
+        self._interfaces = None
+        result = self.instance.interfaces()
+        self.assertIsNotNone(result)
+
+    def test_get_interfaces_already_defined(self):
+        self.instance.interfaces()
+        result = self.instance.interfaces()
+        self.assertIsNotNone(result)
+
     def test_set_mac_address_with_value(self):
         value = 'aa:bb:cc:dd:ee:ff'
         func = function('set_mac_address', mac_address=value)
@@ -75,6 +85,10 @@ class TestApiVarp(EapiConfigUnitTest):
         cmds = 'no ip virtual-router mac-address'
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_mac_address_with_bad_value(self):
+        with self.assertRaises(ValueError):
+            self.instance.set_mac_address(mac_address='0011.2233.4455')
+
     def test_set_mac_address_with_default(self):
         func = function('set_mac_address', default=True)
         cmds = 'default ip virtual-router mac-address'
@@ -87,10 +101,23 @@ class TestApiVarpInterfaces(EapiConfigUnitTest):
         self.instance = pyeapi.api.varp.VarpInterfaces(None)
         self.config = open(get_fixture('running_config.varp')).read()
 
+    def test_get_with_no_interface(self):
+        self.config = ""
+        self.setUp()
+        result = self.instance.get('Vlan1000')
+        self.assertIsNone(result)
+
     def test_add_address_with_value(self):
         func = function('set_addresses', 'Vlan4001', addresses=['1.1.1.4'])
         cmds = ['interface Vlan4001', 'no ip virtual-router address 1.1.1.2',
                 'ip virtual-router address 1.1.1.4']
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_add_address_when_interface_does_not_exist(self):
+        self.config = ""
+        self.setUp()
+        func = function('set_addresses', 'Vlan10', addresses=['1.1.1.4'])
+        cmds = ['interface Vlan10', 'ip virtual-router address 1.1.1.4']
         self.eapi_positive_config_test(func, cmds)
 
     def test_add_address_with_no_value(self):

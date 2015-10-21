@@ -36,7 +36,7 @@ EOS and eAPI.
 
 Example:
     {
-        "mac_address": "aaaa.bbbb.cccc",
+        "mac_address": "aa:bb:cc:dd:ee:ff",
         "interfaces": {
             "Vlan100": {
                 "addresses": [ "1.1.1.1", "2.2.2.2"]
@@ -104,7 +104,8 @@ class Varp(EntityCollection):
         return resource
 
     def _parse_mac_address(self):
-        mac_address_re = re.compile(r'^ip\svirtual-router\smac-address\s((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$', re.M)
+        mac_address_re = re.compile(r'^ip\svirtual-router\smac-address\s'
+                                    r'((?:[a-f0-9]{2}:){5}[a-f0-9]{2})$', re.M)
         mac = mac_address_re.search(self.config)
         mac = mac.group(1) if mac else None
         return dict(mac_address=mac)
