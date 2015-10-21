@@ -47,13 +47,13 @@ class TestApiRoutemaps(DutSystemTest):
                         'route-map TEST deny 10',
                         'set weight 100',
                         'match tag 50'])
-            response = dut.api('routemaps').get('TEST', 'deny', 10)
+            response = dut.api('routemaps').get('TEST')
             self.assertIsNotNone(response)
 
     def test_get_none(self):
         for dut in self.duts:
             dut.config('no route-map TEST deny 10')
-            result = dut.api('routemaps').get('TEST', 'deny', 10)
+            result = dut.api('routemaps').get('TEST')
             self.assertIsNone(result)
 
     def test_getall(self):
@@ -65,37 +65,37 @@ class TestApiRoutemaps(DutSystemTest):
                         'route-map TEST2 permit 50',
                         'match tag 50'])
             result = dut.api('routemaps').getall()
-            self.assertIn(('TEST', 'deny', 10), result)
-            self.assertIn(('TEST2', 'permit', 50), result)
+            self.assertIn(('TEST'), result)
+            self.assertIn(('TEST2'), result)
 
     def test_create(self):
         for dut in self.duts:
             dut.config(['no route-map TEST deny 10'])
             api = dut.api('routemaps')
-            self.assertIsNone(api.get('TEST', 'deny', 10))
+            self.assertIsNone(api.get('TEST'))
             result = dut.api('routemaps').create('TEST', 'deny', 10)
             self.assertTrue(result)
-            self.assertIsNotNone(api.get('TEST', 'deny', 10))
+            self.assertIsNotNone(api.get('TEST'))
             dut.config(['no route-map TEST deny 10'])
 
     def test_create_with_hyphen(self):
         for dut in self.duts:
             dut.config(['no route-map TEST-1 deny 10'])
             api = dut.api('routemaps')
-            self.assertIsNone(api.get('TEST-1', 'deny', 10))
+            self.assertIsNone(api.get('TEST-1'))
             result = dut.api('routemaps').create('TEST-1', 'deny', 10)
             self.assertTrue(result)
-            self.assertIsNotNone(api.get('TEST-1', 'deny', 10))
+            self.assertIsNotNone(api.get('TEST-1'))
             dut.config(['no route-map TEST-1 deny 10'])
 
     def test_create_with_underscore(self):
         for dut in self.duts:
             dut.config(['no route-map TEST_1 deny 10'])
             api = dut.api('routemaps')
-            self.assertIsNone(api.get('TEST_1', 'deny', 10))
+            self.assertIsNone(api.get('TEST_1'))
             result = dut.api('routemaps').create('TEST_1', 'deny', 10)
             self.assertTrue(result)
-            self.assertIsNotNone(api.get('TEST_1', 'deny', 10))
+            self.assertIsNotNone(api.get('TEST_1'))
             dut.config(['no route-map TEST_1 deny 10'])
 
     def test_delete(self):
@@ -104,10 +104,10 @@ class TestApiRoutemaps(DutSystemTest):
                         'route-map TEST deny 10',
                         'set weight 100'])
             api = dut.api('routemaps')
-            self.assertIsNotNone(api.get('TEST', 'deny', 10))
+            self.assertIsNotNone(api.get('TEST'))
             result = dut.api('routemaps').delete('TEST', 'deny', 10)
             self.assertTrue(result)
-            self.assertIsNone(api.get('TEST', 'deny', 10))
+            self.assertIsNone(api.get('TEST'))
 
     def test_default(self):
         for dut in self.duts:
@@ -115,10 +115,10 @@ class TestApiRoutemaps(DutSystemTest):
                         'route-map TEST deny 10',
                         'set weight 100'])
             api = dut.api('routemaps')
-            self.assertIsNotNone(api.get('TEST', 'deny', 10))
+            self.assertIsNotNone(api.get('TEST'))
             result = dut.api('routemaps').default('TEST', 'deny', 10)
             self.assertTrue(result)
-            self.assertIsNone(api.get('TEST', 'deny', 10))
+            self.assertIsNone(api.get('TEST'))
 
     def test_set_description(self):
         for dut in self.duts:
@@ -233,7 +233,7 @@ class TestApiRoutemaps(DutSystemTest):
                              api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_continue('TEST', 'deny', 10, 100)
             self.assertTrue(result)
-            self.assertEqual(100, api.get('TEST', 'deny', 10)['continue'])
+            self.assertEqual(100, api.get('TEST')['deny'][10]['continue'])
 
     def test_update_continue(self):
         for dut in self.duts:
@@ -245,7 +245,7 @@ class TestApiRoutemaps(DutSystemTest):
                              api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_continue('TEST', 'deny', 10, 60)
             self.assertTrue(result)
-            self.assertEqual(60, api.get('TEST', 'deny', 10)['continue'])
+            self.assertEqual(60, api.get('TEST')['deny'][10]['continue'])
 
     def test_default_continue(self):
         for dut in self.duts:
@@ -254,11 +254,11 @@ class TestApiRoutemaps(DutSystemTest):
                         'continue 100'])
             api = dut.api('routemaps')
             self.assertIn('continue 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_continue('TEST', 'deny', 10,
                                                        default=True)
             self.assertTrue(result)
-            self.assertEqual(None, api.get('TEST', 'deny', 10)['continue'])
+            self.assertEqual(None, api.get('TEST')['deny'][10]['continue'])
 
     def test_negate_continue(self):
         for dut in self.duts:
@@ -267,11 +267,11 @@ class TestApiRoutemaps(DutSystemTest):
                         'continue 100'])
             api = dut.api('routemaps')
             self.assertIn('continue 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_continue('TEST', 'deny', 10,
                                                        value=None)
             self.assertTrue(result)
-            self.assertEqual(None, api.get('TEST', 'deny', 10)['continue'])
+            self.assertEqual(None, api.get('TEST')['deny'][10]['continue'])
 
 if __name__ == '__main__':
     unittest.main()
