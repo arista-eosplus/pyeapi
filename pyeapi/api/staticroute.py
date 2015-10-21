@@ -152,88 +152,84 @@ class StaticRoute(EntityCollection):
 
         return routes
 
-    def create(self, ip_dest, next_hop, next_hop_ip=None,
-               distance=None, tag=None, route_name=None):
+    def create(self, ip_dest, next_hop, **kwargs):
         """Create a static route
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns:
             True if the operation succeeds, otherwise False.
         """
 
         # Call _set_route with delete and default set to False
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name)
+        return self._set_route(ip_dest, next_hop, **kwargs)
 
-    def delete(self, ip_dest, next_hop, next_hop_ip=None,
-               distance=None, tag=None, route_name=None):
+    def delete(self, ip_dest, next_hop, **kwargs):
         """Delete a static route
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns:
             True if the operation succeeds, otherwise False.
         """
 
         # Call _set_route with the delete flag set to True
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name, delete=True)
+        kwargs.update({'delete': True})
+        return self._set_route(ip_dest, next_hop, **kwargs)
 
-    def default(self, ip_dest, next_hop, next_hop_ip=None,
-                distance=None, tag=None, route_name=None):
+    def default(self, ip_dest, next_hop, **kwargs):
         """Set a static route to default (i.e. delete the matching route)
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns:
             True if the operation succeeds, otherwise False.
         """
 
         # Call _set_route with the default flag set to True
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name, default=True)
+        kwargs.update({'default': True})
+        return self._set_route(ip_dest, next_hop, **kwargs)
 
-    def set_tag(self, ip_dest, next_hop, next_hop_ip=None,
-                distance=None, tag=None, route_name=None):
+    def set_tag(self, ip_dest, next_hop, **kwargs):
         """Set the tag value for the specified route
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns:
             True if the operation succeeds, otherwise False.
@@ -245,23 +241,21 @@ class StaticRoute(EntityCollection):
         """
 
         # Call _set_route with the new tag information
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name)
+        return self._set_route(ip_dest, next_hop, **kwargs)
 
-    def set_route_name(self, ip_dest, next_hop, next_hop_ip=None,
-                       distance=None, tag=None, route_name=None):
+    def set_route_name(self, ip_dest, next_hop, **kwargs):
         """Set the route_name value for the specified route
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns:
             True if the operation succeeds, otherwise False.
@@ -273,29 +267,34 @@ class StaticRoute(EntityCollection):
         """
 
         # Call _set_route with the new route_name information
-        return self._set_route(ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                               distance=distance, tag=tag,
-                               route_name=route_name)
+        return self._set_route(ip_dest, next_hop, **kwargs)
 
-    def _build_commands(self, ip_dest, next_hop, next_hop_ip=None,
-                        distance=None, tag=None, route_name=None):
+    # def _build_commands(self, ip_dest, next_hop, next_hop_ip=None,
+    #                     distance=None, tag=None, route_name=None):
+    def _build_commands(self, ip_dest, next_hop, **kwargs):
         """Build the EOS command string for ip route interactions.
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
 
         Returns the ip route command string to be sent to the switch for
         the given set of parameters.
         """
 
         commands = "ip route %s %s" % (ip_dest, next_hop)
+
+        next_hop_ip = kwargs.get('next_hop_ip', None)
+        distance = kwargs.get('distance', None)
+        tag = kwargs.get('tag', None)
+        route_name = kwargs.get('route_name', None)
 
         if next_hop_ip is not None:
             commands += " %s" % next_hop_ip
@@ -308,33 +307,41 @@ class StaticRoute(EntityCollection):
 
         return commands
 
-    def _set_route(self, ip_dest, next_hop, next_hop_ip=None,
-                   distance=None, tag=None, route_name=None,
-                   delete=False, default=False):
+    # def _set_route(self, ip_dest, next_hop, next_hop_ip=None,
+    #                distance=None, tag=None, route_name=None,
+    #                delete=False, default=False):
+    def _set_route(self, ip_dest, next_hop, **kwargs):
         """Configure a static route
 
         Args:
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
-            next_hop_ip (string): The next hop address on destination
-                interface
-            distance (string): Administrative distance for this route
-            tag (string): Route tag
-            route_name (string): Route name
-            delete (boolean): If true, deletes the specified route
-                instead of creating or setting values for the route
+            kwargs (dict): A key/value dictionary containing
+                next_hop_ip (string): The next hop address on destination
+                    interface
+                distance (string): Administrative distance for this route
+                tag (string): Route tag
+                route_name (string): Route name
+                delete (boolean): If true, deletes the specified route
+                    instead of creating or setting values for the route
+                default (boolean): If true, defaults the specified route
+                    instead of creating or setting values for the route
 
         Returns:
             True if the operation succeeds, otherwise False.
         """
 
         # Build the route string based on the parameters given
-        commands = self._build_commands(ip_dest, next_hop,
-                                        next_hop_ip=next_hop_ip,
-                                        distance=distance,
-                                        tag=tag,
-                                        route_name=route_name)
+        # commands = self._build_commands(ip_dest, next_hop,
+        #                                 next_hop_ip=next_hop_ip,
+        #                                 distance=distance,
+        #                                 tag=tag,
+        #                                 route_name=route_name)
+        commands = self._build_commands(ip_dest, next_hop, **kwargs)
+
+        delete = kwargs.get('delete', False)
+        default = kwargs.get('default', False)
 
         # Prefix with 'no' if delete is set
         if delete:
