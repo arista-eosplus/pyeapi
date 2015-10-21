@@ -108,7 +108,7 @@ class Interfaces(EntityCollection):
         for name in interfaces_re.findall(self.config):
             interface = self.get(name)
             if interface:
-                response['name'] = interface
+                response[name] = interface
         return response
 
     def __getattr__(self, name):

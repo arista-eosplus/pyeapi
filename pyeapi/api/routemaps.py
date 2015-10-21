@@ -55,46 +55,61 @@ Notes:
 
 import re
 
-from pyeapi.api import Entity
+from pyeapi.api import Entity, EntityCollection
 
 
-class Routemaps(Entity):
+class Routemaps(EntityCollection):
     """The Routemaps class provides management of the routemaps configuration
 
     The Routemaps class is derived from Entity and provides an API for working
     with the nodes routemaps configuraiton.
     """
 
-    def get(self, name, action, seqno):
-        return self._get_instance(name, action, seqno)
+    def get(self, name):
+        if not self.get_block(r'route-map\s%s\s\w+\s\d+' % name):
+            return None
+
+        return self._parse_entries(name)
 
     def getall(self):
         resources = dict()
-        routemaps_re = re.compile(r'^route-map\s(\w+)\s(\w+)\s(\d+)$', re.M)
-        for entry in routemaps_re.findall(self.config):
-            name = entry[0]
-            action = entry[1]
-            seqno = int(entry[2])
-
-            routemap = self.get(name, action, seqno)
+        routemaps_re = re.compile(r'^route-map\s(\w+)\s\w+\s\d+$', re.M)
+        for name in routemaps_re.findall(self.config):
+            routemap = self.get(name)
             if routemap:
-                key = (name, action, seqno)
-                resources[key] = routemap
+                resources[name] = routemap
         return resources
 
-    def _get_instance(self, name, action, seqno):
-        routemap_re = r'route-map\s%s\s%s\s%s' % (name, action, seqno)
-        routemap = self.get_block(routemap_re)
+    def _parse_entries(self, name):
 
-        if not routemap:
-            return None
+        routemap_re = re.compile(r'^route-map\s%s\s(\w+)\s(\d+)$'
+                                 % name, re.M)
+        entries = list()
+        for entry in routemap_re.findall(self.config):
+            resource = dict()
+            action, seqno = entry
+            routemap = self.get_block(r'route-map\s%s\s%s\s%s'
+                                      % (name, action, seqno))
 
-        resource = dict(name=name, action=action, seqno=int(seqno))
-        resource.update(self._parse_match_statements(routemap))
-        resource.update(self._parse_set_statements(routemap))
-        resource.update(self._parse_continue_statement(routemap))
-        resource.update(self._parse_description(routemap))
-        return resource
+            resource = dict(name=name, action=action, seqno=seqno, attr=dict())
+            resource['attr'].update(self._parse_match_statements(routemap))
+            resource['attr'].update(self._parse_set_statements(routemap))
+            resource['attr'].update(self._parse_continue_statement(routemap))
+            resource['attr'].update(self._parse_description(routemap))
+            entries.append(resource)
+
+        return self._merge_entries(entries)
+
+    def _merge_entries(self, entries):
+        response = dict()
+        for e in entries:
+            action = e['action']
+            seqno = int(e['seqno'])
+            if not response.get(action):
+                response[action] = dict()
+            response[action][seqno] = e['attr']
+
+        return response
 
     def _parse_match_statements(self, config):
         match_re = re.compile(r'^\s+match\s(.+)$', re.M)
@@ -196,7 +211,7 @@ class Routemaps(Entity):
             True if the operation succeeds otherwise False
         """
         try:
-            current_statements = self._get_instance(name, action, seqno)['match']
+            current_statements = self.get(name)[action][seqno]['match']
         except:
             current_statements = []
 
@@ -232,7 +247,7 @@ class Routemaps(Entity):
             True if the operation succeeds otherwise False
         """
         try:
-            current_statements = self._get_instance(name, action, seqno)['set']
+            current_statements = self.get(name)[action][seqno]['set']
         except:
             current_statements = []
 
