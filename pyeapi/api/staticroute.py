@@ -375,8 +375,6 @@ class StaticRoute(EntityCollection):
             if default:
                 commands = "default " + commands
 
-        import syslog
-        syslog.syslog("XXX calling: %s\n" % commands)
         return self.configure(commands)
 
 
