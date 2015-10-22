@@ -347,6 +347,7 @@ def hosts_for_tag(tag):
     Returns:
         list: A Python list object that includes the list of hosts assoicated
             with the specified tag.
+
         None: If the specified tag does not exist, then None is returned.
     """
     return config.tags.get(tag)

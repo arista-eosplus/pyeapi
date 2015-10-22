@@ -36,17 +36,6 @@ resources on an EOS node. It provides the following class implementations:
 
     * Routemaps - Configures routemaps in EOS
 
-Routemaps Attributes:
-    name (string): The name given to the routemap clause
-    action (string): How the clause will filter the route. Typically
-                     permit or deny.
-    seqno (integer): The sequence number of this clause
-    description (string): A description for the routemap clause
-    set (list): The list of set statements present in this clause
-    match (list): The list of match statements present in this clause.
-    continue (integer): The next sequence number to evaluate if the criteria
-                        in this clause are met.
-
 Notes:
     The set and match attributes produce a list of strings with The
     corresponding configuration. These strings will omit the preceeding
@@ -66,6 +55,44 @@ class Routemaps(EntityCollection):
     """
 
     def get(self, name):
+        """Provides a method to retrieve all routemap configuration
+        related to the name attribute.
+
+        Args:
+            name (string): The name of the routemap.
+
+        Returns:
+            None if the specified routemap does not exists. If the routermap
+            exists a dictionary will be provided as follows::
+
+                {
+                    'deny': {
+                            30: {
+                                    'continue': 200,
+                                    'description': None,
+                                    'match': ['as 2000',
+                                              'source-protocol ospf',
+                                              'interface Ethernet2'],
+                                    'set': []
+                                }
+                            },
+                    'permit': {
+                            10: {
+                                    'continue': 100,
+                                    'description': None,
+                                    'match': ['interface Ethernet1'],
+                                    'set': ['tag 50']},
+                            20: {
+                                    'continue': 200,
+                                    'description': None,
+                                    'match': ['as 2000',
+                                              'source-protocol ospf',
+                                              'interface Ethernet2'],
+                                    'set': []
+                                }
+                            }
+                }
+        """
         if not self.get_block(r'route-map\s%s\s\w+\s\d+' % name):
             return None
 

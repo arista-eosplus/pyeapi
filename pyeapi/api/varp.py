@@ -34,18 +34,7 @@
 This module provides an API for configuring VARP resources using
 EOS and eAPI.
 
-Example:
-    {
-        "mac_address": "aa:bb:cc:dd:ee:ff",
-        "interfaces": {
-            "Vlan100": {
-                "addresses": [ "1.1.1.1", "2.2.2.2"]
-            },
-            "Vlan200": [...]
-        }
-    }
-
-Parameters:
+Arguments:
     name (string): The interface name the configuration is in reference
         to.  The interface name is the full interface identifier
 
@@ -85,18 +74,18 @@ class Varp(EntityCollection):
 
         Return:
             A Python dictionary object of key/value pairs that represents
-                the current configuration of the node.  If the specified
-                interface does not exist then None is returned.
-        Example:
-            {
-                "mac_address": "aa:bb:cc:dd:ee:ff",
-                "interfaces": {
-                    "Vlan100": {
-                        "addresses": [ "1.1.1.1", "2.2.2.2"]
-                    },
-                    "Vlan200": [...]
+            the current configuration of the node.  If the specified
+            interface does not exist then None is returned::
+
+                {
+                    "mac_address": "aa:bb:cc:dd:ee:ff",
+                    "interfaces": {
+                        "Vlan100": {
+                            "addresses": [ "1.1.1.1", "2.2.2.2"]
+                        },
+                        "Vlan200": [...]
+                    }
                 }
-            }
         """
         resource = dict()
         resource.update(self._parse_mac_address())
@@ -122,11 +111,10 @@ class Varp(EntityCollection):
 
         Args:
             mac_address (string): The mac address that will be assigned as
-            the virtual-router mac address. This should be in the format,
-            aa:bb:cc:dd:ee:ff.
-
+                the virtual-router mac address. This should be in the format,
+                aa:bb:cc:dd:ee:ff.
             default (bool): Sets the virtual-router mac address to the system
-            default (which is to remove the configuration line).
+                default (which is to remove the configuration line).
 
         Returns:
             True if the set operation succeeds otherwise False.

@@ -49,17 +49,17 @@ The following configuration options are available for defining node entries:
 * **enablepwd** - The enable mode password if required by the destination node
 * **transport** - Configures the type of transport connection to use.  The
   default value is _https_.  Valid values are:
-    * socket (available in EOS 4.14.5 or later)
-    * http_local (available in EOS 4.14.5 or later)
-    * http
-    * https
+  * socket (available in EOS 4.14.5 or later)
+  * http_local (available in EOS 4.14.5 or later)
+  * http
+  * https
 * **port** - Configures the port to use for the eAPI connection.  A default
   port is used if this parameter is absent, based on the transport setting
-using the following values:
-    * transport: http, default port: 80
-    * transport: https, deafult port: 443
-    * transport: https_local, default port: 8080
-    * transport: socket, default port: n/a
+  using the following values:
+  * transport: http, default port: 80
+  * transport: https, deafult port: 443
+  * transport: https_local, default port: 8080
+  * transport: socket, default port: n/a
 
 
 _Note:_ See the EOS User Manual found at arista.com for more details on
@@ -67,29 +67,30 @@ configuring eAPI values.
 
 All configuration values are optional.
 
-```
-[connection:veos01]
-username: eapi
-password: password
-transport: http
+.. code-block:: console
 
-[connection:veos02]
-transport: http
+  [connection:veos01]
+  username: eapi
+  password: password
+  transport: http
 
-[connection:veos03]
-transport: socket
+  [connection:veos02]
+  transport: http
 
-[connection:veos04]
-host: 172.16.10.1
-username: eapi
-password: password
-enablepwd: itsasecret
-port: 1234
-transport: https
+  [connection:veos03]
+  transport: socket
 
-[connection:localhost]
-transport: http_local
-```
+  [connection:veos04]
+  host: 172.16.10.1
+  username: eapi
+  password: password
+  enablepwd: itsasecret
+  port: 1234
+  transport: https
+
+  [connection:localhost]
+  transport: http_local
+
 
 The above example shows different ways to define EOS node connections.  All
 configuration options will attempt to use default values if not explicitly
@@ -115,33 +116,34 @@ Once EOS is configured properly and the config file created, getting started
 with a connection to EOS is simple.  Below demonstrates a basic connection
 using pyeapi.  For more examples, please see the examples folder.
 
-```
-# start by importing the library
-import pyeapi
+.. code-block:: python
 
-# create a node object by specifying the node to work with
-node = pyeapi.connect_to('veos01')
+  # start by importing the library
+  import pyeapi
 
-# send one or more commands to the node
-node.enable('show hostname')
-[{'command': 'show hostname', 'result': {u'hostname': u'veos01', u'fqdn':
-u'veos01.arista.com'}, 'encoding': 'json'}]
+  # create a node object by specifying the node to work with
+  node = pyeapi.connect_to('veos01')
 
-# use the config method to send configuration commands
-node.config('hostname veos01')
-[{}]
+  # send one or more commands to the node
+  node.enable('show hostname')
+  [{'command': 'show hostname', 'result': {u'hostname': u'veos01', u'fqdn':
+  u'veos01.arista.com'}, 'encoding': 'json'}]
 
-# multiple commands can be sent by using a list (works for both enable or
-config)
-node.config(['interface Ethernet1', 'description foo'])
-[{}, {}]
+  # use the config method to send configuration commands
+  node.config('hostname veos01')
+  [{}]
 
-# return the running or startup configuration from the node (output omitted for
-brevity)
-node.running_config
+  # multiple commands can be sent by using a list (works for both enable or
+  config)
+  node.config(['interface Ethernet1', 'description foo'])
+  [{}, {}]
 
-node.startup_config
-```
+  # return the running or startup configuration from the node (output omitted for
+  brevity)
+  node.running_config
+
+  node.startup_config
+
 
 ### Using the API
 
@@ -150,32 +152,33 @@ eAPI as well as an API for working directly with EOS resources.   The API is
 designed to be easy and straightforward to use yet also extensible.  Below is
 an example of working with the ``vlans`` API
 
-```
-# create a connection to the node
-import pyeapi
-node = pyeapi.connect_to('veos01')
+.. code-block:: python
 
-# get the instance of the API (in this case vlans)
-vlans = node.api('vlans')
+  # create a connection to the node
+  import pyeapi
+  node = pyeapi.connect_to('veos01')
 
-# return all vlans from the node
-vlans.getall()
-{'1': {'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []},
-'10': {'state': 'active', 'name': 'VLAN0010', 'vlan_id': 10, 'trunk_groups':
-[]}}
+  # get the instance of the API (in this case vlans)
+  vlans = node.api('vlans')
 
-# return a specific vlan from the node
-vlans.get(1)
-{'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []}
+  # return all vlans from the node
+  vlans.getall()
+  {'1': {'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []},
+  '10': {'state': 'active', 'name': 'VLAN0010', 'vlan_id': 10, 'trunk_groups':
+  []}}
 
-# add a new vlan to the node
-vlans.create(100)
-True
+  # return a specific vlan from the node
+  vlans.get(1)
+  {'state': 'active', 'name': 'default', 'vlan_id': 1, 'trunk_groups': []}
 
-# set the new vlan name
-vlans.set_name(100, 'foo')
-True
-```
+  # add a new vlan to the node
+  vlans.create(100)
+  True
+
+  # set the new vlan name
+  vlans.set_name(100, 'foo')
+  True
+
 
 All API implementations developed by Arista EOS+ CS are found in the pyeapi/api
 folder.  See the examples folder for additional examples.

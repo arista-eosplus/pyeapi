@@ -98,20 +98,18 @@ class Stp(Entity):
         interfaces and instances.  See the StpInterfaces and StpInstances
         classes for the key/value pair definitions.
 
-        Example
-            {
-                "mode": [mstp, none],
-                "interfaces": {...},
-                "instances": {...}
-            }
-
         Note:
             See the individual classes for detailed message structures
 
         Returns:
             A Python dictionary object of key/value pairs the represent
-                the entire supported spanning-tree configuration
+            the entire supported spanning-tree configuration::
 
+                {
+                    "mode": [mstp, none],
+                    "interfaces": {...},
+                    "instances": {...}
+                }
         """
         return dict(interfaces=self.interfaces.getall(),
                     instances=self.instances.getall())
