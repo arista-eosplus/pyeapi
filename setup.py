@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 from codecs import open
-from os import path
+from os import path, environ
 import sys
 
 here = path.abspath(path.dirname(__file__))
@@ -80,7 +80,7 @@ def install():
         return False
 
 # Use the following to dynamically build pyeapi module documentation
-if install() and os.environ.get('READTHEDOCS'):
+if install() and environ.get('READTHEDOCS'):
     print 'This method is only called by READTHEDOCS.'
     from subprocess import Popen
     proc = Popen(['make', 'modules'], cwd='docs/')
