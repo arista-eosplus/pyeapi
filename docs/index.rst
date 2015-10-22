@@ -9,10 +9,10 @@ Welcome to Python Client for eAPI's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   pyeapi
-   pyeapi.api
+   description
+   quickstart
    modules
    license
 
@@ -23,5 +23,3 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
-

@@ -1,5 +1,5 @@
-Python Client for eAPI
-======================
+Quickstart
+==========
 
 The Python library for Arista's eAPI command API implementation provides a
 client API work using eAPI and communicating with EOS nodes.  The Python
@@ -27,7 +27,7 @@ through Github issues.
 In order to use pyeapi, the EOS command API must be enabled using ``management
 api http-commands`` configuration mode.  This library supports eAPI calls over
 both HTTP and UNIX Domain Sockets.  Once the command API is enabled on the
-destination node, create a configuration file with the node properities. 
+destination node, create a configuration file with the node properities.
 
 **Note:** The default search path for the conf file is ``~/.eapi.conf``
 followed by ``/mnt/flash/eapi.conf``.  This can be overridden by setting
@@ -52,7 +52,7 @@ The following configuration options are available for defining node entries:
     * socket (available in EOS 4.14.5 or later)
     * http_local (available in EOS 4.14.5 or later)
     * http
-    * https  
+    * https
 * **port** - Configures the port to use for the eAPI connection.  A default
   port is used if this parameter is absent, based on the transport setting
 using the following values:
@@ -65,7 +65,7 @@ using the following values:
 _Note:_ See the EOS User Manual found at arista.com for more details on
 configuring eAPI values.
 
-All configuration values are optional. 
+All configuration values are optional.
 
 ```
 [connection:veos01]
@@ -108,7 +108,7 @@ values in the conf file will overwrite the default.
 ## Using pyeapi
 The Python client for eAPI was designed to be easy to use and implement for
 writing tools and applications that interface with the Arista EOS management
-plane.  
+plane.
 
 ### Creating a connection and sending commands
 Once EOS is configured properly and the config file created, getting started
@@ -195,7 +195,7 @@ and uploaded to PyPi.
 # Testing
 The pyeapi library provides both unit tests and system tests.  The unit tests
 can be run without an EOS node.  To run the system tests, you will need to
-update the ``dut.conf`` file found in test/fixtures.  
+update the ``dut.conf`` file found in test/fixtures.
 
 * To run the unit tests, simply run ``make unittest`` from the root of the
   pyeapi source folder
@@ -209,9 +209,8 @@ update the ``dut.conf`` file found in test/fixtures.
 
 Contributing pull requests are gladly welcomed for this repository.  Please
 note that all contributions that modify the library behavior require
-corresponding test cases otherwise the pull request will be rejected.  
+corresponding test cases otherwise the pull request will be rejected.
 
 # License
 
 New BSD, See [LICENSE](LICENSE) file
-
