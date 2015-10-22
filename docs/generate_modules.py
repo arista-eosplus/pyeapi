@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 import pprint as pp
 
-HERE = './'
+HERE = '.'
 # Readthedocs doesn't like Abspaths, so just using relative. Danger zone.
 # path.abspath(path.dirname(__file__))
 MODULES_PATH = '%s/../pyeapi/' % HERE
@@ -74,6 +74,7 @@ def write_module_file(name, path, package):
     mod_file.write('   :show-inheritance:\n')
 
 def main():
+    print path.abspath(path.dirname(__file__))
     modules = dict(client=None, api=None)
     modules['client'] = get_module_names(MODULES_PATH)
     modules['api'] = get_module_names('%s/api' % MODULES_PATH)
