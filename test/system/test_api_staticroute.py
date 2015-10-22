@@ -118,21 +118,28 @@ class TestApiStaticroute(DutSystemTest):
             ip_dest = '1.2.3.0/24'
             next_hop = 'Ethernet1'
             next_hop_ip = '1.1.1.1'
-            distance = '1'
-            tag = '1'
+            distance = 1
+            tag = 1
             route_name = 'test1'
+
             cmd = "ip route %s %s %s %s tag %s name %s" % \
                 (ip_dest, next_hop, next_hop_ip, distance, tag, route_name)
             dut.config([cmd])
-            route = {'ip_dest': ip_dest,
-                     'next_hop': next_hop,
-                     'next_hop_ip': next_hop_ip,
-                     'distance': distance,
-                     'tag': tag,
-                     'route_name': route_name}
 
-            result = dut.api('staticroute').get(ip_dest, next_hop, distance,
-                                                next_hop_ip=next_hop_ip)
+            route = {
+                ip_dest: {
+                    next_hop: {
+                        next_hop_ip: {
+                            distance: {
+                                'tag': tag,
+                                'route_name': route_name
+                            }
+                        }
+                    }
+                }
+            }
+
+            result = dut.api('staticroute').get(ip_dest)
 
             # Make sure the funtion returns a true result (match found)
             self.assertTrue(result)
@@ -164,27 +171,24 @@ class TestApiStaticroute(DutSystemTest):
             dut.config([route1, route2, route3])
 
             routes = {
-                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", 10):
-                    {'ip_dest': '1.2.3.0/24',
-                     'next_hop': 'Ethernet1',
-                     'next_hop_ip': '1.1.1.1',
-                     'distance': '10',
-                     'tag': '1',
-                     'route_name': 'test1'},
-                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", 1):
-                    {'ip_dest': '1.2.3.0/24',
-                     'next_hop': 'Ethernet1',
-                     'next_hop_ip': '1.1.1.1',
-                     'distance': '1',
-                     'tag': '1',
-                     'route_name': 'test10'},
-                ("1.2.3.0/24", "Ethernet1", "1.1.1.1", 2):
-                    {'ip_dest': '1.2.3.0/24',
-                     'next_hop': 'Ethernet1',
-                     'next_hop_ip': '1.1.1.1',
-                     'distance': '2',
-                     'tag': '10',
-                     'route_name': 'test1'}
+                '1.2.3.0/24': {
+                    'Ethernet1': {
+                        '1.1.1.1': {
+                            10: {
+                                'tag': 1,
+                                'route_name': 'test1'
+                            },
+                            1: {
+                                'tag': 1,
+                                'route_name': 'test10'
+                            },
+                            2: {
+                                'tag': 10,
+                                'route_name': 'test1'
+                            }
+                        }
+                    }
+                }
             }
 
             # Get the list of ip routes from the switch

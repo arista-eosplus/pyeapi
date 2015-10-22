@@ -58,44 +58,55 @@ class TestApiStaticroute(EapiConfigUnitTest):
         result = pyeapi.api.staticroute.instance(None)
         self.assertIsInstance(result, pyeapi.api.staticroute.StaticRoute)
 
-    def test_get_with_invalid_distance(self):
-        with self.assertRaises(ValueError):
-            self.instance.get('1.2.3.0/24', 'Ethernet1', 'z',
-                              next_hop_ip='1.1.1.1')
-
     def test_get(self):
         # Test retrieval of a specific static route entry
-        # Assumes running_config.text file contains the ip route lines:
+        # Assumes running_config.text file contains the following
+        # ip route specifications, and that no additional routes
+        # are specified.
+
         # ip route 0.0.0.0/0 192.68.1.254 1 tag 0
         # ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 tag 1 name test1
+        # ip route 1.2.3.0/24 Ethernet1 1.1.1.1 10 tag 1 name test1
+        # ip route 1.2.3.0/24 Ethernet1 10.1.1.1 20 tag 1 name test1
 
+        # Get the route(s) for ip_dest 0.0.0.0/24
         ip_dest = '0.0.0.0/0'
-        next_hop = '192.68.1.254'
-        next_hop_ip = None
-        distance = '1'
-        route = dict(ip_dest=ip_dest,
-                     next_hop=next_hop,
-                     next_hop_ip=next_hop_ip,
-                     distance=distance,
-                     tag='0',
-                     route_name=None)
-        result = self.instance.get(ip_dest, next_hop, distance,
-                                   next_hop_ip=next_hop_ip)
-        self.assertEqual(result, route)
+        routes = {
+            ip_dest: {
+                '192.68.1.254': {
+                    None: {
+                        1: {'route_name': None,
+                            'tag': 0}
+                        }
+                    }
+                },
+            }
+        result = self.instance.get(ip_dest)
+        self.assertEqual(result, routes)
 
+        # Get the route(s) for ip_dest 1.2.3.0/24
         ip_dest = '1.2.3.0/24'
-        next_hop = 'Ethernet1'
-        next_hop_ip = '1.1.1.1'
-        distance = '1'
-        route = dict(ip_dest=ip_dest,
-                     next_hop=next_hop,
-                     next_hop_ip=next_hop_ip,
-                     distance='1',
-                     tag='1',
-                     route_name='test1')
-        result = self.instance.get(ip_dest, next_hop, distance,
-                                   next_hop_ip=next_hop_ip)
-        self.assertEqual(result, route)
+        routes = {
+            ip_dest: {
+                'Ethernet1': {
+                    '1.1.1.1': {
+                        1: {
+                            'route_name': 'test1',
+                            'tag': 1},
+                        10: {
+                            'route_name': 'test1',
+                            'tag': 1}
+                        },
+                    '10.1.1.1': {
+                        20: {
+                            'route_name': 'test1',
+                            'tag': 1}
+                        }
+                    }
+                }
+            }
+        result = self.instance.get(ip_dest)
+        self.assertEqual(result, routes)
 
     def test_getall(self):
         # Test retrieval of all static route entries
@@ -109,35 +120,32 @@ class TestApiStaticroute(EapiConfigUnitTest):
         # ip route 1.2.3.0/24 Ethernet1 10.1.1.1 20 tag 1 name test1
 
         routes = {
-            ("0.0.0.0/0", "192.68.1.254", None, 1):
-                {'ip_dest': '0.0.0.0/0',
-                 'next_hop': '192.68.1.254',
-                 'next_hop_ip': None,
-                 'distance': "1",
-                 'tag': '0',
-                 'route_name': None},
-            ("1.2.3.0/24", "Ethernet1", "1.1.1.1", 1):
-                {'ip_dest': '1.2.3.0/24',
-                 'next_hop': 'Ethernet1',
-                 'next_hop_ip': '1.1.1.1',
-                 'distance': "1",
-                 'tag': '1',
-                 'route_name': 'test1'},
-            ("1.2.3.0/24", "Ethernet1", "1.1.1.1", 10):
-                {'ip_dest': '1.2.3.0/24',
-                 'next_hop': 'Ethernet1',
-                 'next_hop_ip': '1.1.1.1',
-                 'distance': "10",
-                 'tag': '1',
-                 'route_name': 'test1'},
-            ("1.2.3.0/24", "Ethernet1", "10.1.1.1", 20):
-                {'ip_dest': '1.2.3.0/24',
-                 'next_hop': 'Ethernet1',
-                 'next_hop_ip': '10.1.1.1',
-                 'distance': "20",
-                 'tag': '1',
-                 'route_name': 'test1'}
-        }
+            '0.0.0.0/0': {
+                '192.68.1.254': {
+                    None: {
+                        1: {'route_name': None,
+                            'tag': 0}
+                        }
+                    }
+                },
+            '1.2.3.0/24': {
+                'Ethernet1': {
+                    '1.1.1.1': {
+                        1: {
+                            'route_name': 'test1',
+                            'tag': 1},
+                        10: {
+                            'route_name': 'test1',
+                            'tag': 1}
+                        },
+                    '10.1.1.1': {
+                        20: {
+                            'route_name': 'test1',
+                            'tag': 1}
+                        }
+                    }
+                }
+            }
 
         self.maxDiff = None
         result = self.instance.getall()

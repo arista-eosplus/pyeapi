@@ -82,48 +82,69 @@ class StaticRoute(EntityCollection):
     def __str__(self):
         return 'StaticRoute'
 
-    def get(self, ip_dest, next_hop, distance, next_hop_ip=None):
-        """Retrieves the ip route information for the route specified
-            by the ip_dest, next_hop, and distance parameters
+    def get(self, name):
+        """Retrieves the ip route information for the destination
+        ip address specified.
 
         Args:
-            ip_dest (string): The ip address of the destination in the
+            name (string): The ip address of the destination in the
                 form of A.B.C.D/E
-            next_hop (string): The next hop interface or ip address
-            distance (int): Administrative distance for this route
 
         Returns:
-            dict: An ip route dict object
+            dict: An dict object of static route entries in the form
+                { ip_dest:
+                    { next_hop:
+                        { next_hop_ip:
+                            { distance:
+                                { 'tag': tag,
+                                  'route_name': route_name
+                                }
+                            }
+                        }
+                    }
+                }
 
-            If the unique route specified by the ip_dest, next_hop, and
-            distance does not exist, then None is returned.
+            If the ip address specified does not have any associated
+            static routes, then None is returned.
+
+        Notes:
+            The keys ip_dest, next_hop, next_hop_ip, and distance in
+            the returned dictionary are the values of those components
+            of the ip route specification. If a route does not contain
+            a next_hop_ip, then that key value will be set as 'None'.
         """
 
-        # If distance is None, then set to 1 to match what EOS will
-        # do when distance is not specified.
-        if distance is None:
-            distance = 1
-
-        # Distance may have been passed in as a string. Convert it
-        # to an integer if possible.
-        try:
-            distance = int(distance)
-        except ValueError:
-            raise ValueError("distance parameter must be numerical or None")
-
-        # Make the unique route_id tuple for the requested route
-        route_id = (ip_dest, next_hop, next_hop_ip, distance)
-
-        # Return the route configuration if found, or return None
-        return self.getall().get(route_id)
+        # Return the route configurations for the specified ip address
+        routes = self.getall().get(name)
+        if routes:
+            return {name: routes}
+        return None
 
     def getall(self):
         """Return all ip routes configured on the switch as a resource dict
 
         Returns:
-            dict: A dict of unique ip route names with a nested route
-                dict object. The unique name is built with the ip destination,
-                next hop, and distance values for the route.
+            dict: An dict object of static route entries in the form
+                { ip_dest:
+                    { next_hop:
+                        { next_hop_ip:
+                            { distance:
+                                { 'tag': tag,
+                                  'route_name': route_name
+                                }
+                            }
+                        }
+                    }
+                }
+
+            If the ip address specified does not have any associated
+            static routes, then None is returned.
+
+        Notes:
+            The keys ip_dest, next_hop, next_hop_ip, and distance in
+            the returned dictionary are the values of those components
+            of the ip route specification. If a route does not contain
+            a next_hop_ip, then that key value will be set as 'None'.
         """
 
         # Find all the ip routes in the config
@@ -132,23 +153,28 @@ class StaticRoute(EntityCollection):
         # Parse the routes and add them to the routes dict
         routes = dict()
         for match in matches:
-            # Set the route dict to the returned values, replacing
-            # empty strings with None
-            route = dict()
-            route['ip_dest'] = match[0]
-            route['next_hop'] = match[1]
-            route['next_hop_ip'] = None if match[2] is '' else match[2]
-            route['distance'] = match[3]
-            route['tag'] = None if match[4] is '' else match[4]
-            route['route_name'] = None if match[5] is '' else match[5]
 
-            # Build a unique route_id tuple from the ip_dest,
-            # next_hop, and distance
-            route_id = (route['ip_dest'], route['next_hop'],
-                        route['next_hop_ip'], int(route['distance']))
+            # Get the four identifying components
+            ip_dest = match[0]
+            next_hop = match[1]
+            next_hop_ip = None if match[2] is '' else match[2]
+            distance = int(match[3])
 
-            # Update the routes dict
-            routes.update({route_id: route})
+            # Create the data dict with the remaining components
+            data = {}
+            data['tag'] = None if match[4] is '' else int(match[4])
+            data['route_name'] = None if match[5] is '' else match[5]
+
+            # Build the complete dict entry from the four components
+            # and the data.
+            # temp_dict = parent_dict[key] = parent_dict.get(key, {})
+            # This creates the keyed dict in the parent_dict if it doesn't
+            # exist, or reuses the existing keyed dict.
+            # The temp_dict is used to make things more readable.
+            ip_dict = routes[ip_dest] = routes.get(ip_dest, {})
+            nh_dict = ip_dict[next_hop] = ip_dict.get(next_hop, {})
+            nhip_dict = nh_dict[next_hop_ip] = nh_dict.get(next_hop_ip, {})
+            nhip_dict[distance] = data
 
         return routes
 
@@ -351,6 +377,8 @@ class StaticRoute(EntityCollection):
             if default:
                 commands = "default " + commands
 
+        import syslog
+        syslog.syslog("XXX calling: %s\n" % commands)
         return self.configure(commands)
 
 
