@@ -57,7 +57,7 @@ The following configuration options are available for defining node entries:
   port is used if this parameter is absent, based on the transport setting
   using the following values:
   * transport: http, default port: 80
-  * transport: https, deafult port: 443
+  * transport: https, default port: 443
   * transport: https_local, default port: 8080
   * transport: socket, default port: n/a
 

@@ -11,7 +11,8 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
-   description
+   intro
+   install
    quickstart
    modules
    license
