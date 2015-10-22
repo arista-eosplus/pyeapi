@@ -114,11 +114,9 @@ class StaticRoute(EntityCollection):
             a next_hop_ip, then that key value will be set as 'None'.
         """
 
-        # Return the route configurations for the specified ip address
-        routes = self.getall().get(name)
-        if routes:
-            return {name: routes}
-        return None
+        # Return the route configurations for the specified ip address,
+        # or None if its not found
+        return self.getall().get(name)
 
     def getall(self):
         """Return all ip routes configured on the switch as a resource dict

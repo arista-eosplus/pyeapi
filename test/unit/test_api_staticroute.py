@@ -72,14 +72,12 @@ class TestApiStaticroute(EapiConfigUnitTest):
         # Get the route(s) for ip_dest 0.0.0.0/24
         ip_dest = '0.0.0.0/0'
         routes = {
-            ip_dest: {
-                '192.68.1.254': {
-                    None: {
-                        1: {'route_name': None,
-                            'tag': 0}
-                        }
+            '192.68.1.254': {
+                None: {
+                    1: {'route_name': None,
+                        'tag': 0}
                     }
-                },
+                }
             }
         result = self.instance.get(ip_dest)
         self.assertEqual(result, routes)
@@ -87,21 +85,19 @@ class TestApiStaticroute(EapiConfigUnitTest):
         # Get the route(s) for ip_dest 1.2.3.0/24
         ip_dest = '1.2.3.0/24'
         routes = {
-            ip_dest: {
-                'Ethernet1': {
-                    '1.1.1.1': {
-                        1: {
-                            'route_name': 'test1',
-                            'tag': 1},
-                        10: {
-                            'route_name': 'test1',
-                            'tag': 1}
-                        },
-                    '10.1.1.1': {
-                        20: {
-                            'route_name': 'test1',
-                            'tag': 1}
-                        }
+            'Ethernet1': {
+                '1.1.1.1': {
+                    1: {
+                        'route_name': 'test1',
+                        'tag': 1},
+                    10: {
+                        'route_name': 'test1',
+                        'tag': 1}
+                    },
+                '10.1.1.1': {
+                    20: {
+                        'route_name': 'test1',
+                        'tag': 1}
                     }
                 }
             }

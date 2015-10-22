@@ -127,13 +127,11 @@ class TestApiStaticroute(DutSystemTest):
             dut.config([cmd])
 
             route = {
-                ip_dest: {
-                    next_hop: {
-                        next_hop_ip: {
-                            distance: {
-                                'tag': tag,
-                                'route_name': route_name
-                            }
+                next_hop: {
+                    next_hop_ip: {
+                        distance: {
+                            'tag': tag,
+                            'route_name': route_name
                         }
                     }
                 }
