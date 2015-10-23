@@ -31,7 +31,7 @@
 #
 """Python Client for eAPI
 
-This module provides the client for eAPI.  It provides to primary functions
+This module provides the client for eAPI.  It provides the primary functions
 for building applications that work with Arista EOS eAPI-enabled nodes.  The
 first function is to provide a client for sending and receiving eAPI
 request and response objects on a per node basis.  The second function

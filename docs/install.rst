@@ -51,8 +51,8 @@ actual filename:
   [admin@veos ~]$ sudo pip install /mnt/flash/netaddr-<VERSION>.tar.gz
   [admin@veos ~]$ sudo pip install /mnt/flash/pyeapi-<VERSION>.tar.gz
 
-These packages will be blown away on switch reboot. Therefore, add the install
-commands to ``/mnt/flash/rc.eos`` to install on reboot:
+These packages must be re-installed on reboot. Therefore, add the install
+commands to ``/mnt/flash/rc.eos`` to trigger the install on reboot:
 
 .. code-block:: console
 
@@ -113,6 +113,5 @@ code in the develop branch.
   # Install
   admin:~ admin$ sudo pip install -e ~/projects/pyeapi
 
-.. Tip:: If you start using pyeapi and get import errors, make sure your PATH
-         is set to include the path to pyeapi.  You can also set your PYTHONPATH
-         to include the pyeapi source path.
+.. Tip:: If you start using pyeapi and get import errors, make sure your
+         PYTHONPATH is set to include the path to pyeapi.

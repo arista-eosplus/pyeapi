@@ -5,7 +5,21 @@ Quickstart
 In order to use pyeapi, the EOS command API must be enabled using configuration
 mode.  This library supports eAPI calls over both HTTP/S and UNIX Domain
 Sockets. Once the command API is enabled on the destination node, create a
-configuration file with the node properties.
+configuration file with the node properties. There are some nuances about the
+configuration file that are important to understand; take a minute and read
+about the :ref:`configfile`.
+
+**********************
+Enable EOS Command API
+**********************
+
+Refer to your official Arista EOS Configuration Guide to learn how to enable
+EOS Command API. Depending upon your software version, the options available
+include:
+  - HTTP
+  - HTTPS
+  - HTTP Local
+  - Unix Socket
 
 **************
 Install Pyeapi
@@ -18,83 +32,9 @@ pyeapi.
 Create an eapi.conf file
 ************************
 
-The eAPI configuration file provides a way to keep an inventory of your
-switches in one central place. You can quickly connect to a switch in your
-inventory as shown below. The contents of eapi.conf will change depending upon
-where you run pyeapi. Some examples are provided below.
-
-
-Running pyeapi from a central server
-====================================
-
-This method would be used to connect to various Arista nodes from a central
-server. The eapi.conf file would then contain all of the switches and would
-likely include an HTTP or HTTPS transport method.
-
-Here's an example
-
-The conf file can contain more than one node. Each node section must be
-prefaced by ``connection:<name>`` where <name> is the name of the connection.
-When no ``host`` key is present, the connection name will be used (ie DNS).
-
-.. code-block:: console
-
-  [connection:veos01]
-  username: eapi
-  password: password
-  transport: http
-
-  [connection:veos02]
-  host: 172.16.10.1
-  username: eapi
-  password: password
-  enablepwd: itsasecret
-  port: 1234
-  transport: https
-
-Running pyeapi locally on a switch
-==================================
-
-This method would be used to run a pyeapi script on-box. In this mode, eAPI
-can be configured to require or not require authentication. A quick summary:
-
-=========== ========================
-Type        Authentication Required
-=========== ========================
-https       Yes
-http        Yes
-http_local  No
-socket      No
-=========== ========================
-
-The default transport for pyeapi is ``socket`` and the default host is
-``localhost``. Therefore, if running a pyeapi script on-box and have
-Unix Sockets enabled, you do not need an eapi.conf, nor do you need to pass
-any credentials (quite handy!).
-
-If instead, ``https``, ``http`` or ``http_local`` is configured on your
-node, then you will need an eapi.conf file in ``/mnt/flash/eapi.conf``. It
-would contain something like:
-
-.. code-block:: console
-
-  [connection:localhost]
-  transport: http_local
-
-.. code-block:: console
-
-  [connection:localhost]
-  transport: https
-  username: admin
-  password: admin
-
-.. code-block:: console
-
-  [connection:localhost]
-  transport: http
-  username: admin
-  password: admin
-
+Follow the instructions on the :ref:`configfile` guide to create a pyeapi
+configuration file. You can skip this step if you are running the pyeapi
+script on-box and Unix Sockets are enabled for EOS Command API.
 
 *****************
 Connect to a Node
@@ -106,7 +46,9 @@ plane.
 
 Once EOS is configured properly and the config file created, getting started
 with a connection to EOS is simple.  Below demonstrates a basic connection
-using pyeapi. For more examples, please see the examples folder.
+using pyeapi. For more examples, please see the
+`examples <https://github.com/arista-eosplus/pyeapi/tree/develop/examples>`_
+folder on Github.
 
 This first example shows how to instantiate the Node object. The Node object
 provides some helpful methods and attributes to work with the switch.
@@ -128,13 +70,13 @@ provides some helpful methods and attributes to work with the switch.
   node.config('hostname veos01')
   [{}]
 
-  # multiple commands can be sent by using a list (works for both enable or
-  config)
+  # multiple commands can be sent by using a list
+  # (works for both enable or config)
   node.config(['interface Ethernet1', 'description foo'])
   [{}, {}]
 
-  # return the running or startup configuration from the node (output omitted for
-  brevity)
+  # return the running or startup configuration from the
+  # node (output omitted for brevity)
   node.running_config
 
   node.startup_config
