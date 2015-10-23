@@ -82,6 +82,8 @@ def main():
     modules = dict(client=None, api=None)
     modules['client'] = get_module_names(MODULES_PATH)
     modules['api'] = get_module_names('%s/api' % MODULES_PATH)
+    modules['client'].sort()
+    modules['api'].sort()
     process_modules(modules)
 
 
