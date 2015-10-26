@@ -210,9 +210,10 @@ class BgpNeighbors(EntityCollection):
         return dict(send_community=not value)
 
     def _parse_shutdown(self, config, name):
-        exp = 'no neighbor {} shutdown'.format(name)
-        value = exp in config
-        return dict(shutdown=not value)
+        regexp = r'(?<!no )neighbor {} shutdown'.format(name)
+        match = re.search(regexp, config, re.M)
+        value = True if match else False
+        return dict(shutdown=value)
 
     def _parse_description(self, config, name):
         regexp = r'neighbor {} description (.*)$'.format(name)

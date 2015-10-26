@@ -197,7 +197,7 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_shutdown(self):
-        for state in ['config', 'negate', 'default']:
+        for state in ['config', 'negate', 'default', 'false']:
             name = 'test'
             cmd = 'neighbor {}'.format(name)
             if state == 'config':
@@ -209,6 +209,9 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} shutdown'.format(cmd)]
                 func = function('set_shutdown', name, False, True)
+            elif state == 'false':
+                cmds = ['router bgp 65000', 'no {} shutdown'.format(cmd)]
+                func = function('set_shutdown', name, False)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_send_community(self):
