@@ -504,7 +504,7 @@ class Node(object):
         commands = list(commands)
 
         # push the configure command onto the command stack
-        commands.insert(0, 'configure')
+        commands.insert(0, 'configure terminal')
         response = self.run_commands(commands)
 
         if self.autorefresh:
