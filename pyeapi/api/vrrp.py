@@ -116,6 +116,7 @@ Notes:
         enable: True to enable (no shutdown)|False to disable (shutdown)
         primary_ip: <ip_string>|no|default|None
         priority: <int>|no|default|None
+        description: <string>|no|default|None
         secondary_ip: <dict> may include the following:
             add: <list of ip address strings>
             remove: <list of ip address strings>
