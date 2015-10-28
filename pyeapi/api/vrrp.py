@@ -53,14 +53,14 @@ Vrrp Attributes:
     description (string): The description for the vrrp
     ip_version (int): The ip version value for the vrrp
     timers_advertise (int): The timers advertise setting for the vrrp
-    mac_address_advertisement_interval (int): The mac-address advertisement-
+    mac_addr_adv_interval (int): The mac-address advertisement-
                                               interval setting for the vrrp
     preempt (boolean): The preempt state of the vrrp
-    preempt_delay_minimum (int): The preempt delay minimum setting for the vrrp
+    preempt_delay_min (int): The preempt delay minimum setting for the vrrp
     preempt_delay_reload (int): The preempt delay reload setting for the vrrp
     delay_reload (int): The delay reload setting for the vrrp
     authentication (string): The authentication setting for the vrrp
-    track (dict): The object tracking settings for the vrrp
+    track (list): The object tracking settings for the vrrp
     bfd_ip (string): The bfd ip set for the vrrp
 
 Notes:
@@ -97,16 +97,24 @@ Notes:
                 }
             ip_version: <int>
             timers_advertise: <int>
-            mac_address_advertisement_interval: <int>
+            mac_addr_adv_interval: <int>
             preempt: <True|False>
-            preempt_delay_minimum: <int>
+            preempt_delay_min: <int>
             preempt_delay_reload: <int>
             delay_reload: <int>
             authentication: <string|None>
-            track: {
-                (<object name>, <shutdown|decrement>): <int|True>,
-                (<object name>, <shutdown|decrement>): <int|True>,
-                }
+            track: [
+                {
+                    name: <string>
+                    track_action: <shutdown|decrement>
+                    track_amount: <int>|default|no|None
+                },
+                {
+                    name: <string>
+                    track_action: <shutdown|decrement>
+                    track_amount: <int>|default|no|None
+                },
+            ]
             bfd_ip: <string>
         }
 
@@ -122,22 +130,18 @@ Notes:
             remove: <list of ip address strings>
         ip_version: <int>|no|default|None
         timers_advertise: <int>|no|default|None
-        mac_address_advertisement_interval: <int>|no|default|None
+        mac_addr_adv_interval: <int>|no|default|None
         preempt: True to enable (preempt)|False to disable (no preempt)
-        preempt_delay_minimum: <int>|no|default|None
+        preempt_delay_min: <int>|no|default|None
         preempt_delay_reload: <int>|no|default|None
         delay_reload: <int>|no|default|None
         authentication: <string> NOTE: currently not implemented
-        track: <dict> consisting of entries in the following format:
-            (<object name string>, <shutdown|decrement>): <amount>
-                for shutdown, <amount> may be one of the following:
-                    no|None: disable shutdown tracking for the named object
-                    default: default shutdown tracking for the named object
-                    <any value>: enable shutdown tracking for the named object
-                for decrement, <amount> may be one of the following:
-                    no|None: disable decremental tracking for the named object
-                    default: default decremental tracking for the named object
-                    <int>: set the decrement amount for the named object
+        track: <list> of dicts in the following format:
+            {
+                name: <string>
+                track_action: <shutdown|decrement>
+                track_amount: <int>|default|no|None
+            }
         bfd_ip: <ip string>|no|default|None
 
 """
@@ -146,12 +150,10 @@ import re
 
 from pyeapi.api import EntityCollection
 
-ENABLED = {'no': False, '': True}
-SHUTDOWN = {'no': True, '': False}
 PROPERTIES = ['primary_ip', 'priority', 'description', 'secondary_ip',
               'ip_version', 'enable', 'timers_advertise',
-              'mac_address_advertisement_interval', 'preempt',
-              'preempt_delay_minimum', 'preempt_delay_reload',
+              'mac_addr_adv_interval', 'preempt',
+              'preempt_delay_min', 'preempt_delay_reload',
               'delay_reload', 'authentication', 'track', 'bfd_ip']
 
 
@@ -206,7 +208,7 @@ class Vrrp(EntityCollection):
             subd.update(self._parse_ip_version(config, vrid))
             subd.update(self._parse_mac_addr_adv_interval(config, vrid))
             subd.update(self._parse_preempt(config, vrid))
-            subd.update(self._parse_preempt_delay_minimum(config, vrid))
+            subd.update(self._parse_preempt_delay_min(config, vrid))
             subd.update(self._parse_preempt_delay_reload(config, vrid))
             subd.update(self._parse_primary_ip(config, vrid))
             subd.update(self._parse_priority(config, vrid))
@@ -260,16 +262,16 @@ class Vrrp(EntityCollection):
         return dict(timers_advertise=value)
 
     def _parse_preempt(self, config, vrid):
-        match = re.search(r'^\s+(no|) vrrp %s preempt$' % vrid, config, re.M)
-        value = match.group(1) if match else None
-        value = ENABLED.get(value, 'Error')
-        return dict(preempt=value)
+        match = re.search(r'^\s+vrrp %s preempt$' % vrid, config, re.M)
+        if match:
+            return dict(preempt=True)
+        return dict(preempt=False)
 
     def _parse_enable(self, config, vrid):
-        match = re.search(r'^\s+(no|) vrrp %s shutdown$' % vrid, config, re.M)
-        value = match.group(1) if match else None
-        value = SHUTDOWN.get(value, 'Error')
-        return dict(enable=value)
+        match = re.search(r'^\s+vrrp %s shutdown$' % vrid, config, re.M)
+        if match:
+            return dict(enable=False)
+        return dict(enable=True)
 
     def _parse_secondary_ip(self, config, vrid):
         matches = re.findall(r'^\s+vrrp %s ip (\d+\.\d+\.\d+\.\d+) '
@@ -278,25 +280,23 @@ class Vrrp(EntityCollection):
         return dict(secondary_ip={'exists': value})
 
     def _parse_description(self, config, vrid):
-        match = re.search(r'^\s+(no|) vrrp %s description(.*)$' %
+        match = re.search(r'^\s+vrrp %s description(.*)$' %
                           vrid, config, re.M)
-        enabled = match.group(1) if match else None
-        enabled = ENABLED.get(enabled, 'Error')
-        value = match.group(2).lstrip() if enabled is True else ''
-        value = match.group(2).lstrip()
-        return dict(description=value)
+        if match:
+            return dict(description=match.group(1).lstrip())
+        return dict(description='')
 
     def _parse_mac_addr_adv_interval(self, config, vrid):
         match = re.search(r'^\s+vrrp %s mac-address advertisement-interval '
                           r'(\d+)$' % vrid, config, re.M)
         value = int(match.group(1)) if match else None
-        return dict(mac_address_advertisement_interval=value)
+        return dict(mac_addr_adv_interval=value)
 
-    def _parse_preempt_delay_minimum(self, config, vrid):
+    def _parse_preempt_delay_min(self, config, vrid):
         match = re.search(r'^\s+vrrp %s preempt delay minimum (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
-        return dict(preempt_delay_minimum=value)
+        return dict(preempt_delay_min=value)
 
     def _parse_preempt_delay_reload(self, config, vrid):
         match = re.search(r'^\s+vrrp %s preempt delay reload (\d+)$' %
@@ -305,22 +305,20 @@ class Vrrp(EntityCollection):
         return dict(preempt_delay_reload=value)
 
     def _parse_authentication(self, config, vrid):
-        match = re.search(r'^\s+(no|) vrrp %s authentication'
+        match = re.search(r'^\s+vrrp %s authentication'
                           r'($| ietf-md5 key-string 7 .*$| text .*$)' %
                           vrid, config, re.M)
-        enabled = match.group(1) if match else None
-        enabled = ENABLED.get(enabled)
-        value = match.group(2).lstrip() if enabled is True else ''
-        return dict(authentication=value)
+        if match:
+            return dict(authentication=match.group(1).lstrip())
+        return dict(authentication='')
 
     def _parse_bfd_ip(self, config, vrid):
-        match = re.search(r'^\s+(no|) vrrp %s bfd ip'
+        match = re.search(r'^\s+vrrp %s bfd ip'
                           r'(?: (\d+\.\d+\.\d+\.\d+)|)$' %
                           vrid, config, re.M)
-        enabled = match.group(1) if match else None
-        enabled = ENABLED.get(enabled, 'Error')
-        value = match.group(2) if enabled is True else ''
-        return dict(bfd_ip=value)
+        if match:
+            return dict(bfd_ip=match.group(1))
+        return dict(bfd_ip='')
 
     def _parse_ip_version(self, config, vrid):
         match = re.search(r'^\s+vrrp %s ip version (\d+)$' %
@@ -338,14 +336,20 @@ class Vrrp(EntityCollection):
         matches = re.findall(r'^\s+vrrp %s track (\S+) '
                              r'(decrement|shutdown)(?:( \d+$|$))' %
                              vrid, config, re.M)
-        value = dict()
+        value = []
         for match in matches:
             object = match[0]
             action = match[1]
             amount = None if match[2] == '' else int(match[2])
-            key = (object, action)
-            value.update({key: amount})
-        return dict(track=value)
+            entry = {
+                'name': object,
+                'track_action': action,
+                'track_amount': amount
+            }
+            value.append(entry)
+
+        # Return the list, sorted for easier comparison
+        return dict(track=sorted(value))
 
     def create(self, interface, vrid, **kwargs):
         """Creates a vrrp instance from an interface
@@ -483,6 +487,8 @@ class Vrrp(EntityCollection):
 
         priority = vrconf.get('priority', '__NONE__')
         if priority != '__NONE__':
+            import XXX
+            XXX.print_file_XXX(priority, "XXX priority")
             if priority in ('no', None):
                 commands.append("no vrrp %d priority" % vrid)
             elif priority == 'default':
@@ -550,7 +556,7 @@ class Vrrp(EntityCollection):
                                  "or None")
 
         mac_add_adv_int = \
-            vrconf.get('mac_address_advertisement_interval', '__NONE__')
+            vrconf.get('mac_addr_adv_interval', '__NONE__')
         if mac_add_adv_int != '__NONE__':
             if mac_add_adv_int in ('no', None):
                 commands.append("no vrrp %d mac-address "
@@ -578,18 +584,18 @@ class Vrrp(EntityCollection):
                 raise ValueError("vrrp property 'preempt' must "
                                  "be True, False, 'no', or 'default'")
 
-        preempt_delay_minimum = vrconf.get('preempt_delay_minimum',
+        preempt_delay_min = vrconf.get('preempt_delay_min',
                                            '__NONE__')
-        if preempt_delay_minimum != '__NONE__':
-            if preempt_delay_minimum in ('no', None):
+        if preempt_delay_min != '__NONE__':
+            if preempt_delay_min in ('no', None):
                 commands.append("no vrrp %d preempt delay minimum" % vrid)
-            elif preempt_delay_minimum == 'default':
+            elif preempt_delay_min == 'default':
                 commands.append("default vrrp %d preempt delay minimum" % vrid)
-            elif 0 <= preempt_delay_minimum <= 3600:
+            elif 0 <= preempt_delay_min <= 3600:
                 commands.append("vrrp %d preempt delay minimum %d" %
-                                (vrid, preempt_delay_minimum))
+                                (vrid, preempt_delay_min))
             else:
-                raise ValueError("vrrp property 'preempt_delay_minimum' "
+                raise ValueError("vrrp property 'preempt_delay_min' "
                                  "must an integer in the range 0-3600, None "
                                  "'no', or 'default'")
 
@@ -630,8 +636,11 @@ class Vrrp(EntityCollection):
 
         track = vrconf.get('track', '__NONE__')
         if track != '__NONE__':
-            for (key, amount) in track.iteritems():
-                (tracked, action) = key
+            for entry in track:
+                tracked = entry['name']
+                action = entry['track_action']
+                amount = entry['track_amount']
+
                 if amount in ('no', None):
                     commands.append("no vrrp %d track %s %s"
                                     % (vrid, tracked, action))
@@ -714,15 +723,15 @@ class Vrrp(EntityCollection):
             fixed['timers_advertise'] = 1
         # mac_address_advertisement_interaval:
         #    default, no, None results in value of 30
-        if fixed['mac_address_advertisement_interval'] in \
+        if fixed['mac_addr_adv_interval'] in \
                 ('no', 'default', None):
-            fixed['mac_address_advertisement_interval'] = 30
+            fixed['mac_addr_adv_interval'] = 30
         # preempt: default, no results in value of False
         if fixed['preempt'] in ('no', 'default'):
             fixed['preempt'] = False
-        # preempt_delay_minimum: default, no, None results in value of 0
-        if fixed['preempt_delay_minimum'] in ('no', 'default', None):
-            fixed['preempt_delay_minimum'] = 0
+        # preempt_delay_min: default, no, None results in value of 0
+        if fixed['preempt_delay_min'] in ('no', 'default', None):
+            fixed['preempt_delay_min'] = 0
         # preempt_delay_reload: default, no, None results in value of 0
         if fixed['preempt_delay_reload'] in ('no', 'default', None):
             fixed['preempt_delay_reload'] = 0
@@ -732,22 +741,28 @@ class Vrrp(EntityCollection):
         # authenticetion -> XXX needs implemented
         # track: default, no, None removes the entry
         if 'track' in fixed:
-            # Work with a temporary copy to keep things straight
-            tracks = {}
-            for (key, amount) in fixed['track'].iteritems():
-                (tracked, action) = key
+            tracks = []
+            for entry in fixed['track']:
+                tracked = entry['name']
+                action = entry['track_action']
+                amount = entry['track_amount']
+
                 if amount in ('no', 'default', None):
                     # This tracked object should have been deleted
-                    # from the config. Do not keep it in the dictionary.
-                    pass
+                    # from the config. Do not keep it in the list.
+                    tracked = None
                 elif action == 'shutdown':
                     # This is a valid tracked shutdown. Set it's value to None.
-                    tracks[key] = None
-                else:
-                    # This is a valid decerment. Copy it exactly.
-                    tracks[key] = amount
-            # Copy back the temporary dict into the original
-            fixed['track'] = dict(tracks)
+                    amount = None
+
+                if tracked is not None:
+                    tracks.append({
+                        'name': tracked,
+                        'track_action': action,
+                        'track_amount': amount,
+                    })
+            # Copy the new list over the original, sorted for easier comparison
+            fixed['track'] = sorted(tracks)
         # bfd_ip: default, no, None results in ''
         if fixed['bfd_ip'] in ('no', 'default', None):
             fixed['bfd_ip'] = ''

@@ -47,9 +47,9 @@ known_vrrps = {
     'Ethernet1': {
         10: {'priority': 175,
              'timers_advertise': 1,
-             'mac_address_advertisement_interval': 30,
+             'mac_addr_adv_interval': 30,
              'preempt': True,
-             'preempt_delay_minimum': 0,
+             'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
              'authentication': '',
@@ -57,16 +57,16 @@ known_vrrps = {
              'secondary_ip': {'exists': None},
              'description': 'vrrp 10 on Ethernet1',
              'enable': True,
-             'track': {},
+             'track': [],
              'bfd_ip': '',
              'ip_version': 2}
         },
     'Port-Channel10': {
         10: {'priority': 150,
              'timers_advertise': 1,
-             'mac_address_advertisement_interval': 30,
+             'mac_addr_adv_interval': 30,
              'preempt': True,
-             'preempt_delay_minimum': 0,
+             'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
              'authentication': '',
@@ -76,16 +76,16 @@ known_vrrps = {
              },
              'description': 'vrrp 10 on Port-Channel10',
              'enable': True,
-             'track': {},
+             'track': [],
              'bfd_ip': '',
              'ip_version': 2}
         },
     'Vlan50': {
         10: {'priority': 200,
              'timers_advertise': 3,
-             'mac_address_advertisement_interval': 30,
+             'mac_addr_adv_interval': 30,
              'preempt': True,
-             'preempt_delay_minimum': 0,
+             'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
              'authentication': '',
@@ -95,16 +95,20 @@ known_vrrps = {
              },
              'description': '',
              'enable': True,
-             'track': {
-                ('Ethernet1', 'shutdown'): None
-             },
+             'track': [
+                {
+                    'name': 'Ethernet1',
+                    'track_action': 'shutdown',
+                    'track_amount': None
+                }
+             ],
              'bfd_ip': '',
              'ip_version': 2},
         20: {'priority': 100,
              'timers_advertise': 5,
-             'mac_address_advertisement_interval': 30,
+             'mac_addr_adv_interval': 30,
              'preempt': False,
-             'preempt_delay_minimum': 0,
+             'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
              'authentication': 'text 12345',
@@ -112,18 +116,30 @@ known_vrrps = {
              'secondary_ip': {'exists': None},
              'description': '',
              'enable': False,
-             'track': {
-                ('Ethernet1', 'shutdown'): None,
-                ('Ethernet2', 'decrement'): 1,
-                ('Ethernet2', 'shutdown'): None
+             'track': [
+                {
+                    'name': 'Ethernet1',
+                    'track_action': 'shutdown',
+                    'track_amount': None
                 },
+                {
+                    'name': 'Ethernet2',
+                    'track_action': 'decrement',
+                    'track_amount': 1
+                },
+                {
+                    'name': 'Ethernet2',
+                    'track_action': 'shutdown',
+                    'track_amount': None
+                },
+             ],
              'bfd_ip': '',
              'ip_version': 2},
         30: {'priority': 50,
              'timers_advertise': 1,
-             'mac_address_advertisement_interval': 30,
+             'mac_addr_adv_interval': 30,
              'preempt': True,
-             'preempt_delay_minimum': 0,
+             'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
              'authentication':
@@ -132,7 +148,7 @@ known_vrrps = {
              'secondary_ip': {'exists': None},
              'description': '',
              'enable': True,
-             'track': {},
+             'track': [],
              'bfd_ip': '10.10.4.33',
              'ip_version': 2}
         }
@@ -196,18 +212,34 @@ class TestApiVrrp(EapiConfigUnitTest):
             },
             'ip_version': 3,
             'timers_advertise': 2,
-            'mac_address_advertisement_interval': 3,
+            'mac_addr_adv_interval': 3,
             'preempt': False,
-            'preempt_delay_minimum': 1,
+            'preempt_delay_min': 1,
             'preempt_delay_reload': 1,
             'delay_reload': 1,
             'authentication': '',
-            'track': {
-                ('Ethernet2', 'shutdown'): 1,
-                ('Ethernet1', 'shutdown'): 1,
-                ('Ethernet2', 'decrement'): 1,
-                ('Ethernet1', 'decrement'): None,
-            },
+            'track': [
+                {
+                    'name': 'Ethernet1',
+                    'track_action': 'decrement',
+                    'track_amount': None
+                },
+                {
+                    'name': 'Ethernet1',
+                    'track_action': 'shutdown',
+                    'track_amount': 1
+                },
+                {
+                    'name': 'Ethernet2',
+                    'track_action': 'decrement',
+                    'track_amount': 1
+                },
+                {
+                    'name': 'Ethernet2',
+                    'track_action': 'shutdown',
+                    'track_amount': 1
+                },
+            ],
             'bfd_ip': '10.10.60.30',
         }
 
@@ -227,10 +259,10 @@ class TestApiVrrp(EapiConfigUnitTest):
             'vrrp 10 preempt delay reload 1',
             'vrrp 10 delay reload 1',
             # 'no vrrp 10 authentication',
-            'vrrp 10 track Ethernet2 shutdown',
             'no vrrp 10 track Ethernet1 decrement',
-            'vrrp 10 track Ethernet2 decrement 1',
             'vrrp 10 track Ethernet1 shutdown',
+            'vrrp 10 track Ethernet2 decrement 1',
+            'vrrp 10 track Ethernet2 shutdown',
             'vrrp 10 bfd ip 10.10.60.30',
         ]
         func = function('create', interface, vrid, **configuration)
@@ -434,7 +466,7 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         for (mac_add_adv_int, cmd) in cases:
             func = function('update', upd_intf, upd_vrid,
-                            mac_address_advertisement_interval=mac_add_adv_int)
+                            mac_addr_adv_interval=mac_add_adv_int)
             exp_cmds = [upd_cmd] + [cmd]
             self.eapi_positive_config_test(func, exp_cmds)
 
@@ -443,7 +475,7 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         for mac_add_adv_int in cases:
             func = function('update', upd_intf, upd_vrid,
-                            mac_address_advertisement_interval=mac_add_adv_int)
+                            mac_addr_adv_interval=mac_add_adv_int)
             self.eapi_exception_config_test(func, ValueError)
 
     def test_update_preempt(self):
@@ -486,7 +518,7 @@ class TestApiVrrp(EapiConfigUnitTest):
                             preempt=preempt)
             self.eapi_exception_config_test(func, ValueError)
 
-    def test_update_preempt_delay_minimum(self):
+    def test_update_preempt_delay_min(self):
         # vrrp 10 preempt delay minimum 0
         cases = [
             (3, 'vrrp %d preempt delay minimum 3' % upd_vrid),
@@ -497,7 +529,7 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         for (preempt_dly_min, cmd) in cases:
             func = function('update', upd_intf, upd_vrid,
-                            preempt_delay_minimum=preempt_dly_min)
+                            preempt_delay_min=preempt_dly_min)
             exp_cmds = [upd_cmd] + [cmd]
             self.eapi_positive_config_test(func, exp_cmds)
 
@@ -506,7 +538,7 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         for preempt_dly_min in cases:
             func = function('update', upd_intf, upd_vrid,
-                            preempt_delay_minimum=preempt_dly_min)
+                            preempt_delay_min=preempt_dly_min)
             self.eapi_exception_config_test(func, ValueError)
 
     def test_update_preempt_delay_reload(self):
@@ -583,18 +615,38 @@ class TestApiVrrp(EapiConfigUnitTest):
         # send a command with no tracking specified and expect no commands
         cases = [
             (
-                {('Ethernet2', 'shutdown'): 1,
-                 ('Ethernet1', 'decrement'): 10,
-                 ('Ethernet3', 'shutdown'): 'default',
-                 ('Ethernet2', 'decrement'): 'no',
-                 ('Ethernet1', 'shutdown'): None},
+                [{
+                    'name': 'Ethernet2',
+                    'track_action': 'shutdown',
+                    'track_amount': 1
+                 },
+                 {
+                    'name': 'Ethernet1',
+                    'track_action': 'decrement',
+                    'track_amount': 10
+                 },
+                 {
+                    'name': 'Ethernet3',
+                    'track_action': 'shutdown',
+                    'track_amount': 'default'
+                 },
+                 {
+                    'name': 'Ethernet2',
+                    'track_action': 'decrement',
+                    'track_amount': 'no'
+                 },
+                 {
+                    'name': 'Ethernet1',
+                    'track_action': 'shutdown',
+                    'track_amount': None
+                 }],
                 ['vrrp %d track Ethernet2 shutdown' % upd_vrid,
                  'vrrp %d track Ethernet1 decrement 10' % upd_vrid,
                  'default vrrp %d track Ethernet3 shutdown' % upd_vrid,
                  'no vrrp %d track Ethernet2 decrement' % upd_vrid,
                  'no vrrp %d track Ethernet1 shutdown' % upd_vrid]
             ),
-            ({}, [])
+            ([], [])
         ]
 
         for (track, cmd) in cases:
@@ -605,8 +657,16 @@ class TestApiVrrp(EapiConfigUnitTest):
 
         # Test raising ValueError by entering invalid parameters
         cases = [
-            {('Ethernet1', 'disable'): 10},
-            {('Ethernet1', 'decrement'): True},
+            [{
+                'name': 'Ethernet1',
+                'track_action': 'disable',
+                'track_amount': 10
+            }],
+            [{
+                'name': 'Ethernet1',
+                'track_action': 'decrement',
+                'track_amount': True
+            }]
         ]
 
         for track in cases:
@@ -643,9 +703,9 @@ class TestApiVrrp(EapiConfigUnitTest):
         # match the output from get/getall
         vrconf = {'priority': None,
                   'timers_advertise': None,
-                  'mac_address_advertisement_interval': None,
+                  'mac_addr_adv_interval': None,
                   'preempt': 'default',
-                  'preempt_delay_minimum': None,
+                  'preempt_delay_min': None,
                   'preempt_delay_reload': None,
                   'delay_reload': None,
                   'authentication': '',
@@ -656,19 +716,31 @@ class TestApiVrrp(EapiConfigUnitTest):
                     },
                   'description': None,
                   'enable': True,
-                  'track': {
-                    ('Ethernet1', 'shutdown'): None,
-                    ('Ethernet1', 'decrement'): 10,
-                    ('Ethernet2', 'shutdown'): 'on',
-                  },
+                  'track': [
+                        {
+                            'name': 'Ethernet1',
+                            'track_action': 'shutdown',
+                            'track_amount': None
+                        },
+                        {
+                            'name': 'Ethernet1',
+                            'track_action': 'decrement',
+                            'track_amount': 10
+                        },
+                        {
+                            'name': 'Ethernet2',
+                            'track_action': 'shutdown',
+                            'track_amount': 'on'
+                        },
+                  ],
                   'bfd_ip': None,
                   'ip_version': None}
 
         fixed = {'priority': 100,
                  'timers_advertise': 1,
-                 'mac_address_advertisement_interval': 30,
+                 'mac_addr_adv_interval': 30,
                  'preempt': False,
-                 'preempt_delay_minimum': 0,
+                 'preempt_delay_min': 0,
                  'preempt_delay_reload': 0,
                  'delay_reload': 0,
                  'authentication': '',
@@ -678,10 +750,18 @@ class TestApiVrrp(EapiConfigUnitTest):
                  },
                  'description': None,
                  'enable': True,
-                 'track': {
-                    ('Ethernet1', 'decrement'): 10,
-                    ('Ethernet2', 'shutdown'): None,
-                 },
+                 'track': [
+                    {
+                        'name': 'Ethernet1',
+                        'track_action': 'decrement',
+                        'track_amount': 10
+                    },
+                    {
+                        'name': 'Ethernet2',
+                        'track_action': 'shutdown',
+                        'track_amount': None
+                    },
+                 ],
                  'bfd_ip': '',
                  'ip_version': 2}
 

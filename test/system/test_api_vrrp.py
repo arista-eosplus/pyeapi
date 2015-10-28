@@ -49,17 +49,29 @@ VR_CONFIG = {
     'ip_version': 3,
     'enable': False,
     'timers_advertise': 2,
-    'mac_address_advertisement_interval': 3,
+    'mac_addr_adv_interval': 3,
     'preempt': False,
-    'preempt_delay_minimum': 1,
+    'preempt_delay_min': 1,
     'preempt_delay_reload': None,
     'delay_reload': 1,
     'authentication': '',
-    'track': {
-        ('Ethernet2', 'shutdown'): 1,
-        ('Ethernet1', 'shutdown'): 1,
-        ('Ethernet2', 'decrement'): 10,
-    },
+    'track': [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 10
+        },
+    ],
     'bfd_ip': '10.10.10.150',
 }
 
@@ -78,40 +90,112 @@ ENABLE = [True, False, True]
 TIMERS_ADVERTISE = [10, 'default', 20, 'no', 30, None]
 MAC_ADDR_ADV_INTVL = [50, 'default', 55, 'no', 60, None]
 PREEMPT = [True, False, True]
-PREEMPT_DELAY_MINIMUM = [3600, 'default', 500, 'no', 150, None]
+PREEMPT_DELAY_MIN = [3600, 'default', 500, 'no', 150, None]
 PREEMPT_DELAY_RELOAD = [3600, 'default', 500, 'no', 150, None]
 DELAY_RELOAD = [30, 'default', 25, 'no', 15, None]
 TRACK = [
-    {
-        ('Ethernet2', 'shutdown'): 1,
-        ('Ethernet1', 'shutdown'): 1,
-        ('Ethernet2', 'decrement'): 10,
-    },
-    {
-        ('Ethernet2', 'shutdown'): None,
-        ('Ethernet1', 'shutdown'): 1,
-        ('Ethernet2', 'decrement'): 'default',
-    },
-    {
-        ('Ethernet2', 'shutdown'): 1,
-        ('Ethernet1', 'shutdown'): 2,
-        ('Ethernet2', 'decrement'): 20,
-    },
-    {
-        ('Ethernet2', 'shutdown'): None,
-        ('Ethernet1', 'shutdown'): 1,
-        ('Ethernet2', 'decrement'): 'no',
-    },
-    {
-        ('Ethernet2', 'shutdown'): 1,
-        ('Ethernet1', 'shutdown'): 2,
-        ('Ethernet2', 'decrement'): 20,
-    },
-    {
-        ('Ethernet2', 'shutdown'): None,
-        ('Ethernet1', 'shutdown'): 1,
-        ('Ethernet2', 'decrement'): None,
-    },
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 10
+        },
+    ],
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': None
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 'default'
+        },
+    ],
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 2
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 20
+        },
+    ],
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': None
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 'no'
+        },
+    ],
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 2
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': 20
+        },
+    ],
+    [
+        {
+            'name': 'Ethernet2',
+            'track_action': 'shutdown',
+            'track_amount': None
+        },
+        {
+            'name': 'Ethernet1',
+            'track_action': 'shutdown',
+            'track_amount': 1
+        },
+        {
+            'name': 'Ethernet2',
+            'track_action': 'decrement',
+            'track_amount': None
+        },
+    ],
 ]
 BFD_IP = ['10.10.10.160', 'default', '10.10.10.161', 'no',
           '10.10.10.162', None]
@@ -153,8 +237,13 @@ class TestApiVrrp(DutSystemTest):
 
             # Fix the configuration dict for proper output
             vrrp_conf = dut.api('vrrp').vrconf_format(vrrp_conf)
+            # temp = sorted(vrrp_conf['track'])
+            # vrrp_conf['track'] = temp
 
             response = dut.api('vrrp').get(interface)[vrid]
+            # temp = sorted(response['track'])
+            # response['track'] = temp
+
             self.maxDiff = None
             self.assertEqual(response, vrrp_conf)
 
@@ -210,17 +299,29 @@ class TestApiVrrp(DutSystemTest):
                 'ip_version': 2,
                 'enable': True,
                 'timers_advertise': None,
-                'mac_address_advertisement_interval': 'default',
+                'mac_addr_adv_interval': 'default',
                 'preempt': True,
-                'preempt_delay_minimum': 'default',
+                'preempt_delay_min': 'default',
                 'preempt_delay_reload': 'default',
                 'delay_reload': 'default',
                 'authentication': '',
-                'track': {
-                    ('Ethernet2', 'shutdown'): 1,
-                    ('Ethernet1', 'shutdown'): None,
-                    ('Ethernet2', 'decrement'): 1,
-                },
+                'track': [
+                    {
+                        'name': 'Ethernet2',
+                        'track_action': 'shutdown',
+                        'track_amount': 1
+                    },
+                    {
+                        'name': 'Ethernet1',
+                        'track_action': 'shutdown',
+                        'track_amount': None
+                    },
+                    {
+                        'name': 'Ethernet2',
+                        'track_action': 'decrement',
+                        'track_amount': 1
+                    },
+                ],
                 'bfd_ip': None,
             }
 
@@ -317,7 +418,7 @@ class TestApiVrrp(DutSystemTest):
                 response = dut.api('vrrp').update(interface, vrid, **vrconfig)
                 self.assertIs(response, True)
 
-    def test_update_mac_address_advertisement_interval(self):
+    def test_update_mac_addr_adv_interval(self):
         vrid = 104
         for dut in self.duts:
             interface = self._vlan_setup(dut)
@@ -327,7 +428,7 @@ class TestApiVrrp(DutSystemTest):
                         'exit'])
 
             for mac_addr_adv_intvl in MAC_ADDR_ADV_INTVL:
-                vrconfig = {'mac_address_advertisement_interval':
+                vrconfig = {'mac_addr_adv_interval':
                             mac_addr_adv_intvl}
                 response = dut.api('vrrp').update(interface, vrid, **vrconfig)
                 self.assertIs(response, True)
@@ -346,7 +447,7 @@ class TestApiVrrp(DutSystemTest):
                 response = dut.api('vrrp').update(interface, vrid, **vrconfig)
                 self.assertIs(response, True)
 
-    def test_update_preempt_delay_minimum(self):
+    def test_update_preempt_delay_min(self):
         vrid = 104
         for dut in self.duts:
             interface = self._vlan_setup(dut)
@@ -355,8 +456,8 @@ class TestApiVrrp(DutSystemTest):
                         'vrrp %d shutdown' % vrid,
                         'exit'])
 
-            for preempt_delay_minimum in PREEMPT_DELAY_MINIMUM:
-                vrconfig = {'preempt_delay_minimum': preempt_delay_minimum}
+            for preempt_delay_min in PREEMPT_DELAY_MIN:
+                vrconfig = {'preempt_delay_min': preempt_delay_min}
                 response = dut.api('vrrp').update(interface, vrid, **vrconfig)
                 self.assertIs(response, True)
 
