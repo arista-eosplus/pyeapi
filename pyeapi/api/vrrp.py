@@ -487,8 +487,6 @@ class Vrrp(EntityCollection):
 
         priority = vrconf.get('priority', '__NONE__')
         if priority != '__NONE__':
-            import XXX
-            XXX.print_file_XXX(priority, "XXX priority")
             if priority in ('no', None):
                 commands.append("no vrrp %d priority" % vrid)
             elif priority == 'default':
