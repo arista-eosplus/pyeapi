@@ -186,7 +186,9 @@ class Vrrp(EntityCollection):
         if config is None:
             return config
 
-        match = set(re.findall(r'^\s*(?:no |)vrrp (\d+)', config, re.M))
+        # Find all occurrences of vrids in this interface and make
+        # a set of the unique vrid numbers
+        match = set(re.findall(r'^\s+(?:no |)vrrp (\d+)', config, re.M))
         if not match:
             return None
 
@@ -229,8 +231,7 @@ class Vrrp(EntityCollection):
         vrrps = dict()
 
         # Find the available interfaces
-        interfaces = re.findall(r'^interface\s(Vlan\d+|Port-Channel\d+'
-                                r'|Ethernet\d+)', self.config, re.M)
+        interfaces = re.findall(r'^interface\s(\S+)', self.config, re.M)
 
         # Get the vrrps defined for each interface
         for interface in interfaces:
@@ -242,42 +243,42 @@ class Vrrp(EntityCollection):
         return vrrps
 
     def _parse_primary_ip(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s ip (\d+\.\d+\.\d+\.\d+)$' %
+        match = re.search(r'^\s+vrrp %s ip (\d+\.\d+\.\d+\.\d+)$' %
                           vrid, config, re.M)
         value = match.group(1) if match else None
         return dict(primary_ip=value)
 
     def _parse_priority(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s priority (\d+)$' % vrid, config, re.M)
+        match = re.search(r'^\s+vrrp %s priority (\d+)$' % vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(priority=value)
 
     def _parse_timers_advertise(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s timers advertise (\d+)$' %
+        match = re.search(r'^\s+vrrp %s timers advertise (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(timers_advertise=value)
 
     def _parse_preempt(self, config, vrid):
-        match = re.search(r'^\s*(no|) vrrp %s preempt$' % vrid, config, re.M)
+        match = re.search(r'^\s+(no|) vrrp %s preempt$' % vrid, config, re.M)
         value = match.group(1) if match else None
         value = ENABLED.get(value, 'Error')
         return dict(preempt=value)
 
     def _parse_enable(self, config, vrid):
-        match = re.search(r'^\s*(no|) vrrp %s shutdown$' % vrid, config, re.M)
+        match = re.search(r'^\s+(no|) vrrp %s shutdown$' % vrid, config, re.M)
         value = match.group(1) if match else None
         value = SHUTDOWN.get(value, 'Error')
         return dict(enable=value)
 
     def _parse_secondary_ip(self, config, vrid):
-        matches = re.findall(r'^\s*vrrp %s ip (\d+\.\d+\.\d+\.\d+) '
+        matches = re.findall(r'^\s+vrrp %s ip (\d+\.\d+\.\d+\.\d+) '
                              r'secondary$' % vrid, config, re.M)
         value = matches if matches else None
         return dict(secondary_ip={'exists': value})
 
     def _parse_description(self, config, vrid):
-        match = re.search(r'^\s*(no|) vrrp %s description(.*)$' %
+        match = re.search(r'^\s+(no|) vrrp %s description(.*)$' %
                           vrid, config, re.M)
         enabled = match.group(1) if match else None
         enabled = ENABLED.get(enabled, 'Error')
@@ -286,25 +287,25 @@ class Vrrp(EntityCollection):
         return dict(description=value)
 
     def _parse_mac_addr_adv_interval(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s mac-address advertisement-interval '
+        match = re.search(r'^\s+vrrp %s mac-address advertisement-interval '
                           r'(\d+)$' % vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(mac_address_advertisement_interval=value)
 
     def _parse_preempt_delay_minimum(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s preempt delay minimum (\d+)$' %
+        match = re.search(r'^\s+vrrp %s preempt delay minimum (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(preempt_delay_minimum=value)
 
     def _parse_preempt_delay_reload(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s preempt delay reload (\d+)$' %
+        match = re.search(r'^\s+vrrp %s preempt delay reload (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(preempt_delay_reload=value)
 
     def _parse_authentication(self, config, vrid):
-        match = re.search(r'^\s*(no|) vrrp %s authentication'
+        match = re.search(r'^\s+(no|) vrrp %s authentication'
                           r'($| ietf-md5 key-string 7 .*$| text .*$)' %
                           vrid, config, re.M)
         enabled = match.group(1) if match else None
@@ -313,7 +314,7 @@ class Vrrp(EntityCollection):
         return dict(authentication=value)
 
     def _parse_bfd_ip(self, config, vrid):
-        match = re.search(r'^\s*(no|) vrrp %s bfd ip'
+        match = re.search(r'^\s+(no|) vrrp %s bfd ip'
                           r'(?: (\d+\.\d+\.\d+\.\d+)|)$' %
                           vrid, config, re.M)
         enabled = match.group(1) if match else None
@@ -322,19 +323,19 @@ class Vrrp(EntityCollection):
         return dict(bfd_ip=value)
 
     def _parse_ip_version(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s ip version (\d+)$' %
+        match = re.search(r'^\s+vrrp %s ip version (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(ip_version=value)
 
     def _parse_delay_reload(self, config, vrid):
-        match = re.search(r'^\s*vrrp %s delay reload (\d+)$' %
+        match = re.search(r'^\s+vrrp %s delay reload (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(delay_reload=value)
 
     def _parse_track(self, config, vrid):
-        matches = re.findall(r'^\s*vrrp %s track (\S+) '
+        matches = re.findall(r'^\s+vrrp %s track (\S+) '
                              r'(decrement|shutdown)(?:( \d+$|$))' %
                              vrid, config, re.M)
         value = dict()
