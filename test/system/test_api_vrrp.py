@@ -43,9 +43,7 @@ VR_CONFIG = {
     'primary_ip': '10.10.10.2',
     'priority': 200,
     'description': 'modified vrrp 10 on an interface',
-    'secondary_ip': {
-        'add': ['10.10.10.11'],
-    },
+    'secondary_ip': ['10.10.10.11'],
     'ip_version': 3,
     'enable': False,
     'timers_advertise': 2,
@@ -56,21 +54,9 @@ VR_CONFIG = {
     'delay_reload': 1,
     'authentication': '',
     'track': [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 10
-        },
+        {'name': 'Ethernet1', 'action': 'shutdown'},
+        {'name': 'Ethernet2', 'action': 'decrement', 'amount': 10},
+        {'name': 'Ethernet2', 'action': 'shutdown'},
     ],
     'bfd_ip': '10.10.10.150',
 }
@@ -81,9 +67,8 @@ PRIORITY = [200, 'default', 175, 'no', 190, None]
 DESCRIPTION = ['1st modified vrrp', 'default', '2nd modified vrrp', 'no',
                '3rd modified vrrp', None]
 SECONDARY_IP = [
-    {'add': ['10.10.10.51', '10.10.10.52']},
-    {'add': ['10.10.10.53', '10.10.10.54'],
-     'remove': ['10.10.10.51', '10.10.10.52']},
+    ['10.10.10.51', '10.10.10.52'],
+    ['10.10.10.53', '10.10.10.54'],
 ]
 IP_VERSION = [2, 3, 'default', 3, 'no', 3, None]
 ENABLE = [True, False, True]
@@ -95,106 +80,20 @@ PREEMPT_DELAY_RELOAD = [3600, 'default', 500, 'no', 150, None]
 DELAY_RELOAD = [30, 'default', 25, 'no', 15, None]
 TRACK = [
     [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 10
-        },
+        {'name': 'Ethernet1', 'action': 'shutdown'},
+        {'name': 'Ethernet2', 'action': 'decrement', 'amount': 10},
+        {'name': 'Ethernet2', 'action': 'shutdown'},
     ],
     [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': None
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 'default'
-        },
+        {'name': 'Ethernet1', 'action': 'shutdown'},
     ],
     [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 2
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 20
-        },
+        {'name': 'Ethernet1', 'action': 'shutdown'},
+        {'name': 'Ethernet2', 'action': 'decrement', 'amount': 20},
+        {'name': 'Ethernet2', 'action': 'shutdown'},
     ],
     [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': None
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 'no'
-        },
-    ],
-    [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 2
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': 20
-        },
-    ],
-    [
-        {
-            'name': 'Ethernet2',
-            'track_action': 'shutdown',
-            'track_amount': None
-        },
-        {
-            'name': 'Ethernet1',
-            'track_action': 'shutdown',
-            'track_amount': 1
-        },
-        {
-            'name': 'Ethernet2',
-            'track_action': 'decrement',
-            'track_amount': None
-        },
+        {'name': 'Ethernet1', 'action': 'shutdown'},
     ],
 ]
 BFD_IP = ['10.10.10.160', 'default', '10.10.10.161', 'no',
@@ -221,6 +120,22 @@ class TestApiVrrp(DutSystemTest):
 
             self.assertIsNotNone(response)
 
+    def test_getall(self):
+        vrid = 98
+        vrid2 = 198
+        for dut in self.duts:
+            interface = self._vlan_setup(dut)
+            dut.config(['interface %s' % interface,
+                        'vrrp %d shutdown' % vrid,
+                        'exit',
+                        'interface vlan $',
+                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d shutdown' % vrid2,
+                        'exit'])
+            response = dut.api('vrrp').getall()
+
+            self.assertIsNotNone(response)
+
     def test_create(self):
         vrid = 99
         import copy
@@ -237,12 +152,8 @@ class TestApiVrrp(DutSystemTest):
 
             # Fix the configuration dict for proper output
             vrrp_conf = dut.api('vrrp').vrconf_format(vrrp_conf)
-            # temp = sorted(vrrp_conf['track'])
-            # vrrp_conf['track'] = temp
 
             response = dut.api('vrrp').get(interface)[vrid]
-            # temp = sorted(response['track'])
-            # response['track'] = temp
 
             self.maxDiff = None
             self.assertEqual(response, vrrp_conf)
@@ -292,10 +203,7 @@ class TestApiVrrp(DutSystemTest):
                 'primary_ip': '10.10.10.12',
                 'priority': 200,
                 'description': 'updated vrrp 10 on an interface',
-                'secondary_ip': {
-                    'add': ['10.10.10.13', '10.10.10.23'],
-                    'remove': ['10.10.10.11'],
-                },
+                'secondary_ip': ['10.10.10.13', '10.10.10.23'],
                 'ip_version': 2,
                 'enable': True,
                 'timers_advertise': None,
@@ -306,21 +214,8 @@ class TestApiVrrp(DutSystemTest):
                 'delay_reload': 'default',
                 'authentication': '',
                 'track': [
-                    {
-                        'name': 'Ethernet2',
-                        'track_action': 'shutdown',
-                        'track_amount': 1
-                    },
-                    {
-                        'name': 'Ethernet1',
-                        'track_action': 'shutdown',
-                        'track_amount': None
-                    },
-                    {
-                        'name': 'Ethernet2',
-                        'track_action': 'decrement',
-                        'track_amount': 1
-                    },
+                    {'name': 'Ethernet2', 'action': 'shutdown'},
+                    {'name': 'Ethernet2', 'action': 'decrement', 'amount': 1},
                 ],
                 'bfd_ip': None,
             }
