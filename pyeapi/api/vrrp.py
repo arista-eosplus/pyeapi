@@ -1050,21 +1050,25 @@ class Vrrp(EntityCollection):
         for track in remove:
             match = re.match(r'(\S+)\s+(\S+)\s+(\S+)', track)
             if match:
-                (tr_obj, action, amount) = (match.group(1), match.group(2), match.group(3))
+                (tr_obj, action, amount) = \
+                    (match.group(1), match.group(2), match.group(3))
 
                 if amount == unset:
                     amount = ''
-                t_cmd = "no vrrp %d track %s %s %s" % (vrid, tr_obj, action, amount)
+                t_cmd = ("no vrrp %d track %s %s %s"
+                         % (vrid, tr_obj, action, amount))
                 cmds.append(t_cmd.rstrip())
 
         for track in add:
             match = re.match(r'(\S+)\s+(\S+)\s+(\S+)', track)
             if match:
-                (tr_obj, action, amount) = (match.group(1), match.group(2), match.group(3))
+                (tr_obj, action, amount) = \
+                    (match.group(1), match.group(2), match.group(3))
 
                 if amount == unset:
                     amount = ''
-                t_cmd = "vrrp %d track %s %s %s" % (vrid, tr_obj, action, amount)
+                t_cmd = ("vrrp %d track %s %s %s"
+                         % (vrid, tr_obj, action, amount))
                 cmds.append(t_cmd.rstrip())
 
         cmds = sorted(cmds)
