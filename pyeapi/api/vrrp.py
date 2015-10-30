@@ -722,7 +722,7 @@ class Vrrp(EntityCollection):
             cmd = "default vrrp %d timers advertise" % vrid
         elif disable is True or value is None:
             cmd = "no vrrp %d timers advertise" % vrid
-        elif 1 <= value <= 255:
+        elif int(value) and 1 <= int(value) <= 255:
             cmd = "vrrp %d timers advertise %d" % (vrid, value)
         else:
             raise ValueError("vrrp property 'timers_advertise' must be"
@@ -767,7 +767,7 @@ class Vrrp(EntityCollection):
             cmd = "default vrrp %d mac-address advertisement-interval" % vrid
         elif disable is True or value is None:
             cmd = "no vrrp %d mac-address advertisement-interval" % vrid
-        elif 1 <= value <= 3600:
+        elif int(value) and 1 <= int(value) <= 3600:
             cmd = "vrrp %d mac-address advertisement-interval %d" \
                 % (vrid, value)
         else:
@@ -852,7 +852,7 @@ class Vrrp(EntityCollection):
             cmd = "default vrrp %d preempt delay minimum" % vrid
         elif disable is True or value is None:
             cmd = "no vrrp %d preempt delay minimum" % vrid
-        elif 0 <= value <= 3600:
+        elif int(value) and 0 <= int(value) <= 3600:
             cmd = "vrrp %d preempt delay minimum %d" % (vrid, value)
         else:
             raise ValueError("vrrp property 'preempt_delay_min' must be"
@@ -894,7 +894,7 @@ class Vrrp(EntityCollection):
             cmd = "default vrrp %d preempt delay reload" % vrid
         elif disable is True or value is None:
             cmd = "no vrrp %d preempt delay reload" % vrid
-        elif 0 <= value <= 3600:
+        elif int(value) and 0 <= int(value) <= 3600:
             cmd = "vrrp %d preempt delay reload %d" % (vrid, value)
         else:
             raise ValueError("vrrp property 'preempt_delay_reload' must be"
@@ -936,7 +936,7 @@ class Vrrp(EntityCollection):
             cmd = "default vrrp %d delay reload" % vrid
         elif disable is True or value is None:
             cmd = "no vrrp %d delay reload" % vrid
-        elif 0 <= value <= 3600:
+        elif int(value) and 0 <= int(value) <= 3600:
             cmd = "vrrp %d delay reload %d" % (vrid, value)
         else:
             raise ValueError("vrrp property 'delay_reload' must be"
