@@ -31,6 +31,7 @@ through Github issues.
    modules
    requirements
    contribute
+   release-notes
    support
    license
 
