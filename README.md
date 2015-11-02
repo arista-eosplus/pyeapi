@@ -22,6 +22,7 @@ through Github issues.
 * [Quickstart] [quickstart]
 * [Installation] [install]
 * [Modules] [modules]
+* [Release Notes] [rns]
 * [Contribute] [contribute]
 
 ### Building Local Documentation
@@ -71,3 +72,4 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 [contribute]: http://pyeapi.readthedocs.org/en/master/contribute.html
 [modules]: http://pyeapi.readthedocs.org/en/master/modules.html
 [support]: http://pyeapi.readthedocs.org/en/master/support.html
+[rns]: http://pyeapi.readthedocs.org/en/master/release-notes.html
