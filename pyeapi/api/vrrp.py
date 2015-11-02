@@ -116,7 +116,7 @@ Notes:
             bfd_ip: <string>
         }
 
-    The create and update methods accept a kwargs dictionary which
+    The create and method accepts a kwargs dictionary which
     defines the properties to be applied to the new or existing vrrp
     configuration. The available keywords and values are as follows:
         enable: True to enable (no shutdown)|False to disable (shutdown)
@@ -416,7 +416,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (boolean): True to enable the vrrp, False to disable.
             run (boolean): True to execute the command, False to
                 return a string with the formatted command.
@@ -454,7 +454,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (string): IP address to be set.
             disable (boolean): Unset primary ip if True.
             default (boolean): Set primary ip to default if True.
@@ -500,7 +500,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): Priority to assign to the vrrp.
             disable (boolean): Unset priority if True.
             default (boolean): Set priority to default if True.
@@ -542,7 +542,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (string): Description to assign to the vrrp.
             disable (boolean): Unset description if True.
             default (boolean): Set description to default if True.
@@ -581,7 +581,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): IP version to assign to the vrrp.
             disable (boolean): Unset ip_version if True.
             default (boolean): Set ip_version to default if True.
@@ -629,7 +629,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             secondary_ips (list): A list of secondary ip addresses to
                 be assigned to the virtual router.
             run (boolean): Set to True to execute the command, False to
@@ -691,7 +691,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): Timers advertise value to assign to the vrrp.
             disable (boolean): Unset timers advertise if True.
             default (boolean): Set timers advertise to default if True.
@@ -733,7 +733,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): mac-address advertisement-interval value to
                 assign to the vrrp.
             disable (boolean): Unset mac-address advertisement-interval
@@ -779,7 +779,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (boolean): True to enable preempt, False to disable
                 preempt on the vrrp.
             disable (boolean): Unset preempt if True.
@@ -821,7 +821,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): Preempt delay minimum value to set on the vrrp.
             disable (boolean): Unset preempt delay minimum if True.
             default (boolean): Set preempt delay minimum to default if True.
@@ -863,7 +863,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): Preempt delay reload value to set on the vrrp.
             disable (boolean): Unset preempt delay reload if True.
             default (boolean): Set preempt delay reload to default if True.
@@ -905,7 +905,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (integer): Preempt delay reload value to set on the vrrp.
             disable (boolean): Unset preempt delay reload if True.
             default (boolean): Set preempt delay reload to default if True.
@@ -954,7 +954,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             tracks (list): A list of track definition dictionaries. Each
                 dictionary is a definition of a tracked object in one
                 of the two formats:
@@ -1078,7 +1078,7 @@ class Vrrp(EntityCollection):
 
         Args:
             name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
+            vrid (integer): The vrid number for the vrrp to be managed.
             value (string): The bfd ip address to be set.
             disable (boolean): Unset bfd ip if True.
             default (boolean): Set bfd ip to default if True.
@@ -1307,8 +1307,8 @@ class Vrrp(EntityCollection):
     def vrconf_format(self, vrconfig):
         """Formats a vrrp configuration dictionary to match the
         information as presented from the get and getall methods.
-        vrrp configuration dictionaries passed to the create and update
-        methods may contain data for setting properties which results
+        vrrp configuration dictionaries passed to the create
+        method may contain data for setting properties which results
         in a default value on the node. In these instances, the data
         for setting or changing the property is replaced with the
         value that would be returned from the get and getall methods.
