@@ -120,16 +120,15 @@ class Ipinterfaces(EntityCollection):
     def getall(self):
         """ Returns all of the IP interfaces found in the running-config
 
-        Example:
-            {
-                'Ethernet1': {...},
-                'Ethernet2': {...}
-            }
-
         Returns:
             A Python dictionary object of key/value pairs keyed by interface
-                name that represents all of the IP interfaces on
-                the current node.
+            name that represents all of the IP interfaces on
+            the current node::
+
+                {
+                    'Ethernet1': {...},
+                    'Ethernet2': {...}
+                }
         """
         interfaces_re = re.compile(r'^interface\s(.+)', re.M)
 

@@ -92,15 +92,15 @@ class Interfaces(EntityCollection):
     def getall(self):
         """Returns all interfaces in a dict object.
 
-        Example:
-            {
-                "Ethernet1": {...},
-                "Ethernet2": {...}
-            }
-
         Returns:
             A Python dictionary object containing all interface
-                configuration indexed by interface name
+            configuration indexed by interface name::
+
+                {
+                    "Ethernet1": {...},
+                    "Ethernet2": {...}
+                }
+
         """
         interfaces_re = re.compile(r'(?<=^interface\s)(.+)$', re.M)
 
@@ -303,15 +303,6 @@ class EthernetInterface(BaseInterface):
     def get(self, name):
         """Returns an interface as a set of key/value pairs
 
-        Example:
-            {
-                "name": <string>,
-                "type": "ethernet",
-                "sflow": [true, false],
-                "flowcontrol_send": [on, off],
-                "flowcontrol_receive": [on, off]
-            }
-
         Args:
             name (string): the interface identifier to retrieve the from
                 the configuration
@@ -319,7 +310,15 @@ class EthernetInterface(BaseInterface):
         Returns:
             A Python dictionary object of key/value pairs that represent
             the current configuration for the specified node.  If the
-            specified interface name does not exist, then None is returned.
+            specified interface name does not exist, then None is returned::
+
+                {
+                    "name": <string>,
+                    "type": "ethernet",
+                    "sflow": [true, false],
+                    "flowcontrol_send": [on, off],
+                    "flowcontrol_receive": [on, off]
+                }
         """
         config = self.get_block('^interface %s' % name)
 
@@ -509,23 +508,23 @@ class PortchannelInterface(BaseInterface):
     def get(self, name):
         """Returns a Port-Channel interface as a set of key/value pairs
 
-        Example:
-            {
-                "name": <string>,
-                "type": "portchannel",
-                "members": <arrary of interface names>,
-                "minimum_links: <integer>,
-                "lacp_mode": [on, active, passive]
-            }
-
         Args:
             name (str): The interface identifier to retrieve from the
                 running-configuration
 
         Returns:
             A Python dictionary object of key/value pairs that represents
-                the interface configuration.  If the specified interface
-                does not exist, then None is returned
+            the interface configuration.  If the specified interface
+            does not exist, then None is returned::
+
+                {
+                    "name": <string>,
+                    "type": "portchannel",
+                    "members": <arrary of interface names>,
+                    "minimum_links: <integer>,
+                    "lacp_mode": [on, active, passive]
+                }
+
         """
         config = self.get_block('^interface %s' % name)
         if not config:
