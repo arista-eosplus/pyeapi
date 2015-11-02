@@ -9,7 +9,7 @@ The installation of pyeapi is straightforward and simple. As mentioned in the
 will provide some tips to help you for either platform.
 
 .. contents::
-  :depth: 2
+  :depth: 3
 
 ***********************
 Pip with Network Access
@@ -22,7 +22,15 @@ to install pyeapi
 
   admin:~ admin$ sudo pip install pyeapi
 
-.. Note:: You will likely notice Pip install netaddr, a depency of pyeapi.
+.. Note:: You will likely notice Pip install netaddr, a dependency of pyeapi.
+
+
+Pip - Upgrade Pyeapi
+====================
+
+.. code-block:: console
+
+  admin:~ admin$ sudo pip install --upgrade pyeapi
 
 
 **************************
@@ -115,3 +123,14 @@ code in the develop branch.
 
 .. Tip:: If you start using pyeapi and get import errors, make sure your
          PYTHONPATH is set to include the path to pyeapi.
+
+ Development - Upgrade Pyeapi
+ ============================
+
+ .. code-block:: console
+
+   admin:~ admin$ cd ~/projects/pyeapi
+   admin:~ admin$ git pull
+
+.. Note:: If you followed the directions above and used ``pip install -e``,
+          pip will automatically use the updated code.

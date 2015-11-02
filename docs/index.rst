@@ -30,6 +30,8 @@ through Github issues.
    configfile
    modules
    requirements
+   contribute
+   support
    license
 
 
