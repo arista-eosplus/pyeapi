@@ -52,7 +52,6 @@ VR_CONFIG = {
     'preempt_delay_min': 1,
     'preempt_delay_reload': None,
     'delay_reload': 1,
-    'authentication': '',
     'track': [
         {'name': 'Ethernet1', 'action': 'shutdown'},
         {'name': 'Ethernet2', 'action': 'decrement', 'amount': 10},
@@ -212,7 +211,6 @@ class TestApiVrrp(DutSystemTest):
                 'preempt_delay_min': 'default',
                 'preempt_delay_reload': 'default',
                 'delay_reload': 'default',
-                'authentication': '',
                 'track': [
                     {'name': 'Ethernet2', 'action': 'shutdown'},
                     {'name': 'Ethernet2', 'action': 'decrement', 'amount': 1},

@@ -59,7 +59,6 @@ Vrrp Attributes:
     preempt_delay_min (int): The preempt delay minimum setting for the vrrp
     preempt_delay_reload (int): The preempt delay reload setting for the vrrp
     delay_reload (int): The delay reload setting for the vrrp
-    authentication (string): The authentication setting for the vrrp
     track (list): The object tracking settings for the vrrp
     bfd_ip (string): The bfd ip set for the vrrp
 
@@ -102,7 +101,6 @@ Notes:
             preempt_delay_min: <int>
             preempt_delay_reload: <int>
             delay_reload: <int>
-            authentication: <string|None>
             track: [
                 {
                     name: <string>
@@ -135,7 +133,6 @@ Notes:
         preempt_delay_min: <int>|no|default|None
         preempt_delay_reload: <int>|no|default|None
         delay_reload: <int>|no|default|None
-        authentication: <string> NOTE: currently not implemented
         track: <list> of dicts in the following format:
             {
                 name: <string>
@@ -154,7 +151,7 @@ PROPERTIES = ['primary_ip', 'priority', 'description', 'secondary_ip',
               'ip_version', 'enable', 'timers_advertise',
               'mac_addr_adv_interval', 'preempt',
               'preempt_delay_min', 'preempt_delay_reload',
-              'delay_reload', 'authentication', 'track', 'bfd_ip']
+              'delay_reload', 'track', 'bfd_ip']
 
 
 class Vrrp(EntityCollection):
@@ -201,7 +198,6 @@ class Vrrp(EntityCollection):
             subd = dict()
 
             # Parse the vrrp configuration for the vrid(s) in the list
-            subd.update(self._parse_authentication(config, vrid))
             subd.update(self._parse_delay_reload(config, vrid))
             subd.update(self._parse_description(config, vrid))
             subd.update(self._parse_enable(config, vrid))
@@ -303,14 +299,6 @@ class Vrrp(EntityCollection):
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(preempt_delay_reload=value)
-
-    def _parse_authentication(self, config, vrid):
-        match = re.search(r'^\s+vrrp %s authentication'
-                          r'($| ietf-md5 key-string 7 .*$| text .*$)' %
-                          vrid, config, re.M)
-        if match:
-            return dict(authentication=match.group(1).lstrip())
-        return dict(authentication='')
 
     def _parse_bfd_ip(self, config, vrid):
         match = re.search(r'^\s+vrrp %s bfd ip'
@@ -1187,74 +1175,57 @@ class Vrrp(EntityCollection):
             if primary_ip in ('no', None):
                 cmd = self.set_primary_ip(name, vrid, value=None,
                                           disable=True, run=False)
-                commands.append(cmd)
             elif primary_ip is 'default':
                 cmd = self.set_primary_ip(name, vrid, value=None,
                                           default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_primary_ip(name, vrid, value=primary_ip,
                                           run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         priority = vrconf.get('priority', '__NONE__')
         if priority != '__NONE__':
             if priority in ('no', None):
                 cmd = self.set_priority(name, vrid, value=priority,
                                         disable=True, run=False)
-                commands.append(cmd)
             elif priority == 'default':
                 cmd = self.set_priority(name, vrid, value=priority,
                                         default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_priority(name, vrid, value=priority, run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         description = vrconf.get('description', '__NONE__')
         if description != '__NONE__':
             if description in ('no', None):
                 cmd = self.set_description(name, vrid, value=description,
                                            disable=True, run=False)
-                commands.append(cmd)
             elif description == 'default':
                 cmd = self.set_description(name, vrid, value=description,
                                            default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_description(name, vrid, value=description,
                                            run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         ip_version = vrconf.get('ip_version', '__NONE__')
         if ip_version != '__NONE__':
             if ip_version in ('no', None):
                 cmd = self.set_ip_version(name, vrid, value=ip_version,
                                           disable=True, run=False)
-                commands.append(cmd)
             elif ip_version == 'default':
                 cmd = self.set_ip_version(name, vrid, value=ip_version,
                                           default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_ip_version(name, vrid, value=ip_version,
                                           run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         secondary_ip = vrconf.get('secondary_ip', '__NONE__')
         if secondary_ip != '__NONE__':
             cmds = self.set_secondary_ips(name, vrid, secondary_ip, run=False)
             for cmd in cmds:
                 commands.append(cmd)
-            # secondary_add = secondary_ip.get('add', '__NONE__')
-            # secondary_remove = secondary_ip.get('remove', '__NONE__')
-            # if secondary_add != '__NONE__':
-            #     for s_ip in secondary_add:
-            #         commands.append("vrrp %d ip %s secondary" % (vrid, s_ip))
-            # if secondary_remove != '__NONE__':
-            #     for s_ip in secondary_remove:
-            #         commands.append("no vrrp %d ip %s secondary"
-            #                         % (vrid, s_ip))
 
         timers_advertise = vrconf.get('timers_advertise', '__NONE__')
         if timers_advertise != '__NONE__':
@@ -1262,17 +1233,15 @@ class Vrrp(EntityCollection):
                 cmd = self.set_timers_advertise(name, vrid,
                                                 value=timers_advertise,
                                                 disable=True, run=False)
-                commands.append(cmd)
             elif timers_advertise == 'default':
                 cmd = self.set_timers_advertise(name, vrid,
                                                 value=timers_advertise,
                                                 default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_timers_advertise(name, vrid,
                                                 value=timers_advertise,
                                                 run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         mac_addr_adv_interval = \
             vrconf.get('mac_addr_adv_interval', '__NONE__')
@@ -1282,33 +1251,29 @@ class Vrrp(EntityCollection):
                     self.set_mac_addr_adv_interval(name, vrid,
                                                    value=mac_addr_adv_interval,
                                                    disable=True, run=False)
-                commands.append(cmd)
             elif mac_addr_adv_interval == 'default':
                 cmd = \
                     self.set_mac_addr_adv_interval(name, vrid,
                                                    value=mac_addr_adv_interval,
                                                    default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = \
                     self.set_mac_addr_adv_interval(name, vrid,
                                                    value=mac_addr_adv_interval,
                                                    run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         preempt = vrconf.get('preempt', '__NONE__')
         if preempt != '__NONE__':
             if preempt in ('no', False):
                 cmd = self.set_preempt(name, vrid, value=preempt,
                                        disable=True, run=False)
-                commands.append(cmd)
             elif preempt == 'default':
                 cmd = self.set_preempt(name, vrid, value=preempt,
                                        default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_preempt(name, vrid, value=preempt, run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         preempt_delay_min = vrconf.get('preempt_delay_min', '__NONE__')
         if preempt_delay_min != '__NONE__':
@@ -1316,17 +1281,15 @@ class Vrrp(EntityCollection):
                 cmd = self.set_preempt_delay_min(name, vrid,
                                                  value=preempt_delay_min,
                                                  disable=True, run=False)
-                commands.append(cmd)
             elif preempt_delay_min == 'default':
                 cmd = self.set_preempt_delay_min(name, vrid,
                                                  value=preempt_delay_min,
                                                  default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_preempt_delay_min(name, vrid,
                                                  value=preempt_delay_min,
                                                  run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         preempt_delay_reload = vrconf.get('preempt_delay_reload', '__NONE__')
         if preempt_delay_reload != '__NONE__':
@@ -1334,39 +1297,28 @@ class Vrrp(EntityCollection):
                 cmd = self.set_preempt_delay_reload(name, vrid,
                                                     value=preempt_delay_reload,
                                                     disable=True, run=False)
-                commands.append(cmd)
             elif preempt_delay_reload == 'default':
                 cmd = self.set_preempt_delay_reload(name, vrid,
                                                     value=preempt_delay_reload,
                                                     default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_preempt_delay_reload(name, vrid,
                                                     value=preempt_delay_reload,
                                                     run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         delay_reload = vrconf.get('delay_reload', '__NONE__')
         if delay_reload != '__NONE__':
             if delay_reload in ('no', None):
                 cmd = self.set_delay_reload(name, vrid, value=delay_reload,
                                             disable=True, run=False)
-                commands.append(cmd)
             elif delay_reload == 'default':
                 cmd = self.set_delay_reload(name, vrid, value=delay_reload,
                                             default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_delay_reload(name, vrid, value=delay_reload,
                                             run=False)
-                commands.append(cmd)
-
-        authentication = vrconf.get('authentication', '__NONE__')
-        if authentication != '__NONE__':
-            pass
-            # XXX not yet implemented
-            # needs some handling, because input string does not
-            # necessarily match the status string.
+            commands.append(cmd)
 
         track = vrconf.get('track', '__NONE__')
         if track != '__NONE__':
@@ -1379,14 +1331,12 @@ class Vrrp(EntityCollection):
             if bfd_ip in ('no', None):
                 cmd = self.set_bfd_ip(name, vrid, value=bfd_ip,
                                       disable=True, run=False)
-                commands.append(cmd)
             elif bfd_ip == 'default':
                 cmd = self.set_bfd_ip(name, vrid, value=bfd_ip,
                                       default=True, run=False)
-                commands.append(cmd)
             else:
                 cmd = self.set_bfd_ip(name, vrid, value=bfd_ip, run=False)
-                commands.append(cmd)
+            commands.append(cmd)
 
         # Send the commands to the requested interface
         result = self.configure_interface(name, commands)
@@ -1445,7 +1395,6 @@ class Vrrp(EntityCollection):
         # delay_reload: default, no, None results in value of 0
         if fixed['delay_reload'] in ('no', 'default', None):
             fixed['delay_reload'] = 0
-        # authenticetion -> XXX needs implemented
         # track: list should be exactly what is required,
         # just sort it for easier comparison
         if 'track' in fixed:

@@ -52,7 +52,6 @@ known_vrrps = {
              'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
-             'authentication': '',
              'primary_ip': '10.10.6.10',
              'secondary_ip': [],
              'description': 'vrrp 10 on Ethernet1',
@@ -69,7 +68,6 @@ known_vrrps = {
              'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
-             'authentication': '',
              'primary_ip': '10.10.5.10',
              'secondary_ip': ['10.10.5.20'],
              'description': 'vrrp 10 on Port-Channel10',
@@ -86,7 +84,6 @@ known_vrrps = {
              'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
-             'authentication': '',
              'primary_ip': '10.10.4.10',
              'secondary_ip': ['10.10.4.21', '10.10.4.22',
                               '10.10.4.23', '10.10.4.24'],
@@ -109,7 +106,6 @@ known_vrrps = {
              'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
-             'authentication': 'text 12345',
              'primary_ip': '10.10.4.20',
              'secondary_ip': [],
              'description': '',
@@ -128,8 +124,6 @@ known_vrrps = {
              'preempt_delay_min': 0,
              'preempt_delay_reload': 0,
              'delay_reload': 0,
-             'authentication':
-             'ietf-md5 key-string 7 bu1yTgzm0RDgraNS0MNkaA==',
              'primary_ip': '10.10.4.30',
              'secondary_ip': [],
              'description': '',
@@ -196,7 +190,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             'preempt_delay_min': 1,
             'preempt_delay_reload': 1,
             'delay_reload': 1,
-            'authentication': '',
             'track': [
                  {'name': 'Ethernet1', 'action': 'decrement', 'amount': 1},
                  {'name': 'Ethernet1', 'action': 'shutdown'},
@@ -221,7 +214,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             'vrrp 10 preempt delay minimum 1',
             'vrrp 10 preempt delay reload 1',
             'vrrp 10 delay reload 1',
-            # 'no vrrp 10 authentication',
             'vrrp 10 track Ethernet1 decrement 1',
             'vrrp 10 track Ethernet1 shutdown',
             'vrrp 10 track Ethernet2 decrement 1',
@@ -808,28 +800,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             exp_cmds = [upd_cmd] + [cmd]
             self.eapi_positive_config_test(func, exp_cmds)
 
-    # def test_update_authentication(self):
-    #     # no vrrp 10 authentication
-    #     cases = [
-    #         # XXX fix test cases
-    #     ]
-    #
-    #     for (authentication, cmd) in cases:
-    #         func = function('update', upd_intf, upd_vrid,
-    #                         authentication=authentication)
-    #         exp_cmds = [upd_cmd] + [cmd]
-    #         self.eapi_positive_config_test(func, exp_cmds)
-    #
-    #     # Test raising ValueError by entering invalid parameters
-    #     cases = [
-    #         # XXX fix test cases
-    #     ]
-    #
-    #     for authentication in cases:
-    #         func = function('update', upd_intf, upd_vrid,
-    #                         authentication=authentication)
-    #         self.eapi_exception_config_test(func, ValueError)
-
     def test_set_tracks(self):
         # vrrp 10 track Ethernet1 decrement 10
         # vrrp 10 track Ethernet1 shutdown
@@ -993,7 +963,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             'preempt_delay_min': None,
             'preempt_delay_reload': None,
             'delay_reload': None,
-            'authentication': '',
             'primary_ip': None,
             'secondary_ip': ['10.10.4.22', '10.10.4.21'],
             'description': None,
@@ -1013,7 +982,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             'preempt_delay_min': 0,
             'preempt_delay_reload': 0,
             'delay_reload': 0,
-            'authentication': '',
             'primary_ip': '0.0.0.0',
             'secondary_ip': ['10.10.4.21', '10.10.4.22'],
             'description': None,
