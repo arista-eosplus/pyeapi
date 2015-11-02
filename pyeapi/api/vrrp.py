@@ -1114,47 +1114,6 @@ class Vrrp(EntityCollection):
         # Otherwise return the formatted command
         return cmd
 
-    def update(self, name, vrid, **kwargs):
-        """Update a vrrp instance from an interface
-
-        Note:
-            This method will attempt to set parameters for the vrrp on
-            the node's operational config. Parameters specified in the
-            kwargs argument will be matched against the current
-            parameters for the vrrp, and only those parameters that
-            have changed from the current configuration will be updated.
-
-        Args:
-            name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be updated.
-            kwargs (dict): A dictionary specifying the properties to
-                be applied to the vrrp instance. See library documentation
-                for available keys and values.
-
-        Returns:
-            True if the vrrp could be updated otherwise False (see Node)
-
-        """
-
-        update = dict(kwargs)
-
-        # Get the current configuration for the vrrp from the switch.
-        # Raise an error if the vrrp does not exist on the interface.
-        try:
-            current = self.get(name)[vrid]
-        except:
-            raise ValueError("Attempt to configure a non-existent vrrp")
-
-        # Keep only those properties in the update dictionary that
-        # are different than the current vrrp configuration.
-        for prop in PROPERTIES:
-            if prop in update:
-                if update[prop] == current[prop]:
-                    del update[prop]
-
-        # Configure the vrrp
-        return self._vrrp_set(name, vrid, **update)
-
     def _vrrp_set(self, name, vrid, **kwargs):
         # Configure the commands to create or update a vrrp
         # configuration, and send the commands to the node.

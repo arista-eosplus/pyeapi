@@ -178,6 +178,8 @@ class TestApiVrrp(EapiConfigUnitTest):
     def test_create(self):
         interface = 'Ethernet1'
         vrid = 10
+
+        # Test create with a normal configuration
         configuration = {
             'primary_ip': '10.10.60.10',
             'priority': 200,
@@ -186,7 +188,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             'ip_version': 3,
             'timers_advertise': 2,
             'mac_addr_adv_interval': 3,
-            'preempt': False,
+            'preempt': True,
             'preempt_delay_min': 1,
             'preempt_delay_reload': 1,
             'delay_reload': 1,
@@ -210,7 +212,7 @@ class TestApiVrrp(EapiConfigUnitTest):
             'vrrp 10 ip 10.10.60.30 secondary',
             'vrrp 10 timers advertise 2',
             'vrrp 10 mac-address advertisement-interval 3',
-            'no vrrp 10 preempt',
+            'vrrp 10 preempt',
             'vrrp 10 preempt delay minimum 1',
             'vrrp 10 preempt delay reload 1',
             'vrrp 10 delay reload 1',
@@ -219,6 +221,78 @@ class TestApiVrrp(EapiConfigUnitTest):
             'vrrp 10 track Ethernet2 decrement 1',
             'vrrp 10 track Ethernet2 shutdown',
             'vrrp 10 bfd ip 10.10.60.30',
+        ]
+        func = function('create', interface, vrid, **configuration)
+
+        self.eapi_positive_config_test(func, cmds)
+
+        # Test create setting possible parameters to 'no'
+        configuration = {
+            'primary_ip': 'no',
+            'priority': 'no',
+            'description': 'no',
+            'secondary_ip': [],
+            'ip_version': 'no',
+            'timers_advertise': 'no',
+            'mac_addr_adv_interval': 'no',
+            'preempt': 'no',
+            'preempt_delay_min': 'no',
+            'preempt_delay_reload': 'no',
+            'delay_reload': 'no',
+            'track': [],
+            'bfd_ip': 'no',
+        }
+
+        cmds = [
+            'interface Ethernet1',
+            'vrrp 10 shutdown',
+            'no vrrp 10 ip 10.10.6.10',
+            'no vrrp 10 priority',
+            'no vrrp 10 description',
+            'no vrrp 10 ip version',
+            'no vrrp 10 timers advertise',
+            'no vrrp 10 mac-address advertisement-interval',
+            'no vrrp 10 preempt',
+            'no vrrp 10 preempt delay minimum',
+            'no vrrp 10 preempt delay reload',
+            'no vrrp 10 delay reload',
+            'no vrrp 10 bfd ip',
+        ]
+        func = function('create', interface, vrid, **configuration)
+
+        self.eapi_positive_config_test(func, cmds)
+
+        # Test create setting possible parameters to 'default'
+        configuration = {
+            'primary_ip': 'default',
+            'priority': 'default',
+            'description': 'default',
+            'secondary_ip': [],
+            'ip_version': 'default',
+            'timers_advertise': 'default',
+            'mac_addr_adv_interval': 'default',
+            'preempt': 'default',
+            'preempt_delay_min': 'default',
+            'preempt_delay_reload': 'default',
+            'delay_reload': 'default',
+            'track': [],
+            'bfd_ip': 'default',
+        }
+
+        cmds = [
+            'interface Ethernet1',
+            'vrrp 10 shutdown',
+            'default vrrp 10 ip 10.10.6.10',
+            'default vrrp 10 priority',
+            'default vrrp 10 description',
+            'default vrrp 10 ip version',
+            'default vrrp 10 timers advertise',
+            'default vrrp 10 mac-address advertisement-interval',
+            'default vrrp 10 preempt',
+            'default vrrp 10 preempt delay minimum',
+            'default vrrp 10 preempt delay reload',
+            'default vrrp 10 delay reload',
+            'default vrrp 10 bfd ip',
         ]
         func = function('create', interface, vrid, **configuration)
 
@@ -271,38 +345,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_enable', upd_intf, upd_vrid, value=enable)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_enable called through update when going from
-        # enabled to disabled (True to False)
-        cases = [
-            (False, 'vrrp %d shutdown' % upd_vrid),
-            (True, None),
-        ]
-
-        for (enable, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid, enable=enable)
-            if cmd is not None:
-                exp_cmds = [upd_cmd] + [cmd]
-            else:
-                exp_cmds = [upd_cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
-        # Test set_enable called through update against vrrp 20 for going
-        # from disabled to enabled (False to True)
-        # vrrp 20 shutdown
-        alt_vrid = 20
-        cases = [
-            (True, 'no vrrp %d shutdown' % alt_vrid),
-            (False, None),
-        ]
-
-        for (enable, cmd) in cases:
-            func = function('update', upd_intf, alt_vrid, enable=enable)
-            if cmd is not None:
-                exp_cmds = [upd_cmd] + [cmd]
-            else:
-                exp_cmds = [upd_cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_primary_ip(self):
         # vrrp 10 ip 10.10.4.10
 
@@ -330,20 +372,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=primary_ip)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_primary_ip through update
-        cases = [
-            (ip1, 'vrrp %d ip %s' % (upd_vrid, ip1)),
-            ('default', 'default vrrp %d ip %s' % (upd_vrid, ipcurr)),
-            ('no', 'no vrrp %d ip %s' % (upd_vrid, ipcurr)),
-            (None, 'no vrrp %d ip %s' % (upd_vrid, ipcurr)),
-        ]
-
-        for (primary_ip, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            primary_ip=primary_ip)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_priority(self):
         # vrrp 10 priority 200
 
@@ -369,20 +397,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=priority)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_priority through update
-        cases = [
-            (150, 'vrrp %d priority 150' % upd_vrid),
-            ('default', 'default vrrp %d priority' % upd_vrid),
-            ('no', 'no vrrp %d priority' % upd_vrid),
-            (None, 'no vrrp %d priority' % upd_vrid),
-        ]
-
-        for (priority, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            priority=priority)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_description(self):
         # no vrrp 10 description
 
@@ -400,20 +414,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_description', upd_intf, upd_vrid,
                             value=description, disable=disable,
                             default=default)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
-        # Test set_description through update
-        cases = [
-            (desc, 'vrrp %d description %s' % (upd_vrid, desc)),
-            ('default', 'default vrrp %d description' % upd_vrid),
-            ('no', 'no vrrp %d description' % upd_vrid),
-            (None, 'no vrrp %d description' % upd_vrid),
-        ]
-
-        for (description, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            description=description)
             exp_cmds = [upd_cmd] + [cmd]
             self.eapi_positive_config_test(func, exp_cmds)
 
@@ -441,20 +441,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_ip_version', upd_intf, upd_vrid,
                             value=ip_version)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test set_ip_version through update
-        cases = [
-            (3, 'vrrp %d ip version 3' % upd_vrid),
-            ('default', 'default vrrp %d ip version' % upd_vrid),
-            ('no', 'no vrrp %d ip version' % upd_vrid),
-            (None, 'no vrrp %d ip version' % upd_vrid),
-        ]
-
-        for (ip_version, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            ip_version=ip_version)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
 
     def test_set_secondary_ips(self):
         # vrrp 10 ip 10.10.4.21 secondary
@@ -509,32 +495,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             secondary_ips)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_secondary_ips through update
-        cases = [
-            ([new1, new2, new3],
-             {'add': [new1, new2, new3],
-              'remove': [curr1, curr2, curr3, curr4]}),
-            ([new1, new2, new4],
-             {'add': [new1, new2],
-              'remove': [curr1, curr2, curr3]}),
-            ([],
-             {'add': [],
-              'remove': [curr1, curr2, curr3, curr4]}),
-        ]
-
-        for (secondary_ips, cmd_dict) in cases:
-            cmds = []
-            for sec_ip in cmd_dict['add']:
-                cmds.append("vrrp %d ip %s secondary" % (upd_vrid, sec_ip))
-
-            for sec_ip in cmd_dict['remove']:
-                cmds.append("no vrrp %d ip %s secondary" % (upd_vrid, sec_ip))
-
-            func = function('update', upd_intf, upd_vrid,
-                            secondary_ip=secondary_ips)
-            exp_cmds = [upd_cmd] + sorted(cmds)
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_timers_advertise(self):
         # vrrp 10 timers advertise 3
 
@@ -560,20 +520,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_timers_advertise', upd_intf, upd_vrid,
                             value=timers_advertise)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test set_timers_advertise through update
-        cases = [
-            (255, 'vrrp %d timers advertise 255' % upd_vrid),
-            ('default', 'default vrrp %d timers advertise' % upd_vrid),
-            ('no', 'no vrrp %d timers advertise' % upd_vrid),
-            (None, 'no vrrp %d timers advertise' % upd_vrid),
-        ]
-
-        for (timers_advertise, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            timers_advertise=timers_advertise)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
 
     def test_set_mac_addr_adv_interval(self):
         # vrrp 10 mac-address advertisement-interval 30
@@ -602,21 +548,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=mac_addr_adv_interval)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_mac_addr_adv_interval through update
-        cases = [
-            (3, 'vrrp %d mac-address advertisement-interval 3' % upd_vrid),
-            ('default', 'default vrrp %d mac-address advertisement-interval'
-             % upd_vrid),
-            ('no', 'no vrrp %d mac-address advertisement-interval' % upd_vrid),
-            (None, 'no vrrp %d mac-address advertisement-interval' % upd_vrid),
-        ]
-
-        for (set_mac_addr_adv_interval, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            mac_addr_adv_interval=set_mac_addr_adv_interval)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_preempt(self):
         # vrrp 10 preempt
 
@@ -642,37 +573,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_preempt', upd_intf, upd_vrid,
                             value=preempt)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test turning off preempt with set_preempt through update
-        cases = [
-            (False, 'no vrrp %d preempt' % upd_vrid),
-            ('default', 'default vrrp %d preempt' % upd_vrid),
-            ('no', 'no vrrp %d preempt' % upd_vrid),
-        ]
-
-        for (preempt, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            preempt=preempt)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
-        # Test turning on preept through update
-        # no vrrp 20 preempt
-        alt_vrid = 20
-        cases = [
-            (True, 'vrrp %d preempt' % alt_vrid),
-            ('default', 'default vrrp %d preempt' % alt_vrid),
-            ('no', 'no vrrp %d preempt' % alt_vrid),
-        ]
-
-        for (preempt, cmd) in cases:
-            func = function('update', upd_intf, alt_vrid,
-                            preempt=preempt)
-            if cmd is not None:
-                exp_cmds = [upd_cmd] + [cmd]
-            else:
-                exp_cmds = [upd_cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
 
     def test_set_preempt_delay_min(self):
         # vrrp 10 preempt delay minimum 0
@@ -703,20 +603,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=preempt_delay_min)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_preempt_delay_min through update
-        cases = [
-            (3, 'vrrp %d preempt delay minimum 3' % upd_vrid),
-            ('default', 'default vrrp %d preempt delay minimum' % upd_vrid),
-            ('no', 'no vrrp %d preempt delay minimum' % upd_vrid),
-            (None, 'no vrrp %d preempt delay minimum' % upd_vrid),
-        ]
-
-        for (preempt_delay_min, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            preempt_delay_min=preempt_delay_min)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_preempt_delay_reload(self):
         # vrrp 10 preempt delay reload 0
 
@@ -746,20 +632,6 @@ class TestApiVrrp(EapiConfigUnitTest):
                             value=preempt_delay_reload)
             self.eapi_exception_config_test(func, ValueError)
 
-        # Test set_preempt_delay_reload through update
-        cases = [
-            (3, 'vrrp %d preempt delay reload 3' % upd_vrid),
-            ('default', 'default vrrp %d preempt delay reload' % upd_vrid),
-            ('no', 'no vrrp %d preempt delay reload' % upd_vrid),
-            (None, 'no vrrp %d preempt delay reload' % upd_vrid),
-        ]
-
-        for (preempt_delay_reload, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            preempt_delay_reload=preempt_delay_reload)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
     def test_set_delay_reload(self):
         # vrrp 10 delay reload 0
 
@@ -785,20 +657,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_delay_reload', upd_intf, upd_vrid,
                             value=delay_reload)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test test_set_delay_reload through update
-        cases = [
-            (3, 'vrrp %d delay reload 3' % upd_vrid),
-            ('default', 'default vrrp %d delay reload' % upd_vrid),
-            ('no', 'no vrrp %d delay reload' % upd_vrid),
-            (None, 'no vrrp %d delay reload' % upd_vrid),
-        ]
-
-        for (delay_reload, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            delay_reload=delay_reload)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
 
     def test_set_tracks(self):
         # vrrp 10 track Ethernet1 decrement 10
@@ -860,48 +718,13 @@ class TestApiVrrp(EapiConfigUnitTest):
         # Test raising ValueError by entering invalid parameters
         cases = [
             [{'name': 'Ethernet1', 'action': 'disable', 'amount': 10}],
-            [{'name': 'Ethernet1', 'action': 'decrement', 'amount': True}]
+            [{'name': 'Ethernet1', 'action': 'decrement', 'amount': True}],
+            [{'name': 'Ethernet1', 'action': 'shutdown', 'amount': 10}],
         ]
 
         for tracks in cases:
             func = function('set_tracks', upd_intf, upd_vrid, tracks)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test set_tracks through update
-        cases = [
-            ([curr6, curr5, new1, new2],
-             {'add': [new2],
-              'remove': [curr2, curr3, curr4]}),
-            ([new2, new3, new4, new5, new6],
-             {'add': [new2, new3, new4, new5, new6],
-              'remove': [curr1, curr2, curr3, curr4, curr5, curr6]}),
-            ([],
-             {'add': [],
-              'remove': [curr1, curr2, curr3, curr4, curr5, curr6]}),
-        ]
-
-        for (tracks, cmd_dict) in cases:
-            cmds = []
-            for add in cmd_dict['add']:
-                tr_obj = add['name']
-                action = add['action']
-                amount = add['amount'] if 'amount' in add else ''
-                cmd = ("vrrp %d track %s %s %s"
-                       % (upd_vrid, tr_obj, action, amount))
-                cmds.append(cmd.rstrip())
-
-            for remove in cmd_dict['remove']:
-                tr_obj = remove['name']
-                action = remove['action']
-                amount = remove['amount'] if 'amount' in remove else ''
-                cmd = ("no vrrp %d track %s %s %s"
-                       % (upd_vrid, tr_obj, action, amount))
-                cmds.append(cmd.rstrip())
-
-            func = function('update', upd_intf, upd_vrid,
-                            track=tracks)
-            exp_cmds = [upd_cmd] + sorted(cmds)
-            self.eapi_positive_config_test(func, exp_cmds)
 
     def test_set_bfd_ip(self):
         # no vrrp 10 bfd ip
@@ -929,28 +752,6 @@ class TestApiVrrp(EapiConfigUnitTest):
             func = function('set_bfd_ip', upd_intf, upd_vrid,
                             value=bfd_ip)
             self.eapi_exception_config_test(func, ValueError)
-
-        # Test set_bfd_ip through update
-        cases = [
-            (bfd_addr, 'vrrp %d bfd ip %s' % (upd_vrid, bfd_addr)),
-            ('default', 'default vrrp %d bfd ip' % upd_vrid),
-            ('no', 'no vrrp %d bfd ip' % upd_vrid),
-            (None, 'no vrrp %d bfd ip' % upd_vrid),
-        ]
-
-        for (bfd_ip, cmd) in cases:
-            func = function('update', upd_intf, upd_vrid,
-                            bfd_ip=bfd_ip)
-            exp_cmds = [upd_cmd] + [cmd]
-            self.eapi_positive_config_test(func, exp_cmds)
-
-    def test_update_invalid_vrid(self):
-        # Test raising ValueError by updating a non-existent vrrp
-        non_vrid = 1000
-        params = {'priority': 100, 'enable': True}
-
-        func = function('update', upd_intf, non_vrid, **params)
-        self.eapi_exception_config_test(func, ValueError)
 
     def test_vrconf_format(self):
         # Test the function to format a vrrp configuration to
