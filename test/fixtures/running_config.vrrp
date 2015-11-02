@@ -1,0 +1,533 @@
+!
+logging level VRRP debugging
+!
+default snmp-server enable traps vrrp
+default snmp-server enable traps vrrp trap-new-master
+!
+interface Port-Channel1
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no port-channel min-links
+   no port-channel lacp fallback
+   port-channel lacp fallback timeout 90
+   no l2 mtu
+   no mlag
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+!
+interface Port-Channel10
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 10.10.5.1/24
+   no ip verify unicast
+   no port-channel min-links
+   no port-channel lacp fallback
+   port-channel lacp fallback timeout 90
+   no l2 mtu
+   no mlag
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+   vrrp 10 priority 150
+   vrrp 10 timers advertise 1
+   vrrp 10 mac-address advertisement-interval 30
+   vrrp 10 preempt
+   vrrp 10 preempt delay minimum 0
+   vrrp 10 preempt delay reload 0
+   vrrp 10 delay reload 0
+   no vrrp 10 authentication
+   vrrp 10 ip 10.10.5.10
+   vrrp 10 ip 10.10.5.20 secondary
+   vrrp 10 ipv6 ::
+   vrrp 10 description vrrp 10 on Port-Channel10
+   no vrrp 10 shutdown
+   no vrrp 10 bfd ip
+   no vrrp 10 bfd ipv6
+   vrrp 10 ip version 2
+!
+interface Ethernet1
+   no description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   no l2 mtu
+   default logging event congestion-drops
+   default unidirectional
+   switchport access vlan 1
+   switchport trunk native vlan 1
+   switchport trunk allowed vlan 1-4094
+   switchport mode access
+   switchport mac address learning
+   no switchport private-vlan mapping
+   switchport
+   default encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 10.10.6.1/24
+   no ip verify unicast
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no msrp
+   no mvrp
+   no switchport port-security
+   switchport port-security maximum 1
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   sflow enable
+   no spanning-tree portfast
+   spanning-tree portfast auto
+   no spanning-tree link-type
+   no spanning-tree bpduguard
+   no spanning-tree bpdufilter
+   no spanning-tree cost
+   spanning-tree port-priority 128
+   no spanning-tree guard
+   no spanning-tree bpduguard rate-limit
+   logging event spanning-tree use-global
+   switchport tap native vlan 1
+   no switchport tap identity
+   switchport tap allowed vlan 1-4094
+   switchport tool allowed vlan 1-4094
+   no switchport tool identity
+   no switchport tap truncation
+   no switchport tool truncation
+   no switchport tap default group
+   no switchport tool group
+   no switchport tool dot1q remove outer
+   vrrp 10 priority 175
+   vrrp 10 timers advertise 1
+   vrrp 10 mac-address advertisement-interval 30
+   vrrp 10 preempt
+   vrrp 10 preempt delay minimum 0
+   vrrp 10 preempt delay reload 0
+   vrrp 10 delay reload 0
+   no vrrp 10 authentication
+   vrrp 10 ip 10.10.6.10
+   vrrp 10 ipv6 ::
+   vrrp 10 description vrrp 10 on Ethernet1
+   no vrrp 10 shutdown
+   no vrrp 10 bfd ip
+   no vrrp 10 bfd ipv6
+   vrrp 10 ip version 2
+!
+interface Vlan50
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   autostate
+   no private-vlan mapping
+   snmp trap link-status
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 10.10.4.1/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   no bfd echo
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Vlan50
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   ip igmp host-proxy
+   no ip igmp host-proxy report-interval
+   ip igmp host-proxy version 3
+   no ip igmp host-proxy
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   ip mfib fastdrop
+   default ntp serve
+   no ip pim sparse-mode
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   default ip pim bfd-instance
+   no ip pim bsr-border
+   no ip virtual address
+   vrrp 10 priority 200
+   vrrp 10 timers advertise 3
+   vrrp 10 mac-address advertisement-interval 30
+   vrrp 10 preempt
+   vrrp 10 preempt delay minimum 0
+   vrrp 10 preempt delay reload 0
+   vrrp 10 delay reload 0
+   no vrrp 10 authentication
+   vrrp 10 ip 10.10.4.10
+   vrrp 10 ip 10.10.4.21 secondary
+   vrrp 10 ip 10.10.4.22 secondary
+   vrrp 10 ip 10.10.4.23 secondary
+   vrrp 10 ip 10.10.4.24 secondary
+   vrrp 10 ipv6 ::
+   no vrrp 10 description
+   no vrrp 10 shutdown
+   vrrp 10 track Ethernet1 decrement 10
+   vrrp 10 track Ethernet1 shutdown
+   vrrp 10 track Ethernet2 decrement 50
+   vrrp 10 track Ethernet2 shutdown
+   vrrp 10 track Ethernet11 decrement 75
+   vrrp 10 track Ethernet11 shutdown
+   no vrrp 10 bfd ip
+   no vrrp 10 bfd ipv6
+   vrrp 10 ip version 2
+   vrrp 20 priority 100
+   vrrp 20 timers advertise 5
+   vrrp 20 mac-address advertisement-interval 30
+   no vrrp 20 preempt
+   vrrp 20 preempt delay minimum 0
+   vrrp 20 preempt delay reload 0
+   vrrp 20 delay reload 0
+   vrrp 20 authentication text 12345
+   vrrp 20 ip 10.10.4.20
+   vrrp 20 ipv6 ::
+   no vrrp 20 description
+   vrrp 20 shutdown
+   vrrp 20 track Ethernet1 shutdown
+   vrrp 20 track Ethernet2 decrement 1
+   vrrp 20 track Ethernet2 shutdown
+   no vrrp 20 bfd ip
+   no vrrp 20 bfd ipv6
+   vrrp 20 ip version 2
+   vrrp 30 priority 50
+   vrrp 30 timers advertise 1
+   vrrp 30 mac-address advertisement-interval 30
+   vrrp 30 preempt
+   vrrp 30 preempt delay minimum 0
+   vrrp 30 preempt delay reload 0
+   vrrp 30 delay reload 0
+   vrrp 30 authentication ietf-md5 key-string 7 bu1yTgzm0RDgraNS0MNkaA==
+   vrrp 30 ip 10.10.4.30
+   vrrp 30 ipv6 ::
+   no vrrp 30 description
+   no vrrp 30 shutdown
+   vrrp 30 bfd ip 10.10.4.33
+   no vrrp 30 bfd ipv6
+   vrrp 30 ip version 2
+!
+!
