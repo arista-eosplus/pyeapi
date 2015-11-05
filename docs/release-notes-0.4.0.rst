@@ -2,18 +2,18 @@
 v0.4.0
 ######
 
-2015-11-03
+2015-11-05
 
 New APIs
 ^^^^^^^^
 
-* Add support for vrrp api (`57 <https://github.com/arista-eosplus/pyeapi/pull/57>`_) [`grybak <https://github.com/grybak>`_]
-    .. comment
-* Add support for staticroute api (`45 <https://github.com/arista-eosplus/pyeapi/pull/45>`_) [`grybak <https://github.com/grybak>`_]
+* Add VRRP (`57 <https://github.com/arista-eosplus/pyeapi/pull/57>`_) [`grybak <https://github.com/grybak>`_]
+    Add support for VRRP configuration.
+* Add Staticroute (`45 <https://github.com/arista-eosplus/pyeapi/pull/45>`_) [`grybak <https://github.com/grybak>`_]
     The staticroute API enables you to set static IPv4 routes on your EOS device.
-* Add support for varp api (`43 <https://github.com/arista-eosplus/pyeapi/pull/43>`_) [`phil-arista <https://github.com/phil-arista>`_]
+* Add VARP (`43 <https://github.com/arista-eosplus/pyeapi/pull/43>`_) [`phil-arista <https://github.com/phil-arista>`_]
     The Varp API includes the subclass VarpInterfaces. These two combine to provide methods to set virtual IP addresses on interfaces as well as set the global virtual-router mac-address.
-* Add support for routemap api (`40 <https://github.com/arista-eosplus/pyeapi/pull/40>`_) [`phil-arista <https://github.com/phil-arista>`_]
+* Add Routemap (`40 <https://github.com/arista-eosplus/pyeapi/pull/40>`_) [`phil-arista <https://github.com/phil-arista>`_]
     .. comment
 
 Enhancements
@@ -21,7 +21,7 @@ Enhancements
 
 * Making configure RADIUS compatible (`53 <https://github.com/arista-eosplus/pyeapi/pull/53>`_) [`GaryCarneiro <https://github.com/GaryCarneiro>`_]
     Modifies the syntax of the ``config`` method to use ``configure terminal`` instead of just ``configure``.
-* Add lacp mode to set_members() method (`47 <https://github.com/arista-eosplus/pyeapi/pull/47>`_) [`phil-arista <https://github.com/phil-arista>`_]
+* Close #46 (`47 <https://github.com/arista-eosplus/pyeapi/pull/47>`_) [`phil-arista <https://github.com/phil-arista>`_]
     This enhancement allows you to set the LACP Mode while executing the set_members method.  The call would look like ``node.api('interfaces').set_members(1, [Ethernet1,Ethernet2], mode='active')``
 * Added support to specify timeout (`41 <https://github.com/arista-eosplus/pyeapi/pull/41>`_) [`dbarrosop <https://github.com/dbarrosop>`_]
     This enhancement provides a way to specify a connection timeout.  The default is set to 60 seconds.
