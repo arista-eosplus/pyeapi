@@ -987,11 +987,27 @@ class Vrrp(EntityCollection):
         unset = '_none_'
         tracks_set = []
         for track in tracks:
+            keys = track.keys()
+
+            # Validate no extraneous keys in track definition
+            err_keys = set(keys).difference(('name', 'action', 'amount'))
+            if err_keys:
+                err_keys = ', '.join(err_keys)
+                raise ValueError("Error found in vrrp property 'track': "
+                                 "unknown key(s) '%s' found. Valid keys are "
+                                 "name, action, and amount" % err_keys)
+
+            # Validate required keys in track definition
+            if not set(keys).issuperset(('name', 'action')):
+                raise ValueError("Error found in vrrp property 'track': "
+                                 "track definition must contain 'name' and "
+                                 "'action' keys")
+
             tr_obj = track['name']
             action = track['action']
             amount = track['amount'] if 'amount' in track else unset
 
-            # Validate track definition
+            # Validate values in track definition
             error = False
             if action not in ('shutdown', 'decrement'):
                 error = True
