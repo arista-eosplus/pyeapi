@@ -132,26 +132,34 @@ class Bgp(Entity):
         command = 'default router bgp {}'.format(config['bgp_as'])
         return self.configure(command)
 
-    def set_router_id(self, value=None, default=False):
-        cmd = self.command_builder('router-id', value=value, default=default)
+    def set_router_id(self, value=None, default=False, disable=False):
+        cmd = self.command_builder('router-id', value=value,
+                                   default=default, disable=disable)
         return self.configure_bgp(cmd)
 
-    def set_maximum_paths(self, max_path=None, max_ecmp_path=None, default=False):
+    def set_maximum_paths(self, max_path=None, max_ecmp_path=None,
+                          default=False, disable=False):
         if not max_path and max_ecmp_path:
             raise TypeError('Cannot use maximum_ecmp_paths without '
                             'providing max_path')
         if default:
             cmd = 'default maximum-paths'
+        elif disable:
+            cmd = 'no maximum-paths'
         elif max_path:
             cmd = 'maximum-paths {}'.format(max_path)
             if max_ecmp_path:
                 cmd += ' ecmp {}'.format(max_ecmp_path)
         else:
-            cmd = 'no maximum-paths'
+            raise ValueError("No max_path specified")
         return self.configure_bgp(cmd)
 
-    def set_shutdown(self, value=None, default=False):
-        cmd = self.command_builder('shutdown', value=value, default=default)
+    def set_shutdown(self, value=' ', default=False, disable=False):
+        # value defaults to ' ' so command_builder does not fail when
+        # value, default, and disable all evaluate to False. It results
+        # in sending 'bgp shutdown  ' when default and disable are False.
+        cmd = self.command_builder('shutdown', value=value, default=default,
+                                   disable=disable)
         return self.configure_bgp(cmd)
 
     def add_network(self, prefix, length, route_map=None):
@@ -261,45 +269,54 @@ class BgpNeighbors(EntityCollection):
         cmds = ['router bgp {}'.format(match.group(1)), cmd]
         return super(BgpNeighbors, self).configure(cmds)
 
-    def command_builder(self, name, cmd, value, default):
+    def command_builder(self, name, cmd, value, default, disable):
         string = 'neighbor {} {}'.format(name, cmd)
-        return super(BgpNeighbors, self).command_builder(string, value, default)
+        return super(BgpNeighbors, self).command_builder(string, value,
+                                                         default, disable)
 
-    def set_peer_group(self, name, value=None, default=False):
+    def set_peer_group(self, name, value=None, default=False, disable=False):
         if not self.ispeergroup(name):
-            cmd = self.command_builder(name, 'peer-group', value, default)
+            cmd = self.command_builder(name, 'peer-group', value, default,
+                                       disable)
             return self.configure(cmd)
         return False
 
-    def set_remote_as(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'remote-as', value, default)
+    def set_remote_as(self, name, value=None, default=False, disable=False):
+        cmd = self.command_builder(name, 'remote-as', value, default, disable)
         return self.configure(cmd)
 
-    def set_shutdown(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'shutdown', value, default)
+    def set_shutdown(self, name, value=None, default=False, disable=False):
+        cmd = self.command_builder(name, 'shutdown', value, default, disable)
         return self.configure(cmd)
 
-    def set_send_community(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'send-community', value, default)
+    def set_send_community(self, name, value=None, default=False,
+                           disable=False):
+        cmd = self.command_builder(name, 'send-community', value, default,
+                                   disable)
         return self.configure(cmd)
 
-    def set_next_hop_self(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'next-hop-self', value, default)
+    def set_next_hop_self(self, name, value=None, default=False,
+                          disable=False):
+        cmd = self.command_builder(name, 'next-hop-self', value, default,
+                                   disable)
         return self.configure(cmd)
 
-    def set_route_map_in(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'route-map', value, default)
+    def set_route_map_in(self, name, value=None, default=False, disable=False):
+        cmd = self.command_builder(name, 'route-map', value, default, disable)
         cmd += ' in'
         return self.configure(cmd)
 
-    def set_route_map_out(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'route-map', value, default)
+    def set_route_map_out(self, name, value=None, default=False,
+                          disable=False):
+        cmd = self.command_builder(name, 'route-map', value, default, disable)
         cmd += ' out'
         return self.configure(cmd)
 
-    def set_description(self, name, value=None, default=False):
-        cmd = self.command_builder(name, 'description', value, default)
+    def set_description(self, name, value=None, default=False, disable=False):
+        cmd = self.command_builder(name, 'description', value, default,
+                                   disable)
         return self.configure(cmd)
+
 
 def instance(api):
     return Bgp(api)
