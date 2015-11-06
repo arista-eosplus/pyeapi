@@ -31,7 +31,7 @@
 #
 """API Module for working with EOS local user resources
 
-The Users resource provides configuraiton of local user resources for
+The Users resource provides configuration of local user resources for
 an EOS node.
 
 Parameters:
@@ -74,13 +74,18 @@ def isprivilege(value):
 
 
 class Users(EntityCollection):
-    """The Users class provides a configuration resource for local users
+    """The Users class provides a configuration resource for local users.
+    The regex used here parses the running configuration to find username
+    entries. There is extra logic in the regular expression to store
+    the username as 'user' and then creates a backreference to find a
+    following configuration line that might contain the users sshkey.
     """
 
-    users_re = re.compile(r'username ([^\s]+) privilege (\d+)'
+    users_re = re.compile(r'username (?P<user>[^\s]+) privilege (\d+)'
                           r'(?: role ([^\s]+))?'
                           r'(?: (nopassword))?'
-                          r'(?: secret ([0,5,7]) (.+))?', re.M)
+                          r'(?: secret (0|5|7|sha512) (.+))?'
+                          r'.*$\n(?:username (?P=user) sshkey (.+)$)?', re.M)
 
     def get(self, name):
         """Returns the local user configuration as a resource dict
@@ -97,14 +102,10 @@ class Users(EntityCollection):
         return self.getall().get(name)
 
     def getall(self):
-        """Returns the local user configuration as a resource dict
-
-        Args:
-            name (str): The username to return from the nodes global running-
-                config.
+        """Returns all local users configuration as a resource dict
 
         Returns:
-            dict: A resource dict object
+            dict: A dict of usernames with a nested resource dict object
         """
         users = self.users_re.findall(self.config, re.M)
         resources = dict()
@@ -122,19 +123,20 @@ class Users(EntityCollection):
             dict: A resource dict that is intended to be merged into the
                 user resource
         """
-        (username, priv, role, nopass, fmt, secret) = config
+        (username, priv, role, nopass, fmt, secret, sshkey) = config
         resource = dict()
         resource['privilege'] = priv
         resource['role'] = role
         resource['nopassword'] = nopass == 'nopassword'
         resource['format'] = fmt
         resource['secret'] = secret
+        resource['sshkey'] = sshkey
         return {username: resource}
 
     def create(self, name, nopassword=None, secret=None, encryption=None):
         """Creates a new user on the local system.
 
-        Creating users require either a secret (password) or the nopassword
+        Creating users requires either a secret (password) or the nopassword
         keyword to be specified.
 
         Args:
@@ -243,14 +245,14 @@ class Users(EntityCollection):
                 raise TypeError('priviledge value must be between 0 and 15')
             cmd += ' privilege %s' % value
         else:
-            cmd += ' no privilege'
+            cmd += ' privilege 1'
         return self.configure(cmd)
 
     def set_role(self, name, value=None):
         """Configures the user role vale in EOS
 
         Args:
-            name (str): The name of the user to craete
+            name (str): The name of the user to create
 
             value (str): The value to configure for the user role
 
@@ -261,9 +263,26 @@ class Users(EntityCollection):
         if value is not None:
             cmd += ' role %s' % value
         else:
-            cmd += ' no role'
+            cmd = 'default username %s role' % name
         return self.configure(cmd)
 
+    def set_sshkey(self, name, value=None):
+        """Configures the user sshkey
+
+        Args:
+            name (str): The name of the user to add the sshkey to
+
+            value (str): The value to configure for the sshkey.
+
+        Returns:
+            True if the operation was successful otherwise False
+        """
+        cmd = 'username %s' % name
+        if value:
+            cmd += ' sshkey %s' % value
+        else:
+            cmd = 'no username %s sshkey' % name
+        return self.configure(cmd)
 
 def instance(node):
     """Returns an instance of Users
@@ -277,4 +296,3 @@ def instance(node):
             resource
     """
     return Users(node)
-

@@ -49,7 +49,7 @@ class TestApiStpInterfaces(DutSystemTest):
 
     def test_getall(self):
         for dut in self.duts:
-            dut.config('default interface Et1-7')
+            dut.config('default interface Et1-4')
             result = dut.api('stp').interfaces.getall()
             self.assertIsInstance(result, dict)
 

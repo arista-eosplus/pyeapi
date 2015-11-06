@@ -31,7 +31,7 @@
 #
 """Python Client for eAPI
 
-This module provides the client for eAPI.  It provides to primary functions
+This module provides the client for eAPI.  It provides the primary functions
 for building applications that work with Arista EOS eAPI-enabled nodes.  The
 first function is to provide a client for sending and receiving eAPI
 request and response objects on a per node basis.  The second function
@@ -347,6 +347,7 @@ def hosts_for_tag(tag):
     Returns:
         list: A Python list object that includes the list of hosts assoicated
             with the specified tag.
+
         None: If the specified tag does not exist, then None is returned.
     """
     return config.tags.get(tag)
@@ -375,7 +376,7 @@ def make_connection(transport, **kwargs):
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None):
+            password='', port=None, timeout=60):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -401,7 +402,7 @@ def connect(transport=None, host='localhost', username='admin',
     """
     transport = transport or DEFAULT_TRANSPORT
     return make_connection(transport, host=host, username=username,
-                           password=password, port=port)
+                           password=password, port=port, timeout=timeout)
 
 
 class Node(object):
@@ -504,7 +505,7 @@ class Node(object):
         commands = list(commands)
 
         # push the configure command onto the command stack
-        commands.insert(0, 'configure')
+        commands.insert(0, 'configure terminal')
         response = self.run_commands(commands)
 
         if self.autorefresh:
@@ -581,10 +582,15 @@ class Node(object):
             raise TypeError('config mode commands not supported')
 
         results = list()
+        # IMPORTANT: There are two keys (response, result) that both
+        # return the same value. 'response' was originally placed
+        # there in error and both are now present to avoid breaking
+        # existing scripts. 'response' will be removed in a future release.
         if strict:
             responses = self.run_commands(commands, encoding)
             for index, response in enumerate(responses):
                 results.append(dict(command=commands[index],
+                                    result=response,
                                     response=response,
                                     encoding=encoding))
         else:
@@ -745,7 +751,3 @@ def connect_to(name):
                          port=kwargs.get('port'))
     node = Node(connection, **kwargs)
     return node
-
-
-
-

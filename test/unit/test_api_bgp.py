@@ -49,7 +49,8 @@ class TestApiBgp(EapiConfigUnitTest):
 
     def test_get(self):
         result = self.instance.get()
-        keys = ['bgp_as', 'router_id', 'shutdown', 'neighbors', 'networks']
+        keys = ['bgp_as', 'router_id', 'maximum_paths', 'maximum_ecmp_paths',
+                'shutdown', 'neighbors', 'networks']
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
     def test_create(self):
@@ -95,6 +96,35 @@ class TestApiBgp(EapiConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default router-id']
                 func = function('set_router_id', rid, True)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_maximum_paths_just_max_path(self):
+        for state in ['config', 'negate', 'default']:
+            max_paths = 20
+            if state == 'config':
+                cmds = ['router bgp 65000', 'maximum-paths 20']
+                func = function('set_maximum_paths', max_paths)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no maximum-paths']
+                func = function('set_maximum_paths')
+            elif state == 'default':
+                cmds = ['router bgp 65000', 'default maximum-paths']
+                func = function('set_maximum_paths', default=True)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_maximum_paths_max_path_and_ecmp(self):
+        for state in ['config', 'negate', 'default']:
+            max_paths = 20
+            max_ecmp_path = 20
+            if state == 'config':
+                cmds = ['router bgp 65000', 'maximum-paths 20 ecmp 20']
+                func = function('set_maximum_paths', max_paths, max_ecmp_path)
+            elif state == 'negate':
+                cmds = ['router bgp 65000', 'no maximum-paths']
+                func = function('set_maximum_paths')
+            elif state == 'default':
+                cmds = ['router bgp 65000', 'default maximum-paths']
+                func = function('set_maximum_paths', default=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_shutdown(self):
@@ -167,7 +197,7 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_shutdown(self):
-        for state in ['config', 'negate', 'default']:
+        for state in ['config', 'negate', 'default', 'false']:
             name = 'test'
             cmd = 'neighbor {}'.format(name)
             if state == 'config':
@@ -179,6 +209,9 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} shutdown'.format(cmd)]
                 func = function('set_shutdown', name, False, True)
+            elif state == 'false':
+                cmds = ['router bgp 65000', 'no {} shutdown'.format(cmd)]
+                func = function('set_shutdown', name, False)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_send_community(self):
@@ -262,5 +295,3 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -31,7 +31,7 @@
 #
 import warnings
 
-warnings.warn("Api module spanningtree is dereciated.  Please update api "
+warnings.warn("Api module spanningtree is depricated.  Please update api "
               "calls to use stp instead")
 
 from pyeapi.api.stp import instance     # flake8: noqa

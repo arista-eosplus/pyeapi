@@ -194,7 +194,7 @@ class TestClient(unittest.TestCase):
     def test_connect_types(self, connection):
         transports = list(pyeapi.client.TRANSPORTS.keys())
         kwargs = dict(host='localhost', username='admin', password='',
-                      port=None)
+                      port=None, timeout=60)
 
         for transport in transports:
             pyeapi.client.connect(transport)
@@ -250,7 +250,7 @@ class TestClient(unittest.TestCase):
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
-                          port=None)
+                          port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
 
     def test_connect_to_with_config(self):
@@ -260,7 +260,7 @@ class TestClient(unittest.TestCase):
             pyeapi.client.load_config(filename=conf)
             pyeapi.client.connect_to('test1')
             kwargs = dict(host='192.168.1.16', username='eapi',
-                          password='password', port=None)
+                          password='password', port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
 
 

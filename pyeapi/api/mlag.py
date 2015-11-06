@@ -158,7 +158,7 @@ class Mlag(Entity):
             dict: A dict object that is intended to be merged into the
                 resource dict
         """
-        match = re.search(r'peer-link (\w+)', config)
+        match = re.search(r'peer-link (\S+)', config)
         value = match.group(1) if match else None
         return dict(peer_link=value)
 
@@ -289,4 +289,3 @@ def instance(node):
         object: An instance of Mlag
     """
     return Mlag(node)
-

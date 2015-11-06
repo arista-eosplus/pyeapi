@@ -52,7 +52,7 @@ class TestApiUsers(EapiConfigUnitTest):
         self.assertFalse(result)
 
     def test_get(self):
-        keys = ['nopassword', 'privilege', 'role', 'secret', 'format']
+        keys = ['nopassword', 'privilege', 'role', 'secret', 'format', 'sshkey']
         result = self.instance.get('test')
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
@@ -104,7 +104,7 @@ class TestApiUsers(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_privilege_negate(self):
-        cmds = 'username test no privilege'
+        cmds = 'username test privilege 1'
         func = function('set_privilege', 'test')
         self.eapi_positive_config_test(func, cmds)
 
@@ -118,17 +118,10 @@ class TestApiUsers(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_role_negate(self):
-        cmds = 'username test no role'
+        cmds = 'default username test role'
         func = function('set_role', 'test')
         self.eapi_positive_config_test(func, cmds)
 
 
-
-
-
-
-
 if __name__ == '__main__':
     unittest.main()
-
-

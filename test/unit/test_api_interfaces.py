@@ -77,6 +77,10 @@ class TestApiInterfaces(EapiConfigUnitTest):
         result = self.instance.get('Ethernet1')
         self.assertEqual(result['type'], 'ethernet')
 
+    def test_get_invalid_interface(self):
+        result = self.instance.get('Foo1')
+        self.assertEqual(result, None)
+
     def test_proxy_method_success(self):
         result = self.instance.set_sflow('Ethernet1', True)
         self.assertTrue(result)
@@ -303,6 +307,27 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
                         ['Ethernet5', 'Ethernet7'])
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_members_same_mode(self):
+        cmds = ['interface Ethernet6', 'no channel-group 1',
+                'interface Ethernet7', 'channel-group 1 mode on']
+        func = function('set_members', 'Port-Channel1',
+                        ['Ethernet5', 'Ethernet7'])
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_members_update_mode(self):
+        cmds = ['interface Ethernet6', 'no channel-group 1',
+                'interface Ethernet7', 'channel-group 1 mode active']
+        func = function('set_members', 'Port-Channel1',
+                        ['Ethernet5', 'Ethernet7'], mode='active')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_members_mode_none(self):
+        cmds = ['interface Ethernet6', 'no channel-group 1',
+                'interface Ethernet7', 'channel-group 1 mode on']
+        func = function('set_members', 'Port-Channel1',
+                        ['Ethernet5', 'Ethernet7'], mode=None)
+        self.eapi_positive_config_test(func, cmds)
+
     def test_set_members_no_changes(self):
         func = function('set_members', 'Port-Channel1',
                         ['Ethernet5', 'Ethernet6'])
@@ -410,5 +435,3 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

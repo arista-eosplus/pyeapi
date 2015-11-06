@@ -6,6 +6,9 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
+APIDIR   	    = api_modules
+CLIENTDIR     = client_modules
+CWD						:= $(shell pwd)
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -48,11 +51,18 @@ help:
 
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf $(CLIENTDIR)/*
+	rm -rf $(APIDIR)/*
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+modules:
+	python $(CWD)/generate_modules.py
+
+docs: clean modules html
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

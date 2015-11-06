@@ -1,0 +1,35 @@
+route-map TEST permit 10
+   set tag 50
+   match interface Ethernet1
+   continue 100
+!
+route-map TEST permit 20
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
+route-map TEST deny 30
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
+route-map FOO deny 20
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
+route-map FOOBAR permit 20
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
+route-map FOOBAR permit 20
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
