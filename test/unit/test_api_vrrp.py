@@ -720,6 +720,9 @@ class TestApiVrrp(EapiConfigUnitTest):
             [{'name': 'Ethernet1', 'action': 'disable', 'amount': 10}],
             [{'name': 'Ethernet1', 'action': 'decrement', 'amount': True}],
             [{'name': 'Ethernet1', 'action': 'shutdown', 'amount': 10}],
+            [{'action': 'decrement', 'amount': 10}],
+            [{'name': 'Ethernet1', 'action': 'decrement',
+              'amount': 10, 'bad': 1}],
         ]
 
         for tracks in cases:
