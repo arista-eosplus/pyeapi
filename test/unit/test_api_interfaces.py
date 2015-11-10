@@ -114,7 +114,7 @@ class TestApiBaseInterface(EapiConfigUnitTest):
     def test_set_description_with_no_value(self):
         for intf in INTERFACES:
             cmds = ['interface %s' % intf, 'no description']
-            func = function('set_description', intf)
+            func = function('set_description', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_description_with_default(self):
@@ -365,7 +365,7 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
     def test_set_source_interface_with_no_value(self):
         cmds = ['interface Vxlan1', 'no vxlan source-interface']
-        func = function('set_source_interface', 'Vxlan1')
+        func = function('set_source_interface', 'Vxlan1', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_source_interface_with_default(self):
@@ -380,7 +380,7 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
     def test_set_multicast_group_with_no_value(self):
         cmds = ['interface Vxlan1', 'no vxlan multicast-group']
-        func = function('set_multicast_group', 'Vxlan1')
+        func = function('set_multicast_group', 'Vxlan1', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_multicast_group_with_default(self):
@@ -395,7 +395,7 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
     def test_set_udp_port_with_no_value(self):
         cmds = ['interface Vxlan1', 'no vxlan udp-port']
-        func = function('set_udp_port', 'Vxlan1')
+        func = function('set_udp_port', 'Vxlan1', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_udp_port_with_default(self):

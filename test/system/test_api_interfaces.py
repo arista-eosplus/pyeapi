@@ -344,7 +344,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan source-interface Loopback0'])
             api = dut.api('interfaces')
-            instance = api.set_source_interface('Vxlan1')
+            instance = api.set_source_interface('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('no vxlan source-interface', dut)
 
@@ -370,7 +370,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan multicast-group 239.10.10.10'])
             api = dut.api('interfaces')
-            instance = api.set_multicast_group('Vxlan1')
+            instance = api.set_multicast_group('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('no vxlan multicast-group', dut)
 
@@ -397,7 +397,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan udp-port 1024'])
             api = dut.api('interfaces')
-            instance = api.set_udp_port('Vxlan1')
+            instance = api.set_udp_port('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('vxlan udp-port 4789', dut)
 

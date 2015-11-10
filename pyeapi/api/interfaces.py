@@ -249,7 +249,7 @@ class BaseInterface(EntityCollection):
         """
         return self.configure('default interface %s' % name)
 
-    def set_description(self, name, value=None, default=False):
+    def set_description(self, name, value=None, default=False, disable=False):
         """Configures the interface description
 
         EosVersion:
@@ -265,7 +265,8 @@ class BaseInterface(EntityCollection):
             True if the operation succeeds otherwise False
         """
         string = 'description'
-        commands = self.command_builder(string, value=value, default=default)
+        commands = self.command_builder(string, value=value, default=default,
+                                        disable=disable)
         return self.configure_interface(name, commands)
 
     def set_shutdown(self, name, value=None, default=False):
@@ -773,7 +774,8 @@ class VxlanInterface(BaseInterface):
             values = match.group(1).split(' ')
         return dict(flood_list=values)
 
-    def set_source_interface(self, name, value=None, default=False):
+    def set_source_interface(self, name, value=None, default=False,
+                             disable=False):
         """Configures the Vxlan source-interface value
 
         EosVersion:
@@ -789,10 +791,12 @@ class VxlanInterface(BaseInterface):
             True if the operation succeeds otherwise False
         """
         string = 'vxlan source-interface'
-        cmds = self.command_builder(string, value=value, default=default)
+        cmds = self.command_builder(string, value=value, default=default,
+                                    disable=disable)
         return self.configure_interface(name, cmds)
 
-    def set_multicast_group(self, name, value=None, default=False):
+    def set_multicast_group(self, name, value=None, default=False,
+                            disable=False):
         """Configures the Vxlan multicast-group value
 
         EosVersion:
@@ -808,10 +812,11 @@ class VxlanInterface(BaseInterface):
             True if the operation succeeds otherwise False
         """
         string = 'vxlan multicast-group'
-        cmds = self.command_builder(string, value=value, default=default)
+        cmds = self.command_builder(string, value=value, default=default,
+                                    disable=disable)
         return self.configure_interface(name, cmds)
 
-    def set_udp_port(self, name, value=None, default=False):
+    def set_udp_port(self, name, value=None, default=False, disable=False):
         """Configures vxlan udp-port value
 
         EosVersion:
@@ -826,7 +831,8 @@ class VxlanInterface(BaseInterface):
             True if the operation succeeds otherwise False
         """
         string = 'vxlan udp-port'
-        cmds = self.command_builder(string, value=value, default=default)
+        cmds = self.command_builder(string, value=value, default=default,
+                                    disable=disable)
         return self.configure_interface(name, cmds)
 
     def add_vtep(self, name, vtep, vlan=None):
