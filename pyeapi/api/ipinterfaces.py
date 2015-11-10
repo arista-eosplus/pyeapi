@@ -184,7 +184,7 @@ class Ipinterfaces(EntityCollection):
         commands = ['interface %s' % name, 'no ip address', 'switchport']
         return self.configure(commands)
 
-    def set_address(self, name, value=None, default=False):
+    def set_address(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP address
 
         Args:
@@ -197,6 +197,9 @@ class Ipinterfaces(EntityCollection):
             default (bool): Configures the address parameter to its default
                 value using the EOS CLI default command
 
+            disable (bool): Negates the address parameter value using the
+                EOS CLI no command
+
         Returns:
             True if the operation succeeds otherwise False.
 
@@ -204,13 +207,15 @@ class Ipinterfaces(EntityCollection):
         commands = ['interface %s' % name]
         if default:
             commands.append('default ip address')
+        elif disable:
+            commands.append('no ip address')
         elif value is not None:
             commands.append('ip address %s' % value)
         else:
-            commands.append('no ip address')
+            raise ValueError("invalid address value")
         return self.configure(commands)
 
-    def set_mtu(self, name, value=None, default=False):
+    def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 
         Args:
@@ -222,6 +227,9 @@ class Ipinterfaces(EntityCollection):
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
+
+            disable (bool); Negate the mtu parameter value using the EOS
+                CLI no command
 
         Returns:
             True if the operation succeeds otherwise False.
@@ -239,10 +247,12 @@ class Ipinterfaces(EntityCollection):
         commands = ['interface %s' % name]
         if default:
             commands.append('default mtu')
+        elif disable:
+            commands.append('no mtu')
         elif value is not None:
             commands.append('mtu %s' % value)
         else:
-            commands.append('no mtu')
+            raise ValueError("use disable key to unset mtu")
         return self.configure(commands)
 
 def instance(node):

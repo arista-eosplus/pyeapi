@@ -82,7 +82,7 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
     def test_set_address_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no ip address']
-            func = function('set_address', intf)
+            func = function('set_address', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_address_with_default(self):
@@ -90,6 +90,11 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
             cmds = ['interface %s' % intf, 'default ip address']
             func = function('set_address', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+    def test_set_address_invalid_value_raises_value_error(self):
+        for intf in self.INTERFACES:
+            func = function('set_address', intf, None)
+            self.eapi_exception_config_test(func, ValueError)
 
     def test_set_mtu_with_values(self):
         for intf in self.INTERFACES:
@@ -101,7 +106,7 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
     def test_set_mtu_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no mtu']
-            func = function('set_mtu', intf)
+            func = function('set_mtu', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_mtu_default(self):
@@ -112,11 +117,9 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
 
     def test_set_mtu_invalid_value_raises_value_error(self):
         for intf in self.INTERFACES:
-            for value in [67, 65536, random_string()]:
+            for value in [67, 65536, random_string(), None]:
                 func = function('set_mtu', intf, value)
                 self.eapi_exception_config_test(func, ValueError)
 
 if __name__ == '__main__':
     unittest.main()
-
-
