@@ -70,7 +70,7 @@ class TestApiMlag(EapiConfigUnitTest):
                 func = function('set_domain_id', 'test')
             elif state == 'negate':
                 cmds.append('no domain-id')
-                func = function('set_domain_id')
+                func = function('set_domain_id', value='test', disable=True)
             elif state == 'default':
                 cmds.append('default domain-id')
                 func = function('set_domain_id', value='test', default=True)
@@ -84,7 +84,7 @@ class TestApiMlag(EapiConfigUnitTest):
                 func = function('set_local_interface', 'Vlan1234')
             elif state == 'negate':
                 cmds.append('no local-interface')
-                func = function('set_local_interface')
+                func = function('set_local_interface', disable=True)
             elif state == 'default':
                 cmds.append('default local-interface')
                 func = function('set_local_interface', value='Vlan1234',
@@ -99,7 +99,7 @@ class TestApiMlag(EapiConfigUnitTest):
                 func = function('set_peer_address', '1.2.3.4')
             elif state == 'negate':
                 cmds.append('no peer-address')
-                func = function('set_peer_address')
+                func = function('set_peer_address', disable=True)
             elif state == 'default':
                 cmds.append('default peer-address')
                 func = function('set_peer_address', value='1.2.3.4',
@@ -114,7 +114,7 @@ class TestApiMlag(EapiConfigUnitTest):
                 func = function('set_peer_link', 'Ethernet1')
             elif state == 'negate':
                 cmds.append('no peer-link')
-                func = function('set_peer_link')
+                func = function('set_peer_link', disable=True)
             elif state == 'default':
                 cmds.append('default peer-link')
                 func = function('set_peer_link', value='Ethernet1',
@@ -134,7 +134,7 @@ class TestApiMlag(EapiConfigUnitTest):
                     func = function('set_shutdown', value)
             elif state == 'negate':
                 cmds.append('no shutdown')
-                func = function('set_shutdown')
+                func = function('set_shutdown', disable=True)
             elif state == 'default':
                 cmds.append('default shutdown')
                 func = function('set_shutdown', value=True, default=True)
@@ -147,7 +147,7 @@ class TestApiMlag(EapiConfigUnitTest):
                 func = function('set_mlag_id', 'Ethernet1', '1')
             elif state == 'negate':
                 cmds = ['interface Ethernet1', 'no mlag']
-                func = function('set_mlag_id', 'Ethernet1')
+                func = function('set_mlag_id', 'Ethernet1', disable=True)
             elif state == 'default':
                 cmds = ['interface Ethernet1', 'default mlag']
                 func = function('set_mlag_id', 'Ethernet1', value='1',
@@ -157,5 +157,3 @@ class TestApiMlag(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-
