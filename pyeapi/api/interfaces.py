@@ -260,6 +260,7 @@ class BaseInterface(EntityCollection):
                 interface name (ie Ethernet, not Et)
             value (string): The value to set the description to.
             default (boolean): Specifies to default the interface description
+            disable (boolean): Specifies to negate the interface description
 
         Returns:
             True if the operation succeeds otherwise False
@@ -786,6 +787,7 @@ class VxlanInterface(BaseInterface):
                 Vxlan1
            value(str): The value to configure the source-interface to
            default(bool): Configures the source-interface value to default
+           disable(bool): Negates the source-interface
 
         Returns:
             True if the operation succeeds otherwise False
@@ -806,7 +808,8 @@ class VxlanInterface(BaseInterface):
             name(str): The interface identifier to configure, defaults to
                 Vxlan1
            value(str): The value to configure the multicast-group to
-           default(bool): Configures the mulitcat-group value to default
+           default(bool): Configures the mulitcast-group value to default
+           disable(bool): Negates the multicast-group value
 
         Returns:
             True if the operation succeeds otherwise False
@@ -826,6 +829,7 @@ class VxlanInterface(BaseInterface):
             name(str): The name of the interface to configure
             value(str): The value to set udp-port to
             default(bool): Configure using the default keyword
+            disable(bool): Negate the udp-port value
 
         Returns:
             True if the operation succeeds otherwise False
