@@ -91,7 +91,7 @@ class System(Entity):
         value = 'no ip routing' not in self.config
         return dict(iprouting=value)
 
-    def set_hostname(self, value=None, default=False):
+    def set_hostname(self, value=None, default=False, disable=False):
         """Configures the global system hostname setting
 
         EosVersion:
@@ -100,14 +100,16 @@ class System(Entity):
         Args:
             value (str): The hostname value
             default (bool): Controls use of the default keyword
+            disable (bool): Controls the use of the no keyword
 
         Returns:
             bool: True if the commands are completed successfully
         """
-        cmd = self.command_builder('hostname', value=value, default=default)
+        cmd = self.command_builder('hostname', value=value, default=default,
+                                   disable=disable)
         return self.configure(cmd)
 
-    def set_iprouting(self, value=None, default=False):
+    def set_iprouting(self, value=None, default=False, disable=False):
         """Configures the state of global ip routing
 
         EosVersion:
@@ -116,13 +118,16 @@ class System(Entity):
         Args:
             value(bool): True if ip routing should be enabled or False if
                 ip routing should be disabled
-
             default (bool): Controls the use of the default keyword
+            disable (bool): Controls the use of the no keyword
 
         Returns:
             bool: True if the commands completed successfully otherwise False
         """
-        cmd = self.command_builder('ip routing', value=value, default=default)
+        if value is False:
+            disable = True
+        cmd = self.command_builder('ip routing', value=value, default=default,
+                                   disable=disable)
         return self.configure(cmd)
 
 

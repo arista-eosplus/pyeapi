@@ -72,7 +72,7 @@ class TestApiSystem(DutSystemTest):
     def test_set_hostname_with_no_value(self):
         for dut in self.duts:
             dut.config('hostname test')
-            response = dut.api('system').set_hostname()
+            response = dut.api('system').set_hostname(disable=True)
             self.assertTrue(response, 'dut=%s' % dut)
             value = 'no hostname'
             self.assertIn(value, dut.running_config)
@@ -104,6 +104,20 @@ class TestApiSystem(DutSystemTest):
         for dut in self.duts:
             dut.config('ip routing')
             resp = dut.api('system').set_iprouting(False)
+            self.assertTrue(resp, 'dut=%s' % dut)
+            self.assertIn('no ip routing', dut.running_config)
+
+    def test_set_iprouting_to_no(self):
+        for dut in self.duts:
+            dut.config('ip routing')
+            resp = dut.api('system').set_iprouting(disable=True)
+            self.assertTrue(resp, 'dut=%s' % dut)
+            self.assertIn('no ip routing', dut.running_config)
+
+    def test_set_iprouting_to_default(self):
+        for dut in self.duts:
+            dut.config('ip routing')
+            resp = dut.api('system').set_iprouting(default=True)
             self.assertTrue(resp, 'dut=%s' % dut)
             self.assertIn('no ip routing', dut.running_config)
 

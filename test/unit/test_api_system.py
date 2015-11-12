@@ -60,7 +60,7 @@ class TestApiSystem(EapiConfigUnitTest):
                 func = function('set_hostname', value)
             elif state == 'negate':
                 cmds = 'no hostname'
-                func = function('set_hostname')
+                func = function('set_hostname', disable=True)
             elif state == 'default':
                 cmds = 'default hostname'
                 func = function('set_hostname', value=value, default=True)
@@ -73,7 +73,7 @@ class TestApiSystem(EapiConfigUnitTest):
                 func = function('set_iprouting', True)
             elif state == 'negate':
                 cmds = 'no ip routing'
-                func = function('set_iprouting', False)
+                func = function('set_iprouting', disable=True)
             elif state == 'default':
                 cmds = 'default ip routing'
                 func = function('set_iprouting', default=True)
@@ -84,5 +84,3 @@ class TestApiSystem(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-
