@@ -68,9 +68,14 @@ class TestApiStp(EapiConfigUnitTest):
             func = function('set_mode', value)
             self.eapi_positive_config_test(func, cmds)
 
-    def test_set_mode_with_no_value(self):
+    def test_set_mode_with_default(self):
+        cmds = 'default spanning-tree mode'
+        func = function('set_mode', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_mode_with_disable(self):
         cmds = 'no spanning-tree mode'
-        func = function('set_mode')
+        func = function('set_mode', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_mode_invalid_value_raises_value_error(self):
@@ -139,6 +144,12 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
             func = function('set_bpduguard', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
+    def test_set_bpduguard_with_disable(self):
+        for intf in self.INTERFACES:
+            cmds = ['interface %s' % intf, 'no spanning-tree bpduguard']
+            func = function('set_bpduguard', intf, disable=True)
+            self.eapi_positive_config_test(func, cmds)
+
     def test_set_bpduguard_invalid_intf_raises_value_error(self):
         intf = random_string()
         func = function('set_bpduguard', intf)
@@ -158,7 +169,7 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
     def test_set_portfast_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no spanning-tree portfast']
-            func = function('set_portfast', intf)
+            func = function('set_portfast', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_portfast_with_default(self):
@@ -175,5 +186,3 @@ class TestApiStpInterfaces(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-
