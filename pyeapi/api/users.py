@@ -248,7 +248,7 @@ class Users(EntityCollection):
             cmd += ' privilege 1'
         return self.configure(cmd)
 
-    def set_role(self, name, value=None):
+    def set_role(self, name, value=None, default=False, disable=False):
         """Configures the user role vale in EOS
 
         Args:
@@ -256,17 +256,23 @@ class Users(EntityCollection):
 
             value (str): The value to configure for the user role
 
+            default (bool): Configure the user role using the EOS CLI
+                default command
+
+            disable (bool): Negate the user role using the EOS CLI no command
+
         Returns:
             True if the operation was successful otherwise False
         """
-        cmd = 'username %s' % name
-        if value is not None:
-            cmd += ' role %s' % value
-        else:
+        if default:
             cmd = 'default username %s role' % name
+        elif disable:
+            cmd = 'no username %s role' % name
+        else:
+            cmd = 'username %s role %s' % (name, value)
         return self.configure(cmd)
 
-    def set_sshkey(self, name, value=None):
+    def set_sshkey(self, name, value=None, default=False, disable=False):
         """Configures the user sshkey
 
         Args:
@@ -274,14 +280,20 @@ class Users(EntityCollection):
 
             value (str): The value to configure for the sshkey.
 
+            default (bool): Configure the sshkey using the EOS CLI
+                default command
+
+            disable (bool): Negate the sshkey using the EOS CLI no command
+
         Returns:
             True if the operation was successful otherwise False
         """
-        cmd = 'username %s' % name
-        if value:
-            cmd += ' sshkey %s' % value
-        else:
+        if default:
+            cmd = 'default username %s sshkey' % name
+        elif disable:
             cmd = 'no username %s sshkey' % name
+        else:
+            cmd = 'username %s sshkey %s' % (name, value)
         return self.configure(cmd)
 
 def instance(node):
