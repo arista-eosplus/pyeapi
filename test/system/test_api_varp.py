@@ -84,6 +84,15 @@ class TestApiVarp(DutSystemTest):
             self.assertTrue(result)
             self.assertIn(VIRT_ENTRY_B, api.config)
 
+    def test_remove_mac_address(self):
+        for dut in self.duts:
+            dut.config([VIRT_NULL, VIRT_ENTRY_A])
+            api = dut.api('varp')
+            self.assertIn(VIRT_ENTRY_A, api.config)
+            result = dut.api('varp').set_mac_address(disable=True)
+            self.assertTrue(result)
+            self.assertNotIn(VIRT_ENTRY_A, api.config)
+
     def test_set_mac_address_with_bad_value(self):
         for dut in self.duts:
             dut.config([VIRT_NULL])
@@ -130,25 +139,6 @@ class TestApiVarpInterfaces(DutSystemTest):
             self.assertNotIn('ip virtual-router address 1.1.1.20',
                              api.get_block('interface Vlan1000'))
 
-    def test_set_virtual_addr_with_values_dirty(self):
-        for dut in self.duts:
-            dut.config(['no interface Vlan1000', 'interface Vlan1000',
-                        'ip address 1.1.1.1/24',
-                        'ip virtual-router address 1.1.1.20'])
-            api = dut.api('varp')
-            self.assertIn('ip virtual-router address 1.1.1.20',
-                             api.get_block('interface Vlan1000'))
-            result = dut.api('varp').interfaces.set_addresses('Vlan1000',
-                                                              ['1.1.1.2',
-                                                               '1.1.1.3'])
-            self.assertTrue(result)
-            self.assertIn('ip virtual-router address 1.1.1.2',
-                          api.get_block('interface Vlan1000'))
-            self.assertIn('ip virtual-router address 1.1.1.3',
-                          api.get_block('interface Vlan1000'))
-            self.assertNotIn('ip virtual-router address 1.1.1.20',
-                             api.get_block('interface Vlan1000'))
-
     def test_default_virtual_addrs(self):
         for dut in self.duts:
             dut.config(['no interface Vlan1000', 'interface Vlan1000',
@@ -181,6 +171,25 @@ class TestApiVarpInterfaces(DutSystemTest):
                           api.get_block('interface Vlan1000'))
             result = dut.api('varp').interfaces.set_addresses('Vlan1000',
                                                               addresses=None)
+            self.assertTrue(result)
+            self.assertNotIn('ip virtual-router address 1.1.1.20',
+                             api.get_block('interface Vlan1000'))
+            self.assertNotIn('ip virtual-router address 1.1.1.21',
+                             api.get_block('interface Vlan1000'))
+
+    def test_negate_virtual_addrs_with_disable(self):
+        for dut in self.duts:
+            dut.config(['no interface Vlan1000', 'interface Vlan1000',
+                        'ip address 1.1.1.1/24',
+                        'ip virtual-router address 1.1.1.20',
+                        'ip virtual-router address 1.1.1.21'])
+            api = dut.api('varp')
+            self.assertIn('ip virtual-router address 1.1.1.20',
+                          api.get_block('interface Vlan1000'))
+            self.assertIn('ip virtual-router address 1.1.1.21',
+                          api.get_block('interface Vlan1000'))
+            result = dut.api('varp').interfaces.set_addresses('Vlan1000',
+                                                              disable=True)
             self.assertTrue(result)
             self.assertNotIn('ip virtual-router address 1.1.1.20',
                              api.get_block('interface Vlan1000'))

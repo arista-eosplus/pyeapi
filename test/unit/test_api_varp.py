@@ -80,10 +80,14 @@ class TestApiVarp(EapiConfigUnitTest):
         cmds = 'ip virtual-router mac-address %s' % value
         self.eapi_positive_config_test(func, cmds)
 
-    def test_set_mac_address_with_no_value(self):
-        func = function('set_mac_address', mac_address=None)
+    def test_set_mac_address_with_disable(self):
+        func = function('set_mac_address', disable=True)
         cmds = 'no ip virtual-router mac-address'
         self.eapi_positive_config_test(func, cmds)
+
+    def test_set_mac_address_with_no_value(self):
+        with self.assertRaises(ValueError):
+            self.instance.set_mac_address(mac_address=None)
 
     def test_set_mac_address_with_bad_value(self):
         with self.assertRaises(ValueError):
@@ -133,6 +137,11 @@ class TestApiVarpInterfaces(EapiConfigUnitTest):
     def test_add_address_with_default(self):
         func = function('set_addresses', 'Vlan4001', default=True)
         cmds = ['interface Vlan4001', 'default ip virtual-router address']
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_add_address_with_disable(self):
+        func = function('set_addresses', 'Vlan4001', disable=True)
+        cmds = ['interface Vlan4001', 'no ip virtual-router address']
         self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
