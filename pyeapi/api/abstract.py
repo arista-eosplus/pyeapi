@@ -145,8 +145,8 @@ class BaseEntity(object):
         elif value:
             return '%s %s' % (string, value)
         else:
-            raise ValueError("XXX no value received '%s'" % value)
-            return 'no %s' % string
+            raise ValueError("abstract.command_builder: No value "
+                             "received '%s'" % value)
 
     def configure_interface(self, name, commands):
         """Configures the specified interface with the commands
