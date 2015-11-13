@@ -120,7 +120,7 @@ class BaseEntity(object):
         except (CommandError, ConnectionError):
             return False
 
-    def command_builder(self, string, value=None, default=None):
+    def command_builder(self, string, value=None, default=None, disable=None):
         """Builds a command with keywords
 
         Args:
@@ -130,17 +130,22 @@ class BaseEntity(object):
                 string is used
             default (bool): Specifies the command should use the default
                 keyword argument
+            disable (bool): Specifies the command should use the no
+                keyword argument
 
         Returns:
             A command string that can be used to configure the node
         """
         if default:
             return 'default %s' % string
+        elif disable:
+            return 'no %s' % string
         elif value is True:
             return string
         elif value:
             return '%s %s' % (string, value)
         else:
+            raise ValueError("XXX no value received '%s'" % value)
             return 'no %s' % string
 
     def configure_interface(self, name, commands):
@@ -202,5 +207,3 @@ class EntityCollection(BaseEntity, Mapping):
 
     def get(self, name, default=None):
         raise NotImplementedError
-
-
