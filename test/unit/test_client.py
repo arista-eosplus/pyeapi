@@ -36,7 +36,7 @@ import imp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, patch
+from mock import Mock, patch, call
 
 from testlib import get_fixture, random_string, random_int
 
@@ -76,8 +76,8 @@ class TestNode(unittest.TestCase):
 
         self.assertEqual(self.connection.execute.call_count, len(commands))
 
-        for cmd in commands:
-            self.connection.execute.assert_call_with(['enable', cmd], 'json')
+        expected_calls = [call(['enable', cmd], 'json') for cmd in commands]
+        self.assertEqual(self.connection.execute.mock_calls, expected_calls)
 
         for index, response in enumerate(responses):
             self.assertEqual(commands[index], response['result'])
