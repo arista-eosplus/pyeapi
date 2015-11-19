@@ -35,10 +35,11 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, function, random_string
+from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
 import pyeapi.api.varp
+
 
 class TestApiVarp(EapiConfigUnitTest):
 
@@ -97,6 +98,7 @@ class TestApiVarp(EapiConfigUnitTest):
         func = function('set_mac_address', default=True)
         cmds = 'default ip virtual-router mac-address'
         self.eapi_positive_config_test(func, cmds)
+
 
 class TestApiVarpInterfaces(EapiConfigUnitTest):
 

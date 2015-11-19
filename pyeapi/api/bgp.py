@@ -142,23 +142,21 @@ class Bgp(Entity):
         if not max_path and max_ecmp_path:
             raise TypeError('Cannot use maximum_ecmp_paths without '
                             'providing max_path')
-        if default:
-            cmd = 'default maximum-paths'
-        elif disable:
-            cmd = 'no maximum-paths'
-        elif max_path:
-            cmd = 'maximum-paths {}'.format(max_path)
+        value = None
+        if max_path:
+            value = '{}'.format(max_path)
             if max_ecmp_path:
-                cmd += ' ecmp {}'.format(max_ecmp_path)
-        else:
-            raise ValueError("No max_path specified")
+                value += ' ecmp {}'.format(max_ecmp_path)
+        cmd = self.command_builder('maximum-paths', value=value,
+                                   default=default, disable=disable)
         return self.configure_bgp(cmd)
 
-    def set_shutdown(self, value=' ', default=False, disable=False):
-        # value defaults to ' ' so command_builder does not fail when
-        # value, default, and disable all evaluate to False. It results
-        # in sending 'bgp shutdown  ' when default and disable are False.
-        cmd = self.command_builder('shutdown', value=value, default=default,
+    def set_shutdown(self, default=False, disable=True):
+        # Default setting for BGP shutdown is disable=True,
+        # meaning 'no shutdown'.
+        # If both default and disable are false, BGP shutdown will
+        # effectively be enabled.
+        cmd = self.command_builder('shutdown', value=True, default=default,
                                    disable=disable)
         return self.configure_bgp(cmd)
 
@@ -254,7 +252,7 @@ class BgpNeighbors(EntityCollection):
             return True
 
     def create(self, name):
-        return self.set_shutdown(name, True)
+        return self.set_shutdown(name, default=False, disable=False)
 
     def delete(self, name):
         response = self.configure('no neighbor {}'.format(name))
@@ -285,8 +283,12 @@ class BgpNeighbors(EntityCollection):
         cmd = self.command_builder(name, 'remote-as', value, default, disable)
         return self.configure(cmd)
 
-    def set_shutdown(self, name, value=None, default=False, disable=False):
-        cmd = self.command_builder(name, 'shutdown', value, default, disable)
+    def set_shutdown(self, name, default=False, disable=True):
+        # Default setting for BGP neighbor shutdown is
+        # disable=True, meaning 'no shutdown'
+        # If both default and disable are false, BGP neighbor shutdown will
+        # effectively be enabled.
+        cmd = self.command_builder(name, 'shutdown', True, default, disable)
         return self.configure(cmd)
 
     def set_send_community(self, name, value=None, default=False,

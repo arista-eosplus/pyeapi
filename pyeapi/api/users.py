@@ -57,6 +57,7 @@ from pyeapi.api import EntityCollection
 DEFAULT_ENCRYPTION = 'cleartext'
 ENCRYPTION_MAP = {'cleartext': 0, 'md5': 5, 'sha512': 'sha512'}
 
+
 def isprivilege(value):
     """Checks value for valid privilege level
 
@@ -190,7 +191,6 @@ class Users(EntityCollection):
         cmd = 'username %s secret %s %s' % (name, enc, secret)
         return self.configure(cmd)
 
-
     def create_with_nopassword(self, name):
         """Creates a new user on the local node
 
@@ -264,12 +264,8 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if default:
-            cmd = 'default username %s role' % name
-        elif disable:
-            cmd = 'no username %s role' % name
-        else:
-            cmd = 'username %s role %s' % (name, value)
+        cmd = self.command_builder('username %s role' % name, value=value,
+                                   default=default, disable=disable)
         return self.configure(cmd)
 
     def set_sshkey(self, name, value=None, default=False, disable=False):
@@ -288,13 +284,10 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if default:
-            cmd = 'default username %s sshkey' % name
-        elif disable:
-            cmd = 'no username %s sshkey' % name
-        else:
-            cmd = 'username %s sshkey %s' % (name, value)
+        cmd = self.command_builder('username %s sshkey' % name, value=value,
+                                   default=default, disable=disable)
         return self.configure(cmd)
+
 
 def instance(node):
     """Returns an instance of Users

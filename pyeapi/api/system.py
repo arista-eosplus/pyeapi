@@ -46,6 +46,7 @@ import re
 
 from pyeapi.api import Entity
 
+
 class System(Entity):
     """The System class implements global config for the node
 

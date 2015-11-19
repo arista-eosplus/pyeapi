@@ -154,12 +154,12 @@ class TestApiRoutemaps(DutSystemTest):
                         'match as 100'])
             api = dut.api('routemaps')
             self.assertIn('match as 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_match_statements('TEST', 'deny',
-                                                                10, ['as 200'])
+                                                               10, ['as 200'])
             self.assertTrue(result)
             self.assertNotIn('match as 100',
-                          api.get_block('route-map TEST deny 10'))
+                             api.get_block('route-map TEST deny 10'))
             self.assertIn('match as 200',
                           api.get_block('route-map TEST deny 10'))
 
@@ -170,12 +170,12 @@ class TestApiRoutemaps(DutSystemTest):
                         'match as 100'])
             api = dut.api('routemaps')
             self.assertIn('match as 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_match_statements('TEST', 'deny',
                                                                10, ['tag 50'])
             self.assertTrue(result)
             self.assertNotIn('match as 100',
-                          api.get_block('route-map TEST deny 10'))
+                             api.get_block('route-map TEST deny 10'))
             self.assertIn('match tag 50',
                           api.get_block('route-map TEST deny 10'))
 
@@ -199,12 +199,12 @@ class TestApiRoutemaps(DutSystemTest):
                         'set weight 100'])
             api = dut.api('routemaps')
             self.assertIn('set weight 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_set_statements('TEST', 'deny',
                                                              10, ['weight 200'])
             self.assertTrue(result)
             self.assertNotIn('set weight 100',
-                          api.get_block('route-map TEST deny 10'))
+                             api.get_block('route-map TEST deny 10'))
             self.assertIn('set weight 200',
                           api.get_block('route-map TEST deny 10'))
 
@@ -215,12 +215,12 @@ class TestApiRoutemaps(DutSystemTest):
                         'set weight 100'])
             api = dut.api('routemaps')
             self.assertIn('set weight 100',
-                             api.get_block('route-map TEST deny 10'))
+                          api.get_block('route-map TEST deny 10'))
             result = dut.api('routemaps').set_set_statements('TEST', 'deny',
                                                              10, ['tag 50'])
             self.assertTrue(result)
             self.assertNotIn('set weight 100',
-                          api.get_block('route-map TEST deny 10'))
+                             api.get_block('route-map TEST deny 10'))
             self.assertIn('set tag 50',
                           api.get_block('route-map TEST deny 10'))
 

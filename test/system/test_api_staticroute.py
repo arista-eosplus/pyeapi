@@ -269,8 +269,8 @@ class TestApiStaticroute(DutSystemTest):
                         'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 10 tag 99'])
 
             result = dut.api('staticroute').set_tag(
-                        '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
-                        distance=10, tag=3)
+                '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
+                distance=10, tag=3)
             self.assertTrue(result)
 
     def test_set_route_name(self):
@@ -283,8 +283,8 @@ class TestApiStaticroute(DutSystemTest):
                         'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 name test99'])
 
             result = dut.api('staticroute').set_route_name(
-                        '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
-                        distance=1, route_name='test3')
+                '1.2.3.0/24', 'Ethernet1', next_hop_ip='1.1.1.1',
+                distance=1, route_name='test3')
             self.assertTrue(result)
 
 if __name__ == '__main__':

@@ -121,20 +121,19 @@ class Varp(EntityCollection):
         Returns:
             True if the set operation succeeds otherwise False.
         """
-        if default:
-            commands = 'default ip virtual-router mac-address'
-        elif disable:
-            commands = 'no ip virtual-router mac-address'
-        elif mac_address is not None:
-            # Check to see if mac_address matches expected format
-            if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}', mac_address):
-                raise ValueError('mac_address must be formatted like:'
-                                 'aa:bb:cc:dd:ee:ff')
-            commands = 'ip virtual-router mac-address %s' % mac_address
-        else:
-            raise ValueError('mac_address must be a properly formatted '
-                             'address string')
+        if not default and not disable:
+            if mac_address is not None:
+                # Check to see if mac_address matches expected format
+                if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}', mac_address):
+                    raise ValueError('mac_address must be formatted like:'
+                                     'aa:bb:cc:dd:ee:ff')
+            else:
+                raise ValueError('mac_address must be a properly formatted '
+                                 'address string')
 
+        commands = self.command_builder('ip virtual-router mac-address',
+                                        value=mac_address, default=default,
+                                        disable=disable)
         return self.configure(commands)
 
 

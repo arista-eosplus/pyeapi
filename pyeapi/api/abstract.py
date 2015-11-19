@@ -123,15 +123,21 @@ class BaseEntity(object):
     def command_builder(self, string, value=None, default=None, disable=None):
         """Builds a command with keywords
 
+        Notes:
+            Negating a command string by overriding 'value' with None or an
+                assigned value that evalutates to false has been deprecated.
+                Please use 'disable' to negate a command.
+            Parameters are evaluated in the order 'default', 'disable', 'value'.
+
         Args:
             string (str): The command string
             value: The configuration setting to subsititue into the command
                 string.  If value is a boolean and True, just the command
                 string is used
             default (bool): Specifies the command should use the default
-                keyword argument
+                keyword argument. Default preempts disable and value.
             disable (bool): Specifies the command should use the no
-                keyword argument
+                keyword argument. Disable preempts value.
 
         Returns:
             A command string that can be used to configure the node
@@ -145,8 +151,10 @@ class BaseEntity(object):
         elif value:
             return '%s %s' % (string, value)
         else:
-            raise ValueError("abstract.command_builder: No value "
-                             "received '%s'" % value)
+            return 'no %s' % string
+            # -- above line to be deprecated and replaced with the error below
+            # raise ValueError("abstract.command_builder: No value "
+            #                  "received '%s'" % value)
 
     def configure_interface(self, name, commands):
         """Configures the specified interface with the commands

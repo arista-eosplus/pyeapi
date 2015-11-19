@@ -135,6 +135,16 @@ class TestResourceInterfaces(DutSystemTest):
                                       intf, 'text')
             self.assertIn('no sflow enable', config[0]['output'])
 
+    def test_set_sflow_default(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
+            result = dut.api('interfaces').set_sflow(intf, default=True)
+            self.assertTrue(result)
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
+            self.assertNotIn('no sflow enable', config[0]['output'])
+
 
 class TestPortchannelInterface(DutSystemTest):
 
@@ -275,7 +285,6 @@ class TestPortchannelInterface(DutSystemTest):
             self.assertNotIn('channel-group 1 mode on',
                              config[0]['output'], 'dut=%s' % dut)
 
-
     def test_minimum_links_valid(self):
         for dut in self.duts:
             minlinks = random_int(1, 16)
@@ -295,6 +304,7 @@ class TestPortchannelInterface(DutSystemTest):
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
                                                              minlinks)
             self.assertFalse(result)
+
 
 class TestApiVxlanInterface(DutSystemTest):
 

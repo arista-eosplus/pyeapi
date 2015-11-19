@@ -191,7 +191,7 @@ class Mlag(Entity):
                 interfaces[name] = dict(mlag_id=match.group(1))
         return dict(interfaces=interfaces)
 
-    def configure_mlag(self, string, value, default, disable):
+    def _configure_mlag(self, string, value, default, disable):
         cfg = self.command_builder(string, value=value, default=default,
                                    disable=disable)
         cmds = ['mlag configuration', cfg]
@@ -208,7 +208,7 @@ class Mlag(Entity):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('domain-id', value, default, disable)
+        return self._configure_mlag('domain-id', value, default, disable)
 
     def set_local_interface(self, value=None, default=False, disable=False):
         """Configures the mlag local-interface value
@@ -222,7 +222,7 @@ class Mlag(Entity):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('local-interface', value, default, disable)
+        return self._configure_mlag('local-interface', value, default, disable)
 
     def set_peer_address(self, value=None, default=False, disable=False):
         """Configures the mlag peer-address value
@@ -236,7 +236,7 @@ class Mlag(Entity):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('peer-address', value, default, disable)
+        return self._configure_mlag('peer-address', value, default, disable)
 
     def set_peer_link(self, value=None, default=False, disable=False):
         """Configures the mlag peer-link value
@@ -250,13 +250,16 @@ class Mlag(Entity):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('peer-link', value, default, disable)
+        return self._configure_mlag('peer-link', value, default, disable)
 
-    def set_shutdown(self, value=None, default=False, disable=False):
+    def set_shutdown(self, default=False, disable=True):
         """Configures the mlag shutdown value
 
+        Default setting for set_shutdown is disable=True, meaning
+        'no shutdown'. Setting both default and disable to False will
+        effectively enable shutdown.
+
         Args:
-            value (str): The value to configure the shutdown
             default (bool): Configures the shutdown using the
                 default keyword
             disable (bool): Negates shutdown using the no keyword
@@ -264,10 +267,7 @@ class Mlag(Entity):
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        if value is False:
-            # Shutdown is False, 'disable' shutdown = no shutdown
-            disable = True
-        return self.configure_mlag('shutdown', value, default, disable)
+        return self._configure_mlag('shutdown', True, default, disable)
 
     def set_mlag_id(self, name, value=None, default=False, disable=False):
         """Configures the interface mlag value for the specified interface

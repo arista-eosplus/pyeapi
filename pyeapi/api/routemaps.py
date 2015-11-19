@@ -44,7 +44,7 @@ Notes:
 
 import re
 
-from pyeapi.api import Entity, EntityCollection
+from pyeapi.api import EntityCollection
 
 
 class Routemaps(EntityCollection):
@@ -336,18 +336,13 @@ class Routemaps(EntityCollection):
             True if the operation succeeds otherwise False is returned
         """
         commands = ['route-map %s %s %s' % (name, action, seqno)]
-        if default:
-            commands.append('default description')
-        elif disable:
-            commands.append('no description')
-        elif value is not None:
-            commands.append('no description')
-            commands.append('description %s' % value)
-        else:
-            raise ValueError('description must be a valid string unless '
-                             'default or disable is specified')
-
+        if value is not None:
+            # Before assigning a new description, clear any existing description
+            commands.append(self.command_builder('description', disable=True))
+        commands.append(self.command_builder('description', value=value,
+                                             default=default, disable=disable))
         return self.configure(commands)
+
 
 def instance(node):
     """Returns an instance of Routemaps

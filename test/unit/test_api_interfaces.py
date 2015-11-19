@@ -44,6 +44,7 @@ import pyeapi.api.interfaces
 INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
               'Port-Channel1', 'Vxlan1']
 
+
 class TestFunctions(unittest.TestCase):
 
     def test_isvalidinterface_returns_true(self):
@@ -90,7 +91,6 @@ class TestApiInterfaces(EapiConfigUnitTest):
             self.instance.set_sflow('Management1', True)
 
 
-
 class TestApiBaseInterface(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
@@ -123,18 +123,13 @@ class TestApiBaseInterface(EapiConfigUnitTest):
             func = function('set_description', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
-    def test_set_shutdown_with_value(self):
+    def test_set_shutdown(self):
         for intf in INTERFACES:
-            for value in [True, False]:
-                cmds = ['interface %s' % intf]
-                if value:
-                    cmds.append('shutdown')
-                else:
-                    cmds.append('no shutdown')
-                func = function('set_shutdown', intf, value)
-                self.eapi_positive_config_test(func, cmds)
+            cmds = ['interface %s' % intf, 'shutdown']
+            func = function('set_shutdown', intf, default=False, disable=False)
+            self.eapi_positive_config_test(func, cmds)
 
-    def test_set_shutdown_with_no_value(self):
+    def test_set_shutdown_with_disable(self):
         for intf in INTERFACES:
             cmds = ['interface %s' % intf, 'no shutdown']
             func = function('set_shutdown', intf)
@@ -145,12 +140,6 @@ class TestApiBaseInterface(EapiConfigUnitTest):
             cmds = ['interface %s' % intf, 'default shutdown']
             func = function('set_shutdown', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
-
-    def test_set_shutdown_invalid_value_raises_value_error(self):
-        for intf in INTERFACES:
-            func = function('set_shutdown', intf, random_string())
-            self.eapi_exception_config_test(func, ValueError)
-
 
 
 class TestApiEthernetInterface(EapiConfigUnitTest):
@@ -215,6 +204,14 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
                 func = function('set_flowcontrol', intf, direction)
                 self.eapi_positive_config_test(func, cmds)
 
+    def test_set_flowcontrol_with_disable(self):
+        for intf in self.INTERFACES:
+            for direction in ['send', 'receive']:
+                cmds = ['interface %s' % intf, 'no flowcontrol %s' % direction]
+                func = function('set_flowcontrol', intf, direction,
+                                disable=True)
+                self.eapi_positive_config_test(func, cmds)
+
     def test_set_flowcontrol_with_default(self):
         for intf in self.INTERFACES:
             for direction in ['send', 'receive']:
@@ -223,7 +220,6 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
                 func = function('set_flowcontrol', intf, direction,
                                 default=True)
                 self.eapi_positive_config_test(func, cmds)
-
 
     def test_set_sflow_with_value(self):
         for intf in self.INTERFACES:
@@ -244,14 +240,15 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
 
     def test_set_sflow_with_default(self):
         for intf in INTERFACES:
-            cmds = ['interface %s' % intf, 'default sflow']
+            cmds = ['interface %s' % intf, 'default sflow enable']
             func = function('set_sflow', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
-    def test_set_shutdown_invalid_value_raises_value_error(self):
+    def test_set_sflow_invalid_value_raises_value_error(self):
         for intf in INTERFACES:
             func = function('set_sflow', intf, random_string())
             self.eapi_exception_config_test(func, ValueError)
+
 
 class TestApiPortchannelInterface(EapiConfigUnitTest):
 
@@ -290,6 +287,11 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
     def test_set_minimum_links_with_default(self):
         cmds = ['interface Port-Channel1', 'default port-channel min-links']
         func = function('set_minimum_links', 'Port-Channel1', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_minimum_links_with_disable(self):
+        cmds = ['interface Port-Channel1', 'no port-channel min-links']
+        func = function('set_minimum_links', 'Port-Channel1', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_get_lacp_mode(self):
@@ -344,6 +346,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
     def test_set_lacp_mode_invalid_mode(self):
         func = function('set_lacp_mode', 'Port-Channel1', random_string())
         self.eapi_negative_config_test(func)
+
 
 class TestApiVxlanInterface(EapiConfigUnitTest):
 

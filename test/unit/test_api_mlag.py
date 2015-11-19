@@ -125,19 +125,14 @@ class TestApiMlag(EapiConfigUnitTest):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
-                for value in [True, False]:
-                    cmds = ['mlag configuration']
-                    if value:
-                        cmds.append('shutdown')
-                    else:
-                        cmds.append('no shutdown')
-                    func = function('set_shutdown', value)
+                cmds.append('shutdown')
+                func = function('set_shutdown', default=False, disable=False)
             elif state == 'negate':
                 cmds.append('no shutdown')
                 func = function('set_shutdown', disable=True)
             elif state == 'default':
                 cmds.append('default shutdown')
-                func = function('set_shutdown', value=True, default=True)
+                func = function('set_shutdown', default=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_mlag_id(self):

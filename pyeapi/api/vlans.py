@@ -58,6 +58,7 @@ NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
 TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
 
+
 def isvlan(value):
     """Checks if the argument is a valid VLAN
 
@@ -226,7 +227,6 @@ class Vlans(EntityCollection):
         commands.insert(0, 'vlan %s' % vid)
         return self.configure(commands)
 
-
     def set_name(self, vid, name=None, default=False, disable=False):
         """ Configures the VLAN name
 
@@ -308,7 +308,6 @@ class Vlans(EntityCollection):
 
         return not failure
 
-
     def add_trunk_group(self, vid, name):
         """ Adds a new trunk group to the Vlan in the running-config
 
@@ -339,6 +338,7 @@ class Vlans(EntityCollection):
             True if the operation was successful otherwise False
         """
         return self.configure_vlan(vid, 'no trunk group %s' % name)
+
 
 def instance(node):
     """Returns an instance of Vlans

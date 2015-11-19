@@ -75,6 +75,7 @@ VALID_INTERFACES = frozenset([
     'Vxlan',
 ])
 
+
 def isvalidinterface(value):
     match = re.match(r'([EPVLM][a-z-C]+)', value)
     return match and match.group() in VALID_INTERFACES
@@ -134,6 +135,7 @@ class Interfaces(EntityCollection):
                                  (instance, name))
         method = getattr(instance, name)
         return method(*args, **kwargs)
+
 
 class BaseInterface(EntityCollection):
 
@@ -270,32 +272,30 @@ class BaseInterface(EntityCollection):
                                         disable=disable)
         return self.configure_interface(name, commands)
 
-    def set_shutdown(self, name, value=None, default=False):
+    def set_shutdown(self, name, default=False, disable=True):
         """Configures the interface shutdown state
+
+        Default configuration for set_shutdown is disable=True, meaning
+        'no shutdown'. Setting both default and disable to False will
+        effectively enable shutdown on the interface.
 
         Args:
             name (string): The interface identifier.  It must be a full
                 interface name (ie Ethernet, not Et)
 
-            value (boolean): True if the interface should be in shutdown state
-                otherwise False
+            default (boolean): Specifies to default the interface shutdown
 
-            default (boolean): Specifies to default the interface description
+            disable (boolean): Specifies to disable interface shutdown, i.e.
+                disable=True => no shutdown
 
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        if value not in [True, False, None]:
-            raise ValueError('invalid value for shutdown')
-
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default shutdown')
-        elif value:
-            commands.append('shutdown')
-        else:
-            commands.append('no shutdown')
+        commands.append(self.command_builder('shutdown', value=True,
+                                             default=default, disable=disable))
         return self.configure(commands)
+
 
 class EthernetInterface(BaseInterface):
 
@@ -408,42 +408,52 @@ class EthernetInterface(BaseInterface):
         raise NotImplementedError('deleting Ethernet interfaces is '
                                   'not supported')
 
-    def set_flowcontrol_send(self, name, value=None, default=False):
+    def set_flowcontrol_send(self, name, value=None, default=False,
+                             disable=False):
         """Configures the interface flowcontrol send value
 
         Args:
             name (string): The interface identifier.  It must be a full
                 interface name (ie Ethernet, not Et)
 
-            direction (string): one of either 'send' or 'receive'
+            value (boolean): True if the interface should enable sending flow
+                control packets, otherwise False
 
-            value (boolean): True if the interface should be in shutdown state
-                          otherwise False
-            default (boolean): Specifies to default the interface description
+            default (boolean): Specifies to default the interface flow
+                control send value
+
+            disable (boolean): Specifies to disable the interface flow
+                control send value
 
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        return self.set_flowcontrol(name, 'send', value, default)
+        return self.set_flowcontrol(name, 'send', value, default, disable)
 
-    def set_flowcontrol_receive(self, name, value=None, default=False):
+    def set_flowcontrol_receive(self, name, value=None, default=False,
+                                disable=False):
         """Configures the interface flowcontrol receive value
 
         Args:
             name (string): The interface identifier.  It must be a full
                 interface name (ie Ethernet, not Et)
 
-            value (boolean): True if the interface should be in shutdown state
-                          otherwise False
+            value (boolean): True if the interface should enable receiving
+                flow control packets, otherwise False
 
-            default (boolean): Specifies to default the interface description
+            default (boolean): Specifies to default the interface flow
+                control receive value
+
+            disable (boolean): Specifies to disable the interface flow
+                control receive value
 
         Returns:
             True if the operation succeeds otherwise False is returned
         """
-        return self.set_flowcontrol(name, 'receive', value, default)
+        return self.set_flowcontrol(name, 'receive', value, default, disable)
 
-    def set_flowcontrol(self, name, direction, value=None, default=False):
+    def set_flowcontrol(self, name, direction, value=None, default=False,
+                        disable=False):
         """Configures the interface flowcontrol value
 
         Args:
@@ -452,10 +462,14 @@ class EthernetInterface(BaseInterface):
 
             direction (string): one of either 'send' or 'receive'
 
-            value (boolean): True if the interface should be in shutdown state
-                          otherwise False
+            value (boolean): True if the interface should enable flow control
+                packet handling, otherwise False
 
-            default (boolean): Specifies to default the interface description
+            default (boolean): Specifies to default the interface flow control
+                send or receive value
+
+            disable (boolean): Specifies to disable the interface flow control
+                send or receive value
 
         Returns:
             True if the operation succeeds otherwise False is returned
@@ -468,15 +482,12 @@ class EthernetInterface(BaseInterface):
             raise ValueError('invalid direction specified')
 
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default flowcontrol %s' % direction)
-        elif value:
-            commands.append('flowcontrol %s %s' % (direction, value))
-        else:
-            commands.append('no flowcontrol %s' % direction)
+        commands.append(self.command_builder('flowcontrol %s' % direction,
+                                             value=value, default=default,
+                                             disable=disable))
         return self.configure(commands)
 
-    def set_sflow(self, name, value=None, default=False):
+    def set_sflow(self, name, value=None, default=False, disable=False):
         """Configures the sFlow state on the interface
 
         Args:
@@ -487,6 +498,8 @@ class EthernetInterface(BaseInterface):
 
             default (boolean): Specifies the default value for sFlow
 
+            disable (boolean): Specifies to disable sFlow
+
         Returns:
             True if the operation succeeds otherwise False is returned
         """
@@ -494,13 +507,10 @@ class EthernetInterface(BaseInterface):
             raise ValueError
 
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default sflow')
-        elif value:
-            commands.append('sflow enable')
-        else:
-            commands.append('no sflow enable')
+        commands.append(self.command_builder('sflow enable', value=value,
+                                             default=default, disable=disable))
         return self.configure(commands)
+
 
 class PortchannelInterface(BaseInterface):
 
@@ -655,7 +665,7 @@ class PortchannelInterface(BaseInterface):
 
         return self.configure(remove_commands + add_commands)
 
-    def set_minimum_links(self, name, value=None, default=False):
+    def set_minimum_links(self, name, value=None, default=False, disable=False):
         """Configures the Port-Channel min-links value
 
         Args:
@@ -663,20 +673,21 @@ class PortchannelInterface(BaseInterface):
 
             value(str): The value to configure the min-links
 
-            default (bool): Specifies to default the interface description
+            default (bool): Specifies to default the port channel min-links
+                value
+
+            disable (bool): Specifies to disable the port channel min-links
+                value
 
         Returns:
             True if the operation succeeds otherwise False is returned
         """
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default port-channel min-links')
-        elif value is not None:
-            commands.append('port-channel min-links %s' % value)
-        else:
-            commands.append('no port-channel min-links')
-
+        commands.append(self.command_builder('port-channel min-links',
+                                             value=value, default=default,
+                                             disable=disable))
         return self.configure(commands)
+
 
 class VxlanInterface(BaseInterface):
 
@@ -914,12 +925,6 @@ class VxlanInterface(BaseInterface):
 
         """
         return self.configure_interface(name, 'no vxlan vlan %s vni' % vid)
-
-
-
-
-
-
 
 
 INTERFACE_CLASS_MAP = {

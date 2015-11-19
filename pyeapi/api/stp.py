@@ -57,6 +57,7 @@ import re
 
 from pyeapi.api import Entity, EntityCollection
 
+
 class Stp(Entity):
     """The Stp class implements global configuration for spanning-tree
 
@@ -146,15 +147,14 @@ class Stp(Entity):
         Raises:
             ValueError if the value is not in the accepted range
         """
-        if default:
-            cmds = 'default spanning-tree mode'
-        elif disable:
-            cmds = 'no spanning-tree mode'
-        elif value not in ['mstp', 'none']:
-            raise ValueError("Specified value must be one of 'mstp', 'none'")
-        else:
-            cmds = 'spanning-tree mode %s' % value
+        if not default and not disable:
+            if value not in ['mstp', 'none']:
+                raise ValueError("Specified value must be one of "
+                                 "'mstp', 'none'")
+        cmds = self.command_builder('spanning-tree mode', value=value,
+                                    default=default, disable=disable)
         return self.configure(cmds)
+
 
 class StpInstances(EntityCollection):
     """Provides a configuration resource for spanning-tree instances
@@ -167,6 +167,7 @@ class StpInstances(EntityCollection):
     def getall(self):
         # TODO: (privateip, 20150106) stubbed out, needs implementation
         return dict()
+
 
 class StpInterfaces(EntityCollection):
     """Provides a configuration resource for spanning-tree interfaces
@@ -250,7 +251,6 @@ class StpInterfaces(EntityCollection):
         if not isvalidinterface(name):
             raise ValueError('invalid interface value specified')
         return super(StpInterfaces, self).configure_interface(name, cmds)
-
 
     def set_portfast_type(self, name, value='normal'):
         """Configures the portfast value for the specified interface
@@ -361,6 +361,7 @@ def isvalidinterface(value):
         True if it could be a spanning-tree interface, otherwise False
     """
     return value[0:2] in ['Et', 'Po']
+
 
 def instance(api):
     return Stp(api)

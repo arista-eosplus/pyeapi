@@ -41,6 +41,7 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.ipinterfaces
 
+
 class TestApiIpinterfaces(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Vlan1234', 'Management1',
@@ -93,8 +94,13 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
 
     def test_set_address_invalid_value_raises_value_error(self):
         for intf in self.INTERFACES:
-            func = function('set_address', intf, None)
-            self.eapi_exception_config_test(func, ValueError)
+            # func = function('set_address', intf, None)
+            # self.eapi_exception_config_test(func, ValueError)
+            # If command_builder fails because value is None, uncomment
+            # above lines and remove below lines.
+            cmds = ['interface %s' % intf, 'no ip address']
+            func = function('set_address', intf, value=None)
+            self.eapi_positive_config_test(func, cmds)
 
     def test_set_mtu_with_values(self):
         for intf in self.INTERFACES:
@@ -117,9 +123,16 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
 
     def test_set_mtu_invalid_value_raises_value_error(self):
         for intf in self.INTERFACES:
-            for value in [67, 65536, random_string(), None]:
+            for value in [67, 65536, random_string()]:
                 func = function('set_mtu', intf, value)
                 self.eapi_exception_config_test(func, ValueError)
+            for value in [None]:
+                # If command_builder fails because value is None, put None
+                # in the first loop to check for value error, and remove
+                # this second loop
+                cmds = ['interface %s' % intf, 'no mtu']
+                func = function('set_mtu', intf, value)
+                self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()
