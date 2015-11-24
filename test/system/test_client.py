@@ -39,6 +39,7 @@ from testlib import random_int, random_string, get_fixture
 
 import pyeapi.client
 
+
 class TestClient(unittest.TestCase):
 
     def setUp(self):
@@ -118,9 +119,6 @@ class TestNode(unittest.TestCase):
                 self.assertIsNotNone(exc.command_error)
                 self.assertIsNotNone(exc.output)
                 self.assertIsNotNone(exc.commands)
-
-
-
 
 
 if __name__ == '__main__':

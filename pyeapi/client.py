@@ -376,7 +376,7 @@ def make_connection(transport, **kwargs):
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None, timeout=60):
+            password='', port=None, timeout=60, return_node=False):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -395,14 +395,27 @@ def connect(transport=None, host='localhost', username='admin',
         port (int): The TCP port of the endpoint for the eAPI connection.  If
             this keyword is not specified, the default value is automatically
             determined by the transport type. (http=80, https=443)
+        return_node (bool): Returns a Node object if True, otherwise
+            returns an EapiConnection object.
+
 
     Returns:
-        A instance of an EapiConnection object for the specified transport.
+        An instance of an EapiConnection object for the specified transport.
 
     """
     transport = transport or DEFAULT_TRANSPORT
-    return make_connection(transport, host=host, username=username,
+    connection = make_connection(transport, host=host, username=username,
                            password=password, port=port, timeout=timeout)
+    if return_node:
+        kwargs = dict(
+            transport=transport,
+            host=host,
+            username=username,
+            password=password,
+            port=port,
+        )
+        return Node(connection, **kwargs)
+    return connection
 
 
 class Node(object):
@@ -744,10 +757,10 @@ def connect_to(name):
     if not kwargs:
         raise AttributeError('connection profile not found in config')
 
-    connection = connect(transport=kwargs.get('transport'),
-                         host=kwargs.get('host'),
-                         username=kwargs.get('username'),
-                         password=kwargs.get('password'),
-                         port=kwargs.get('port'))
-    node = Node(connection, **kwargs)
+    node = connect(transport=kwargs.get('transport'),
+                   host=kwargs.get('host'),
+                   username=kwargs.get('username'),
+                   password=kwargs.get('password'),
+                   port=kwargs.get('port'),
+                   return_node=True)
     return node
