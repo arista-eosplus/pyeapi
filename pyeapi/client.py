@@ -405,16 +405,10 @@ def connect(transport=None, host='localhost', username='admin',
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
-                           password=password, port=port, timeout=timeout)
+                                 password=password, port=port, timeout=timeout)
     if return_node:
-        kwargs = dict(
-            transport=transport,
-            host=host,
-            username=username,
-            password=password,
-            port=port,
-        )
-        return Node(connection, **kwargs)
+        return Node(connection, transport=transport, host=host,
+                    username=username, password=password, port=port)
     return connection
 
 
