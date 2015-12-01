@@ -109,16 +109,45 @@ class TestNode(unittest.TestCase):
                 self.duts.append(pyeapi.client.connect_to(name))
 
     def test_exception_trace(self):
+        # Send commands that will return an error and validate the errors
+
+        # General format of an error message:
+        rfmt = r'Error \[%d\]: CLI command \d+ of \d+ \'.*\' failed: %s \[%s\]'
+        # Design error tests
+        cases = []
+        # Send an incomplete command
+        cases.append(('show run', rfmt
+                      % (1002, 'invalid command',
+                         'incomplete token \(at token \d+: \'.*\'\)')))
+        # Send a mangled command
+        cases.append(('shwo version', rfmt
+                      % (1002, 'invalid command',
+                         'Invalid input \(at token \d+: \'.*\'\)')))
+        # Send a command that cannot be run through the api
+        cases.append(('reload', rfmt
+                      % (1004, 'incompatible command',
+                         'Command not permitted via API access. To reload '
+                         'the machine over the API, please use \'reload '
+                         'now\' instead.')))
+        # Send a continuous command that requires a break
+        cases.append(('watch 10 show int e1 count rates', rfmt
+                      % (1000, 'could not run command',
+                         'init error \(cbreak\(\) returned ERR\)')))
+
         for dut in self.duts:
-            try:
-                dut.enable(['show version', 'show run', 'show hostname'],
-                           strict=True)
-                self.fail('A CommandError should have been raised')
-            except pyeapi.eapilib.CommandError as exc:
-                self.assertEqual(len(exc.trace), 4)
-                self.assertIsNotNone(exc.command_error)
-                self.assertIsNotNone(exc.output)
-                self.assertIsNotNone(exc.commands)
+            for (cmd, regex) in cases:
+                try:
+                    # Insert the error in list of valid commands
+                    dut.enable(['show version', cmd, 'show hostname'],
+                               strict=True)
+                    self.fail('A CommandError should have been raised')
+                except pyeapi.eapilib.CommandError as exc:
+                    # Validate the properties of the exception
+                    self.assertEqual(len(exc.trace), 4)
+                    self.assertIsNotNone(exc.command_error)
+                    self.assertIsNotNone(exc.output)
+                    self.assertIsNotNone(exc.commands)
+                    self.assertRegexpMatches(exc.message, regex)
 
 
 if __name__ == '__main__':
