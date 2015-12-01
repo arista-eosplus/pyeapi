@@ -48,6 +48,7 @@ import netaddr
 
 from pyeapi.api import EntityCollection
 
+
 def mask_to_prefixlen(mask):
     """Converts a subnet mask from dotted decimal to bit length
 
@@ -59,6 +60,7 @@ def mask_to_prefixlen(mask):
     """
     mask = mask or '255.255.255.255'
     return netaddr.IPAddress(mask).netmask_bits()
+
 
 def prefixlen_to_mask(prefixlen):
     """Converts a prefix length to a dotted decimal subnet mask
@@ -72,6 +74,7 @@ def prefixlen_to_mask(prefixlen):
     prefixlen = prefixlen or '32'
     addr = '0.0.0.0/%s' % prefixlen
     return str(netaddr.IPNetwork(addr).netmask)
+
 
 class StandardAcls(EntityCollection):
 
@@ -146,6 +149,6 @@ class StandardAcls(EntityCollection):
         cmds = ['ip access-list standard %s' % name, 'no %s' % seqno, 'exit']
         return self.configure(cmds)
 
+
 def instance(node):
     return StandardAcls(node)
-

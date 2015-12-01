@@ -64,7 +64,7 @@ class TestApiMlag(DutSystemTest):
             dut.config(['mlag configuration', 'domain-id test'])
             api = dut.api('mlag')
             self.assertIn('domain-id test', api.get_block('mlag configuration'))
-            result = dut.api('mlag').set_domain_id()
+            result = dut.api('mlag').set_domain_id(disable=True)
             self.assertTrue(result)
             self.assertIn('no domain-id', api.get_block('mlag configuration'))
 
@@ -91,7 +91,7 @@ class TestApiMlag(DutSystemTest):
             dut.config(['interface Vlan1234', 'mlag configuration', 'local-interface Vlan1234'])
             api = dut.api('mlag')
             self.assertIn('local-interface Vlan1234', api.get_block('mlag configuration'))
-            result = api.set_local_interface()
+            result = api.set_local_interface(disable=True)
             self.assertTrue(result)
             self.assertIn('no local-interface', api.get_block('mlag configuration'))
 
@@ -119,7 +119,7 @@ class TestApiMlag(DutSystemTest):
                         'mlag configuration', 'peer-address 1.2.3.4'])
             api = dut.api('mlag')
             self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
-            result = api.set_peer_address()
+            result = api.set_peer_address(disable=True)
             self.assertTrue(result)
             self.assertIn('no peer-address', api.get_block('mlag configuration'))
 
@@ -156,7 +156,7 @@ class TestApiMlag(DutSystemTest):
             dut.config(['mlag configuration', 'peer-link Ethernet1'])
             api = dut.api('mlag')
             self.assertIn('peer-link Ethernet1', api.get_block('mlag configuration'))
-            result = api.set_peer_link()
+            result = api.set_peer_link(disable=True)
             self.assertTrue(result)
             self.assertIn('no peer-link', api.get_block('mlag configuration'))
 
@@ -192,7 +192,7 @@ class TestApiMlag(DutSystemTest):
             dut.config(['mlag configuration', 'shutdown'])
             api = dut.api('mlag')
             self.assertIn('shutdown', api.get_block('mlag configuration'))
-            result = api.set_shutdown()
+            result = api.set_shutdown(disable=True)
             self.assertTrue(result)
             self.assertIn('no shutdown', api.get_block('mlag configuration'))
 
@@ -220,7 +220,7 @@ class TestApiMlag(DutSystemTest):
                         'interface Port-Channel10', 'mlag 100'])
             api = dut.api('mlag')
             self.assertIn('mlag 100', api.get_block('interface Port-Channel10'))
-            result = api.set_mlag_id('Port-Channel10')
+            result = api.set_mlag_id('Port-Channel10', disable=True)
             self.assertTrue(result)
             self.assertIn('no mlag', api.get_block('interface Port-Channel10'))
 

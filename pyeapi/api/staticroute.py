@@ -293,8 +293,6 @@ class StaticRoute(EntityCollection):
         # Call _set_route with the new route_name information
         return self._set_route(ip_dest, next_hop, **kwargs)
 
-    # def _build_commands(self, ip_dest, next_hop, next_hop_ip=None,
-    #                     distance=None, tag=None, route_name=None):
     def _build_commands(self, ip_dest, next_hop, **kwargs):
         """Build the EOS command string for ip route interactions.
 
@@ -331,9 +329,6 @@ class StaticRoute(EntityCollection):
 
         return commands
 
-    # def _set_route(self, ip_dest, next_hop, next_hop_ip=None,
-    #                distance=None, tag=None, route_name=None,
-    #                delete=False, default=False):
     def _set_route(self, ip_dest, next_hop, **kwargs):
         """Configure a static route
 
@@ -356,12 +351,6 @@ class StaticRoute(EntityCollection):
             True if the operation succeeds, otherwise False.
         """
 
-        # Build the route string based on the parameters given
-        # commands = self._build_commands(ip_dest, next_hop,
-        #                                 next_hop_ip=next_hop_ip,
-        #                                 distance=distance,
-        #                                 tag=tag,
-        #                                 route_name=route_name)
         commands = self._build_commands(ip_dest, next_hop, **kwargs)
 
         delete = kwargs.get('delete', False)

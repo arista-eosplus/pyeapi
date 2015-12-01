@@ -40,6 +40,7 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.vlans
 
+
 class TestApiVlans(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
@@ -91,12 +92,11 @@ class TestApiVlans(EapiConfigUnitTest):
                 func = function('set_name', vid, name)
             elif state == 'negate':
                 cmds = ['vlan %s' % vid, 'no name']
-                func = function('set_name', vid)
+                func = function('set_name', vid, disable=True)
             elif state == 'default':
                 cmds = ['vlan %s' % vid, 'default name']
                 func = function('set_name', vid, default=True)
             self.eapi_positive_config_test(func, cmds)
-
 
     def test_set_state(self):
         for state in ['config', 'negate', 'default']:
@@ -108,7 +108,7 @@ class TestApiVlans(EapiConfigUnitTest):
                     self.eapi_positive_config_test(func, cmds)
             elif state == 'negate':
                 cmds = ['vlan %s' % vid, 'no state']
-                func = function('set_state', vid)
+                func = function('set_state', vid, disable=True)
                 self.eapi_positive_config_test(func, cmds)
             elif state == 'default':
                 cmds = ['vlan %s' % vid, 'default state']
@@ -131,6 +131,11 @@ class TestApiVlans(EapiConfigUnitTest):
         func = function('set_trunk_groups', '10', 'tg2')
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_trunk_groups_remove_all(self):
+        cmds = ['vlan 10', 'no trunk group']
+        func = function('set_trunk_groups', '10', disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
     def test_add_trunk_group(self):
         vid = random_vlan()
         tg = random_string()
@@ -147,5 +152,3 @@ class TestApiVlans(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

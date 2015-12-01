@@ -57,6 +57,7 @@ import re
 
 from pyeapi.api import Entity, EntityCollection
 
+
 class Stp(Entity):
     """The Stp class implements global configuration for spanning-tree
 
@@ -128,7 +129,7 @@ class Stp(Entity):
         self._instances = StpInstances(self.node)
         return self._instances
 
-    def set_mode(self, value=None):
+    def set_mode(self, value=None, default=False, disable=False):
         """Configures the global spanning-tree mode
 
         Note:
@@ -137,6 +138,8 @@ class Stp(Entity):
         Args:
             value (string): The value to configure the global spanning-tree
                 mode of operation.  Valid values include 'mstp', 'none'
+            default (bool): Set the global spanning-tree mode to default.
+            disable (bool): Negate the global spanning-tree mode.
 
         Returns:
             True if the configuration operation succeeds otherwise False
@@ -144,13 +147,14 @@ class Stp(Entity):
         Raises:
             ValueError if the value is not in the accepted range
         """
-        if value not in ['mstp', 'none', None]:
-            raise ValueError("Specified value must be one of 'mstp', 'none'")
-        if value is None:
-            cmds = 'no spanning-tree mode'
-        else:
-            cmds = 'spanning-tree mode %s' % value
+        if not default and not disable:
+            if value not in ['mstp', 'none']:
+                raise ValueError("Specified value must be one of "
+                                 "'mstp', 'none'")
+        cmds = self.command_builder('spanning-tree mode', value=value,
+                                    default=default, disable=disable)
         return self.configure(cmds)
+
 
 class StpInstances(EntityCollection):
     """Provides a configuration resource for spanning-tree instances
@@ -163,6 +167,7 @@ class StpInstances(EntityCollection):
     def getall(self):
         # TODO: (privateip, 20150106) stubbed out, needs implementation
         return dict()
+
 
 class StpInterfaces(EntityCollection):
     """Provides a configuration resource for spanning-tree interfaces
@@ -247,7 +252,6 @@ class StpInterfaces(EntityCollection):
             raise ValueError('invalid interface value specified')
         return super(StpInterfaces, self).configure_interface(name, cmds)
 
-
     def set_portfast_type(self, name, value='normal'):
         """Configures the portfast value for the specified interface
 
@@ -275,7 +279,7 @@ class StpInterfaces(EntityCollection):
             cmds.append('spanning-tree portfast auto')
         return self.configure_interface(name, cmds)
 
-    def set_portfast(self, name, value=None, default=False):
+    def set_portfast(self, name, value=None, default=False, disable=False):
         """Configures the portfast value for the specified interface
 
         Args:
@@ -287,6 +291,9 @@ class StpInterfaces(EntityCollection):
             default (bool): Configures the portfast parameter to its default
                 value using the EOS CLI default config command
 
+            disable (bool): Negates the portfast parameter using the EOS
+                CLI no config command
+
         Returns:
             True if the command succeeds, otherwise False
 
@@ -297,11 +304,14 @@ class StpInterfaces(EntityCollection):
                 to a valid boolean
 
         """
+        if value is False:
+            disable = True
         string = 'spanning-tree portfast'
-        cmds = self.command_builder(string, value=value, default=default)
+        cmds = self.command_builder(string, value=value, default=default,
+                                    disable=disable)
         return self.configure_interface(name, cmds)
 
-    def set_bpduguard(self, name, value=None, default=False):
+    def set_bpduguard(self, name, value=False, default=False, disable=False):
         """Configures the bpduguard value for the specified interface
 
         Args:
@@ -312,6 +322,9 @@ class StpInterfaces(EntityCollection):
 
             default (bool): Configures the bpduguard parameter to its default
                 value using the EOS CLI default config command
+
+            disable (bool): Negates the bpduguard parameter using the EOS
+                CLI no config command
 
         Returns:
             True if the command succeeds, otherwise False
@@ -325,7 +338,8 @@ class StpInterfaces(EntityCollection):
         """
         value = 'enable' if value else 'disable'
         string = 'spanning-tree bpduguard'
-        cmds = self.command_builder(string, value=value, default=default)
+        cmds = self.command_builder(string, value=value, default=default,
+                                    disable=disable)
         return self.configure_interface(name, cmds)
 
 
@@ -347,6 +361,7 @@ def isvalidinterface(value):
         True if it could be a spanning-tree interface, otherwise False
     """
     return value[0:2] in ['Et', 'Po']
+
 
 def instance(api):
     return Stp(api)

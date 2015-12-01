@@ -120,8 +120,14 @@ class BaseEntity(object):
         except (CommandError, ConnectionError):
             return False
 
-    def command_builder(self, string, value=None, default=None):
+    def command_builder(self, string, value=None, default=None, disable=None):
         """Builds a command with keywords
+
+        Notes:
+            Negating a command string by overriding 'value' with None or an
+                assigned value that evalutates to false has been deprecated.
+                Please use 'disable' to negate a command.
+            Parameters are evaluated in the order 'default', 'disable', 'value'.
 
         Args:
             string (str): The command string
@@ -129,19 +135,26 @@ class BaseEntity(object):
                 string.  If value is a boolean and True, just the command
                 string is used
             default (bool): Specifies the command should use the default
-                keyword argument
+                keyword argument. Default preempts disable and value.
+            disable (bool): Specifies the command should use the no
+                keyword argument. Disable preempts value.
 
         Returns:
             A command string that can be used to configure the node
         """
         if default:
             return 'default %s' % string
+        elif disable:
+            return 'no %s' % string
         elif value is True:
             return string
         elif value:
             return '%s %s' % (string, value)
         else:
             return 'no %s' % string
+            # -- above line to be deprecated and replaced with the error below
+            # raise ValueError("abstract.command_builder: No value "
+            #                  "received '%s'" % value)
 
     def configure_interface(self, name, commands):
         """Configures the specified interface with the commands
@@ -202,5 +215,3 @@ class EntityCollection(BaseEntity, Mapping):
 
     def get(self, name, default=None):
         raise NotImplementedError
-
-

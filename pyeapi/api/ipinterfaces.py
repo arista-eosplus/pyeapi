@@ -52,6 +52,7 @@ from pyeapi.api import EntityCollection
 
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
+
 class Ipinterfaces(EntityCollection):
 
     def get(self, name):
@@ -184,7 +185,7 @@ class Ipinterfaces(EntityCollection):
         commands = ['interface %s' % name, 'no ip address', 'switchport']
         return self.configure(commands)
 
-    def set_address(self, name, value=None, default=False):
+    def set_address(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP address
 
         Args:
@@ -197,20 +198,19 @@ class Ipinterfaces(EntityCollection):
             default (bool): Configures the address parameter to its default
                 value using the EOS CLI default command
 
+            disable (bool): Negates the address parameter value using the
+                EOS CLI no command
+
         Returns:
             True if the operation succeeds otherwise False.
 
         """
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default ip address')
-        elif value is not None:
-            commands.append('ip address %s' % value)
-        else:
-            commands.append('no ip address')
+        commands.append(self.command_builder('ip address', value=value,
+                                             default=default, disable=disable))
         return self.configure(commands)
 
-    def set_mtu(self, name, value=None, default=False):
+    def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 
         Args:
@@ -222,6 +222,9 @@ class Ipinterfaces(EntityCollection):
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
+
+            disable (bool); Negate the mtu parameter value using the EOS
+                CLI no command
 
         Returns:
             True if the operation succeeds otherwise False.
@@ -237,13 +240,10 @@ class Ipinterfaces(EntityCollection):
                 raise ValueError('invalid mtu value')
 
         commands = ['interface %s' % name]
-        if default:
-            commands.append('default mtu')
-        elif value is not None:
-            commands.append('mtu %s' % value)
-        else:
-            commands.append('no mtu')
+        commands.append(self.command_builder('mtu', value=value,
+                                             default=default, disable=disable))
         return self.configure(commands)
+
 
 def instance(node):
     """Returns an instance of Ipinterfaces

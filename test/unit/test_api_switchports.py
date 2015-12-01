@@ -41,6 +41,7 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.switchports
 
+
 class TestApiSwitchports(EapiConfigUnitTest):
 
     INTERFACES = ['Ethernet1', 'Ethernet1/1', 'Port-Channel1']
@@ -87,7 +88,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
     def test_set_mode_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no switchport mode']
-            func = function('set_mode', intf)
+            func = function('set_mode', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_mode_with_default(self):
@@ -106,7 +107,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
     def test_set_access_vlan_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no switchport access vlan']
-            func = function('set_access_vlan', intf)
+            func = function('set_access_vlan', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_access_vlan_with_default(self):
@@ -126,7 +127,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
     def test_set_trunk_native_vlan_with_no_value(self):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf, 'no switchport trunk native vlan']
-            func = function('set_trunk_native_vlan', intf)
+            func = function('set_trunk_native_vlan', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_trunk_native_vlan_with_default(self):
@@ -148,7 +149,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
         for intf in self.INTERFACES:
             cmds = ['interface %s' % intf,
                     'no switchport trunk allowed vlan']
-            func = function('set_trunk_allowed_vlans', intf)
+            func = function('set_trunk_allowed_vlans', intf, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_allowed_vlans_with_default(self):
@@ -164,6 +165,27 @@ class TestApiSwitchports(EapiConfigUnitTest):
                     'default switchport trunk group']
             func = function('set_trunk_groups', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+    def test_set_trunk_groups_with_no(self):
+        for intf in self.INTERFACES:
+            cmds = ['interface %s' % intf,
+                    'no switchport trunk group']
+            func = function('set_trunk_groups', intf, disable=True)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_set_trunk_groups_with_add(self):
+        intf = 'Ethernet1'
+        cmds = ['interface %s' % intf,
+                'switchport trunk group bang']
+        func = function('set_trunk_groups', intf, ['foo', 'bar', 'bang'])
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_trunk_groups_with_remove(self):
+        intf = 'Ethernet1'
+        cmds = ['interface %s' % intf,
+                'no switchport trunk group foo']
+        func = function('set_trunk_groups', intf, ['bar'])
+        self.eapi_positive_config_test(func, cmds)
 
     def test_add_trunk_group(self):
         for intf in self.INTERFACES:
@@ -181,5 +203,3 @@ class TestApiSwitchports(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -35,10 +35,11 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, random_vlan, random_string, function
+from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
 import pyeapi.api.bgp
+
 
 class TestApiBgp(EapiConfigUnitTest):
 
@@ -92,11 +93,20 @@ class TestApiBgp(EapiConfigUnitTest):
                 func = function('set_router_id', rid)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no router-id']
-                func = function('set_router_id')
+                func = function('set_router_id', None, False, True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default router-id']
                 func = function('set_router_id', rid, True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_router_id', value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no router-id']
+        func = function('set_router_id', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_maximum_paths_just_max_path(self):
         for state in ['config', 'negate', 'default']:
@@ -106,11 +116,20 @@ class TestApiBgp(EapiConfigUnitTest):
                 func = function('set_maximum_paths', max_paths)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no maximum-paths']
-                func = function('set_maximum_paths')
+                func = function('set_maximum_paths', disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_maximum_paths', max_path=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no maximum-paths']
+        func = function('set_maximum_paths', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_maximum_paths_max_path_and_ecmp(self):
         for state in ['config', 'negate', 'default']:
@@ -121,24 +140,29 @@ class TestApiBgp(EapiConfigUnitTest):
                 func = function('set_maximum_paths', max_paths, max_ecmp_path)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no maximum-paths']
-                func = function('set_maximum_paths')
+                func = function('set_maximum_paths', disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default maximum-paths']
                 func = function('set_maximum_paths', default=True)
             self.eapi_positive_config_test(func, cmds)
 
+        func = function('set_maximum_paths', max_path=None, max_ecmp_path=20,
+                        default=False, disable=False)
+        self.eapi_exception_config_test(func, TypeError)
+
     def test_set_shutdown(self):
         for state in ['config', 'negate', 'default']:
             if state == 'config':
                 cmds = ['router bgp 65000', 'shutdown']
-                func = function('set_shutdown', True)
+                func = function('set_shutdown', default=False, disable=False)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no shutdown']
-                func = function('set_shutdown')
+                func = function('set_shutdown', disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default shutdown']
-                func = function('set_shutdown', False, True)
+                func = function('set_shutdown', default=True)
             self.eapi_positive_config_test(func, cmds)
+
 
 class TestApiBgpNeighbor(EapiConfigUnitTest):
 
@@ -174,11 +198,21 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
                 func = function('set_peer_group', name, peer_group)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {}'.format(cmd)]
-                func = function('set_peer_group', name)
+                func = function('set_peer_group', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {}'.format(cmd)]
-                func = function('set_peer_group', name, peer_group, True)
+                func = function('set_peer_group', name, peer_group,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_peer_group', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor 172.16.10.1 peer-group']
+        func = function('set_peer_group', '172.16.10.1', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_remote_as(self):
         for state in ['config', 'negate', 'default']:
@@ -190,11 +224,20 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
                 func = function('set_remote_as', name, remote_as)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {}'.format(cmd)]
-                func = function('set_remote_as', name)
+                func = function('set_remote_as', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {}'.format(cmd)]
-                func = function('set_remote_as', name, remote_as, True)
+                func = function('set_remote_as', name, remote_as, default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_remote_as', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test remote-as']
+        func = function('set_remote_as', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_shutdown(self):
         for state in ['config', 'negate', 'default', 'false']:
@@ -202,16 +245,17 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {}'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} shutdown'.format(cmd)]
-                func = function('set_shutdown', name, True)
+                func = function('set_shutdown', name, default=False,
+                                disable=False)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {} shutdown'.format(cmd)]
-                func = function('set_shutdown', name)
+                func = function('set_shutdown', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} shutdown'.format(cmd)]
-                func = function('set_shutdown', name, False, True)
+                func = function('set_shutdown', name, default=True)
             elif state == 'false':
                 cmds = ['router bgp 65000', 'no {} shutdown'.format(cmd)]
-                func = function('set_shutdown', name, False)
+                func = function('set_shutdown', name, disable=True)
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_send_community(self):
@@ -220,14 +264,25 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {}'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} send-community'.format(cmd)]
-                func = function('set_send_community', name, True)
+                func = function('set_send_community', name, value=True)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {} send-community'.format(cmd)]
-                func = function('set_send_community', name)
+                func = function('set_send_community', name, disable=True)
             elif state == 'default':
-                cmds = ['router bgp 65000', 'default {} send-community'.format(cmd)]
-                func = function('set_send_community', name, False, True)
+                cmds = ['router bgp 65000',
+                        'default {} send-community'.format(cmd)]
+                func = function('set_send_community', name, value=False,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_send_community', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test send-community']
+        func = function('set_send_community', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_next_hop_self(self):
         for state in ['config', 'negate', 'default']:
@@ -235,14 +290,25 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {}'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} next-hop-self'.format(cmd)]
-                func = function('set_next_hop_self', name, True)
+                func = function('set_next_hop_self', name, value=True)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {} next-hop-self'.format(cmd)]
-                func = function('set_next_hop_self', name)
+                func = function('set_next_hop_self', name, disable=True)
             elif state == 'default':
-                cmds = ['router bgp 65000', 'default {} next-hop-self'.format(cmd)]
-                func = function('set_next_hop_self', name, False, True)
+                cmds = ['router bgp 65000',
+                        'default {} next-hop-self'.format(cmd)]
+                func = function('set_next_hop_self', name, value=False,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_next_hop_self', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test next-hop-self']
+        func = function('set_next_hop_self', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_route_map_in(self):
         for state in ['config', 'negate', 'default']:
@@ -251,14 +317,24 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {} route-map'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} {} in'.format(cmd, route_map)]
-                func = function('set_route_map_in', name, route_map)
+                func = function('set_route_map_in', name, value=route_map)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {} in'.format(cmd)]
-                func = function('set_route_map_in', name)
+                func = function('set_route_map_in', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} in'.format(cmd)]
-                func = function('set_route_map_in', name, route_map, True)
+                func = function('set_route_map_in', name, value=route_map,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_route_map_in', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test route-map in']
+        func = function('set_route_map_in', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_route_map_out(self):
         for state in ['config', 'negate', 'default']:
@@ -267,14 +343,24 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {} route-map'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} {} out'.format(cmd, route_map)]
-                func = function('set_route_map_out', name, route_map)
+                func = function('set_route_map_out', name, value=route_map)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {} out'.format(cmd)]
-                func = function('set_route_map_out', name)
+                func = function('set_route_map_out', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {} out'.format(cmd)]
-                func = function('set_route_map_out', name, route_map, True)
+                func = function('set_route_map_out', name, value=route_map,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_route_map_out', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test route-map out']
+        func = function('set_route_map_out', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_description(self):
         for state in ['config', 'negate', 'default']:
@@ -283,14 +369,24 @@ class TestApiBgpNeighbor(EapiConfigUnitTest):
             cmd = 'neighbor {} description'.format(name)
             if state == 'config':
                 cmds = ['router bgp 65000', '{} {}'.format(cmd, value)]
-                func = function('set_description', name, value)
+                func = function('set_description', name, value=value)
             elif state == 'negate':
                 cmds = ['router bgp 65000', 'no {}'.format(cmd)]
-                func = function('set_description', name)
+                func = function('set_description', name, disable=True)
             elif state == 'default':
                 cmds = ['router bgp 65000', 'default {}'.format(cmd)]
-                func = function('set_description', name, value, True)
+                func = function('set_description', name, value=value,
+                                default=True)
             self.eapi_positive_config_test(func, cmds)
+
+        # func = function('set_description', name, value=None, default=False,
+        #                 disable=False)
+        # self.eapi_exception_config_test(func, ValueError)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['router bgp 65000', 'no neighbor test description']
+        func = function('set_description', 'test', None)
+        self.eapi_positive_config_test(func, cmds)
 
 
 if __name__ == '__main__':

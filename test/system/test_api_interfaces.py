@@ -135,6 +135,16 @@ class TestResourceInterfaces(DutSystemTest):
                                       intf, 'text')
             self.assertIn('no sflow enable', config[0]['output'])
 
+    def test_set_sflow_default(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
+            result = dut.api('interfaces').set_sflow(intf, default=True)
+            self.assertTrue(result)
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
+            self.assertNotIn('no sflow enable', config[0]['output'])
+
 
 class TestPortchannelInterface(DutSystemTest):
 
@@ -275,7 +285,6 @@ class TestPortchannelInterface(DutSystemTest):
             self.assertNotIn('channel-group 1 mode on',
                              config[0]['output'], 'dut=%s' % dut)
 
-
     def test_minimum_links_valid(self):
         for dut in self.duts:
             minlinks = random_int(1, 16)
@@ -295,6 +304,7 @@ class TestPortchannelInterface(DutSystemTest):
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
                                                              minlinks)
             self.assertFalse(result)
+
 
 class TestApiVxlanInterface(DutSystemTest):
 
@@ -344,7 +354,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan source-interface Loopback0'])
             api = dut.api('interfaces')
-            instance = api.set_source_interface('Vxlan1')
+            instance = api.set_source_interface('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('no vxlan source-interface', dut)
 
@@ -370,7 +380,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan multicast-group 239.10.10.10'])
             api = dut.api('interfaces')
-            instance = api.set_multicast_group('Vxlan1')
+            instance = api.set_multicast_group('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('no vxlan multicast-group', dut)
 
@@ -397,7 +407,7 @@ class TestApiVxlanInterface(DutSystemTest):
             dut.config(['no interface Vxlan1', 'interface Vxlan1',
                         'vxlan udp-port 1024'])
             api = dut.api('interfaces')
-            instance = api.set_udp_port('Vxlan1')
+            instance = api.set_udp_port('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('vxlan udp-port 4789', dut)
 

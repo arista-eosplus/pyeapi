@@ -515,15 +515,13 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d priority" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d priority" % vrid
-        elif re.match(r'^\d+$', str(value)) and 1 <= value <= 254:
-            cmd = "vrrp %d priority %s" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'priority' must be "
-                             "an integer in the range 1-254")
+        if not default and not disable:
+            if not str(value).isdigit() or value < 1 or value > 254:
+                raise ValueError("vrrp property 'priority' must be "
+                                 "an integer in the range 1-254")
+
+        cmd = self.command_builder('vrrp %d priority' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -557,12 +555,8 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d description" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d description" % vrid
-        else:
-            cmd = "vrrp %d description %s" % (vrid, value)
+        cmd = self.command_builder('vrrp %d description' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -596,14 +590,12 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d ip version" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d ip version" % vrid
-        elif value in (2, 3):
-            cmd = "vrrp %d ip version %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'ip_version' must be 2 or 3")
+        if not default and not disable:
+            if value not in (2, 3):
+                raise ValueError("vrrp property 'ip_version' must be 2 or 3")
+
+        cmd = self.command_builder('vrrp %d ip version' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -706,15 +698,14 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d timers advertise" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d timers advertise" % vrid
-        elif int(value) and 1 <= int(value) <= 255:
-            cmd = "vrrp %d timers advertise %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'timers_advertise' must be"
-                             "in the range 1-255")
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 255:
+                raise ValueError("vrrp property 'timers_advertise' must be"
+                                 "in the range 1-255")
+
+        cmd = self.command_builder('vrrp %d timers advertise' % vrid,
+                                   value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -751,16 +742,14 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d mac-address advertisement-interval" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d mac-address advertisement-interval" % vrid
-        elif int(value) and 1 <= int(value) <= 3600:
-            cmd = "vrrp %d mac-address advertisement-interval %d" \
-                % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'mac_addr_adv_interval' must be"
-                             "in the range 1-3600")
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'mac_addr_adv_interval' must be"
+                                 "in the range 1-3600")
+
+        cmd = self.command_builder('vrrp %d mac-address advertisement-interval'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -795,14 +784,13 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt" % vrid
-        elif disable is True or value is None or value is False:
-            cmd = "no vrrp %d preempt" % vrid
-        elif value is True:
-            cmd = "vrrp %d preempt" % vrid
-        else:
-            raise ValueError("vrrp property 'preempt' must be True or False")
+        if not default and not disable:
+            if value is not True and value is not False:
+                raise ValueError("vrrp property 'preempt' must be True "
+                                 "or False")
+
+        cmd = self.command_builder('vrrp %d preempt' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -836,15 +824,14 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt delay minimum" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d preempt delay minimum" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d preempt delay minimum %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'preempt_delay_min' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'preempt_delay_min' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d preempt delay minimum'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -878,15 +865,14 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt delay reload" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d preempt delay reload" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d preempt delay reload %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'preempt_delay_reload' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'preempt_delay_reload' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d preempt delay reload'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -920,15 +906,13 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d delay reload" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d delay reload" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d delay reload %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'delay_reload' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'delay_reload' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d delay reload' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -1109,15 +1093,12 @@ class Vrrp(EntityCollection):
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d bfd ip" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d bfd ip" % vrid
-        elif re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
-            cmd = "vrrp %d bfd ip %s" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'bfd_ip' must be "
-                             "a properly formatted IP address")
+        if not default and not disable:
+            if not re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
+                raise ValueError("vrrp property 'bfd_ip' must be "
+                                 "a properly formatted IP address")
+        cmd = self.command_builder('vrrp %d bfd ip' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:

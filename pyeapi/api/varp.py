@@ -103,7 +103,7 @@ class Varp(EntityCollection):
         interfaces = VarpInterfaces(self.node).getall()
         return dict(interfaces=interfaces)
 
-    def set_mac_address(self, mac_address=None, default=False):
+    def set_mac_address(self, mac_address=None, default=False, disable=False):
         """ Sets the virtual-router mac address
 
         This method will set the switch virtual-router mac address. If a
@@ -115,21 +115,25 @@ class Varp(EntityCollection):
                 aa:bb:cc:dd:ee:ff.
             default (bool): Sets the virtual-router mac address to the system
                 default (which is to remove the configuration line).
+            disabel (bool): Negates the virtual-router mac address using
+                the system no configuration command
 
         Returns:
             True if the set operation succeeds otherwise False.
         """
-        if default:
-            commands = 'default ip virtual-router mac-address'
-        elif mac_address is not None:
-            # Check to see if mac_address matches expected format
-            if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}', mac_address):
-                raise ValueError('mac_address must be formatted like:'
-                                 'aa:bb:cc:dd:ee:ff')
-            commands = 'ip virtual-router mac-address %s' % mac_address
-        else:
-            commands = 'no ip virtual-router mac-address'
+        if not default and not disable:
+            if mac_address is not None:
+                # Check to see if mac_address matches expected format
+                if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}', mac_address):
+                    raise ValueError('mac_address must be formatted like:'
+                                     'aa:bb:cc:dd:ee:ff')
+            else:
+                raise ValueError('mac_address must be a properly formatted '
+                                 'address string')
 
+        commands = self.command_builder('ip virtual-router mac-address',
+                                        value=mac_address, default=default,
+                                        disable=disable)
         return self.configure(commands)
 
 
@@ -157,13 +161,15 @@ class VarpInterfaces(EntityCollection):
                 resources[name] = interface_detail
         return resources
 
-    def set_addresses(self, name, addresses=None, default=False):
+    def set_addresses(self, name, addresses=None, default=False, disable=False):
 
         commands = list()
         commands.append('interface %s' % name)
 
         if default:
             commands.append('default ip virtual-router address')
+        elif disable:
+            commands.append('no ip virtual-router address')
         elif addresses is not None:
             try:
                 current_addresses = self.get(name)['addresses']

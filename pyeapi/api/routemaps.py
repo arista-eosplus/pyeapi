@@ -44,7 +44,7 @@ Notes:
 
 import re
 
-from pyeapi.api import Entity, EntityCollection
+from pyeapi.api import EntityCollection
 
 
 class Routemaps(EntityCollection):
@@ -292,7 +292,8 @@ class Routemaps(EntityCollection):
 
         return self.configure(commands) if commands else True
 
-    def set_continue(self, name, action, seqno, value=None, default=False):
+    def set_continue(self, name, action, seqno, value=None, default=False,
+                     disable=False):
         """Configures the routemap continue value
 
         Args:
@@ -301,6 +302,7 @@ class Routemaps(EntityCollection):
             seqno (integer): The sequence number for the routemap clause.
             value (integer): The value to configure for the routemap continue
             default (bool): Specifies to default the routemap continue value
+            disable (bool): Specifies to negate the routemap continue value
 
         Returns:
             True if the operation succeeds otherwise False is returned
@@ -308,16 +310,18 @@ class Routemaps(EntityCollection):
         commands = ['route-map %s %s %s' % (name, action, seqno)]
         if default:
             commands.append('default continue')
-        elif value is not None:
-            if value < 1:
-                raise ValueError('seqno must be a positive integer')
-            commands.append('continue %s' % value)
-        else:
+        elif disable:
             commands.append('no continue')
+        else:
+            if not str(value).isdigit() or value < 1:
+                raise ValueError('seqno must be a positive integer unless '
+                                 'default or disable is specified')
+            commands.append('continue %s' % value)
 
         return self.configure(commands)
 
-    def set_description(self, name, action, seqno, value=None, default=False):
+    def set_description(self, name, action, seqno, value=None, default=False,
+                        disable=False):
         """Configures the routemap description
 
         Args:
@@ -325,21 +329,20 @@ class Routemaps(EntityCollection):
             action (string): The action to take for this routemap clause.
             seqno (integer): The sequence number for the routemap clause.
             value (string): The value to configure for the routemap description
-            default (bool): Specifies to default the routemap continue value
+            default (bool): Specifies to default the routemap description value
+            disable (bool): Specifies to negate the routemap description
 
         Returns:
             True if the operation succeeds otherwise False is returned
         """
         commands = ['route-map %s %s %s' % (name, action, seqno)]
-        if default:
-            commands.append('default description')
-        elif value is not None:
-            commands.append('no description')
-            commands.append('description %s' % value)
-        else:
-            commands.append('no description')
-
+        if value is not None:
+            # Before assigning a new description, clear any existing description
+            commands.append(self.command_builder('description', disable=True))
+        commands.append(self.command_builder('description', value=value,
+                                             default=default, disable=disable))
         return self.configure(commands)
+
 
 def instance(node):
     """Returns an instance of Routemaps

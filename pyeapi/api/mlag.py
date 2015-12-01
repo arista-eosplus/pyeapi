@@ -175,7 +175,6 @@ class Mlag(Entity):
         value = 'no shutdown' not in config
         return dict(shutdown=value)
 
-
     def _parse_interfaces(self):
         """Scans the global config and returns the configured interfaces
 
@@ -192,77 +191,85 @@ class Mlag(Entity):
                 interfaces[name] = dict(mlag_id=match.group(1))
         return dict(interfaces=interfaces)
 
-
-    def configure_mlag(self, string, value, default):
-        cfg = self.command_builder(string, value=value, default=default)
+    def _configure_mlag(self, string, value, default, disable):
+        cfg = self.command_builder(string, value=value, default=default,
+                                   disable=disable)
         cmds = ['mlag configuration', cfg]
         return super(Mlag, self).configure(cmds)
 
-    def set_domain_id(self, value=None, default=False):
+    def set_domain_id(self, value=None, default=False, disable=False):
         """Configures the mlag domain-id value
 
         Args:
             value (str): The value to configure the domain-id
             default (bool): Configures the domain-id using the default keyword
+            disable (bool): Negates the domain-id using the no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('domain-id', value, default)
+        return self._configure_mlag('domain-id', value, default, disable)
 
-    def set_local_interface(self, value=None, default=False):
+    def set_local_interface(self, value=None, default=False, disable=False):
         """Configures the mlag local-interface value
 
         Args:
             value (str): The value to configure the local-interface
             default (bool): Configures the local-interface using the
                 default keyword
+            disable (bool): Negates the local-interface using the no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('local-interface', value, default)
+        return self._configure_mlag('local-interface', value, default, disable)
 
-    def set_peer_address(self, value=None, default=False):
+    def set_peer_address(self, value=None, default=False, disable=False):
         """Configures the mlag peer-address value
 
         Args:
             value (str): The value to configure the peer-address
             default (bool): Configures the peer-address using the
                 default keyword
+            disable (bool): Negates the peer-address using the no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('peer-address', value, default)
+        return self._configure_mlag('peer-address', value, default, disable)
 
-    def set_peer_link(self, value=None, default=False):
+    def set_peer_link(self, value=None, default=False, disable=False):
         """Configures the mlag peer-link value
 
         Args:
             value (str): The value to configure the peer-link
             default (bool): Configures the peer-link using the
                 default keyword
+            disable (bool): Negates the peer-link using the no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('peer-link', value, default)
+        return self._configure_mlag('peer-link', value, default, disable)
 
-    def set_shutdown(self, value=None, default=False):
+    def set_shutdown(self, default=False, disable=True):
         """Configures the mlag shutdown value
 
+        Default setting for set_shutdown is disable=True, meaning
+        'no shutdown'. Setting both default and disable to False will
+        effectively enable shutdown.
+
         Args:
-            value (str): The value to configure the shutdown
             default (bool): Configures the shutdown using the
                 default keyword
+            disable (bool): Negates shutdown using the no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        return self.configure_mlag('shutdown', value, default)
+        return self._configure_mlag('shutdown', True, default, disable)
 
-    def set_mlag_id(self, name, value=None, default=False):
+    def set_mlag_id(self, name, value=None, default=False, disable=False):
         """Configures the interface mlag value for the specified interface
 
         Args:
@@ -271,12 +278,16 @@ class Mlag(Entity):
             value (str): The mlag identifier to cofigure on the interface
             default (bool): Configures the interface mlag value using the
                 default keyword
+            disable (bool): Negates the interface mlag value using the
+                no keyword
 
         Returns:
             bool: Returns True if the commands complete successfully
         """
-        cmd = self.command_builder('mlag', value=value, default=default)
+        cmd = self.command_builder('mlag', value=value, default=default,
+                                   disable=disable)
         return self.configure_interface(name, cmd)
+
 
 def instance(node):
     """Returns an instance of Mlag

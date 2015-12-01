@@ -118,8 +118,28 @@ class TestApiUsers(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_role_negate(self):
+        cmds = 'no username test role'
+        func = function('set_role', 'test', disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_role_default(self):
         cmds = 'default username test role'
-        func = function('set_role', 'test')
+        func = function('set_role', 'test', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_sshkey(self):
+        cmds = 'username test sshkey newkey'
+        func = function('set_sshkey', 'test', value='newkey')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_sshkey_negate(self):
+        cmds = 'no username test sshkey'
+        func = function('set_sshkey', 'test', disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_sshkey_default(self):
+        cmds = 'default username test sshkey'
+        func = function('set_sshkey', 'test', default=True)
         self.eapi_positive_config_test(func, cmds)
 
 

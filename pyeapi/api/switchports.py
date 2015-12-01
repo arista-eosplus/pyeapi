@@ -42,6 +42,7 @@ import re
 from pyeapi.api import EntityCollection
 from pyeapi.utils import make_iterable
 
+
 class Switchports(EntityCollection):
     """The Switchports class provides a configuration resource for swichports
 
@@ -86,7 +87,6 @@ class Switchports(EntityCollection):
         resource.update(self._parse_trunk_allowed_vlans(config))
         resource.update(self._parse_trunk_groups(config))
         return resource
-
 
     def _parse_mode(self, config):
         """Scans the specified config and parses the switchport mode value
@@ -239,7 +239,7 @@ class Switchports(EntityCollection):
                     'default switchport']
         return self.configure(commands)
 
-    def set_mode(self, name, value=None, default=False):
+    def set_mode(self, name, value=None, default=False, disable=False):
         """Configures the switchport mode
 
         Args:
@@ -254,14 +254,17 @@ class Switchports(EntityCollection):
             default (bool): Configures the mode parameter to its default
                 value using the EOS CLI
 
+            disable (bool): Negate the mode parameter using the EOS CLI
+
         Returns:
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport mode'
-        command = self.command_builder(string, value=value, default=default)
+        command = self.command_builder(string, value=value, default=default,
+                                       disable=disable)
         return self.configure_interface(name, command)
 
-    def set_access_vlan(self, name, value=None, default=False):
+    def set_access_vlan(self, name, value=None, default=False, disable=False):
         """Configures the switchport access vlan
 
         Args:
@@ -276,14 +279,18 @@ class Switchports(EntityCollection):
             default (bool): Configures the access vlan parameter to its default
                 value using the EOS CLI
 
+            disable (bool): Negate the access vlan parameter using the EOS CLI
+
         Returns:
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport access vlan'
-        command = self.command_builder(string, value=value, default=default)
+        command = self.command_builder(string, value=value, default=default,
+                                       disable=disable)
         return self.configure_interface(name, command)
 
-    def set_trunk_native_vlan(self, name, value=None, default=False):
+    def set_trunk_native_vlan(self, name, value=None, default=False,
+                              disable=False):
         """Configures the switchport trunk native vlan value
 
         Args:
@@ -298,14 +305,18 @@ class Switchports(EntityCollection):
             default (bool): Configures the access vlan parameter to its default
                 value using the EOS CLI
 
+            disable (bool): Negate the access vlan parameter using the EOS CLI
+
         Returns:
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport trunk native vlan'
-        command = self.command_builder(string, value=value, default=default)
+        command = self.command_builder(string, value=value, default=default,
+                                       disable=disable)
         return self.configure_interface(name, command)
 
-    def set_trunk_allowed_vlans(self, name, value=None, default=False):
+    def set_trunk_allowed_vlans(self, name, value=None, default=False,
+                                disable=False):
         """Configures the switchport trunk allowed vlans value
 
         Args:
@@ -320,26 +331,34 @@ class Switchports(EntityCollection):
             default (bool): Configures the access vlan parameter to its default
                 value using the EOS CLI
 
+            disable (bool): Negate the access vlan parameter using the EOS CLI
+
         Returns:
             True if the create operation succeeds otherwise False.
         """
         string = 'switchport trunk allowed vlan'
-        command = self.command_builder(string, value=value, default=default)
+        command = self.command_builder(string, value=value, default=default,
+                                       disable=disable)
         return self.configure_interface(name, command)
 
-    def set_trunk_groups(self, intf, value=None, default=False):
+    def set_trunk_groups(self, intf, value=None, default=False, disable=False):
         """Configures the switchport trunk group value
 
         Args:
             intf (str): The interface identifier to configure.
             value (str): The set of values to configure the trunk group
             default (bool): Configures the trunk group default value
+            disable (bool): Negates all trunk group settings
 
         Returns:
             True if the config operation succeeds otherwise False
         """
         if default:
             cmd = 'default switchport trunk group'
+            return self.configure_interface(intf, cmd)
+
+        if disable:
+            cmd = 'no switchport trunk group'
             return self.configure_interface(intf, cmd)
 
         current_value = self.get(intf)['trunk_groups']
