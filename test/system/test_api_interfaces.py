@@ -62,11 +62,11 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_getall(self):
         for dut in self.duts:
-            intf = random_interface(dut)
-            dut.config(['default interface %s' % intf])
+            rintf = random_interface(dut)
+            dut.config(['default interface %s' % rintf])
             result = dut.api('interfaces').getall()
             self.assertIsInstance(result, dict)
-            for intf in [intf, 'Management1']:
+            for intf in [rintf, 'Management1']:
                 self.assertIn(intf, result)
 
     def test_create_and_return_true(self):
@@ -115,6 +115,28 @@ class TestResourceInterfaces(DutSystemTest):
             config = config[0]['interfaces'][intf]
             self.assertEqual(config['description'], text)
 
+    def test_set_description_negate(self):
+        for dut in self.duts:
+            text = random_string()
+            intf = random_interface(dut)
+            dut.config(['interface %s' % intf, 'description %s' % text])
+            result = dut.api('interfaces').set_description(intf, disable=True)
+            self.assertTrue(result)
+            config = dut.run_commands('show interfaces %s' % intf)
+            config = config[0]['interfaces'][intf]
+            self.assertEqual(config['description'], '')
+
+    def test_set_description_default(self):
+        for dut in self.duts:
+            text = random_string()
+            intf = random_interface(dut)
+            dut.config(['interface %s' % intf, 'description %s' % text])
+            result = dut.api('interfaces').set_description(intf, default=True)
+            self.assertTrue(result)
+            config = dut.run_commands('show interfaces %s' % intf)
+            config = config[0]['interfaces'][intf]
+            self.assertEqual(config['description'], '')
+
     def test_set_sflow_enable(self):
         for dut in self.duts:
             intf = random_interface(dut)
@@ -129,7 +151,7 @@ class TestResourceInterfaces(DutSystemTest):
         for dut in self.duts:
             intf = random_interface(dut)
             dut.config('default interface %s' % intf)
-            result = dut.api('interfaces').set_sflow(intf, False)
+            result = dut.api('interfaces').set_sflow(intf, disable=True)
             self.assertTrue(result)
             config = dut.run_commands('show running-config interfaces %s' %
                                       intf, 'text')
@@ -157,13 +179,71 @@ class TestPortchannelInterface(DutSystemTest):
             self.assertEqual(result['type'], 'portchannel')
             self.assertEqual(result['name'], 'Port-Channel1')
 
-    def test_get_lacp_mode_with_default(self):
+    def test_set_members(self):
         for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+            et3 = random_interface(dut, exclude=[et1, et2])
+
             dut.config(['no interface Port-Channel1',
-                        'interface Port-Channel1'])
-            instance = dut.api('interfaces').get_instance('Port-Channel1')
-            result = instance.get_lacp_mode('Port-Channel1')
-            self.assertEqual(result, 'on', 'dut=%s' % dut)
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et3])
+
+            api = dut.api('interfaces')
+            result = api.set_members('Port-Channel1', [et1, et3])
+            self.assertTrue(result, 'dut=%s' % dut)
+
+            cmd = 'show running-config interfaces %s'
+
+            # check to make sure et1 is still in the lag and et3 was
+            # added to the lag
+            for interface in [et1, et3]:
+                config = dut.run_commands(cmd % interface, 'text')
+                self.assertIn('channel-group 1 mode on',
+                              config[0]['output'], 'dut=%s' % dut)
+
+            # checks to  make sure et2 was remvoved form the lag
+            config = dut.run_commands(cmd % et2, 'text')
+            self.assertNotIn('channel-group 1 mode on',
+                             config[0]['output'], 'dut=%s' % dut)
+
+    def test_set_members_with_mode(self):
+        for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+            et3 = random_interface(dut, exclude=[et1, et2])
+
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et3])
+
+            api = dut.api('interfaces')
+            result = api.set_members('Port-Channel1', [et1, et3], mode='active')
+            self.assertTrue(result, 'dut=%s' % dut)
+
+            cmd = 'show running-config interfaces %s'
+
+            # check to make sure et1 is still in the lag and et3 was
+            # added to the lag
+            for interface in [et1, et3]:
+                config = dut.run_commands(cmd % interface, 'text')
+                self.assertIn('channel-group 1 mode active',
+                              config[0]['output'], 'dut=%s' % dut)
+
+            # checks to  make sure et2 was remvoved form the lag
+            config = dut.run_commands(cmd % et2, 'text')
+            self.assertNotIn('channel-group 1 mode on',
+                             config[0]['output'], 'dut=%s' % dut)
 
     def test_get_members_default(self):
         for dut in self.duts:
@@ -218,72 +298,13 @@ class TestPortchannelInterface(DutSystemTest):
             result = dut.api('interfaces').set_lacp_mode('Port-Channel1', mode)
             self.assertFalse(result)
 
-    def test_set_members(self):
+    def test_get_lacp_mode_with_default(self):
         for dut in self.duts:
-            et1 = random_interface(dut)
-            et2 = random_interface(dut, exclude=[et1])
-            et3 = random_interface(dut, exclude=[et1, et2])
-
             dut.config(['no interface Port-Channel1',
-                        'default interface %s' % et1,
-                        'interface %s' % et1,
-                        'channel-group 1 mode on',
-                        'default interface %s' % et2,
-                        'interface %s' % et2,
-                        'channel-group 1 mode on',
-                        'default interface %s' % et3])
-
-            api = dut.api('interfaces')
-            result = api.set_members('Port-Channel1', [et1, et3])
-            self.assertTrue(result, 'dut=%s' % dut)
-
-            cmd = 'show running-config interfaces %s'
-
-            # check to make sure et1 is still in the lag and et3 was
-            # added to the lag
-            for interface in [et1, et3]:
-                config = dut.run_commands(cmd % interface, 'text')
-                self.assertIn('channel-group 1 mode on',
-                              config[0]['output'], 'dut=%s' % dut)
-
-            # checks to  make sure et2 was remvoved form the lag
-            config = dut.run_commands(cmd % et2, 'text')
-            self.assertNotIn('channel-group 1 mode on',
-                             config[0]['output'], 'dut=%s' % dut)
-
-
-    def test_set_members_with_mode(self):
-        for dut in self.duts:
-            et1 = random_interface(dut)
-            et2 = random_interface(dut, exclude=[et1])
-            et3 = random_interface(dut, exclude=[et1, et2])
-
-            dut.config(['no interface Port-Channel1',
-                        'default interface %s' % et1,
-                        'interface %s' % et1,
-                        'channel-group 1 mode on',
-                        'default interface %s' % et2,
-                        'interface %s' % et2,
-                        'channel-group 1 mode on',
-                        'default interface %s' % et3])
-
-            api = dut.api('interfaces')
-            result = api.set_members('Port-Channel1', [et1, et3], mode='active')
-            self.assertTrue(result, 'dut=%s' % dut)
-
-            cmd = 'show running-config interfaces %s'
-
-            # check to make sure et1 is still in the lag and et3 was
-            # added to the lag
-            for interface in [et1, et3]:
-                config = dut.run_commands(cmd % interface, 'text')
-                self.assertIn('channel-group 1 mode active',
-                              config[0]['output'], 'dut=%s' % dut)
-
-            # checks to  make sure et2 was remvoved form the lag
-            config = dut.run_commands(cmd % et2, 'text')
-            self.assertNotIn('channel-group 1 mode on',
-                             config[0]['output'], 'dut=%s' % dut)
+                        'interface Port-Channel1'])
+            instance = dut.api('interfaces').get_instance('Port-Channel1')
+            result = instance.get_lacp_mode('Port-Channel1')
+            self.assertEqual(result, 'on', 'dut=%s' % dut)
 
     def test_minimum_links_valid(self):
         for dut in self.duts:
