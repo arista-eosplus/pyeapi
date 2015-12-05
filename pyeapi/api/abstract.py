@@ -81,8 +81,8 @@ class BaseEntity(object):
         Args:
             parent (str): The parent string to search the config for and
                 return the block
-            config (str): A text string config to be searched. A value of
-                None will search the running-config of the Node.
+            config (str): A text config string to be searched. Default
+                is to search the running-config of the Node.
 
         Returns:
             A string object that represents the block from the config.  If
