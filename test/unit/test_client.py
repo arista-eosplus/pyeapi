@@ -73,7 +73,6 @@ class TestNode(unittest.TestCase):
 
         responses = self.node.enable(commands)
 
-
         self.assertEqual(self.connection.execute.call_count, len(commands))
 
         expected_calls = [call(['enable', cmd], 'json') for cmd in commands]
@@ -244,13 +243,24 @@ class TestClient(unittest.TestCase):
         node._startup_config = config
         self.assertEqual(node.startup_config, config)
 
-
     def test_connect_default_type(self):
         transport = Mock()
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None, timeout=60)
+            transport.assert_called_once_with(**kwargs)
+
+    def test_connect_return_node(self):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
+            conf = get_fixture('eapi.conf')
+            pyeapi.client.load_config(filename=conf)
+            pyeapi.client.connect(host='192.168.1.16', username='eapi',
+                                  password='password', port=None, timeout=60,
+                                  return_node=True)
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
 
     def test_connect_to_with_config(self):
@@ -262,8 +272,6 @@ class TestClient(unittest.TestCase):
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
-
-
 
 
 if __name__ == '__main__':

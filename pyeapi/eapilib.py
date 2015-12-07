@@ -101,13 +101,19 @@ class CommandError(EapiError):
             of the error_code and error_text
     """
     def __init__(self, code, message, **kwargs):
-        super(CommandError, self).__init__(message)
+        cmd_err = kwargs.get('command_error')
+        if int(code) in [1000, 1002, 1004]:
+            msg_fmt = 'Error [{}]: {} [{}]'.format(code, message, cmd_err)
+        else:
+            msg_fmt = 'Error [{}]: {}'.format(code, message)
+
+        super(CommandError, self).__init__(msg_fmt)
         self.error_code = code
         self.error_text = message
-        self.command_error = kwargs.get('command_error')
+        self.command_error = cmd_err
         self.commands = kwargs.get('commands')
         self.output = kwargs.get('output')
-        self.message = 'Error [{}]: {}'.format(code, message)
+        self.message = msg_fmt
 
     @property
     def trace(self):
@@ -452,7 +458,7 @@ class EapiConnection(object):
 
         Raises:
             CommandError:  A CommandError is raised that includes the error
-                code, error message along wit the list of commands that were
+                code, error message along with the list of commands that were
                 sent to the node.  The exception instance is also stored in
                 the error property and is availble until the next request is
                 sent
