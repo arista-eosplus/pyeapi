@@ -75,12 +75,14 @@ class BaseEntity(object):
     def error(self):
         return self.node.connection.error
 
-    def get_block(self, parent):
+    def get_block(self, parent, config='running_config'):
         """ Scans the config and returns a block of code
 
         Args:
             parent (str): The parent string to search the config for and
                 return the block
+            config (str): A text config string to be searched. Default
+                is to search the running-config of the Node.
 
         Returns:
             A string object that represents the block from the config.  If
@@ -90,7 +92,7 @@ class BaseEntity(object):
         """
         try:
             parent = r'^%s$' % parent
-            return self.node.section(parent)
+            return self.node.section(parent, config=config)
         except TypeError:
             return None
 
