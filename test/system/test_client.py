@@ -95,6 +95,22 @@ class TestClient(unittest.TestCase):
                 self.assertIsInstance(result, list, 'dut=%s' % dut)
                 self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
+    def test_get_block(self):
+        # Verify get_block using a config string returns correct value
+        for dut in self.duts:
+            api = dut.api('interfaces')
+            config = api.config
+            running = api.get_block('interface Ethernet1')
+            txtstr = api.get_block('interface Ethernet1', config=config)
+            self.assertEqual(running, txtstr)
+
+    def test_get_block_none(self):
+        # Verify get_block using a config string where match fails returns None
+        for dut in self.duts:
+            api = dut.api('interfaces')
+            txtstr = api.get_block('interface Ethernet1', config='config')
+            self.assertEqual(txtstr, None)
+
 
 class TestNode(unittest.TestCase):
 

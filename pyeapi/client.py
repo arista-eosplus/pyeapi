@@ -536,7 +536,8 @@ class Node(object):
         Returns:
             The configuration section as a string object.
         """
-        config = getattr(self, config)
+        if config in ['running_config', 'startup_config']:
+            config = getattr(self, config)
         match = re.search(regex, config, re.M)
         if not match:
             raise TypeError('config section not found')
