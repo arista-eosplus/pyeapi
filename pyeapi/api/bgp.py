@@ -161,12 +161,16 @@ class Bgp(Entity):
         return self.configure_bgp(cmd)
 
     def add_network(self, prefix, length, route_map=None):
+        if prefix == '' or length == '':
+            raise ValueError('network prefix/length values may not be null')
         cmd = 'network {}/{}'.format(prefix, length)
         if route_map:
             cmd += ' route-map {}'.format(route_map)
         return self.configure_bgp(cmd)
 
     def remove_network(self, prefix, masklen, route_map=None):
+        if prefix == '' or masklen == '':
+            raise ValueError('network prefix/masklen values may not be null')
         cmd = 'no network {}/{}'.format(prefix, masklen)
         if route_map:
             cmd += ' route-map {}'.format(route_map)
