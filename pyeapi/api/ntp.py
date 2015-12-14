@@ -53,7 +53,7 @@ class Ntp(Entity):
     def get(self):
         """Returns the current NTP configuration
 
-        The Ntp resourc returns the following:
+        The Ntp resource returns the following:
 
             * source_interface (str): The interface port that specifies
                                       NTP server
@@ -65,7 +65,7 @@ class Ntp(Entity):
 
         Returns:
             A Python dictionary object of key/value pairs that represents
-            the current NTP configuration of the node.
+            the current NTP configuration of the node::
 
                 {
                     "source_interface": 'Loopback0',
