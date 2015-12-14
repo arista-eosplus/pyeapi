@@ -80,10 +80,22 @@ class TestApiBgp(EapiConfigUnitTest):
         cmds = ['router bgp 65000', 'network 172.16.10.1/24 route-map test']
         self.eapi_positive_config_test(func, cmds)
 
+        func = function('add_network', '', '24', 'test')
+        self.eapi_exception_config_test(func, ValueError)
+
+        func = function('add_network', '172.16.10.1', '', 'test')
+        self.eapi_exception_config_test(func, ValueError)
+
     def test_remove_network(self):
         func = function('remove_network', '172.16.10.1', '24', 'test')
         cmds = ['router bgp 65000', 'no network 172.16.10.1/24 route-map test']
         self.eapi_positive_config_test(func, cmds)
+
+        func = function('remove_network', '', '24', 'test')
+        self.eapi_exception_config_test(func, ValueError)
+
+        func = function('remove_network', '172.16.10.1', '', 'test')
+        self.eapi_exception_config_test(func, ValueError)
 
     def test_set_router_id(self):
         for state in ['config', 'negate', 'default']:
