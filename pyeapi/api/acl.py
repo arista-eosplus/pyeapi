@@ -136,9 +136,11 @@ class StandardAcls(EntityCollection):
         cmds.append('exit')
         return self.configure(cmds)
 
-    def add_entry(self, name, action, addr, prefixlen, log=False):
+    def add_entry(self, name, action, addr, prefixlen, log=False, seqno=None):
         cmds = ['ip access-list standard %s' % name]
         entry = '%s %s/%s' % (action, addr, prefixlen)
+        if seqno is not None:
+            entry = '%s %s' % (seqno, entry)
         if log:
             entry += ' log'
         cmds.append(entry)
