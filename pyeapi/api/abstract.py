@@ -96,7 +96,7 @@ class BaseEntity(object):
         except TypeError:
             return None
 
-    def configure(self, commands):
+    def configure(self, commands, stdin=False):
         """Sends the commands list to the node in config mode
 
         This method performs configuration the node using the array of
@@ -117,7 +117,10 @@ class BaseEntity(object):
                 False is returned
         """
         try:
-            self.node.config(commands)
+            if stdin:
+               self.node.config_with_input(commands)
+            else:
+               self.node.config(commands)
             return True
         except (CommandError, ConnectionError):
             return False

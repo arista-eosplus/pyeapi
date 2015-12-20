@@ -130,7 +130,27 @@ class System(Entity):
         cmd = self.command_builder('ip routing', value=value, default=default,
                                    disable=disable)
         return self.configure(cmd)
+     
+    def set_banner(self, banner_type, value=None, default=False):
+        """Configures the state of global ip routing
 
+        Args:
+            banner_type(str): banner to be changed (likely either login or motd) 
+            value(str): value to set for the banner 
+            default (bool): Controls the use of the default keyword
+
+        Returns:
+            bool: True if the commands completed successfully otherwise False
+        """
+
+        command_string = "banner %s" % banner_type
+        if default is True:
+           cmd = self.command_builder(command_string, value=None, default=default)
+           return self.configure(cmd)
+        else:
+           command_input = dict(command=command_string, value=value)
+           return self.configure(command_input, True)
+         
 
 def instance(api):
     """Returns an instance of System

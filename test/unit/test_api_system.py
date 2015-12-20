@@ -79,8 +79,5 @@ class TestApiSystem(EapiConfigUnitTest):
                 func = function('set_iprouting', default=True)
             self.eapi_positive_config_test(func, cmds)
 
-
-
-
 if __name__ == '__main__':
     unittest.main()

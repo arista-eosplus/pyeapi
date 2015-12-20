@@ -522,6 +522,44 @@ class Node(object):
         response.pop(0)
 
         return response
+    def config_with_input(self, commands):
+        """Configures the node with a command that would normally take stdin
+           
+           This method will send a configuration change to the node for commands
+           to use std input.  Banners are an example of such a configuration.  
+           It will take a dictionary where the key is the command and the value 
+           would be entered as if it where coming from standard input
+
+           Args:
+               commands(dict or list): the dict should have a key of command 
+               and value.  Where command is configuration item to change with 
+               string set for the key value.  
+               These commands will be constructed into the 
+               correct form to be sent to node to make the desired config 
+               changes.   The function will preprend the required commands
+               to put the session in config mode
+ 
+          Returns:
+              The config method will return a list of dictionaries with 
+              the ouptut from each command
+        """ 
+        command_list = [] 
+        command_list.append('configure terminal')
+        if isinstance(commands, list):
+            for com in commands:
+                command_list.append({'cmd': com['command'], 'input': com['value']})  
+        else:
+            command_list.append({'cmd': commands['command'], 'input': commands['value']})
+            
+ 
+        response = self.run_commands(command_list)
+         
+        if self.autorefresh:
+            self.refresh()
+
+        response.pop(0)
+
+        return response
 
     def section(self, regex, config='running_config'):
         """Returns a section of the config
