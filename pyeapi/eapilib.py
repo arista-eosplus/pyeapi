@@ -367,14 +367,17 @@ class EapiConnection(object):
                 self.transport.putheader('Authorization',
                                          'Basic %s' % (self._auth))
 
-            self.transport.endheaders()
             if int(sys.version[0]) > 2:
                 # For Python 3.x compatibility
                 data = data.encode()
 
-            self.transport.send(data)
+            self.transport.endheaders(message_body=data)
 
-            response = self.transport.getresponse()
+            try:  # Python 2.7: use buffering of HTTP responses
+                response = self.transport.getresponse(buffering=True)
+            except TypeError:  # Python 2.6: older, and 3.x on
+                response = self.transport.getresponse()
+
             response_content = response.read()
             _LOGGER.debug("Response: status: {status}, reason: {reason}".format(
                           status=response.status,
