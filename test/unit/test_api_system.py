@@ -48,7 +48,7 @@ class TestApiSystem(EapiConfigUnitTest):
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        keys = ['hostname', 'iprouting']
+        keys = ['hostname', 'iprouting', 'banner_motd', 'banner_login']
         result = self.instance.get()
         self.assertEqual(sorted(keys), sorted(list(result.keys())))
 

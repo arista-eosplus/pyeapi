@@ -67,6 +67,8 @@ class System(Entity):
         resource = dict()
         resource.update(self._parse_hostname())
         resource.update(self._parse_iprouting())
+        resource.update(self._parse_banners())
+
         return resource
 
     def _parse_hostname(self):
@@ -91,6 +93,27 @@ class System(Entity):
         """
         value = 'no ip routing' not in self.config
         return dict(iprouting=value)
+
+    def _parse_banners(self):
+        """Parses the global config and returns the value for both motd
+            and login banners.   
+
+        Returns:
+           dict: The configure value for modtd and login banners. If the 
+                  banner is not set it will return a value of None for that
+                  key. The returned dict object is intendd to be merged 
+                  into the resource dict
+        """
+        motd_value = login_value = None 
+        matches = re.findall('^banner ([a-z]*[A-Z]*[0-9]*\n)(.*?)EOF', self.config, 
+                             re.DOTALL | re.M)
+        for match in matches:
+            if match[0].strip() == "motd":
+                motd_value = match[1].strip()
+            elif match[0].strip() == "login":
+                login_value = match[1].strip()
+              
+        return dict(banner_motd=motd_value, banner_login=login_value)
 
     def set_hostname(self, value=None, default=False, disable=False):
         """Configures the global system hostname setting
@@ -131,21 +154,23 @@ class System(Entity):
                                    disable=disable)
         return self.configure(cmd)
      
-    def set_banner(self, banner_type, value=None, default=False):
-        """Configures the state of global ip routing
+    def set_banner(self, banner_type, value=None, default=False, disable=False):
+        """Configures system banners 
 
         Args:
             banner_type(str): banner to be changed (likely either login or motd) 
             value(str): value to set for the banner 
             default (bool): Controls the use of the default keyword
+            disable (bool): Controls the use of the no keyword`
 
         Returns:
             bool: True if the commands completed successfully otherwise False
         """
 
         command_string = "banner %s" % banner_type
-        if default is True:
-           cmd = self.command_builder(command_string, value=None, default=default)
+        if default is True or disable is True:
+           cmd = self.command_builder(command_string, value=None, default=default,
+                                      disable=disable)
            return self.configure(cmd)
         else:
            command_input = dict(command=command_string, value=value)
