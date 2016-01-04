@@ -75,6 +75,8 @@ class EapiConfigUnitTest(unittest.TestCase):
 
         self.mock_config = Mock(name='node.config')
         self.node.config = self.mock_config
+        self.mock_config_with_input = Mock(name='node.conifg_with_input')
+        self.node.config_with_input = self.mock_config_with_input
 
         self.mock_enable = Mock(name='node.enable')
         self.node.enable = self.mock_enable
@@ -82,35 +84,48 @@ class EapiConfigUnitTest(unittest.TestCase):
         self.assertIsNotNone(self.instance)
         self.instance.node = self.node
 
-    def eapi_config_test(self, func, cmds=None, *args, **kwargs):
+    def eapi_config_test(self, func, stdin=False, cmds=None, *args, **kwargs):
         func, fargs, fkwargs = func
         func = getattr(self.instance, func)
 
         if cmds is not None:
             lcmds = len([cmds]) if isinstance(cmds, str) else len(cmds)
-            self.mock_config.return_value = [{} for i in range(0, lcmds)]
+            if not stdin:
+                self.mock_config.return_value = [{} for i in range(0, lcmds)]
+            else:
+                self.mock_config_with_input.return_value = [{} for i in range(0, lcmds)]
 
         result = func(*fargs, **fkwargs)
 
         if cmds is not None:
-            self.node.config.assert_called_with(cmds)
+            if not stdin:
+                self.node.config.assert_called_with(cmds)
+            else:
+                self.node.config_with_input.assert_called_with(cmds)
         else:
-            self.assertEqual(self.node.config.call_count, 0)
+            if not stdin:    
+                self.assertEqual(self.node.config.call_count, 0)
+            else:
+                self.assertEqual(self.node.config_with_input.call_count, 0)
 
         return result
 
     def eapi_positive_config_test(self, func, cmds=None, *args, **kwargs):
-        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+        result = self.eapi_config_test(func, False, cmds, *args, **kwargs)
         self.assertTrue(result)
 
     def eapi_negative_config_test(self, func, cmds=None, *args, **kwargs):
-        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+        result = self.eapi_config_test(func, False, cmds, *args, **kwargs)
         self.assertFalse(result)
 
     def eapi_exception_config_test(self, func, exc, *args, **kwargs):
         with self.assertRaises(exc):
-            self.eapi_config_test(func, *args, **kwargs)
+            self.eapi_config_test(func, False, *args, **kwargs)
 
+    def eapi_positive_config_with_input_test(self, func, cmds=None, 
+                                             *args, **kwargs):
+        result = self.eapi_config_test(func, True, cmds, *args, **kwargs)
+        self.assertTrue(result)
 
 
 

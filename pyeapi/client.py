@@ -550,8 +550,7 @@ class Node(object):
                 command_list.append({'cmd': com['command'], 'input': com['value']})  
         else:
             command_list.append({'cmd': commands['command'], 'input': commands['value']})
-            
- 
+        
         response = self.run_commands(command_list)
          
         if self.autorefresh:
