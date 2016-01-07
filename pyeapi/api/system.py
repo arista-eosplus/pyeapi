@@ -174,7 +174,7 @@ class System(Entity):
            return self.configure(cmd)
         else:
            command_input = dict(command=command_string, value=value)
-           return self.configure(command_input, True)
+           return self.configure(command_input)
          
 
 def instance(api):

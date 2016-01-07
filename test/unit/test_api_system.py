@@ -86,7 +86,7 @@ class TestApiSystem(EapiConfigUnitTest):
          func = function('set_banner', banner_type='motd', 
                          value=banner_value)
          cmds = dict(command='banner motd', value=banner_value) 
-         self.eapi_positive_config_with_input_test(func, cmds) 
+         self.eapi_positive_config_test(func, cmds) 
     def test_set_banner_default_disable(self):
          func = function('set_banner', banner_type='motd', 
                          value=None, default=True)
