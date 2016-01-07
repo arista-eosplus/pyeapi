@@ -273,7 +273,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         self.assertEqual(values, result)
 
     def test_set_minimum_links_with_value(self):
-        minlinks = random_int(0, 16)
+        minlinks = random_int(1, 16)
         cmds = ['interface Port-Channel1',
                 'port-channel min-links %s' % minlinks]
         func = function('set_minimum_links', 'Port-Channel1', minlinks)
