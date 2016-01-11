@@ -92,12 +92,6 @@ class TestNode(unittest.TestCase):
         self.node.run_commands = Mock(return_value=[{}, {}, {}])
         result = self.node.config(commands)
         self.assertEqual(result, [{}, {}])
-   
-    def test_config_with_input(self):
-        command = dict(command=random_string(), value=random_string())
-        self.node.run_commands = Mock(return_value=[{}, {}])
-        result = self.node.config_with_input(command)
-        self.assertEqual(result, [{}])
 
     def test_get_config(self):
         config = [dict(output='test\nconfig')]
