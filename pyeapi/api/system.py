@@ -105,13 +105,13 @@ class System(Entity):
                   into the resource dict
         """
         motd_value = login_value = None 
-        matches = re.findall('^banner ([a-z]*[A-Z]*[0-9]*\n)(.*?)EOF', self.config, 
+        matches = re.findall('^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n', self.config, 
                              re.DOTALL | re.M)
         for match in matches:
             if match[0].strip() == "motd":
-                motd_value = match[1].strip()
+                motd_value = match[1]
             elif match[0].strip() == "login":
-                login_value = match[1].strip()
+                login_value = match[1]
               
         return dict(banner_motd=motd_value, banner_login=login_value)
 
@@ -173,8 +173,10 @@ class System(Entity):
                                       disable=disable)
            return self.configure(cmd)
         else:
-           command_input = dict(command=command_string, value=value)
-           return self.configure(command_input)
+           if not value.endswith("\n"):
+               value = value + "\n"
+           command_input = dict(cmd=command_string, input=value)
+           return self.configure([command_input])
          
 
 def instance(api):

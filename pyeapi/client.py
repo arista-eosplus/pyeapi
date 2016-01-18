@@ -498,14 +498,9 @@ class Node(object):
         to put the session into config mode.
 
         Args:
-            commands (str, list, dict): The commands to send to the node in config
+            commands (str, list): The commands to send to the node in config
                 mode.  If the commands argument is a string it will be cast to
                 a list. 
-                They dict type should be used for commands that use 
-                stdin.  The expected format is:
-                   command: <configuration string>
-                   value:   <configuration value to set>
-                    
                 The list of commands will also be prepended with the
                 necessary commands to put the session in config mode.
 
@@ -515,17 +510,7 @@ class Node(object):
                 response from any commands it prepends.
         """
         commands = make_iterable(commands)
-        if type(commands) is dict:
-            commands = [commands]
-        else:
-            commands = list(commands)
-        for idx, command in enumerate(commands):
-            if 'value' in command:
-                try:
-                    commands[idx] = {'cmd': command["command"], 'input': command["value"]}
-                except TypeError:
-                    #continue if the string 'value' is found but not as a key in a dict
-                    continue 
+        commands = list(commands)
         
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
