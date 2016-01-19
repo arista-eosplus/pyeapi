@@ -637,6 +637,14 @@ class Node(object):
         """
         commands = make_iterable(commands)
 
+        # Some commands are multiline commands. These are banner commands and SSL commands. So with this two lines we
+        # can support those by passing commands by doing:
+        # banner login MULTILINE: This is my banner.\nAnd I even support multiple lines.
+        # Why this? To be able to read a configuration from a file, split it into lines and pass it as it is
+        # to pyeapi without caring about multiline commands.
+        commands = [{'cmd': c.split('MULTILINE:')[0], 'input': c.split('MULTILINE:')[1]}
+                    if 'MULTILINE:' in c else c for c in commands]
+
         if self._enablepwd:
             commands.insert(0, {'cmd': 'enable', 'input': self._enablepwd})
         else:
