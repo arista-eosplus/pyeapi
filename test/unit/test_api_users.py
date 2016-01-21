@@ -89,6 +89,10 @@ class TestApiUsers(EapiConfigUnitTest):
             self.instance.create_with_secret('test', 'test', 'test')
 
     def test_delete(self):
+        with self.assertRaises(TypeError):
+            self.instance.delete('admin')
+
+    def test_delete_admin_exception(self):
         cmds = 'no username test'
         func = function('delete', 'test')
         self.eapi_positive_config_test(func, cmds)
