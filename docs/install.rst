@@ -121,6 +121,13 @@ code in the develop branch.
   # Install
   admin:~ admin$ sudo pip install -e ~/projects/pyeapi
 
+**Step 4:** Install pyeapi requirements
+
+.. code-block:: console
+
+  # Go to a directory where you'd like to keep the source
+  admin:~ admin$ pip install -r dev-requirements.txt
+
 .. Tip:: If you start using pyeapi and get import errors, make sure your
          PYTHONPATH is set to include the path to pyeapi.
 
