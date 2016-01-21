@@ -155,6 +155,23 @@ class TestClient(unittest.TestCase):
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config.sections())
 
+    def test_load_config_empty_conf(self):
+        conf = get_fixture('empty.conf')
+        pyeapi.client.load_config(filename=conf)
+        conns = pyeapi.client.config.connections
+        self.assertEqual(conns, ['localhost'])
+
+    def test_load_config_yaml(self):
+        conf = get_fixture('eapi.conf.yaml')
+        pyeapi.client.load_config(filename=conf)
+        conns = pyeapi.client.config.connections
+        self.assertEqual(conns, ['localhost'])
+
+    def test_load_config_env_path(self):
+        os.environ['EAPI_CONF'] = get_fixture('env_path.conf')
+        pyeapi.client.config.autoload()
+        self.assertIn('connection:env_path', pyeapi.client.config.sections())
+
     def test_config_always_has_default_connection(self):
         conf = '/invalid.conf'
         pyeapi.client.load_config(conf)

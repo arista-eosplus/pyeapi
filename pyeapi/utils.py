@@ -139,7 +139,7 @@ def islocalconnection():
     return os.path.exists('/etc/Eos-release')
 
 def debug(text):
-    """Prints test to syslog when on a local connection
+    """Prints text to syslog when on a local connection
 
     Args:
         text (str): The string object to print to syslog
@@ -231,4 +231,3 @@ def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
         else:
             values.extend([v1])
     return [str(x) for x in values]
-

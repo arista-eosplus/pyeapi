@@ -98,11 +98,12 @@ try:
     # Try Python 3.x import first
     # Note: SafeConfigParser is deprecated and replaced by ConfigParser
     from configparser import ConfigParser as SafeConfigParser
+    from configparser import MissingSectionHeaderError
 except ImportError:
     # Use Python 2.7 import as a fallback
-    from ConfigParser import SafeConfigParser
+    from ConfigParser import SafeConfigParser, MissingSectionHeaderError
 
-from pyeapi.utils import load_module, make_iterable
+from pyeapi.utils import load_module, make_iterable, debug
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
@@ -191,7 +192,12 @@ class Config(SafeConfigParser):
         Args:
             filename (str): The full path to the file to load
         """
-        SafeConfigParser.read(self, filename)
+        try:
+            SafeConfigParser.read(self, filename)
+        except MissingSectionHeaderError:
+            # Ignore file and log message on MissingSectionHeaderError
+            debug("File contains no section headers: in eapi conf file: %s" %
+                  filename)
 
         self._add_default_connection()
 
