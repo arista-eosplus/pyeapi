@@ -103,7 +103,7 @@ except ImportError:
     # Use Python 2.7 import as a fallback
     from ConfigParser import SafeConfigParser, MissingSectionHeaderError
 
-from pyeapi.utils import load_module, make_iterable, debug
+from pyeapi.utils import load_module, make_iterable, syslog_warning
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
@@ -196,8 +196,8 @@ class Config(SafeConfigParser):
             SafeConfigParser.read(self, filename)
         except MissingSectionHeaderError:
             # Ignore file and log message on MissingSectionHeaderError
-            debug("File contains no section headers: in eapi conf file: %s" %
-                  filename)
+            syslog_warning("%s: File contains no section headers: in eapi "
+                           "conf file: %s" % (__name__, filename))
 
         self._add_default_connection()
 

@@ -47,7 +47,8 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-_syslog_handler = logging.handlers.SysLogHandler()
+_syslog_handler = logging.handlers.SysLogHandler(address='/var/run/syslog',
+                                                 facility='local1')
 _LOGGER.addHandler(_syslog_handler)
 _LOGGER.setLevel(logging.INFO)
 
@@ -148,6 +149,16 @@ def debug(text):
 
     if islocalconnection():
         _LOGGER.debug(text)
+
+def syslog_warning(text):
+    """Print text to syslog at warning level
+
+    Args:
+        text (str): The string object to print to syslog
+
+    """
+
+    _LOGGER.warn(text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
