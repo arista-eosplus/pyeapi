@@ -34,6 +34,7 @@ import sys
 import imp
 import logging
 import logging.handlers
+import syslog
 import collections
 
 from itertools import tee
@@ -47,7 +48,7 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-_syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
+_syslog_handler = logging.handlers.SysLogHandler()
 _LOGGER.addHandler(_syslog_handler)
 _LOGGER.setLevel(logging.INFO)
 
@@ -157,7 +158,8 @@ def syslog_warning(text):
 
     """
 
-    _LOGGER.warn(text)
+    syslog.openlog("pyeapi")
+    syslog.syslog(syslog.LOG_WARNING, text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
