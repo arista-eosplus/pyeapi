@@ -34,7 +34,6 @@ import sys
 import imp
 import logging
 import logging.handlers
-import syslog
 import collections
 
 from itertools import tee
@@ -48,8 +47,7 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-_syslog_handler = logging.handlers.SysLogHandler(address='/var/run/syslog',
-                                                 facility=syslog.LOG_LOCAL1)
+_syslog_handler = logging.handlers.SysLogHandler(address='/var/run/syslog')
 _LOGGER.addHandler(_syslog_handler)
 _LOGGER.setLevel(logging.INFO)
 
