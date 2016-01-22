@@ -47,7 +47,7 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-_syslog_handler = logging.handlers.SysLogHandler()
+_syslog_handler = logging.handlers.SysLogHandler(address="/dev/log")
 _LOGGER.addHandler(_syslog_handler)
 _LOGGER.setLevel(logging.INFO)
 
