@@ -211,6 +211,9 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
+        if name == 'admin':
+            raise TypeError('the admin user cannot be deleted.')
+
         return self.configure('no username %s' % name)
 
     def default(self, name):
