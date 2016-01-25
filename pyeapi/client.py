@@ -500,7 +500,8 @@ class Node(object):
         Args:
             commands (str, list): The commands to send to the node in config
                 mode.  If the commands argument is a string it will be cast to
-                a list.  The list of commands will also be prepended with the
+                a list. 
+                The list of commands will also be prepended with the
                 necessary commands to put the session in config mode.
 
         Returns:
@@ -510,7 +511,7 @@ class Node(object):
         """
         commands = make_iterable(commands)
         commands = list(commands)
-
+        
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
         response = self.run_commands(commands)

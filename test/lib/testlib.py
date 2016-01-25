@@ -111,6 +111,10 @@ class EapiConfigUnitTest(unittest.TestCase):
         with self.assertRaises(exc):
             self.eapi_config_test(func, *args, **kwargs)
 
+    def eapi_positive_config_with_input_test(self, func, cmds=None, 
+                                             *args, **kwargs):
+        result = self.eapi_config_test(func, cmds, *args, **kwargs)
+        self.assertTrue(result)
 
 
 
