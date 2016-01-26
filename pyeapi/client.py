@@ -98,11 +98,13 @@ try:
     # Try Python 3.x import first
     # Note: SafeConfigParser is deprecated and replaced by ConfigParser
     from configparser import ConfigParser as SafeConfigParser
+    from configparser import Error as SafeConfigParserError
 except ImportError:
     # Use Python 2.7 import as a fallback
     from ConfigParser import SafeConfigParser
+    from ConfigParser import Error as SafeConfigParserError
 
-from pyeapi.utils import load_module, make_iterable
+from pyeapi.utils import load_module, make_iterable, syslog_warning
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
@@ -191,7 +193,12 @@ class Config(SafeConfigParser):
         Args:
             filename (str): The full path to the file to load
         """
-        SafeConfigParser.read(self, filename)
+        try:
+            SafeConfigParser.read(self, filename)
+        except SafeConfigParserError as exc:
+            # Ignore file and syslog a message on SafeConfigParser errors
+            syslog_warning("%s: parsing error in eapi conf file: %s" %
+                           (type(exc).__name__, filename))
 
         self._add_default_connection()
 
