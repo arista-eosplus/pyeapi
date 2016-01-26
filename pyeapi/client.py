@@ -196,9 +196,9 @@ class Config(SafeConfigParser):
         try:
             SafeConfigParser.read(self, filename)
         except SafeConfigParserError as exc:
-            # Ignore file and log message on MissingSectionHeaderError
-            syslog_warning("%s: File contains no section headers: in eapi "
-                           "conf file: %s" % (type(exc).__name__, filename))
+            # Ignore file and syslog a message on SafeConfigParser errors
+            syslog_warning("%s: parsing error in eapi conf file: %s" %
+                           (type(exc).__name__, filename))
 
         self._add_default_connection()
 
