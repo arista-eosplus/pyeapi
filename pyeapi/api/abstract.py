@@ -129,13 +129,14 @@ class BaseEntity(object):
             Negating a command string by overriding 'value' with None or an
                 assigned value that evalutates to false has been deprecated.
                 Please use 'disable' to negate a command.
+
             Parameters are evaluated in the order 'default', 'disable', 'value'
 
         Args:
             string (str): The command string
-            value: The configuration setting to subsititue into the command
-                string.  If value is a boolean and True, just the command
-                string is used
+            value (str): The configuration setting to subsititue into the
+                command string. If value is a boolean and True, just the
+                command string is used
             default (bool): Specifies the command should use the default
                 keyword argument. Default preempts disable and value.
             disable (bool): Specifies the command should use the no

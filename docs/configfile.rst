@@ -34,18 +34,20 @@ The following configuration options are available for defining node entries:
 
 :transport: Configures the type of transport connection to use. Valid
   values are:
-    - socket (default, available in EOS 4.14.5 or later)
-    - http_local (available in EOS 4.14.5 or later)
-    - http
-    - https
+
+      - socket (default, available in EOS 4.14.5 or later)
+      - http_local (available in EOS 4.14.5 or later)
+      - http
+      - https
 
 :port: Configures the port to use for the eAPI connection.  A default
-  port is used if this parameter is absent, based on the transport setting
-  using the following values:
-    - transport: http, default port: 80
-    - transport: https, deafult port: 443
-    - transport: http_local, default port: 8080
-    - transport: socket, default port: n/a
+    port is used if this parameter is absent, based on the transport setting
+    using the following values:
+
+      - transport: http, default port: 80
+      - transport: https, deafult port: 443
+      - transport: http_local, default port: 8080
+      - transport: socket, default port: n/a
 
 *********************************
 When is an eapi.conf file needed?
