@@ -82,21 +82,21 @@ class TestApiSystem(EapiConfigUnitTest):
             self.eapi_positive_config_test(func, cmds)
 
     def test_set_banner(self):
-         banner_value = random_string() + "\n"
-         func = function('set_banner', banner_type='motd', 
-                         value=banner_value)
-         cmds = [dict(cmd='banner motd', input=banner_value)]
-         self.eapi_positive_config_test(func, cmds) 
+        banner_value = random_string() + "\n"
+        func = function('set_banner', banner_type='motd',
+                        value=banner_value)
+        cmds = [dict(cmd='banner motd', input=banner_value)]
+        self.eapi_positive_config_test(func, cmds)
 
     def test_set_banner_default_disable(self):
-         func = function('set_banner', banner_type='motd', 
-                         value=None, default=True)
-         cmds = 'default banner motd'
-         self.eapi_positive_config_test(func, cmds) 
-         func = function('set_banner', banner_type='motd', 
-                         value=None, disable=True)
-         cmds = 'no banner motd'
-         self.eapi_positive_config_test(func, cmds)
+        func = function('set_banner', banner_type='motd',
+                        value=None, default=True)
+        cmds = 'default banner motd'
+        self.eapi_positive_config_test(func, cmds)
+        func = function('set_banner', banner_type='motd',
+                        value=None, disable=True)
+        cmds = 'no banner motd'
+        self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()

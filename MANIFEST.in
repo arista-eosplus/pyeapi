@@ -12,6 +12,12 @@ recursive-include test *.portchannel
 recursive-include test *.py
 recursive-include test *.text
 recursive-include test *.vxlan
+recursive-include test *.bgp
+recursive-include test *.routemaps
+recursive-include test *.varp
+recursive-include test *.varp_null
+recursive-include test *.vrrp
+recursive-include test *.yaml
 recursive-include docs description.rst
 recursive-include docs *.py
 recursive-include docs *.rst

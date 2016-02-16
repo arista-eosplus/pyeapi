@@ -744,8 +744,8 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'mac_addr_adv_interval' must be"
-                                 "in the range 1-3600")
+                raise ValueError("vrrp property 'mac_addr_adv_interval' must "
+                                 "be in the range 1-3600")
 
         cmd = self.command_builder('vrrp %d mac-address advertisement-interval'
                                    % vrid, value=value, default=default,

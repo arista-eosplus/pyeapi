@@ -96,23 +96,23 @@ class System(Entity):
 
     def _parse_banners(self):
         """Parses the global config and returns the value for both motd
-            and login banners.   
+            and login banners.
 
         Returns:
-           dict: The configure value for modtd and login banners. If the 
+           dict: The configure value for modtd and login banners. If the
                   banner is not set it will return a value of None for that
-                  key. The returned dict object is intendd to be merged 
+                  key. The returned dict object is intendd to be merged
                   into the resource dict
         """
-        motd_value = login_value = None 
-        matches = re.findall('^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n', self.config, 
-                             re.DOTALL | re.M)
+        motd_value = login_value = None
+        matches = re.findall('^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n',
+                             self.config, re.DOTALL | re.M)
         for match in matches:
             if match[0].strip() == "motd":
                 motd_value = match[1]
             elif match[0].strip() == "login":
                 login_value = match[1]
-              
+
         return dict(banner_motd=motd_value, banner_login=login_value)
 
     def set_hostname(self, value=None, default=False, disable=False):
@@ -153,13 +153,14 @@ class System(Entity):
         cmd = self.command_builder('ip routing', value=value, default=default,
                                    disable=disable)
         return self.configure(cmd)
-     
-    def set_banner(self, banner_type, value=None, default=False, disable=False):
-        """Configures system banners 
+
+    def set_banner(self, banner_type, value=None, default=False,
+                   disable=False):
+        """Configures system banners
 
         Args:
-            banner_type(str): banner to be changed (likely either login or motd) 
-            value(str): value to set for the banner 
+            banner_type(str): banner to be changed (likely login or motd)
+            value(str): value to set for the banner
             default (bool): Controls the use of the default keyword
             disable (bool): Controls the use of the no keyword`
 
@@ -169,15 +170,15 @@ class System(Entity):
 
         command_string = "banner %s" % banner_type
         if default is True or disable is True:
-           cmd = self.command_builder(command_string, value=None, default=default,
-                                      disable=disable)
-           return self.configure(cmd)
+            cmd = self.command_builder(command_string, value=None,
+                                       default=default, disable=disable)
+            return self.configure(cmd)
         else:
-           if not value.endswith("\n"):
-               value = value + "\n"
-           command_input = dict(cmd=command_string, input=value)
-           return self.configure([command_input])
-         
+            if not value.endswith("\n"):
+                value = value + "\n"
+            command_input = dict(cmd=command_string, input=value)
+            return self.configure([command_input])
+
 
 def instance(api):
     """Returns an instance of System

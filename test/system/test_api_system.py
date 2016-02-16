@@ -64,9 +64,9 @@ class TestApiSystem(DutSystemTest):
     def test_get_check_banners(self):
         for dut in self.duts:
             motd_banner_value = random_string() + "\n"
-            login_banner_value = random_string() + "\n" 
-            dut.config([dict(cmd="banner motd",input=motd_banner_value)])
-            dut.config([dict(cmd="banner login",input=login_banner_value)])
+            login_banner_value = random_string() + "\n"
+            dut.config([dict(cmd="banner motd", input=motd_banner_value)])
+            dut.config([dict(cmd="banner login", input=login_banner_value)])
             resp = dut.api('system').get()
             self.assertEqual(resp['banner_login'], login_banner_value.rstrip())
             self.assertEqual(resp['banner_motd'], motd_banner_value.rstrip())
@@ -150,8 +150,8 @@ class TestApiSystem(DutSystemTest):
     def test_set_banner_motd(self):
         for dut in self.duts:
             banner_value = random_string()
-            dut.config([dict(cmd="banner motd", 
-                            input=banner_value)])
+            dut.config([dict(cmd="banner motd",
+                             input=banner_value)])
             self.assertIn(banner_value, dut.running_config)
             banner_api_value = random_string()
             resp = dut.api('system').set_banner("motd", banner_api_value)
@@ -191,16 +191,16 @@ class TestApiSystem(DutSystemTest):
 
     def test_set_banner_motd_default(self):
         for dut in self.duts:
-            dut.config([dict(cmd="banner motd", 
-                            input="!!!!REMOVE BANNER TEST!!!!")])
-            resp = dut.api('system').set_banner('motd', None, True)
+            dut.config([dict(cmd="banner motd",
+                             input="!!!!REMOVE BANNER TEST!!!!")])
+            dut.api('system').set_banner('motd', None, True)
             self.assertIn('no banner motd', dut.running_config)
 
     def test_set_banner_login(self):
         for dut in self.duts:
             banner_value = random_string()
-            dut.config([dict(cmd="banner login", 
-                            input=banner_value)])
+            dut.config([dict(cmd="banner login",
+                             input=banner_value)])
             self.assertIn(banner_value, dut.running_config)
             banner_api_value = random_string()
             resp = dut.api('system').set_banner("login", banner_api_value)
@@ -211,16 +211,16 @@ class TestApiSystem(DutSystemTest):
 
     def test_set_banner_login_default(self):
         for dut in self.duts:
-            dut.config([dict(cmd="banner login", 
-                            input="!!!!REMOVE LOGIN BANNER TEST!!!!")])
-            resp = dut.api('system').set_banner('login', None, True)
+            dut.config([dict(cmd="banner login",
+                             input="!!!!REMOVE LOGIN BANNER TEST!!!!")])
+            dut.api('system').set_banner('login', None, True)
             self.assertIn('no banner login', dut.running_config)
-   
+
     def test_set_banner_login_negate(self):
         for dut in self.duts:
-            dut.config([dict(cmd="banner login", 
-                            input="!!!!REMOVE LOGIN BANNER TEST!!!!")])
-            resp = dut.api('system').set_banner('login', None, False, True)
+            dut.config([dict(cmd="banner login",
+                             input="!!!!REMOVE LOGIN BANNER TEST!!!!")])
+            dut.api('system').set_banner('login', None, False, True)
             self.assertIn('no banner login', dut.running_config)
 
 

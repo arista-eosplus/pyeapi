@@ -665,7 +665,8 @@ class PortchannelInterface(BaseInterface):
 
         return self.configure(remove_commands + add_commands)
 
-    def set_minimum_links(self, name, value=None, default=False, disable=False):
+    def set_minimum_links(self, name, value=None, default=False,
+                          disable=False):
         """Configures the Port-Channel min-links value
 
         Args:

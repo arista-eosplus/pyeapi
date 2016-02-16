@@ -202,7 +202,7 @@ def expand_range(arg, value_delimiter=',', range_delimiter='-'):
     for item in expanded:
         if range_delimiter in item:
             start, end = item.split(range_delimiter)
-            _expand = range(int(start), int(end)+1)
+            _expand = range(int(start), int(end) + 1)
             values.extend([str(x) for x in _expand])
         else:
             values.extend([item])
