@@ -77,7 +77,8 @@ class Ipinterfaces(EntityCollection):
         """
         config = self.get_block('interface %s' % name)
 
-        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config, re.M):
+        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config,
+                                                                  re.M):
             return None
 
         resource = dict(name=name)

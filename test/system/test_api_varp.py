@@ -36,7 +36,6 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from systestlib import DutSystemTest
-from testlib import random_string
 
 VIRT_NULL = 'no ip virtual-router mac-address'
 VIRT_ENTRY_A = 'ip virtual-router mac-address 00:11:22:33:44:55'

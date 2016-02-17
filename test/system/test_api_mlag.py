@@ -118,20 +118,24 @@ class TestApiMlag(DutSystemTest):
             dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24',
                         'mlag configuration', 'peer-address 1.2.3.4'])
             api = dut.api('mlag')
-            self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
+            self.assertIn('peer-address 1.2.3.4',
+                          api.get_block('mlag configuration'))
             result = api.set_peer_address(disable=True)
             self.assertTrue(result)
-            self.assertIn('no peer-address', api.get_block('mlag configuration'))
+            self.assertIn('no peer-address',
+                          api.get_block('mlag configuration'))
 
     def test_set_peer_address_with_default(self):
         for dut in self.duts:
             dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24',
                         'mlag configuration', 'peer-address 1.2.3.4'])
             api = dut.api('mlag')
-            self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
+            self.assertIn('peer-address 1.2.3.4',
+                          api.get_block('mlag configuration'))
             result = api.set_peer_address(default=True)
             self.assertTrue(result)
-            self.assertIn('no peer-address', api.get_block('mlag configuration'))
+            self.assertIn('no peer-address',
+                          api.get_block('mlag configuration'))
 
     def test_set_peer_link_with_value(self):
         for dut in self.duts:
@@ -140,11 +144,13 @@ class TestApiMlag(DutSystemTest):
             self.assertIn('no peer-link', api.get_block('mlag configuration'))
             result = dut.api('mlag').set_peer_link('Ethernet1')
             self.assertTrue(result)
-            self.assertIn('peer-link Ethernet1', api.get_block('mlag configuration'))
+            self.assertIn('peer-link Ethernet1',
+                          api.get_block('mlag configuration'))
 
     def test_set_peer_link_with_value_portchannel(self):
         for dut in self.duts:
-            dut.config(['default mlag configuration','interface Port-Channel5'])
+            dut.config(['default mlag configuration',
+                        'interface Port-Channel5'])
             api = dut.api('mlag')
             self.assertIn('no peer-link', api.get_block('mlag configuration'))
             result = dut.api('mlag').set_peer_link('Port-Channel5')
@@ -164,7 +170,8 @@ class TestApiMlag(DutSystemTest):
         for dut in self.duts:
             dut.config(['mlag configuration', 'peer-link Ethernet1'])
             api = dut.api('mlag')
-            self.assertIn('peer-link Ethernet1', api.get_block('mlag configuration'))
+            self.assertIn('peer-link Ethernet1',
+                          api.get_block('mlag configuration'))
             result = api.set_peer_link(default=True)
             self.assertTrue(result)
             self.assertIn('no peer-link', api.get_block('mlag configuration'))
@@ -219,7 +226,8 @@ class TestApiMlag(DutSystemTest):
             dut.config(['no interface Port-Channel10',
                         'interface Port-Channel10', 'mlag 100'])
             api = dut.api('mlag')
-            self.assertIn('mlag 100', api.get_block('interface Port-Channel10'))
+            self.assertIn('mlag 100',
+                          api.get_block('interface Port-Channel10'))
             result = api.set_mlag_id('Port-Channel10', disable=True)
             self.assertTrue(result)
             self.assertIn('no mlag', api.get_block('interface Port-Channel10'))
@@ -229,7 +237,8 @@ class TestApiMlag(DutSystemTest):
             dut.config(['no interface Port-Channel10',
                         'interface Port-Channel10', 'mlag 100'])
             api = dut.api('mlag')
-            self.assertIn('mlag 100', api.get_block('interface Port-Channel10'))
+            self.assertIn('mlag 100',
+                          api.get_block('interface Port-Channel10'))
             result = api.set_mlag_id('Port-Channel10', default=True)
             self.assertTrue(result)
             self.assertIn('no mlag', api.get_block('interface Port-Channel10'))

@@ -101,6 +101,7 @@ class TestApiStandardAcls(EapiConfigUnitTest):
         func = function('add_entry', 'test', 'permit', '0.0.0.0',
                         '32', True)
         self.eapi_positive_config_test(func, cmds)
+
     def test_add_entry_with_seqno(self):
         cmds = ['ip access-list standard test', '30 permit 0.0.0.0/32 log', 'exit']
         func = function('add_entry', 'test', 'permit', '0.0.0.0',
@@ -110,5 +111,3 @@ class TestApiStandardAcls(EapiConfigUnitTest):
 
 if __name__ == '__main__':
     unittest.main()
-
-

@@ -124,7 +124,8 @@ class Varp(EntityCollection):
         if not default and not disable:
             if mac_address is not None:
                 # Check to see if mac_address matches expected format
-                if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}', mac_address):
+                if not re.match(r'(?:[a-f0-9]{2}:){5}[a-f0-9]{2}',
+                                mac_address):
                     raise ValueError('mac_address must be formatted like:'
                                      'aa:bb:cc:dd:ee:ff')
             else:
@@ -161,7 +162,8 @@ class VarpInterfaces(EntityCollection):
                 resources[name] = interface_detail
         return resources
 
-    def set_addresses(self, name, addresses=None, default=False, disable=False):
+    def set_addresses(self, name, addresses=None, default=False,
+                      disable=False):
 
         commands = list()
         commands.append('interface %s' % name)

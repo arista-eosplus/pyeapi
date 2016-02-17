@@ -38,34 +38,39 @@ implementations:
     * Vrrp - Configure vrrps in EOS
 
 Vrrp Attributes:
-    enable (boolean): The shutdown state of the vrrp
-    primary_ip (string): The ip address of the vrrp
-    secondary_ip (dict): The secondary ip addresses configured for the vrrp
-                         This is a dictionary in the format
-                            { key: [ list of ip addresses ] }
-                         where key is 'add', 'remove', or 'exists'. 'add' is
-                         used to add the list of secondary ip addresses
-                         to the vrrp. 'remove' will remove the list of
-                         secondary ip addresses from the vrrp. 'exists' is
-                         a report only key for retrieving the current
-                         secondary ip addresses on a vrrp.
-    priority (int): The priority rank of the vrrp
-    description (string): The description for the vrrp
-    ip_version (int): The ip version value for the vrrp
-    timers_advertise (int): The timers advertise setting for the vrrp
-    mac_addr_adv_interval (int): The mac-address advertisement-
-                                              interval setting for the vrrp
-    preempt (boolean): The preempt state of the vrrp
-    preempt_delay_min (int): The preempt delay minimum setting for the vrrp
-    preempt_delay_reload (int): The preempt delay reload setting for the vrrp
-    delay_reload (int): The delay reload setting for the vrrp
-    track (list): The object tracking settings for the vrrp
-    bfd_ip (string): The bfd ip set for the vrrp
+    - enable (boolean): The shutdown state of the vrrp
+    - primary_ip (string): The ip address of the vrrp
+    - secondary_ip (dict): The secondary ip addresses configured for the vrrp
+        This is a dictionary in the format::
+
+            { key: [ list of ip addresses ] }
+
+        where key is 'add', 'remove', or 'exists'. 'add' is
+        used to add the list of secondary ip addresses
+        to the vrrp. 'remove' will remove the list of
+        secondary ip addresses from the vrrp. 'exists' is
+        a report only key for retrieving the current
+        secondary ip addresses on a vrrp.
+
+    - priority (int): The priority rank of the vrrp
+    - description (string): The description for the vrrp
+    - ip_version (int): The ip version value for the vrrp
+    - timers_advertise (int): The timers advertise setting for the vrrp
+    - mac_addr_adv_interval (int): The mac-address advertisement-interval
+        setting for the vrrp
+
+    - preempt (boolean): The preempt state of the vrrp
+    - preempt_delay_min (int): The preempt delay minimum setting for the vrrp
+    - preempt_delay_reload (int): The preempt delay reload setting for the vrrp
+    - delay_reload (int): The delay reload setting for the vrrp
+    - track (list): The object tracking settings for the vrrp
+    - bfd_ip (string): The bfd ip set for the vrrp
 
 Notes:
     The get method will return a dictionary of all the currently configured
     vrrps on a single interface, with the VRID of each vrrp as the keys
-    in the dictionary:
+    in the dictionary::
+
         {
             vrrp1: { data },
             vrrp2: { data },
@@ -73,7 +78,8 @@ Notes:
 
     The getall method will return a dictionary of all the currently configured
     vrrps on the node, with the interface name as the top-level keys, with
-    the VRIDs for each vrrp on an interface as a sub-key of that interface:
+    the VRIDs for each vrrp on an interface as a sub-key of that interface::
+
         {
             interface1: {
                 vrrp1: { data },
@@ -85,7 +91,8 @@ Notes:
             }
         }
 
-    The data for a configured vrrp is a dictionary with the following format:
+    The data for a configured vrrp is a dictionary with the following format::
+
         {
             enable: <True|False>
             primary_ip: <string>
@@ -119,27 +126,30 @@ Notes:
     The create and method accepts a kwargs dictionary which
     defines the properties to be applied to the new or existing vrrp
     configuration. The available keywords and values are as follows:
-        enable: True to enable (no shutdown)|False to disable (shutdown)
-        primary_ip: <ip_string>|no|default|None
-        priority: <int>|no|default|None
-        description: <string>|no|default|None
-        secondary_ip: <dict> may include the following:
-            add: <list of ip address strings>
-            remove: <list of ip address strings>
-        ip_version: <int>|no|default|None
-        timers_advertise: <int>|no|default|None
-        mac_addr_adv_interval: <int>|no|default|None
-        preempt: True to enable (preempt)|False to disable (no preempt)
-        preempt_delay_min: <int>|no|default|None
-        preempt_delay_reload: <int>|no|default|None
-        delay_reload: <int>|no|default|None
-        track: <list> of dicts in the following format:
+
+        - enable: True to enable (no shutdown)|False to disable (shutdown)
+        - primary_ip: <ip_string>|no|default|None
+        - priority: <int>|no|default|None
+        - description: <string>|no|default|None
+        - secondary_ip: <dict> may include the following
+            - add: <list of ip address strings>
+            - remove: <list of ip address strings>
+        - ip_version: <int>|no|default|None
+        - timers_advertise: <int>|no|default|None
+        - mac_addr_adv_interval: <int>|no|default|None
+        - preempt: True to enable (preempt)|False to disable (no preempt)
+        - preempt_delay_min: <int>|no|default|None
+        - preempt_delay_reload: <int>|no|default|None
+        - delay_reload: <int>|no|default|None
+        - track: <list> of dicts in the following format::
+
             {
                 name: <string>
                 action: <shutdown|decrement>
                 amount: <int>|default|no|None
             }
-        bfd_ip: <ip string>|no|default|None
+
+        - bfd_ip: <ip string>|no|default|None
 
 """
 
@@ -422,10 +432,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure
-            If run is False:
-                The formatted command string which can be passed to the node
+            If run is True, returns True if the command executed successfully,
+            error if failure
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -462,10 +473,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -508,10 +520,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -548,10 +561,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -583,10 +597,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -628,10 +643,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -691,10 +707,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -735,17 +752,18 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'mac_addr_adv_interval' must be"
-                                 "in the range 1-3600")
+                raise ValueError("vrrp property 'mac_addr_adv_interval' must "
+                                 "be in the range 1-3600")
 
         cmd = self.command_builder('vrrp %d mac-address advertisement-interval'
                                    % vrid, value=value, default=default,
@@ -777,10 +795,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -817,10 +836,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -858,10 +878,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -899,10 +920,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -941,20 +963,23 @@ class Vrrp(EntityCollection):
             vrid (integer): The vrid number for the vrrp to be managed.
             tracks (list): A list of track definition dictionaries. Each
                 dictionary is a definition of a tracked object in one
-                of the two formats:
+                of the two formats::
+
                     {'name': tracked_object_name,
                      'action': 'shutdown'}
                     {'name': tracked_object_name,
                      'action': 'decrement',
                      'amount': amount_of_decrement}
+
             run (boolean): Set to True to execute the command, False to
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -1086,13 +1111,13 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
-
         if not default and not disable:
             if not re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
                 raise ValueError("vrrp property 'bfd_ip' must be "

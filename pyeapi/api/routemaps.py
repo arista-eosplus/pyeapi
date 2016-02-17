@@ -337,7 +337,7 @@ class Routemaps(EntityCollection):
         """
         commands = ['route-map %s %s %s' % (name, action, seqno)]
         if value is not None:
-            # Before assigning a new description, clear any existing description
+            # Before assigning a new description, clear any existing desc
             commands.append(self.command_builder('description', disable=True))
         commands.append(self.command_builder('description', value=value,
                                              default=default, disable=disable))
