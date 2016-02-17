@@ -16,6 +16,7 @@ Enable EOS Command API
 Refer to your official Arista EOS Configuration Guide to learn how to enable
 EOS Command API. Depending upon your software version, the options available
 include:
+
   - HTTP
   - HTTPS
   - HTTP Local

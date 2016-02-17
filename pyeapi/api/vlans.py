@@ -58,6 +58,7 @@ NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
 TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
 
+
 def isvlan(value):
     """Checks if the argument is a valid VLAN
 
@@ -226,8 +227,7 @@ class Vlans(EntityCollection):
         commands.insert(0, 'vlan %s' % vid)
         return self.configure(commands)
 
-
-    def set_name(self, vid, name=None, default=False):
+    def set_name(self, vid, name=None, default=False, disable=False):
         """ Configures the VLAN name
 
         EosVersion:
@@ -237,14 +237,16 @@ class Vlans(EntityCollection):
             vid (str): The VLAN ID to Configures
             name (str): The value to configure the vlan name
             default (bool): Defaults the VLAN ID name
+            disable (bool): Negates the VLAN ID name
 
         Returns:
             True if the operation was successful otherwise False
         """
-        cmds = self.command_builder('name', value=name, default=default)
+        cmds = self.command_builder('name', value=name, default=default,
+                                    disable=disable)
         return self.configure_vlan(vid, cmds)
 
-    def set_state(self, vid, value=None, default=False):
+    def set_state(self, vid, value=None, default=False, disable=False):
         """ Configures the VLAN state
 
         EosVersion:
@@ -254,14 +256,16 @@ class Vlans(EntityCollection):
             vid (str): The VLAN ID to configure
             value (str): The value to set the vlan state to
             default (bool): Configures the vlan state to its default value
+            disable (bool): Negates the vlan state
 
         Returns:
             True if the operation was successful otherwise False
         """
-        cmds = self.command_builder('state', value=value, default=default)
+        cmds = self.command_builder('state', value=value, default=default,
+                                    disable=disable)
         return self.configure_vlan(vid, cmds)
 
-    def set_trunk_groups(self, vid, value=None, default=False):
+    def set_trunk_groups(self, vid, value=None, default=False, disable=False):
         """ Configures the list of trunk groups support on a vlan
 
         This method handles configuring the vlan trunk group value to default
@@ -278,6 +282,7 @@ class Vlans(EntityCollection):
                 for this vlan id.
             default (bool): Configures the trunk group value to default if
                 this value is true
+            disable (bool): Negates the trunk group value if set to true
 
         Returns:
             True if the operation was successful otherwise False
@@ -285,6 +290,8 @@ class Vlans(EntityCollection):
         """
         if default:
             return self.configure_vlan(vid, 'default trunk group')
+        if disable:
+            return self.configure_vlan(vid, 'no trunk group')
 
         current_value = self.get(vid)['trunk_groups']
         failure = False
@@ -300,7 +307,6 @@ class Vlans(EntityCollection):
                 failure = True
 
         return not failure
-
 
     def add_trunk_group(self, vid, name):
         """ Adds a new trunk group to the Vlan in the running-config
@@ -333,6 +339,7 @@ class Vlans(EntityCollection):
         """
         return self.configure_vlan(vid, 'no trunk group %s' % name)
 
+
 def instance(node):
     """Returns an instance of Vlans
 
@@ -345,4 +352,3 @@ def instance(node):
             resource
     """
     return Vlans(node)
-

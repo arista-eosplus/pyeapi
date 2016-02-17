@@ -81,7 +81,7 @@ def install():
 
 # Use the following to dynamically build pyeapi module documentation
 if install() and environ.get('READTHEDOCS'):
-    print 'This method is only called by READTHEDOCS.'
+    print('This method is only called by READTHEDOCS.')
     from subprocess import Popen
     proc = Popen(['make', 'modules'], cwd='docs/')
     (_, err) = proc.communicate()

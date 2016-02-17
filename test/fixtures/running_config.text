@@ -241,6 +241,12 @@ ip host puppet 192.168.1.130
 !
 no ntp trusted-key
 no ntp authenticate
+ntp source Loopback1
+ntp server 1.2.3.4 prefer
+ntp server 10.20.30.40
+ntp server 11.22.33.44
+ntp server 123.33.22.11 prefer
+ntp server 123.44.55.66
 ntp server 192.168.1.32 iburst
 no ntp serve all
 !

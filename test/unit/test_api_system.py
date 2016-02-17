@@ -48,9 +48,11 @@ class TestApiSystem(EapiConfigUnitTest):
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        keys = ['hostname', 'iprouting']
+        keys = ['hostname', 'iprouting', 'banner_motd', 'banner_login']
         result = self.instance.get()
         self.assertEqual(sorted(keys), sorted(list(result.keys())))
+        self.assertIsNotNone(self.instance.get()['banner_motd'])
+        self.assertIsNotNone(self.instance.get()['banner_login'])
 
     def test_set_hostname(self):
         for state in ['config', 'negate', 'default']:
@@ -60,7 +62,7 @@ class TestApiSystem(EapiConfigUnitTest):
                 func = function('set_hostname', value)
             elif state == 'negate':
                 cmds = 'no hostname'
-                func = function('set_hostname')
+                func = function('set_hostname', disable=True)
             elif state == 'default':
                 cmds = 'default hostname'
                 func = function('set_hostname', value=value, default=True)
@@ -73,16 +75,28 @@ class TestApiSystem(EapiConfigUnitTest):
                 func = function('set_iprouting', True)
             elif state == 'negate':
                 cmds = 'no ip routing'
-                func = function('set_iprouting', False)
+                func = function('set_iprouting', disable=True)
             elif state == 'default':
                 cmds = 'default ip routing'
                 func = function('set_iprouting', default=True)
             self.eapi_positive_config_test(func, cmds)
 
+    def test_set_banner(self):
+        banner_value = random_string() + "\n"
+        func = function('set_banner', banner_type='motd',
+                        value=banner_value)
+        cmds = [dict(cmd='banner motd', input=banner_value)]
+        self.eapi_positive_config_test(func, cmds)
 
-
+    def test_set_banner_default_disable(self):
+        func = function('set_banner', banner_type='motd',
+                        value=None, default=True)
+        cmds = 'default banner motd'
+        self.eapi_positive_config_test(func, cmds)
+        func = function('set_banner', banner_type='motd',
+                        value=None, disable=True)
+        cmds = 'no banner motd'
+        self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':
     unittest.main()
-
-

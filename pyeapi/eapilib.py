@@ -44,7 +44,7 @@ import logging
 import ssl
 
 try:
-     # Try Python 3.x import first
+    # Try Python 3.x import first
     from http.client import HTTPConnection, HTTPSConnection
 except ImportError:
     # Use Python 2.7 import as a fallback
@@ -101,13 +101,19 @@ class CommandError(EapiError):
             of the error_code and error_text
     """
     def __init__(self, code, message, **kwargs):
-        super(CommandError, self).__init__(message)
+        cmd_err = kwargs.get('command_error')
+        if int(code) in [1000, 1002, 1004]:
+            msg_fmt = 'Error [{}]: {} [{}]'.format(code, message, cmd_err)
+        else:
+            msg_fmt = 'Error [{}]: {}'.format(code, message)
+
+        super(CommandError, self).__init__(msg_fmt)
         self.error_code = code
         self.error_text = message
-        self.command_error = kwargs.get('command_error')
+        self.command_error = cmd_err
         self.commands = kwargs.get('commands')
         self.output = kwargs.get('output')
-        self.message = 'Error [{}]: {}'.format(code, message)
+        self.message = msg_fmt
 
     @property
     def trace(self):
@@ -350,7 +356,7 @@ class EapiConnection(object):
         """
         try:
             _LOGGER.debug("Request content: {}".format(data))
-            #debug('eapi_request: %s' % data)
+            # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
 
@@ -361,16 +367,19 @@ class EapiConnection(object):
                 self.transport.putheader('Authorization',
                                          'Basic %s' % (self._auth))
 
-            self.transport.endheaders()
             if int(sys.version[0]) > 2:
                 # For Python 3.x compatibility
                 data = data.encode()
 
-            self.transport.send(data)
+            self.transport.endheaders(message_body=data)
 
-            response = self.transport.getresponse()
+            try:  # Python 2.7: use buffering of HTTP responses
+                response = self.transport.getresponse(buffering=True)
+            except TypeError:  # Python 2.6: older, and 3.x on
+                response = self.transport.getresponse()
+
             response_content = response.read()
-            _LOGGER.debug("Response: status: {status}, reason: {reason}".format(
+            _LOGGER.debug("Response: status:{status}, reason:{reason}".format(
                           status=response.status,
                           reason=response.reason))
             _LOGGER.debug("Response content: {}".format(response_content))
@@ -452,7 +461,7 @@ class EapiConnection(object):
 
         Raises:
             CommandError:  A CommandError is raised that includes the error
-                code, error message along wit the list of commands that were
+                code, error message along with the list of commands that were
                 sent to the node.  The exception instance is also stored in
                 the error property and is availble until the next request is
                 sent
@@ -482,7 +491,8 @@ class HttpLocalEapiConnection(EapiConnection):
         super(HttpLocalEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_LOCAL_PORT
         path = path or DEFAULT_HTTP_PATH
-        self.transport = HttpConnection(path, 'localhost', port, timeout=timeout)
+        self.transport = HttpConnection(path, 'localhost', port,
+                                        timeout=timeout)
 
 class HttpEapiConnection(EapiConnection):
     def __init__(self, host, port=None, path=None, username=None,
@@ -505,7 +515,8 @@ class HttpsEapiConnection(EapiConnection):
         if context is None and not enforce_verification:
             context = self.disable_certificate_verification()
 
-        self.transport = https_connection_factory(path, host, port, context, timeout)
+        self.transport = https_connection_factory(path, host, port,
+                                                  context, timeout)
         self.authentication(username, password)
 
     def disable_certificate_verification(self):

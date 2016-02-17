@@ -34,6 +34,7 @@ import sys
 import imp
 import logging
 import logging.handlers
+import syslog
 import collections
 
 from itertools import tee
@@ -139,7 +140,7 @@ def islocalconnection():
     return os.path.exists('/etc/Eos-release')
 
 def debug(text):
-    """Prints test to syslog when on a local connection
+    """Prints text to syslog when on a local connection
 
     Args:
         text (str): The string object to print to syslog
@@ -148,6 +149,17 @@ def debug(text):
 
     if islocalconnection():
         _LOGGER.debug(text)
+
+def syslog_warning(text):
+    """Print text to syslog at warning level
+
+    Args:
+        text (str): The string object to print to syslog
+
+    """
+
+    syslog.openlog("pyeapi")
+    syslog.syslog(syslog.LOG_WARNING, text)
 
 def make_iterable(value):
     """Converts the supplied value to a list object
@@ -190,7 +202,7 @@ def expand_range(arg, value_delimiter=',', range_delimiter='-'):
     for item in expanded:
         if range_delimiter in item:
             start, end = item.split(range_delimiter)
-            _expand = range(int(start), int(end)+1)
+            _expand = range(int(start), int(end) + 1)
             values.extend([str(x) for x in _expand])
         else:
             values.extend([item])
@@ -231,4 +243,3 @@ def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
         else:
             values.extend([v1])
     return [str(x) for x in values]
-

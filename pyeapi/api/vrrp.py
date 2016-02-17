@@ -38,34 +38,39 @@ implementations:
     * Vrrp - Configure vrrps in EOS
 
 Vrrp Attributes:
-    enable (boolean): The shutdown state of the vrrp
-    primary_ip (string): The ip address of the vrrp
-    secondary_ip (dict): The secondary ip addresses configured for the vrrp
-                         This is a dictionary in the format
-                            { key: [ list of ip addresses ] }
-                         where key is 'add', 'remove', or 'exists'. 'add' is
-                         used to add the list of secondary ip addresses
-                         to the vrrp. 'remove' will remove the list of
-                         secondary ip addresses from the vrrp. 'exists' is
-                         a report only key for retrieving the current
-                         secondary ip addresses on a vrrp.
-    priority (int): The priority rank of the vrrp
-    description (string): The description for the vrrp
-    ip_version (int): The ip version value for the vrrp
-    timers_advertise (int): The timers advertise setting for the vrrp
-    mac_addr_adv_interval (int): The mac-address advertisement-
-                                              interval setting for the vrrp
-    preempt (boolean): The preempt state of the vrrp
-    preempt_delay_min (int): The preempt delay minimum setting for the vrrp
-    preempt_delay_reload (int): The preempt delay reload setting for the vrrp
-    delay_reload (int): The delay reload setting for the vrrp
-    track (list): The object tracking settings for the vrrp
-    bfd_ip (string): The bfd ip set for the vrrp
+    - enable (boolean): The shutdown state of the vrrp
+    - primary_ip (string): The ip address of the vrrp
+    - secondary_ip (dict): The secondary ip addresses configured for the vrrp
+        This is a dictionary in the format::
+
+            { key: [ list of ip addresses ] }
+
+        where key is 'add', 'remove', or 'exists'. 'add' is
+        used to add the list of secondary ip addresses
+        to the vrrp. 'remove' will remove the list of
+        secondary ip addresses from the vrrp. 'exists' is
+        a report only key for retrieving the current
+        secondary ip addresses on a vrrp.
+
+    - priority (int): The priority rank of the vrrp
+    - description (string): The description for the vrrp
+    - ip_version (int): The ip version value for the vrrp
+    - timers_advertise (int): The timers advertise setting for the vrrp
+    - mac_addr_adv_interval (int): The mac-address advertisement-interval
+        setting for the vrrp
+
+    - preempt (boolean): The preempt state of the vrrp
+    - preempt_delay_min (int): The preempt delay minimum setting for the vrrp
+    - preempt_delay_reload (int): The preempt delay reload setting for the vrrp
+    - delay_reload (int): The delay reload setting for the vrrp
+    - track (list): The object tracking settings for the vrrp
+    - bfd_ip (string): The bfd ip set for the vrrp
 
 Notes:
     The get method will return a dictionary of all the currently configured
     vrrps on a single interface, with the VRID of each vrrp as the keys
-    in the dictionary:
+    in the dictionary::
+
         {
             vrrp1: { data },
             vrrp2: { data },
@@ -73,7 +78,8 @@ Notes:
 
     The getall method will return a dictionary of all the currently configured
     vrrps on the node, with the interface name as the top-level keys, with
-    the VRIDs for each vrrp on an interface as a sub-key of that interface:
+    the VRIDs for each vrrp on an interface as a sub-key of that interface::
+
         {
             interface1: {
                 vrrp1: { data },
@@ -85,7 +91,8 @@ Notes:
             }
         }
 
-    The data for a configured vrrp is a dictionary with the following format:
+    The data for a configured vrrp is a dictionary with the following format::
+
         {
             enable: <True|False>
             primary_ip: <string>
@@ -119,27 +126,30 @@ Notes:
     The create and method accepts a kwargs dictionary which
     defines the properties to be applied to the new or existing vrrp
     configuration. The available keywords and values are as follows:
-        enable: True to enable (no shutdown)|False to disable (shutdown)
-        primary_ip: <ip_string>|no|default|None
-        priority: <int>|no|default|None
-        description: <string>|no|default|None
-        secondary_ip: <dict> may include the following:
-            add: <list of ip address strings>
-            remove: <list of ip address strings>
-        ip_version: <int>|no|default|None
-        timers_advertise: <int>|no|default|None
-        mac_addr_adv_interval: <int>|no|default|None
-        preempt: True to enable (preempt)|False to disable (no preempt)
-        preempt_delay_min: <int>|no|default|None
-        preempt_delay_reload: <int>|no|default|None
-        delay_reload: <int>|no|default|None
-        track: <list> of dicts in the following format:
+
+        - enable: True to enable (no shutdown)|False to disable (shutdown)
+        - primary_ip: <ip_string>|no|default|None
+        - priority: <int>|no|default|None
+        - description: <string>|no|default|None
+        - secondary_ip: <dict> may include the following
+            - add: <list of ip address strings>
+            - remove: <list of ip address strings>
+        - ip_version: <int>|no|default|None
+        - timers_advertise: <int>|no|default|None
+        - mac_addr_adv_interval: <int>|no|default|None
+        - preempt: True to enable (preempt)|False to disable (no preempt)
+        - preempt_delay_min: <int>|no|default|None
+        - preempt_delay_reload: <int>|no|default|None
+        - delay_reload: <int>|no|default|None
+        - track: <list> of dicts in the following format::
+
             {
                 name: <string>
                 action: <shutdown|decrement>
                 amount: <int>|default|no|None
             }
-        bfd_ip: <ip string>|no|default|None
+
+        - bfd_ip: <ip string>|no|default|None
 
 """
 
@@ -422,10 +432,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure
-            If run is False:
-                The formatted command string which can be passed to the node
+            If run is True, returns True if the command executed successfully,
+            error if failure
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -462,10 +473,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -508,22 +520,21 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d priority" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d priority" % vrid
-        elif re.match(r'^\d+$', str(value)) and 1 <= value <= 254:
-            cmd = "vrrp %d priority %s" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'priority' must be "
-                             "an integer in the range 1-254")
+        if not default and not disable:
+            if not str(value).isdigit() or value < 1 or value > 254:
+                raise ValueError("vrrp property 'priority' must be "
+                                 "an integer in the range 1-254")
+
+        cmd = self.command_builder('vrrp %d priority' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -550,19 +561,16 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d description" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d description" % vrid
-        else:
-            cmd = "vrrp %d description %s" % (vrid, value)
+        cmd = self.command_builder('vrrp %d description' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -589,21 +597,20 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d ip version" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d ip version" % vrid
-        elif value in (2, 3):
-            cmd = "vrrp %d ip version %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'ip_version' must be 2 or 3")
+        if not default and not disable:
+            if value not in (2, 3):
+                raise ValueError("vrrp property 'ip_version' must be 2 or 3")
+
+        cmd = self.command_builder('vrrp %d ip version' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -636,10 +643,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -699,22 +707,22 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d timers advertise" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d timers advertise" % vrid
-        elif int(value) and 1 <= int(value) <= 255:
-            cmd = "vrrp %d timers advertise %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'timers_advertise' must be"
-                             "in the range 1-255")
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 255:
+                raise ValueError("vrrp property 'timers_advertise' must be"
+                                 "in the range 1-255")
+
+        cmd = self.command_builder('vrrp %d timers advertise' % vrid,
+                                   value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -744,23 +752,22 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d mac-address advertisement-interval" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d mac-address advertisement-interval" % vrid
-        elif int(value) and 1 <= int(value) <= 3600:
-            cmd = "vrrp %d mac-address advertisement-interval %d" \
-                % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'mac_addr_adv_interval' must be"
-                             "in the range 1-3600")
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'mac_addr_adv_interval' must "
+                                 "be in the range 1-3600")
+
+        cmd = self.command_builder('vrrp %d mac-address advertisement-interval'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -788,21 +795,21 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt" % vrid
-        elif disable is True or value is None or value is False:
-            cmd = "no vrrp %d preempt" % vrid
-        elif value is True:
-            cmd = "vrrp %d preempt" % vrid
-        else:
-            raise ValueError("vrrp property 'preempt' must be True or False")
+        if not default and not disable:
+            if value is not True and value is not False:
+                raise ValueError("vrrp property 'preempt' must be True "
+                                 "or False")
+
+        cmd = self.command_builder('vrrp %d preempt' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -829,22 +836,22 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt delay minimum" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d preempt delay minimum" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d preempt delay minimum %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'preempt_delay_min' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'preempt_delay_min' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d preempt delay minimum'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -871,22 +878,22 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d preempt delay reload" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d preempt delay reload" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d preempt delay reload %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'preempt_delay_reload' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'preempt_delay_reload' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d preempt delay reload'
+                                   % vrid, value=value, default=default,
+                                   disable=disable)
 
         # Run the command if requested
         if run:
@@ -913,22 +920,21 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
-        if default is True:
-            cmd = "default vrrp %d delay reload" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d delay reload" % vrid
-        elif int(value) and 0 <= int(value) <= 3600:
-            cmd = "vrrp %d delay reload %d" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'delay_reload' must be"
-                             "in the range 0-3600 %r" % value)
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'delay_reload' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d delay reload' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:
@@ -957,20 +963,23 @@ class Vrrp(EntityCollection):
             vrid (integer): The vrid number for the vrrp to be managed.
             tracks (list): A list of track definition dictionaries. Each
                 dictionary is a definition of a tracked object in one
-                of the two formats:
+                of the two formats::
+
                     {'name': tracked_object_name,
                      'action': 'shutdown'}
                     {'name': tracked_object_name,
                      'action': 'decrement',
                      'amount': amount_of_decrement}
+
             run (boolean): Set to True to execute the command, False to
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -987,11 +996,27 @@ class Vrrp(EntityCollection):
         unset = '_none_'
         tracks_set = []
         for track in tracks:
+            keys = track.keys()
+
+            # Validate no extraneous keys in track definition
+            err_keys = set(keys).difference(('name', 'action', 'amount'))
+            if err_keys:
+                err_keys = ', '.join(err_keys)
+                raise ValueError("Error found in vrrp property 'track': "
+                                 "unknown key(s) '%s' found. Valid keys are "
+                                 "name, action, and amount" % err_keys)
+
+            # Validate required keys in track definition
+            if not set(keys).issuperset(('name', 'action')):
+                raise ValueError("Error found in vrrp property 'track': "
+                                 "track definition must contain 'name' and "
+                                 "'action' keys")
+
             tr_obj = track['name']
             action = track['action']
             amount = track['amount'] if 'amount' in track else unset
 
-            # Validate track definition
+            # Validate values in track definition
             error = False
             if action not in ('shutdown', 'decrement'):
                 error = True
@@ -1086,22 +1111,19 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
-
-        if default is True:
-            cmd = "default vrrp %d bfd ip" % vrid
-        elif disable is True or value is None:
-            cmd = "no vrrp %d bfd ip" % vrid
-        elif re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
-            cmd = "vrrp %d bfd ip %s" % (vrid, value)
-        else:
-            raise ValueError("vrrp property 'bfd_ip' must be "
-                             "a properly formatted IP address")
+        if not default and not disable:
+            if not re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
+                raise ValueError("vrrp property 'bfd_ip' must be "
+                                 "a properly formatted IP address")
+        cmd = self.command_builder('vrrp %d bfd ip' % vrid, value=value,
+                                   default=default, disable=disable)
 
         # Run the command if requested
         if run:

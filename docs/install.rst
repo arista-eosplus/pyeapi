@@ -90,7 +90,7 @@ code in the develop branch.
 
 **Step 1:** Clone the pyeapi Github repo
 
-.. code-block:: console
+.. code-block:: shell
 
   # Go to a directory where you'd like to keep the source
   admin:~ admin$ cd ~/projects
@@ -99,7 +99,7 @@ code in the develop branch.
 
 **Step 2:** Check out the desired version or branch
 
-.. code-block:: console
+.. code-block:: shell
 
   # Go to a directory where you'd like to keep the source
   admin:~ admin$ cd ~/projects/pyeapi
@@ -113,7 +113,7 @@ code in the develop branch.
 
 **Step 3:** Install pyeapi using Pip with -e switch
 
-.. code-block:: console
+.. code-block:: shell
 
   # Go to a directory where you'd like to keep the source
   admin:~ admin$ cd ~/projects/pyeapi
@@ -121,13 +121,21 @@ code in the develop branch.
   # Install
   admin:~ admin$ sudo pip install -e ~/projects/pyeapi
 
+**Step 4:** Install pyeapi requirements
+
+.. code-block:: shell
+
+  # Go to a directory where you'd like to keep the source
+  admin:~ admin$ pip install -r dev-requirements.txt
+
 .. Tip:: If you start using pyeapi and get import errors, make sure your
          PYTHONPATH is set to include the path to pyeapi.
 
- Development - Upgrade Pyeapi
- ============================
 
- .. code-block:: console
+Development - Upgrade Pyeapi
+============================
+
+ .. code-block:: shell
 
    admin:~ admin$ cd ~/projects/pyeapi
    admin:~ admin$ git pull

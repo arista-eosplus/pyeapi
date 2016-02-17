@@ -27,17 +27,17 @@ VERSION := $(shell cat VERSION)
 
 ########################################################
 
-all: clean check pep8 pyflakes tests
+all: clean check pep8 flake8 tests
 
 pep8:
-	-pep8 -r --ignore=E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 pyeapi/ test/
+	-pep8 -r --ignore=E402,E731,E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E225,E261,E241 pyeapi/ test/
 
 pyflakes:
 	pyflakes pyeapi/ test/
 
 flake8:
-	flake8 --ignore=E302,E303,W391 --exit-zero pyeapi/
-	flake8 --ignore=E302,E303,W391,N802 --max-line-length=100 test/
+	flake8 --ignore=E302,E303,E402,E731,W391 --exit-zero pyeapi/
+	flake8 --ignore=E302,E303,E402,E731,W391,N802 --max-line-length=100 test/
 
 check:
 	check-manifest
@@ -50,6 +50,10 @@ clean:
 	rm -rf *.egg-info
 	@echo "Cleaning up byte compiled python stuff"
 	find . -type f -regex ".*\.py[co]$$" -delete
+	@echo "Cleaning up doc builds"
+	rm -rf docs/_build
+	rm -rf docs/api_modules
+	rm -rf docs/client_modules
 
 sdist: clean
 	$(PYTHON) setup.py sdist

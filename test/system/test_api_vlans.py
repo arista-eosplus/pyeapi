@@ -153,6 +153,20 @@ class TestApiVlans(DutSystemTest):
             config = sorted(config[0]['trunkGroups'][vid]['names'])
             self.assertEqual(sorted([tg1, tg3]), config)
 
+    def test_set_trunk_groups_disable(self):
+        for dut in self.duts:
+            vid = str(random_int(2, 4094))
+            tg1 = random_string(maxchar=10)
+            tg2 = random_string(maxchar=10)
+            tg3 = random_string(maxchar=10)
+            dut.config(['no vlan %s' % vid, 'vlan %s' % vid,
+                        'trunk group %s' % tg1, 'trunk group %s' % tg2,
+                        'trunk group %s' % tg3])
+            result = dut.api('vlans').set_trunk_groups(vid, disable=True)
+            self.assertTrue(result, 'dut=%s' % dut)
+            config = dut.run_commands('show vlan %s trunk group' % vid)
+            config = sorted(config[0]['trunkGroups'][vid]['names'])
+            self.assertEqual([], config)
 
     def test_add_trunk_group(self):
         for dut in self.duts:
@@ -176,10 +190,6 @@ class TestApiVlans(DutSystemTest):
             config = dut.run_commands('show vlan trunk group')
             self.assertNotIn(tg, config[0]['trunkGroups'][vid]['names'],
                              'dut=%s' % dut)
-
-
-
-
 
 
 if __name__ == '__main__':

@@ -98,11 +98,13 @@ try:
     # Try Python 3.x import first
     # Note: SafeConfigParser is deprecated and replaced by ConfigParser
     from configparser import ConfigParser as SafeConfigParser
+    from configparser import Error as SafeConfigParserError
 except ImportError:
     # Use Python 2.7 import as a fallback
     from ConfigParser import SafeConfigParser
+    from ConfigParser import Error as SafeConfigParserError
 
-from pyeapi.utils import load_module, make_iterable
+from pyeapi.utils import load_module, make_iterable, syslog_warning
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
@@ -191,7 +193,12 @@ class Config(SafeConfigParser):
         Args:
             filename (str): The full path to the file to load
         """
-        SafeConfigParser.read(self, filename)
+        try:
+            SafeConfigParser.read(self, filename)
+        except SafeConfigParserError as exc:
+            # Ignore file and syslog a message on SafeConfigParser errors
+            syslog_warning("%s: parsing error in eapi conf file: %s" %
+                           (type(exc).__name__, filename))
 
         self._add_default_connection()
 
@@ -376,7 +383,7 @@ def make_connection(transport, **kwargs):
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None, timeout=60):
+            password='', port=None, timeout=60, return_node=False):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -395,14 +402,21 @@ def connect(transport=None, host='localhost', username='admin',
         port (int): The TCP port of the endpoint for the eAPI connection.  If
             this keyword is not specified, the default value is automatically
             determined by the transport type. (http=80, https=443)
+        return_node (bool): Returns a Node object if True, otherwise
+            returns an EapiConnection object.
+
 
     Returns:
-        A instance of an EapiConnection object for the specified transport.
+        An instance of an EapiConnection object for the specified transport.
 
     """
     transport = transport or DEFAULT_TRANSPORT
-    return make_connection(transport, host=host, username=username,
-                           password=password, port=port, timeout=timeout)
+    connection = make_connection(transport, host=host, username=username,
+                                 password=password, port=port, timeout=timeout)
+    if return_node:
+        return Node(connection, transport=transport, host=host,
+                    username=username, password=password, port=port)
+    return connection
 
 
 class Node(object):
@@ -493,7 +507,8 @@ class Node(object):
         Args:
             commands (str, list): The commands to send to the node in config
                 mode.  If the commands argument is a string it will be cast to
-                a list.  The list of commands will also be prepended with the
+                a list.
+                The list of commands will also be prepended with the
                 necessary commands to put the session in config mode.
 
         Returns:
@@ -529,7 +544,8 @@ class Node(object):
         Returns:
             The configuration section as a string object.
         """
-        config = getattr(self, config)
+        if config in ['running_config', 'startup_config']:
+            config = getattr(self, config)
         match = re.search(regex, config, re.M)
         if not match:
             raise TypeError('config section not found')
@@ -744,10 +760,10 @@ def connect_to(name):
     if not kwargs:
         raise AttributeError('connection profile not found in config')
 
-    connection = connect(transport=kwargs.get('transport'),
-                         host=kwargs.get('host'),
-                         username=kwargs.get('username'),
-                         password=kwargs.get('password'),
-                         port=kwargs.get('port'))
-    node = Node(connection, **kwargs)
+    node = connect(transport=kwargs.get('transport'),
+                   host=kwargs.get('host'),
+                   username=kwargs.get('username'),
+                   password=kwargs.get('password'),
+                   port=kwargs.get('port'),
+                   return_node=True)
     return node

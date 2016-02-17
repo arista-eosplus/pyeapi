@@ -40,6 +40,7 @@ from testlib import EapiConfigUnitTest
 
 import pyeapi.api.routemaps
 
+
 class TestApiRoutemaps(EapiConfigUnitTest):
 
     def __init__(self, *args, **kwargs):
@@ -113,6 +114,10 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         with self.assertRaises(ValueError):
             self.instance.set_continue('TEST', 'permit', 10, -1)
 
+    def test_set_continue_with_invalid_string(self):
+        with self.assertRaises(ValueError):
+            self.instance.set_continue('TEST', 'permit', 10, 'invalid')
+
     def test_set_continue_to_default(self):
         cmds = ['route-map TEST permit 10', 'default continue']
         func = function('set_continue', 'TEST', 'permit', 10, default=True)
@@ -120,7 +125,7 @@ class TestApiRoutemaps(EapiConfigUnitTest):
 
     def test_negate_continue(self):
         cmds = ['route-map TEST permit 10', 'no continue']
-        func = function('set_continue', 'TEST', 'permit', 10)
+        func = function('set_continue', 'TEST', 'permit', 10, disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_description_with_value(self):
@@ -131,15 +136,22 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
     def test_negate_description(self):
-        value = random_string()
         cmds = ['route-map TEST permit 10', 'no description']
-        func = function('set_description', 'TEST', 'permit', 10)
+        func = function('set_description', 'TEST', 'permit', 10, disable=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_description_with_default(self):
-        value = random_string()
         cmds = ['route-map TEST permit 10', 'default description']
         func = function('set_description', 'TEST', 'permit', 10, default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_description_with_invalid_value(self):
+        # with self.assertRaises(ValueError):
+        #     self.instance.set_description('TEST', 'permit', 10, value=None)
+        # If command_builder fails because value is None, uncomment
+        # above lines and remove below lines.
+        cmds = ['route-map TEST permit 10', 'no description']
+        func = function('set_description', 'TEST', 'permit', 10, value=None)
         self.eapi_positive_config_test(func, cmds)
 
 if __name__ == '__main__':

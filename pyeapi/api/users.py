@@ -57,6 +57,7 @@ from pyeapi.api import EntityCollection
 DEFAULT_ENCRYPTION = 'cleartext'
 ENCRYPTION_MAP = {'cleartext': 0, 'md5': 5, 'sha512': 'sha512'}
 
+
 def isprivilege(value):
     """Checks value for valid privilege level
 
@@ -190,7 +191,6 @@ class Users(EntityCollection):
         cmd = 'username %s secret %s %s' % (name, enc, secret)
         return self.configure(cmd)
 
-
     def create_with_nopassword(self, name):
         """Creates a new user on the local node
 
@@ -211,6 +211,9 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
+        if name == 'admin':
+            raise TypeError('the admin user cannot be deleted.')
+
         return self.configure('no username %s' % name)
 
     def default(self, name):
@@ -248,7 +251,7 @@ class Users(EntityCollection):
             cmd += ' privilege 1'
         return self.configure(cmd)
 
-    def set_role(self, name, value=None):
+    def set_role(self, name, value=None, default=False, disable=False):
         """Configures the user role vale in EOS
 
         Args:
@@ -256,17 +259,19 @@ class Users(EntityCollection):
 
             value (str): The value to configure for the user role
 
+            default (bool): Configure the user role using the EOS CLI
+                default command
+
+            disable (bool): Negate the user role using the EOS CLI no command
+
         Returns:
             True if the operation was successful otherwise False
         """
-        cmd = 'username %s' % name
-        if value is not None:
-            cmd += ' role %s' % value
-        else:
-            cmd = 'default username %s role' % name
+        cmd = self.command_builder('username %s role' % name, value=value,
+                                   default=default, disable=disable)
         return self.configure(cmd)
 
-    def set_sshkey(self, name, value=None):
+    def set_sshkey(self, name, value=None, default=False, disable=False):
         """Configures the user sshkey
 
         Args:
@@ -274,15 +279,18 @@ class Users(EntityCollection):
 
             value (str): The value to configure for the sshkey.
 
+            default (bool): Configure the sshkey using the EOS CLI
+                default command
+
+            disable (bool): Negate the sshkey using the EOS CLI no command
+
         Returns:
             True if the operation was successful otherwise False
         """
-        cmd = 'username %s' % name
-        if value:
-            cmd += ' sshkey %s' % value
-        else:
-            cmd = 'no username %s sshkey' % name
+        cmd = self.command_builder('username %s sshkey' % name, value=value,
+                                   default=default, disable=disable)
         return self.configure(cmd)
+
 
 def instance(node):
     """Returns an instance of Users

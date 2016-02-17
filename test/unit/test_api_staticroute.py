@@ -76,9 +76,9 @@ class TestApiStaticroute(EapiConfigUnitTest):
                 None: {
                     1: {'route_name': None,
                         'tag': 0}
-                    }
                 }
             }
+        }
         result = self.instance.get(ip_dest)
         self.assertEqual(result, routes)
 
@@ -93,14 +93,14 @@ class TestApiStaticroute(EapiConfigUnitTest):
                     10: {
                         'route_name': 'test1',
                         'tag': 1}
-                    },
+                },
                 '10.1.1.1': {
                     20: {
                         'route_name': 'test1',
                         'tag': 1}
-                    }
                 }
             }
+        }
         result = self.instance.get(ip_dest)
         self.assertEqual(result, routes)
 
@@ -121,9 +121,9 @@ class TestApiStaticroute(EapiConfigUnitTest):
                     None: {
                         1: {'route_name': None,
                             'tag': 0}
-                        }
                     }
-                },
+                }
+            },
             '1.2.3.0/24': {
                 'Ethernet1': {
                     '1.1.1.1': {
@@ -133,15 +133,15 @@ class TestApiStaticroute(EapiConfigUnitTest):
                         10: {
                             'route_name': 'test1',
                             'tag': 1}
-                        },
+                    },
                     '10.1.1.1': {
                         20: {
                             'route_name': 'test1',
                             'tag': 1}
-                        }
                     }
                 }
             }
+        }
 
         self.maxDiff = None
         result = self.instance.getall()

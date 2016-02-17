@@ -34,9 +34,9 @@ class TestEapiConnection(unittest.TestCase):
         with self.assertRaises(pyeapi.eapilib.ConnectionError):
             instance.execute('test')
 
-    def test_execute_raises_comand_error(self):
+    def test_execute_raises_command_error(self):
         mock_send = Mock(name='send')
-        mock_send.side_effect = pyeapi.eapilib.CommandError('test', 'test')
+        mock_send.side_effect = pyeapi.eapilib.CommandError('1000', 'test')
 
         instance = pyeapi.eapilib.EapiConnection()
         instance.send = mock_send
@@ -138,11 +138,3 @@ class TestCommandError(unittest.TestCase):
         result = pyeapi.eapilib.CommandError(9999, 'test', commands=commands,
                                              output=output)
         self.assertIsNotNone(result.trace)
-
-
-
-
-
-
-
-

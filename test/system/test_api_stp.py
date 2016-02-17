@@ -65,9 +65,27 @@ class TestApiStpInterfaces(DutSystemTest):
         for dut in self.duts:
             intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
-                        'spanning-tree bpduguard disable'])
+                        'spanning-tree bpduguard enable'])
             resource = dut.api('stp').interfaces
-            result = resource.set_bpduguard('Ethernet1', False)
+            result = resource.set_bpduguard(intf, False)
+            self.assertTrue(result, 'dut=%s' % dut)
+
+    def test_set_bpdugard_to_default(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'spanning-tree bpduguard enable'])
+            resource = dut.api('stp').interfaces
+            result = resource.set_bpduguard(intf, default=True)
+            self.assertTrue(result, 'dut=%s' % dut)
+
+    def test_set_bpdugard_to_no(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'spanning-tree bpduguard enable'])
+            resource = dut.api('stp').interfaces
+            result = resource.set_bpduguard(intf, disable=True)
             self.assertTrue(result, 'dut=%s' % dut)
 
     def test_set_portfast_to_true(self):
@@ -84,7 +102,25 @@ class TestApiStpInterfaces(DutSystemTest):
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'spanning-tree portfast'])
             resource = dut.api('stp').interfaces
-            result = resource.set_portfast('Ethernet1', False)
+            result = resource.set_portfast(intf, False)
+            self.assertTrue(result, 'dut=%s' % dut)
+
+    def test_set_portfast_to_default(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'spanning-tree portfast'])
+            resource = dut.api('stp').interfaces
+            result = resource.set_portfast(intf, default=True)
+            self.assertTrue(result, 'dut=%s' % dut)
+
+    def test_set_portfast_to_no(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config(['default interface %s' % intf, 'interface %s' % intf,
+                        'spanning-tree portfast'])
+            resource = dut.api('stp').interfaces
+            result = resource.set_portfast(intf, disable=True)
             self.assertTrue(result, 'dut=%s' % dut)
 
     def test_set_portfast_to_edge(self):

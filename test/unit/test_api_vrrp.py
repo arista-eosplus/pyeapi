@@ -59,7 +59,7 @@ known_vrrps = {
              'track': [],
              'bfd_ip': '',
              'ip_version': 2}
-        },
+    },
     'Port-Channel10': {
         10: {'priority': 150,
              'timers_advertise': 1,
@@ -75,7 +75,7 @@ known_vrrps = {
              'track': [],
              'bfd_ip': '',
              'ip_version': 2}
-        },
+    },
     'Vlan50': {
         10: {'priority': 200,
              'timers_advertise': 3,
@@ -131,8 +131,8 @@ known_vrrps = {
              'track': [],
              'bfd_ip': '10.10.4.33',
              'ip_version': 2}
-        }
     }
+}
 
 
 class TestApiVrrp(EapiConfigUnitTest):
@@ -193,11 +193,11 @@ class TestApiVrrp(EapiConfigUnitTest):
             'preempt_delay_reload': 1,
             'delay_reload': 1,
             'track': [
-                 {'name': 'Ethernet1', 'action': 'decrement', 'amount': 1},
-                 {'name': 'Ethernet1', 'action': 'shutdown'},
-                 {'name': 'Ethernet2', 'action': 'decrement', 'amount': 1},
-                 {'name': 'Ethernet2', 'action': 'shutdown'},
-             ],
+                {'name': 'Ethernet1', 'action': 'decrement', 'amount': 1},
+                {'name': 'Ethernet1', 'action': 'shutdown'},
+                {'name': 'Ethernet2', 'action': 'decrement', 'amount': 1},
+                {'name': 'Ethernet2', 'action': 'shutdown'},
+            ],
             'bfd_ip': '10.10.60.30',
         }
 
@@ -720,6 +720,9 @@ class TestApiVrrp(EapiConfigUnitTest):
             [{'name': 'Ethernet1', 'action': 'disable', 'amount': 10}],
             [{'name': 'Ethernet1', 'action': 'decrement', 'amount': True}],
             [{'name': 'Ethernet1', 'action': 'shutdown', 'amount': 10}],
+            [{'action': 'decrement', 'amount': 10}],
+            [{'name': 'Ethernet1', 'action': 'decrement',
+              'amount': 10, 'bad': 1}],
         ]
 
         for tracks in cases:

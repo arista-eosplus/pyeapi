@@ -36,7 +36,7 @@ import imp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, patch
+from mock import Mock, patch, call
 
 from testlib import get_fixture, random_string, random_int
 
@@ -73,11 +73,10 @@ class TestNode(unittest.TestCase):
 
         responses = self.node.enable(commands)
 
-
         self.assertEqual(self.connection.execute.call_count, len(commands))
 
-        for cmd in commands:
-            self.connection.execute.assert_call_with(['enable', cmd], 'json')
+        expected_calls = [call(['enable', cmd], 'json') for cmd in commands]
+        self.assertEqual(self.connection.execute.mock_calls, expected_calls)
 
         for index, response in enumerate(responses):
             self.assertEqual(commands[index], response['result'])
@@ -155,6 +154,23 @@ class TestClient(unittest.TestCase):
         for name in ['localhost', 'test1', 'test2']:
             name = 'connection:%s' % name
             self.assertIn(name, pyeapi.client.config.sections())
+
+    def test_load_config_empty_conf(self):
+        conf = get_fixture('empty.conf')
+        pyeapi.client.load_config(filename=conf)
+        conns = pyeapi.client.config.connections
+        self.assertEqual(conns, ['localhost'])
+
+    def test_load_config_yaml(self):
+        conf = get_fixture('eapi.conf.yaml')
+        pyeapi.client.load_config(filename=conf)
+        conns = pyeapi.client.config.connections
+        self.assertEqual(conns, ['localhost'])
+
+    def test_load_config_env_path(self):
+        os.environ['EAPI_CONF'] = get_fixture('env_path.conf')
+        pyeapi.client.config.autoload()
+        self.assertIn('connection:env_path', pyeapi.client.config.sections())
 
     def test_config_always_has_default_connection(self):
         conf = '/invalid.conf'
@@ -244,13 +260,24 @@ class TestClient(unittest.TestCase):
         node._startup_config = config
         self.assertEqual(node.startup_config, config)
 
-
     def test_connect_default_type(self):
         transport = Mock()
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None, timeout=60)
+            transport.assert_called_once_with(**kwargs)
+
+    def test_connect_return_node(self):
+        transport = Mock()
+        with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
+            conf = get_fixture('eapi.conf')
+            pyeapi.client.load_config(filename=conf)
+            pyeapi.client.connect(host='192.168.1.16', username='eapi',
+                                  password='password', port=None, timeout=60,
+                                  return_node=True)
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
 
     def test_connect_to_with_config(self):
@@ -262,8 +289,6 @@ class TestClient(unittest.TestCase):
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
-
-
 
 
 if __name__ == '__main__':
