@@ -432,10 +432,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure
-            If run is False:
-                The formatted command string which can be passed to the node
+            If run is True, returns True if the command executed successfully,
+            error if failure
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -472,10 +473,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -518,10 +520,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -558,10 +561,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -593,10 +597,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -638,10 +643,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -701,10 +707,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -745,10 +752,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -787,10 +795,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -827,10 +836,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -868,10 +878,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -909,10 +920,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -961,10 +973,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
 
@@ -1096,10 +1109,11 @@ class Vrrp(EntityCollection):
                 return a string with the formatted command.
 
         Returns:
-            If run is True:
-                True if the command executed successfully, error if failure.
-            If run is False:
-                The formatted command string which can be passed to the node.
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
 
         """
         if not default and not disable:
