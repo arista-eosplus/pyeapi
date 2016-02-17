@@ -963,12 +963,14 @@ class Vrrp(EntityCollection):
             vrid (integer): The vrid number for the vrrp to be managed.
             tracks (list): A list of track definition dictionaries. Each
                 dictionary is a definition of a tracked object in one
-                of the two formats:
+                of the two formats::
+
                     {'name': tracked_object_name,
                      'action': 'shutdown'}
                     {'name': tracked_object_name,
                      'action': 'decrement',
                      'amount': amount_of_decrement}
+
             run (boolean): Set to True to execute the command, False to
                 return a string with the formatted command.
 
