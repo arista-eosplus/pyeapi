@@ -765,6 +765,5 @@ def connect_to(name):
                    username=kwargs.get('username'),
                    password=kwargs.get('password'),
                    port=kwargs.get('port'),
-                   timeout=kwargs.get('timeout'),
                    return_node=True)
     return node
