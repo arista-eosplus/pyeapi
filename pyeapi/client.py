@@ -654,7 +654,7 @@ class Node(object):
         # into lines and pass it as it is
         # to pyeapi without caring about multiline commands.
         commands = [{'cmd': c.split('MULTILINE:')[0],
-                     'input': c.split('MULTILINE:')[1]}
+                     'input': '%s\n' % (c.split('MULTILINE:')[1].strip())}
                     if 'MULTILINE:' in c else c for c in commands]
 
         if self._enablepwd:
