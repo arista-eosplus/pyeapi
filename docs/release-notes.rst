@@ -19,3 +19,4 @@ Release Notes
     release-notes-0.3.3.rst
     release-notes-0.4.0.rst
     release-notes-0.5.0.rst
+    release-notes-0.6.0.rst
