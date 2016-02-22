@@ -93,6 +93,24 @@ class TestNode(unittest.TestCase):
         result = self.node.config(commands)
         self.assertEqual(result, [{}, {}])
 
+    def test_config_with_single_multiline(self):
+        command = ('banner login MULTILINE:This is a new banner\n'
+                   'with different lines!!!')
+
+        self.node.run_commands = Mock(return_value=[{}, {}])
+        result = self.node.config(command)
+        self.assertEqual(result, [{}])
+
+    def test_config_with_multiple_multilines(self):
+        commands = [random_string(),
+                    ('banner login MULTILINE:This is a new banner\n'
+                    'with different lines!!!'),
+                    random_string()]
+
+        self.node.run_commands = Mock(return_value=[{}, {}, {}, {}])
+        result = self.node.config(commands)
+        self.assertEqual(result, [{}, {}, {}])
+
     def test_get_config(self):
         config = [dict(output='test\nconfig')]
         self.node.run_commands = Mock(return_value=config)
