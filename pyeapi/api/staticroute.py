@@ -125,7 +125,7 @@ class StaticRoute(EntityCollection):
 
         Returns:
             dict: An dict object of static route entries in the form::
-            
+
                 { ip_dest:
                     { next_hop:
                         { next_hop_ip:
