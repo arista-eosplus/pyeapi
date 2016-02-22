@@ -79,6 +79,21 @@ class TestClient(unittest.TestCase):
                                       hostname, 'text')
             self.assertEqual(result[0]['output'].strip(), hostname)
 
+    def test_config_single_multiline_command(self):
+        for dut in self.duts:
+            # Clear any current banner
+            dut.config('no banner login')
+
+            banner = 'This is a new banner\nwith different lines!!!'
+            cmd = 'banner login MULTILINE:%s' % banner
+            result = dut.config(cmd)
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+            self.assertEqual(result[0], {}, 'dut=%s' % dut)
+            result = dut.run_commands('show banner login', 'text')
+            self.assertEqual(result[0]['output'].strip().split('\n'),
+                             banner.split('\n'))
+
     def test_config_multiple_commands(self):
         for dut in self.duts:
             commands = list()
