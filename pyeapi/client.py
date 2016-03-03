@@ -383,7 +383,7 @@ def make_connection(transport, **kwargs):
     return klass(**kwargs)
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None, timeout=60, return_node=False):
+            password='', port=None, timeout=60, return_node=False, **kwargs):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -415,7 +415,7 @@ def connect(transport=None, host='localhost', username='admin',
                                  password=password, port=port, timeout=timeout)
     if return_node:
         return Node(connection, transport=transport, host=host,
-                    username=username, password=password, port=port)
+                    username=username, password=password, port=port, **kwargs)
     return connection
 
 
@@ -772,10 +772,5 @@ def connect_to(name):
     if not kwargs:
         raise AttributeError('connection profile not found in config')
 
-    node = connect(transport=kwargs.get('transport'),
-                   host=kwargs.get('host'),
-                   username=kwargs.get('username'),
-                   password=kwargs.get('password'),
-                   port=kwargs.get('port'),
-                   return_node=True)
+    node = connect(return_node=True, **kwargs)
     return node
