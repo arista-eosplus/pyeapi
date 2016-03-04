@@ -50,7 +50,12 @@ class TestClient(unittest.TestCase):
         for name in config.sections():
             if name.startswith('connection:') and 'localhost' not in name:
                 name = name.split(':')[1]
-                self.duts.append(pyeapi.client.connect_to(name))
+                dut = pyeapi.client.connect_to(name)
+                self.duts.append(dut)
+                if dut._enablepwd is not None:
+                    # If enable password defined for dut, set the
+                    # enable password on the dut and clear it on tearDown
+                    dut.config("enable secret %s" % dut._enablepwd)
 
     def test_enable_single_command(self):
         for dut in self.duts:
@@ -125,6 +130,10 @@ class TestClient(unittest.TestCase):
             api = dut.api('interfaces')
             txtstr = api.get_block('interface Ethernet1', config='config')
             self.assertEqual(txtstr, None)
+
+    def tearDown(self):
+        for dut in self.duts:
+            dut.config("no enable secret")
 
 
 class TestNode(unittest.TestCase):
