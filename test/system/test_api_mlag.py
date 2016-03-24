@@ -55,7 +55,7 @@ class TestApiMlag(DutSystemTest):
             dut.config('default mlag configuration')
             api = dut.api('mlag')
             self.assertIn('no domain-id', api.get_block('mlag configuration'))
-            result = dut.api('mlag').set_domain_id('test')
+            result = dut.api('mlag').set_domain_id('test.dom-id')
             self.assertTrue(result)
             self.assertIn('domain-id test', api.get_block('mlag configuration'))
 
