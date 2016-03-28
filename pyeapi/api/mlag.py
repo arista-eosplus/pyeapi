@@ -116,7 +116,7 @@ class Mlag(Entity):
             dict: A dict object that is intended to be merged into the
                 resource dict
         """
-        match = re.search(r'domain-id ([\w\.\-]+)', config)
+        match = re.search(r'domain-id (.+)', config)
         value = match.group(1) if match else None
         return dict(domain_id=value)
 
