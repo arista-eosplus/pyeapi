@@ -125,7 +125,7 @@ else:
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
-handler = logging.handlers.SysLogHandler(address=address)
+handler = logging.handlers.SysLogHandler()
 formatter = logging.Formatter('pyeapi.%(module)s.%(funcName)s: %(message)s')
 handler.setFormatter(formatter)
 LOGGER.addHandler(handler)
