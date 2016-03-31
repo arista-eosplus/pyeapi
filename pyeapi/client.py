@@ -91,6 +91,7 @@ contains the settings for nodes used by the connect_to function.
 
 """
 import os
+import sys
 import logging
 import re
 
@@ -104,13 +105,30 @@ except ImportError:
     from ConfigParser import SafeConfigParser
     from ConfigParser import Error as SafeConfigParserError
 
-from pyeapi.utils import load_module, make_iterable, syslog_warning
+from pyeapi.utils import load_module, make_iterable
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
+if sys.platform == "darwin":
+    # Mac OS syslog
+    address = '/var/run/syslog'
+elif sys.platform == "win32":
+    # Windows write to localhost, port 514
+    # This is the default SysLogHandler address, but needs to be
+    # specified since we are using a variable.
+    address = ('localhost', 514)
+else:
+    # Most *nix syslog
+    address = '/dev/log'
+
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
+handler = logging.handlers.SysLogHandler(address=address)
+formatter = logging.Formatter('pyeapi.%(module)s.%(funcName)s: %(message)s')
+handler.setFormatter(formatter)
+LOGGER.addHandler(handler)
 
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
@@ -193,12 +211,14 @@ class Config(SafeConfigParser):
         Args:
             filename (str): The full path to the file to load
         """
+
         try:
             SafeConfigParser.read(self, filename)
         except SafeConfigParserError as exc:
             # Ignore file and syslog a message on SafeConfigParser errors
-            syslog_warning("%s: parsing error in eapi conf file: %s" %
-                           (type(exc).__name__, filename))
+            msg = ("%s: parsing error in eapi conf file: %s" %
+                   (type(exc).__name__, filename))
+            LOGGER.debug(msg)
 
         self._add_default_connection()
 

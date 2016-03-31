@@ -150,17 +150,6 @@ def debug(text):
     if islocalconnection():
         _LOGGER.debug(text)
 
-def syslog_warning(text):
-    """Print text to syslog at warning level
-
-    Args:
-        text (str): The string object to print to syslog
-
-    """
-
-    syslog.openlog("pyeapi")
-    syslog.syslog(syslog.LOG_WARNING, text)
-
 def make_iterable(value):
     """Converts the supplied value to a list object
 
