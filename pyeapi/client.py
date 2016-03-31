@@ -121,7 +121,7 @@ elif sys.platform == "win32":
     address = ('localhost', 514)
 else:
     # Most *nix syslog
-    address = '/dev/log'
+    address = '/var/log/syslog'
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
