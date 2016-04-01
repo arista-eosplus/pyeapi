@@ -389,7 +389,7 @@ class EapiConnection(object):
                 # For Python 3.x - decode bytes into string
                 response_content = response_content.decode()
             decoded = json.loads(response_content)
-            debug('eapi_response: %s' % decoded)
+            _LOGGER.debug('eapi_response: %s' % decoded)
 
             if 'error' in decoded:
                 (code, msg, err, out) = self._parse_error_message(decoded)
