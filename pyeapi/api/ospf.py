@@ -35,10 +35,6 @@ API module for Ospf
 
 import re
 
-from collections import namedtuple
-
-import netaddr
-
 from pyeapi.api import Entity, EntityCollection
 from pyeapi.utils import make_iterable
 
