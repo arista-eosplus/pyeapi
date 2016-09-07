@@ -9,6 +9,7 @@ router ospf 65000
    distance ospf inter-area 110
    redistribute bgp route-map RM-IN
    redistribute bgp route-map RM-OUT
+   redistribute static
    area 0.0.0.0 default-cost 10
    network 172.16.10.0/24 area 0.0.0.0
    network 172.17.0.0/16 area 0.0.0.0
