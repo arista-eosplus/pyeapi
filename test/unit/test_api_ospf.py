@@ -88,6 +88,49 @@ class TestApiOspf(EapiConfigUnitTest):
                 func = function('set_no_shutdown')
             self.eapi_positive_config_test(func, cmds)
 
+    def test_add_redistribution_no_route_map(self):
+        for protocol in ['bgp', 'rip', 'static', 'connected', 'no-proto']:
+            cmds = ['router ospf 65000', 'redistribute {}'.format(protocol)]
+            func = function('add_redistribution', protocol)
+            if protocol != 'no-proto':
+                self.eapi_positive_config_test(func, cmds)
+            else:
+                self.eapi_exception_config_test(func, ValueError)
+
+    def test_add_redistribution_with_route_map(self):
+        for protocol in ['bgp', 'rip', 'static', 'connected']:
+            cmds = ['router ospf 65000', 'redistribute {} route-map test'.format(protocol)]
+            func = function('add_redistribution', protocol, 'test')
+            if protocol != 'no-proto':
+                self.eapi_positive_config_test(func, cmds)
+            else:
+                self.eapi_exception_config_test(func, ValueError)
+
+
+    def test_delete_redistribution_no_route_map(self):
+        for protocol in ['bgp', 'rip', 'static', 'connected', 'no-proto']:
+            cmds = ['router ospf 65000', 'no redistribute {}'.format(protocol)]
+            func = function('remove_redistribution', protocol)
+            if protocol != 'no-proto':
+                self.eapi_positive_config_test(func, cmds)
+            else:
+                self.eapi_exception_config_test(func, ValueError)
+
+
+class TestApiNegOspf(EapiConfigUnitTest):
+
+    def __init__(self, *args, **kwargs):
+        super(TestApiNegOspf, self).__init__(*args, **kwargs)
+        self.instance = pyeapi.api.ospf.instance(None)
+        self.config = open(get_fixture('running_config.bgp')).read()
+
+    def test_no_get(self):
+        result = self.instance.get()
+        self.assertEqual(None, result)
+
+    def test_no_delete(self):
+        result = self.instance.delete()
+        self.assertTrue(result)
 
 if __name__ == '__main__':
     unittest.main()
