@@ -13,6 +13,7 @@
 #	make unittest -- runs the unit tests
 #	make systest -- runs the system tests
 #	make clean -- clean distutils
+#	make coverage_report -- code coverage report
 #
 ########################################################
 # variable section

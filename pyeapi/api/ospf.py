@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2016, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,9 @@
 '''
 API module for Ospf
 '''
-
 import re
-
-from pyeapi.api import Entity, EntityCollection
+from pyeapi.api import Entity
 from pyeapi.utils import make_iterable
-
 
 class Ospf(Entity):
     # The Ospf class implements global Ospf router configuration
@@ -51,7 +48,7 @@ class Ospf(Entity):
         config = self.get_block('^router ospf .*')
         if not config:
             return None
-    
+
         response = dict()
         response.update(self._parse_router_id(config))
         response.update(self._parse_networks(config))
@@ -92,7 +89,8 @@ class Ospf(Entity):
                 # complex redist eg 'redistribute bgp route-map NYSE-RP-MAP'
                 protocol = ospf_redist[1]
                 route_map_name = ospf_redist[3]
-                redistributions.append(dict(protocol=protocol, route_map=route_map_name))
+                redistributions.append(dict(protocol=protocol,
+                                       route_map=route_map_name))
         return dict(redistributions=redistributions)
 
     def _parse_shutdown(self, config):
@@ -128,9 +126,10 @@ class Ospf(Entity):
         return super(Ospf, self).configure(cmds)
 
     def set_router_id(self, value=None, default=False, disable=False):
-        cmd = self.command_builder('router-id', value=value, default=default, disable=disable)
+        cmd = self.command_builder('router-id', value=value,
+                                   default=default, disable=disable)
         return self.configure_ospf(cmd)
-        
+
     def add_network(self, network, netmask, area=0):
         if network == '' or netmask == '':
             raise ValueError('network and mask values '
@@ -153,7 +152,8 @@ class Ospf(Entity):
         if route_map_name is None:
             cmd = 'redistribute {}'.format(protocol)
         else:
-            cmd = 'redistribute {} route-map {}'.format(protocol, route_map_name)
+            cmd = 'redistribute {} route-map {}'.format(protocol,
+                                                        route_map_name)
         return self.configure_ospf(cmd)
 
     def remove_redistribution(self, protocol):
@@ -161,7 +161,7 @@ class Ospf(Entity):
         if protocol not in protocols:
             raise ValueError('redistributed protocol must be'
                              'bgp, connected, rip or static')
-        cmd = 'no redistribute {}'.format(protocol)        
+        cmd = 'no redistribute {}'.format(protocol)
         return self.configure_ospf(cmd)
 
 def instance(api):

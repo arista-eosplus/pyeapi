@@ -16,7 +16,6 @@ class TestApiOspf(EapiConfigUnitTest):
         super(TestApiOspf, self).__init__(*args, **kwargs)
         self.instance = pyeapi.api.ospf.instance(None)
         self.config = open(get_fixture('running_config.ospf')).read()
-        
 
     def test_get(self):
         result = self.instance.get()
@@ -132,7 +131,6 @@ class TestApiNegOspf(EapiConfigUnitTest):
     def test_no_delete(self):
         result = self.instance.delete()
         self.assertTrue(result)
- 
 
 if __name__ == '__main__':
     unittest.main()

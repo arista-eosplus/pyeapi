@@ -30,13 +30,12 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 import os
-import unittest
-
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from random import randint
 from systestlib import DutSystemTest
+
 def clear_ospf_config(dut, id=None):
     if id is None:
         try:
@@ -50,14 +49,14 @@ class TestApiOspf(DutSystemTest):
     def test_get(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            dut.config(["router ospf 1", "router-id 1.1.1.1", "network 2.2.2.0/24 area 0", 
+            dut.config(["router ospf 1", "router-id 1.1.1.1", "network 2.2.2.0/24 area 0",
                         "redistribute bgp"])
             ospf_response = dut.api('ospf').get()
-            config = dict(router_id="1.1.1.1", ospf_process_id=1, 
+            config = dict(router_id="1.1.1.1", ospf_process_id=1,
                           networks=[dict(netmask='24', network="2.2.2.0", area="0.0.0.0")],
                           redistributions=[dict(protocol="bgp")], shutdown=False)
             self.assertEqual(ospf_response, config)
-            
+
     def test_shutdown(self):
         for dut in self.duts:
             clear_ospf_config(dut)
@@ -70,7 +69,7 @@ class TestApiOspf(DutSystemTest):
     def test_no_shutown(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            dut.config(["router ospf 10", "network 1.1.1.0/24 area 0", 
+            dut.config(["router ospf 10", "network 1.1.1.0/24 area 0",
                        "shutdown"])
             ospf = dut.api('ospf')
             response = ospf.set_no_shutdown()
@@ -89,7 +88,7 @@ class TestApiOspf(DutSystemTest):
     def test_create_valid_id(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            id = randint(1,65536)
+            id = randint(1, 65536)
             ospf = dut.api("ospf")
             response = ospf.create(id)
             self.assertTrue(response)
@@ -127,7 +126,7 @@ class TestApiOspf(DutSystemTest):
             response = ospf.set_router_id(disable=True)
             self.assertTrue(response)
             self.assertIn("no router-id", ospf.get_block("router ospf 1"))
-            
+
     def test_add_network(self):
         for dut in self.duts:
             clear_ospf_config(dut)
@@ -139,7 +138,7 @@ class TestApiOspf(DutSystemTest):
             response = ospf.add_network("10.10.10.0", "24")
             self.assertTrue(response)
             self.assertIn("network 10.10.10.0/24 area 0.0.0.0", ospf.get_block("router ospf 1"))
-    
+
     def test_remove_network(self):
         for dut in self.duts:
             clear_ospf_config(dut)
@@ -153,7 +152,7 @@ class TestApiOspf(DutSystemTest):
             self.assertTrue(response)
             for config in ospf_config:
                 if "router ospf" not in config:
-                    self.assertNotIn(config, ospf.get_block("router ospf 1")) 
+                    self.assertNotIn(config, ospf.get_block("router ospf 1"))
 
     def test_add_redistribution(self):
         for dut in self.duts:
@@ -162,11 +161,11 @@ class TestApiOspf(DutSystemTest):
             ospf = dut.api("ospf")
             protos = ['bgp', 'rip', 'static', 'connected']
             for proto in protos:
-                if randint(1,10) % 2 == 0:
+                if randint(1, 10) % 2 == 0:
                     response = ospf.add_redistribution(proto, 'test')
                 else:
                     response = ospf.add_redistribution(proto)
-                self.assertTrue(response)  
+                self.assertTrue(response)
             for proto in protos:
                 self.assertIn("redistribute {}".format(proto), ospf.get_block("router ospf 1"))
             with self.assertRaises(ValueError):
