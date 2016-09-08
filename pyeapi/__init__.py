@@ -29,7 +29,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-__version__ = '0.6.1'
+__version__ = '0.7.0'
 __author__ = 'Arista EOS+'
 
 

@@ -13,6 +13,7 @@
 #	make unittest -- runs the unit tests
 #	make systest -- runs the system tests
 #	make clean -- clean distutils
+#	make coverage_report -- code coverage report
 #
 ########################################################
 # variable section
@@ -67,4 +68,4 @@ systest: clean
 	$(COVERAGE) run -m unittest discover test/system -v
 
 coverage_report:
-	$(COVERAGE) report -m
+	$(COVERAGE) report --rcfile=".coveragerc"

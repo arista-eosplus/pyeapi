@@ -66,8 +66,8 @@ class TestApiMlag(EapiConfigUnitTest):
         for state in ['config', 'negate', 'default']:
             cmds = ['mlag configuration']
             if state == 'config':
-                cmds.append('domain-id test')
-                func = function('set_domain_id', 'test')
+                cmds.append('domain-id test.dom-id string')
+                func = function('set_domain_id', 'test.dom-id string')
             elif state == 'negate':
                 cmds.append('no domain-id')
                 func = function('set_domain_id', value='test', disable=True)

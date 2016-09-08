@@ -76,4 +76,4 @@ class TestUtils(unittest.TestCase):
     def test_debug(self, mock_logger):
         pyeapi.utils.islocalconnection = Mock(return_value=True)
         pyeapi.utils.debug('test')
-        mock_logger.debug.assert_called_with('test')
+        mock_logger.debug.assert_called_with('test_utils.test_debug: test')

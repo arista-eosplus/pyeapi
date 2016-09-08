@@ -1,0 +1,29 @@
+!
+ip routing
+!
+router ospf 65000
+   router-id 1.1.1.1
+   no bfd all-interfaces
+   distance ospf intra-area 110
+   distance ospf external 110
+   distance ospf inter-area 110
+   redistribute bgp route-map RM-IN
+   redistribute bgp route-map RM-OUT
+   redistribute static
+   area 0.0.0.0 default-cost 10
+   network 172.16.10.0/24 area 0.0.0.0
+   network 172.17.0.0/16 area 0.0.0.0
+   max-lsa 12000 75 ignore-time 5 ignore-count 5 reset-time 5
+   adjacency exchange-start threshold 20
+   log-adjacency-changes
+   timers throttle spf 0 5000 5000
+   timers lsa arrival 1000
+   timers throttle lsa all 1000 5000 5000
+   no timers out-delay
+   maximum-paths 128
+   no timers pacing flood
+   no max-metric router-lsa
+   point-to-point routes
+   no graceful-restart
+!
+!
