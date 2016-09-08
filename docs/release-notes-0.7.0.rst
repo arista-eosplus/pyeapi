@@ -24,4 +24,4 @@ Fixed
 ^^^^^
 
 * Allow dot and hyphen in mlag domain-id (`91 <https://github.com/arista-eosplus/pyeapi/issues/91>`_)
-    Include handling any character in domain-id string, including dot, hyphen, and space
+    Include handling any character in domain-id string, including dot, hyphen, and space.
