@@ -38,7 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from testlib import random_int, random_string, get_fixture
 
 import pyeapi.client
-
+import pyeapi.eapilib
 
 class TestClient(unittest.TestCase):
 
@@ -62,6 +62,18 @@ class TestClient(unittest.TestCase):
             result = dut.run_commands('show version')
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
+    def test_no_enable_single_command(self):
+        for dut in self.duts:
+            result = dut.run_commands('show version', 'json', send_enable=False)
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
+    def test_no_enable_single_command_no_auth(self):
+        for dut in self.duts:
+            dut.run_commands('disable')
+            with self.assertRaises(pyeapi.eapilib.CommandError):
+                dut.run_commands('show running-config', 'json', send_enable=False)
 
     def test_enable_multiple_commands(self):
         for dut in self.duts:
@@ -164,29 +176,48 @@ class TestNode(unittest.TestCase):
                       % (1002, 'invalid command',
                          'Invalid input \(at token \d+: \'.*\'\)')))
         # Send a command that cannot be run through the api
+        # note the command for reload looks to change in new EOS
+        # in 4.15 the  reload now is replaced with 'force' if you are
+        # testing some DUT running older code and this test fails
+        # change the error message to the following:
+        # To reload the machine over the API, please use 'reload now' instead
         cases.append(('reload', rfmt
                       % (1004, 'incompatible command',
                          'Command not permitted via API access. To reload '
-                         'the machine over the API, please use \'reload '
-                         'now\' instead.')))
+                         'the machine over the API, please include the'
+                         ' `force` keyword.')))
         # Send a continuous command that requires a break
         cases.append(('watch 10 show int e1 count rates', rfmt
                       % (1000, 'could not run command',
                          'init error \(cbreak\(\) returned ERR\)')))
+        # Send a command that has insufficient priv
+        cases.append(('show running-config', rfmt
+                      % (1002, 'invalid command',
+                         'Invalid input (privileged mode required)')))
+
 
         for dut in self.duts:
             for (cmd, regex) in cases:
                 try:
                     # Insert the error in list of valid commands
-                    dut.enable(['show version', cmd, 'show hostname'],
-                               strict=True)
+                    if cmd != "show running-config":
+                        dut.enable(['show version', cmd, 'show hostname'],
+                                   strict=True)
+                    else:
+                        dut.enable(['disable', 'show version', cmd],
+                                   strict=True, send_enable=False)
+
                     self.fail('A CommandError should have been raised')
                 except pyeapi.eapilib.CommandError as exc:
                     # Validate the properties of the exception
-                    self.assertEqual(len(exc.trace), 4)
+                    if cmd != 'show running-config':
+                        self.assertEqual(len(exc.trace), 4)
+                    else:
+                        self.assertEqual(len(exc.trace), 3)
                     self.assertIsNotNone(exc.command_error)
                     self.assertIsNotNone(exc.output)
                     self.assertIsNotNone(exc.commands)
+                    print regex
                     self.assertRegexpMatches(exc.message, regex)
 
 
