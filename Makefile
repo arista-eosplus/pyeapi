@@ -68,4 +68,4 @@ systest: clean
 	$(COVERAGE) run -m unittest discover test/system -v
 
 coverage_report:
-	$(COVERAGE) report -m
+	$(COVERAGE) report --rcfile=".coveragerc"
