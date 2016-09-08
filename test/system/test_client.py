@@ -217,7 +217,6 @@ class TestNode(unittest.TestCase):
                     self.assertIsNotNone(exc.command_error)
                     self.assertIsNotNone(exc.output)
                     self.assertIsNotNone(exc.commands)
-                    print regex
                     self.assertRegexpMatches(exc.message, regex)
 
 
