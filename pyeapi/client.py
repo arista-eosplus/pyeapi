@@ -560,7 +560,8 @@ class Node(object):
         block_end = line_end + block_end
         return config[block_start:block_end]
 
-    def enable(self, commands, encoding='json', strict=False):
+    def enable(self, commands, encoding='json', strict=False, 
+              send_enable=True):
         """Sends the array of commands to the node in enable mode
 
         This method will send the commands to the node and evaluate
@@ -576,6 +577,8 @@ class Node(object):
 
             strict (bool): If False, this method will attempt to run a
                 command with text encoding if JSON encoding fails
+            send_enable (bool): If True the enable command will be
+                               prepended to the command list automatically.
 
         Returns:
             A dict object that includes the response for each command along
@@ -604,7 +607,7 @@ class Node(object):
         # there in error and both are now present to avoid breaking
         # existing scripts. 'response' will be removed in a future release.
         if strict:
-            responses = self.run_commands(commands, encoding)
+            responses = self.run_commands(commands, encoding, send_enable)
             for index, response in enumerate(responses):
                 results.append(dict(command=commands[index],
                                     result=response,
@@ -613,13 +616,13 @@ class Node(object):
         else:
             for command in commands:
                 try:
-                    resp = self.run_commands(command, encoding)
+                    resp = self.run_commands(command, encoding, send_enable)
                     results.append(dict(command=command,
                                         result=resp[0],
                                         encoding=encoding))
                 except CommandError as exc:
                     if exc.error_code == 1003:
-                        resp = self.run_commands(command, 'text')
+                        resp = self.run_commands(command, 'text', send_enable)
                         results.append(dict(command=command,
                                             result=resp[0],
                                             encoding='text'))
@@ -627,7 +630,7 @@ class Node(object):
                         raise
         return results
 
-    def run_commands(self, commands, encoding='json'):
+    def run_commands(self, commands, encoding='json', send_enable=True):
         """Sends the commands over the transport to the device
 
         This method sends the commands to the device using the nodes
@@ -639,6 +642,8 @@ class Node(object):
                 device using the transport
             encoding (str): The encoding method to use for the request and
                 excpected response.
+            send_enable (bool): If True the enable command will be
+                               prepended to the command list automatically.
 
         Returns:
             This method will return the raw response from the connection
@@ -658,15 +663,17 @@ class Node(object):
                      'input': '%s\n' % (c.split('MULTILINE:')[1].strip())}
                     if 'MULTILINE:' in c else c for c in commands]
 
-        if self._enablepwd:
-            commands.insert(0, {'cmd': 'enable', 'input': self._enablepwd})
-        else:
-            commands.insert(0, 'enable')
+        if send_enable:
+            if self._enablepwd:
+                commands.insert(0, {'cmd': 'enable', 'input': self._enablepwd})
+            else:
+                commands.insert(0, 'enable')
 
         response = self._connection.execute(commands, encoding)
 
-        # pop enable command from the response
-        response['result'].pop(0)
+        # pop enable command from the response only if we sent enable
+        if send_enable:
+            response['result'].pop(0)
 
         return response['result']
 
