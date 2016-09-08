@@ -183,9 +183,7 @@ class TestNode(unittest.TestCase):
         # To reload the machine over the API, please use 'reload now' instead
         cases.append(('reload', rfmt
                       % (1004, 'incompatible command',
-                         'Command not permitted via API access. To reload '
-                         'the machine over the API, please include the'
-                         ' `force` keyword.')))
+                         'Command not permitted via API access..*')))
         # Send a continuous command that requires a break
         cases.append(('watch 10 show int e1 count rates', rfmt
                       % (1000, 'could not run command',
@@ -193,7 +191,7 @@ class TestNode(unittest.TestCase):
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',
-                         'Invalid input (privileged mode required)')))
+                         'Invalid input \(privileged mode required\)')))
 
 
         for dut in self.duts:
