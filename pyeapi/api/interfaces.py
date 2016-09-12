@@ -756,7 +756,7 @@ class VxlanInterface(BaseInterface):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+.[\d]+.[\d]+)', 
+        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+\.[\d]+\.[\d]+)', 
                           config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)

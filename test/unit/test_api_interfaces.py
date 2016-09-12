@@ -407,8 +407,6 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         func = function('set_multicast_decap', 'Vxlan1', default=True)
         self.eapi_positive_config_test(func, cmds)
 
-
-
     def test_set_udp_port_with_value(self):
         cmds = ['interface Vxlan1', 'vxlan udp-port 1024']
         func = function('set_udp_port', 'Vxlan1', '1024')

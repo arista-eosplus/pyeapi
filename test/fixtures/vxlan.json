@@ -9,6 +9,7 @@
             "vlanToVtepList": {},
             "mtu": 0,
             "hardware": "vxlan",
+            "mcastGrpDecap": "",
             "replicationMode": "multicast",
             "bandwidth": 0,
             "floodMcastGrp": "239.10.10.10",

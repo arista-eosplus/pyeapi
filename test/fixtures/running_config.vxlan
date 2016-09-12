@@ -46,4 +46,5 @@ interface Vxlan1
    no vxlan vlan flood vtep
    no vxlan learn-restrict vtep
    no vxlan vlan learn-restrict vtep
+   no vxlan multicast-group decap
 !
