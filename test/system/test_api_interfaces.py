@@ -341,6 +341,8 @@ class TestApiVxlanInterface(DutSystemTest):
             self.assertEqual(result['description'], None)
             self.assertEqual(result['source_interface'], '')
             self.assertEqual(result['multicast_group'], '')
+            self.assertEqual(result['multicast_decap'], False)
+
 
     def get_config(self, dut):
         cmd = 'show running-config all interfaces Vxlan1'
@@ -404,6 +406,16 @@ class TestApiVxlanInterface(DutSystemTest):
             instance = api.set_multicast_group('Vxlan1', disable=True)
             self.assertTrue(instance)
             self.contains('no vxlan multicast-group', dut)
+
+    '''commenting this one out as it will only parse on a  trident based DUT
+    def test_set_multicast_decap(self):
+        for dut in self.duts:
+            dut.config(['no interface Vxlan1', 'interface Vxlan1'])
+            api = dut.api('interfaces')
+            instance = api.set_multicast_decap('Vxlan1')
+            self.assertTrue(instance)
+            self.contains('vxlan multicast-group decap', dut)
+    '''
 
     def test_set_udp_port(self):
         for dut in self.duts:

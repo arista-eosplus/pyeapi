@@ -71,9 +71,8 @@ class TestClient(unittest.TestCase):
 
     def test_no_enable_single_command_no_auth(self):
         for dut in self.duts:
-            dut.run_commands('disable')
             with self.assertRaises(pyeapi.eapilib.CommandError):
-                dut.run_commands('show running-config', 'json', send_enable=False)
+                dut.run_commands(['disable', 'show running-config'], 'json', send_enable=False)
 
     def test_enable_multiple_commands(self):
         for dut in self.duts:
@@ -187,7 +186,7 @@ class TestNode(unittest.TestCase):
         # Send a continuous command that requires a break
         cases.append(('watch 10 show int e1 count rates', rfmt
                       % (1000, 'could not run command',
-                         'init error \(cbreak\(\) returned ERR\)')))
+                         'init error.*')))
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',

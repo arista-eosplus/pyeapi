@@ -710,6 +710,8 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
+            * multicast_decap (bool): If the mutlicast decap 
+                                      feature is configured
 
         Args:
             name (str): The interface identifier to retrieve from the
@@ -732,6 +734,7 @@ class VxlanInterface(BaseInterface):
         response.update(self._parse_udp_port(config))
         response.update(self._parse_vlans(config))
         response.update(self._parse_flood_list(config))
+        response.update(self._parse_multicast_decap(config))
 
         return response
 
@@ -753,9 +756,14 @@ class VxlanInterface(BaseInterface):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search(r'vxlan multicast-group ([^\s]+)', config)
+        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+\.[\d]+\.[\d]+)', 
+                          config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)
+   
+    def _parse_multicast_decap(self, config):
+        value = 'vxlan mutlicast-group decap' in config
+        return dict(multicast_decap=bool(value))
 
     def _parse_udp_port(self, config):
         match = re.search(r'vxlan udp-port (\d+)', config)
@@ -830,6 +838,31 @@ class VxlanInterface(BaseInterface):
         cmds = self.command_builder(string, value=value, default=default,
                                     disable=disable)
         return self.configure_interface(name, cmds)
+
+    def set_multicast_decap(self, name, default=False,
+                           disable=False):
+        """Configures the Vxlan multicast-group decap feature 
+
+        EosVersion:
+            4.15.0M
+
+        Args:
+            name(str): The interface identifier to configure, defaults to
+                Vxlan1
+           default(bool): Configures the mulitcast-group decap value to default
+           disable(bool): Negates the multicast-group decap value
+
+        Returns:
+            True if the operation succeeds otherwise False
+        """
+        string = 'vxlan multicast-group decap'
+        if(default or disable):
+            cmds = self.command_builder(string, value=None, default=default,
+                                       disable=disable)
+        else:
+            cmds = [string] 
+        return self.configure_interface(name, cmds)
+
 
     def set_udp_port(self, name, value=None, default=False, disable=False):
         """Configures vxlan udp-port value

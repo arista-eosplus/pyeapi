@@ -357,7 +357,8 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
     def test_get(self):
         keys = ['name', 'type', 'description', 'shutdown', 'source_interface',
-                'multicast_group', 'udp_port', 'vlans', 'flood_list']
+                'multicast_group', 'udp_port', 'vlans', 'flood_list',
+                'multicast_decap']
         result = self.instance.get('Vxlan1')
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
@@ -389,6 +390,21 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
     def test_set_multicast_group_with_default(self):
         cmds = ['interface Vxlan1', 'default vxlan multicast-group']
         func = function('set_multicast_group', 'Vxlan1', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap(self):
+        cmds = ['interface Vxlan1', 'vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap_with_no_value(self):
+        cmds = ['interface Vxlan1', 'no vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1', disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap_with_default(self):
+        cmds = ['interface Vxlan1', 'default vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1', default=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_udp_port_with_value(self):
