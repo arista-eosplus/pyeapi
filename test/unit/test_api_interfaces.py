@@ -268,6 +268,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         values = dict(name='Port-Channel1', type='portchannel',
                       description=None, shutdown=False,
                       lacp_mode='on', minimum_links=0,
+                      lacp_fallback='disabled', lacp_timeout=90,
                       members=['Ethernet5', 'Ethernet6'])
 
         self.assertEqual(values, result)
