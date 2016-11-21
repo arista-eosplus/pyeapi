@@ -270,6 +270,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
                       lacp_mode='on', minimum_links=0,
                       lacp_fallback='disabled', lacp_timeout=90,
                       members=['Ethernet5', 'Ethernet6'])
+
         self.assertEqual(values, result)
 
     def test_set_minimum_links_with_value(self):
@@ -451,7 +452,6 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         cmds = ['interface Vxlan1', 'vxlan vlan 10 flood vtep remove 1.1.1.1']
         func = function('remove_vtep', 'Vxlan1', '1.1.1.1', vlan='10')
         self.eapi_positive_config_test(func, cmds)
-
 
 if __name__ == '__main__':
     unittest.main()
