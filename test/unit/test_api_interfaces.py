@@ -270,7 +270,6 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
                       lacp_mode='on', minimum_links=0,
                       lacp_fallback='disabled', lacp_timeout=90,
                       members=['Ethernet5', 'Ethernet6'])
-
         self.assertEqual(values, result)
 
     def test_set_minimum_links_with_value(self):
