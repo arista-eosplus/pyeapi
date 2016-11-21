@@ -735,7 +735,7 @@ class PortchannelInterface(BaseInterface):
 
     def set_lacp_timeout(self, name, value=None):
         """Configures the Port-Channel LACP fallback timeout
-           The fallback timeout configures the period an interface in 
+           The fallback timeout configures the period an interface in
            fallback mode remains in LACP mode without receiving a PDU.
 
         Args:
@@ -747,8 +747,8 @@ class PortchannelInterface(BaseInterface):
             True if the operation succeeds otherwise False is returned
         """
         commands = ['interface %s' % name]
-        commands.append(self.command_builder('port-channel lacp fallback timeout',
-                                             value=value))
+        string = 'port-channel lacp fallback timeout'
+        commands.append(self.command_builder(string, value=value))
         return self.configure(commands)
 
 
@@ -772,7 +772,7 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
-            * multicast_decap (bool): If the mutlicast decap 
+            * multicast_decap (bool): If the mutlicast decap
                                       feature is configured
 
         Args:
@@ -818,11 +818,11 @@ class VxlanInterface(BaseInterface):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+\.[\d]+\.[\d]+)', 
+        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+\.[\d]+\.[\d]+)',
                           config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)
-   
+
     def _parse_multicast_decap(self, config):
         value = 'vxlan mutlicast-group decap' in config
         return dict(multicast_decap=bool(value))
@@ -902,7 +902,7 @@ class VxlanInterface(BaseInterface):
         return self.configure_interface(name, cmds)
 
     def set_multicast_decap(self, name, default=False, disable=False):
-        """Configures the Vxlan multicast-group decap feature 
+        """Configures the Vxlan multicast-group decap feature
 
         EosVersion:
             4.15.0M
@@ -921,7 +921,7 @@ class VxlanInterface(BaseInterface):
             cmds = self.command_builder(string, value=None, default=default,
                                         disable=disable)
         else:
-            cmds = [string] 
+            cmds = [string]
         return self.configure_interface(name, cmds)
 
 
