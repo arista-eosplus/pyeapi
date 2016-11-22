@@ -453,5 +453,6 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         func = function('remove_vtep', 'Vxlan1', '1.1.1.1', vlan='10')
         self.eapi_positive_config_test(func, cmds)
 
+
 if __name__ == '__main__':
     unittest.main()

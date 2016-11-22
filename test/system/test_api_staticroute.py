@@ -287,5 +287,6 @@ class TestApiStaticroute(DutSystemTest):
                 distance=1, route_name='test3')
             self.assertTrue(result)
 
+
 if __name__ == '__main__':
     unittest.main()

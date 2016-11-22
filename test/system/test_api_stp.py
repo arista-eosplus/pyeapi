@@ -140,5 +140,6 @@ class TestApiStpInterfaces(DutSystemTest):
             result = resource.set_portfast_type(intf, 'normal')
             self.assertTrue(result, 'dut=%s' % dut)
 
+
 if __name__ == '__main__':
     unittest.main()

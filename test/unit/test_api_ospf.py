@@ -132,6 +132,7 @@ class TestApiNegOspf(EapiConfigUnitTest):
         result = self.instance.delete()
         self.assertTrue(result)
 
+
 if __name__ == '__main__':
     unittest.main()
 

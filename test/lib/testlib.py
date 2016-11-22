@@ -54,6 +54,7 @@ def random_vlan():
 def random_int(minvalue, maxvalue):
     return random.randint(minvalue, maxvalue)
 
+
 from collections import namedtuple
 Function = namedtuple('Function', 'name args kwargs')
 

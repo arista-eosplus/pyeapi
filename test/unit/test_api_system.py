@@ -98,5 +98,6 @@ class TestApiSystem(EapiConfigUnitTest):
         cmds = 'no banner motd'
         self.eapi_positive_config_test(func, cmds)
 
+
 if __name__ == '__main__':
     unittest.main()

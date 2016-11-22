@@ -492,5 +492,6 @@ class TestApiVxlanInterface(DutSystemTest):
             self.assertTrue(instance)
             self.notcontains('vxlan vlan 10 vni 10', dut)
 
+
 if __name__ == '__main__':
     unittest.main()

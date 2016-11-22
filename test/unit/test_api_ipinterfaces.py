@@ -134,5 +134,6 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
                 func = function('set_mtu', intf, value)
                 self.eapi_positive_config_test(func, cmds)
 
+
 if __name__ == '__main__':
     unittest.main()
