@@ -295,6 +295,31 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         func = function('set_minimum_links', 'Port-Channel1', disable=True)
         self.eapi_positive_config_test(func, cmds)
 
+    def test_set_lacp_timeout_with_value(self):
+        timeout = random_int(1, 16)
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback timeout %s' % timeout]
+        func = function('set_lacp_timeout', 'Port-Channel1', timeout)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_individual(self):
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback individual']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'individual')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_static(self):
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback static']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'static')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_disabled(self):
+        cmds = ['interface Port-Channel1', 'no port-channel lacp fallback']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'disabled')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_invalid_mode(self):
+        func = function('set_lacp_fallback', 'Port-Channel1', random_string())
+        self.eapi_negative_config_test(func)
+
     def test_get_lacp_mode(self):
         result = self.instance.get_lacp_mode('Port-Channel1')
         self.assertEqual(result, 'on')

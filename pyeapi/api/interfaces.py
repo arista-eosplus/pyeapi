@@ -725,9 +725,7 @@ class PortchannelInterface(BaseInterface):
         """
         if mode not in ['disabled', 'static', 'individual']:
             return False
-        disable = False
-        if mode == 'disabled':
-            disable = True
+        disable = True if mode == 'disabled' else False
         commands = ['interface %s' % name]
         commands.append(self.command_builder('port-channel lacp fallback',
                                              value=mode, disable=disable))
