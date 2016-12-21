@@ -560,8 +560,8 @@ class Node(object):
         block_end = line_end + block_end
         return config[block_start:block_end]
 
-    def enable(self, commands, encoding='json', strict=False, 
-              send_enable=True):
+    def enable(self, commands, encoding='json', strict=False,
+               send_enable=True):
         """Sends the array of commands to the node in enable mode
 
         This method will send the commands to the node and evaluate

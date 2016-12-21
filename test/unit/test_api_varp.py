@@ -146,5 +146,6 @@ class TestApiVarpInterfaces(EapiConfigUnitTest):
         cmds = ['interface Vlan4001', 'no ip virtual-router address']
         self.eapi_positive_config_test(func, cmds)
 
+
 if __name__ == '__main__':
     unittest.main()

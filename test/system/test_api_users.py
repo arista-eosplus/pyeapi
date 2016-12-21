@@ -177,5 +177,6 @@ class TestApiUsers(DutSystemTest):
             self.assertNotIn('username test sshkey %s' % TEST_SSH_KEY,
                              api.config)
 
+
 if __name__ == '__main__':
     unittest.main()

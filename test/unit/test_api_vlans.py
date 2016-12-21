@@ -150,5 +150,6 @@ class TestApiVlans(EapiConfigUnitTest):
         func = function('remove_trunk_group', vid, tg)
         self.eapi_positive_config_test(func, cmds)
 
+
 if __name__ == '__main__':
     unittest.main()
