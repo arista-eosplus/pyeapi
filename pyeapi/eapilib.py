@@ -489,25 +489,25 @@ class SocketEapiConnection(EapiConnection):
 class HttpLocalEapiConnection(EapiConnection):
     def __init__(self, port=None, path=None, timeout=60, **kwargs):
         super(HttpLocalEapiConnection, self).__init__()
-        port = int(port) or DEFAULT_HTTP_LOCAL_PORT
+        port = port or DEFAULT_HTTP_LOCAL_PORT
         path = path or DEFAULT_HTTP_PATH
-        self.transport = HttpConnection(path, 'localhost', port,
+        self.transport = HttpConnection(path, 'localhost', int(port),
                                         timeout=timeout)
 
 class HttpEapiConnection(EapiConnection):
     def __init__(self, host, port=None, path=None, username=None,
                  password=None, timeout=60, **kwargs):
         super(HttpEapiConnection, self).__init__()
-        port = int(port) or DEFAULT_HTTP_PORT
+        port = port or DEFAULT_HTTP_PORT
         path = path or DEFAULT_HTTP_PATH
-        self.transport = HttpConnection(path, host, port, timeout=timeout)
+        self.transport = HttpConnection(path, host, int(port), timeout=timeout)
         self.authentication(username, password)
 
 class HttpsEapiConnection(EapiConnection):
     def __init__(self, host, port=None, path=None, username=None,
                  password=None, context=None, timeout=60, **kwargs):
         super(HttpsEapiConnection, self).__init__()
-        port = int(port) or DEFAULT_HTTPS_PORT
+        port = port or DEFAULT_HTTPS_PORT
         path = path or DEFAULT_HTTP_PATH
 
         enforce_verification = kwargs.get('enforce_verification')
@@ -515,7 +515,7 @@ class HttpsEapiConnection(EapiConnection):
         if context is None and not enforce_verification:
             context = self.disable_certificate_verification()
 
-        self.transport = https_connection_factory(path, host, port,
+        self.transport = https_connection_factory(path, host, int(port),
                                                   context, timeout)
         self.authentication(username, password)
 
