@@ -116,7 +116,7 @@ class TestNode(unittest.TestCase):
     def test_config_with_multiple_multilines(self):
         commands = [random_string(),
                     ('banner login MULTILINE:This is a new banner\n'
-                    'with different lines!!!'),
+                     'with different lines!!!'),
                     random_string()]
 
         self.node.run_commands = Mock(return_value=[{}, {}, {}, {}])

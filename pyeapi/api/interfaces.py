@@ -65,6 +65,8 @@ from pyeapi.utils import ProxyCall
 MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
 DEFAULT_LACP_MODE = 'on'
+DEFAULT_LACP_FALLBACK = 'disabled'
+DEFAULT_LACP_FALLBACK_TIMEOUT = 90
 
 VALID_INTERFACES = frozenset([
     'Ethernet',
@@ -548,6 +550,8 @@ class PortchannelInterface(BaseInterface):
         response['members'] = self.get_members(name)
         response['lacp_mode'] = self.get_lacp_mode(name)
         response.update(self._parse_minimum_links(config))
+        response.update(self._parse_lacp_timeout(config))
+        response.update(self._parse_lacp_fallback(config))
         return response
 
     def _parse_minimum_links(self, config):
@@ -556,6 +560,20 @@ class PortchannelInterface(BaseInterface):
         if match:
             value = int(match.group(1))
         return dict(minimum_links=value)
+
+    def _parse_lacp_fallback(self, config):
+        value = DEFAULT_LACP_FALLBACK
+        match = re.search(r'lacp fallback (static|individual)', config)
+        if match:
+            value = match.group(1)
+        return dict(lacp_fallback=value)
+
+    def _parse_lacp_timeout(self, config):
+        value = DEFAULT_LACP_FALLBACK_TIMEOUT
+        match = re.search(r'lacp fallback timeout (\d+)', config)
+        if match:
+            value = int(match.group(1))
+        return dict(lacp_timeout=value)
 
     def get_lacp_mode(self, name):
         """Returns the LACP mode for the specified Port-Channel interface
@@ -687,6 +705,48 @@ class PortchannelInterface(BaseInterface):
         commands.append(self.command_builder('port-channel min-links',
                                              value=value, default=default,
                                              disable=disable))
+        return self.configure(commands)
+
+    def set_lacp_fallback(self, name, mode=None):
+        """Configures the Port-Channel lacp_fallback
+
+        Args:
+            name(str): The Port-Channel interface name
+
+            mode(str): The Port-Channel LACP fallback setting
+                Valid values are 'disabled', 'static', 'individual':
+
+                * static  - Fallback to static LAG mode
+                * individual - Fallback to individual ports
+                * disabled - Disable LACP fallback
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        if mode not in ['disabled', 'static', 'individual']:
+            return False
+        disable = True if mode == 'disabled' else False
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('port-channel lacp fallback',
+                                             value=mode, disable=disable))
+        return self.configure(commands)
+
+    def set_lacp_timeout(self, name, value=None):
+        """Configures the Port-Channel LACP fallback timeout
+           The fallback timeout configures the period an interface in
+           fallback mode remains in LACP mode without receiving a PDU.
+
+        Args:
+            name(str): The Port-Channel interface name
+
+            value(int): port-channel lacp fallback timeout in seconds
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        commands = ['interface %s' % name]
+        string = 'port-channel lacp fallback timeout'
+        commands.append(self.command_builder(string, value=value))
         return self.configure(commands)
 
 
