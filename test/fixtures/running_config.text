@@ -1748,5 +1748,17 @@ management xmpp
    vrf default
    session privilege 1
 !
+vrf definition alpha
+   rd 1:10
+   description vrf definition for alpha
+!
+vrf definition beta
+  description the beta description
+!
+vrf definition delta
+!
+vrf definition gamma
+  rd 1000:5.2.2.2
+  description hello there everyone
 !
 end
