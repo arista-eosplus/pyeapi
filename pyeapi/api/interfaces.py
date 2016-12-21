@@ -710,7 +710,7 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
-            * multicast_decap (bool): If the mutlicast decap 
+            * multicast_decap (bool): If the mutlicast decap
                                       feature is configured
 
         Args:
@@ -756,11 +756,12 @@ class VxlanInterface(BaseInterface):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search(r'vxlan multicast-group ([\d]{3}\.[\d]+\.[\d]+\.[\d]+)', 
+        match = re.search(r'vxlan multicast-group '
+                          r'([\d]{3}\.[\d]+\.[\d]+\.[\d]+)',
                           config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)
-   
+
     def _parse_multicast_decap(self, config):
         value = 'vxlan mutlicast-group decap' in config
         return dict(multicast_decap=bool(value))
@@ -840,8 +841,8 @@ class VxlanInterface(BaseInterface):
         return self.configure_interface(name, cmds)
 
     def set_multicast_decap(self, name, default=False,
-                           disable=False):
-        """Configures the Vxlan multicast-group decap feature 
+                            disable=False):
+        """Configures the Vxlan multicast-group decap feature
 
         EosVersion:
             4.15.0M
@@ -858,9 +859,9 @@ class VxlanInterface(BaseInterface):
         string = 'vxlan multicast-group decap'
         if(default or disable):
             cmds = self.command_builder(string, value=None, default=default,
-                                       disable=disable)
+                                        disable=disable)
         else:
-            cmds = [string] 
+            cmds = [string]
         return self.configure_interface(name, cmds)
 
 

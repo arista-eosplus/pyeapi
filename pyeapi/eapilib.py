@@ -50,7 +50,7 @@ except ImportError:
     # Use Python 2.7 import as a fallback
     from httplib import HTTPConnection, HTTPSConnection
 
-from pyeapi.utils import debug, make_iterable
+from pyeapi.utils import make_iterable
 
 _LOGGER = logging.getLogger(__name__)
 

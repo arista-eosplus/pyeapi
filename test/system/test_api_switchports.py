@@ -132,5 +132,6 @@ class TestApiSwitchports(DutSystemTest):
                           config[0]['output'], 'dut=%s' % dut)
             dut.config('default interface %s' % intf)
 
+
 if __name__ == '__main__':
     unittest.main()

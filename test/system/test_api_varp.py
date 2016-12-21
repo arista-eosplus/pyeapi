@@ -232,5 +232,6 @@ class TestApiVarpInterfaces(DutSystemTest):
             self.assertNotIn('ip virtual-router address 1.1.1.21',
                              api.get_block('interface Vlan1000'))
 
+
 if __name__ == '__main__':
     unittest.main()
