@@ -50,7 +50,7 @@ except ImportError:
     # Use Python 2.7 import as a fallback
     from httplib import HTTPConnection, HTTPSConnection
 
-from pyeapi.utils import debug, make_iterable
+from pyeapi.utils import make_iterable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -491,7 +491,7 @@ class HttpLocalEapiConnection(EapiConnection):
         super(HttpLocalEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_LOCAL_PORT
         path = path or DEFAULT_HTTP_PATH
-        self.transport = HttpConnection(path, 'localhost', port,
+        self.transport = HttpConnection(path, 'localhost', int(port),
                                         timeout=timeout)
 
 class HttpEapiConnection(EapiConnection):
@@ -500,7 +500,7 @@ class HttpEapiConnection(EapiConnection):
         super(HttpEapiConnection, self).__init__()
         port = port or DEFAULT_HTTP_PORT
         path = path or DEFAULT_HTTP_PATH
-        self.transport = HttpConnection(path, host, port, timeout=timeout)
+        self.transport = HttpConnection(path, host, int(port), timeout=timeout)
         self.authentication(username, password)
 
 class HttpsEapiConnection(EapiConnection):
@@ -515,7 +515,7 @@ class HttpsEapiConnection(EapiConnection):
         if context is None and not enforce_verification:
             context = self.disable_certificate_verification()
 
-        self.transport = https_connection_factory(path, host, port,
+        self.transport = https_connection_factory(path, host, int(port),
                                                   context, timeout)
         self.authentication(username, password)
 

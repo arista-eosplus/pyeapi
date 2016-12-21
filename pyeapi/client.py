@@ -91,8 +91,6 @@ contains the settings for nodes used by the connect_to function.
 
 """
 import os
-import sys
-import logging
 import re
 
 try:
@@ -312,7 +310,10 @@ class Config(SafeConfigParser):
 
 # TODO: This is a global variable (in the module) - to review the impact on
 # having a shared state for the config file.
+
+
 config = Config()
+
 
 def load_config(filename):
     """Function method that loads a conf file
