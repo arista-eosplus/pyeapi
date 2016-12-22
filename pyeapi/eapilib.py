@@ -251,7 +251,7 @@ class EapiConnection(object):
         _LOGGER.debug('Autentication string is: {}'.format(self._auth))
 
 
-    def request(self, commands, encoding=None, reqid=None):
+    def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
 
         This method will take a list of EOS commands and generate a valid
@@ -290,6 +290,8 @@ class EapiConnection(object):
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         params = {"version": 1, "cmds": commands, "format": encoding}
+        if 'autoComplete' in kwargs:
+            params["autoComplete"] = kwargs["autoComplete"]
         return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
                            "params": params, "id": str(reqid)})
 
@@ -393,6 +395,11 @@ class EapiConnection(object):
 
             if 'error' in decoded:
                 (code, msg, err, out) = self._parse_error_message(decoded)
+                if "unexpected keyword argument 'autoComplete'" in msg:
+                    auto_msg = ("autoComplete parameter is not supported in"
+                                " this version of EOS.")
+                    _LOGGER.error(auto_msg)
+                    msg = msg + ". " + auto_msg
                 raise CommandError(code, msg, command_error=err, output=out)
 
             return decoded
