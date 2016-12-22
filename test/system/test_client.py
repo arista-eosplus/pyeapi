@@ -142,6 +142,25 @@ class TestClient(unittest.TestCase):
             txtstr = api.get_block('interface Ethernet1', config='config')
             self.assertEqual(txtstr, None)
 
+    def test_execute_with_autocomplete(self):
+        # There are some versions of EOS before 4.17.x that have the
+        # autocomplete feature available. If system tests are run on one of
+        # those version of EOS this system test will fail.
+        for dut in self.duts:
+            result = dut.connection.execute(['show version'], encoding='json')
+            version = result['result'][0]['version']
+            version = version.split('.')
+            if int(version[0]) >= 4 and int(version[1]) >= 17:
+                result = dut.connection.execute(['sh ver'], encoding='json',
+                                                autoComplete=True)
+                self.assertIn('version', result['result'][0])
+            else:
+                # Verify exception thrown for EOS version that does not
+                # support autocomplete parameter with EAPI
+                with self.assertRaises(pyeapi.eapilib.CommandError):
+                    dut.connection.execute(['sh ver'], encoding='json',
+                                           autoComplete=True)
+
     def tearDown(self):
         for dut in self.duts:
             dut.config("no enable secret")
