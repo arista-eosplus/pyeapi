@@ -123,7 +123,7 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
 
     def test_set_mtu_invalid_value_raises_value_error(self):
         for intf in self.INTERFACES:
-            for value in [67, 65536, random_string()]:
+            for value in [67, 65536, 'a' + random_string()]:
                 func = function('set_mtu', intf, value)
                 self.eapi_exception_config_test(func, ValueError)
             for value in [None]:
