@@ -83,7 +83,7 @@ class TestApiVarp(EapiConfigUnitTest):
 
     def test_set_mac_address_with_disable(self):
         func = function('set_mac_address', disable=True)
-        cmds = 'no ip virtual-router mac-address'
+        cmds = 'no ip virtual-router mac-address 00:11:22:33:44:55'
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_mac_address_with_no_value(self):
@@ -96,7 +96,7 @@ class TestApiVarp(EapiConfigUnitTest):
 
     def test_set_mac_address_with_default(self):
         func = function('set_mac_address', default=True)
-        cmds = 'default ip virtual-router mac-address'
+        cmds = 'default ip virtual-router mac-address 00:11:22:33:44:55'
         self.eapi_positive_config_test(func, cmds)
 
 
