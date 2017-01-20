@@ -145,12 +145,40 @@ class TestEapiConnection(unittest.TestCase):
                      " of EOS.")
             self.assertIn(match, error.message)
 
+    def test_send_raises_expandaliases_command_error(self):
+        message = "runCmds() got an unexpected keyword argument" \
+                  " 'expandAliases'"
+        error = dict(code=9999, message=message, data=[{'errors': ['test']}])
+        response_dict = dict(jsonrpc='2.0', error=error, id=id(self))
+        response_json = json.dumps(response_dict)
+
+        mock_transport = Mock(name='transport')
+        mockcfg = {'getresponse.return_value.read.return_value': response_json}
+        mock_transport.configure_mock(**mockcfg)
+
+        instance = pyeapi.eapilib.EapiConnection()
+        instance.transport = mock_transport
+
+        try:
+            instance.send('test')
+        except pyeapi.eapilib.CommandError as error:
+            match = ("expandAliases parameter is not supported in this version"
+                     " of EOS.")
+            self.assertIn(match, error.message)
+
     def test_request_adds_autocomplete(self):
         instance = pyeapi.eapilib.EapiConnection()
         request = instance.request(['sh ver'], encoding='json',
                                    autoComplete=True)
         data = json.loads(request)
         self.assertIn('autoComplete', data['params'])
+
+    def test_request_adds_expandaliases(self):
+        instance = pyeapi.eapilib.EapiConnection()
+        request = instance.request(['test'], encoding='json',
+                                   expandAliases=True)
+        data = json.loads(request)
+        self.assertIn('expandAliases', data['params'])
 
     def test_request_ignores_unknown_param(self):
         instance = pyeapi.eapilib.EapiConnection()
