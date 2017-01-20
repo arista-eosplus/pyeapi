@@ -42,6 +42,7 @@ import socket
 import base64
 import logging
 import ssl
+import re
 
 try:
     # Try Python 3.x import first
@@ -282,6 +283,9 @@ class EapiConnection(object):
                 parameter in the eAPI request
             reqid (string): A custom value to assign to the request ID
                 field.  This value is automatically generated if not passed
+            **kwargs: Additional keyword arguments for expanded eAPI
+                functionality. Only supported eAPI params are used in building
+                the request
 
         Returns:
             A JSON encoding request structure that can be send over eAPI
@@ -290,8 +294,10 @@ class EapiConnection(object):
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         params = {"version": 1, "cmds": commands, "format": encoding}
-        if 'autoComplete' in kwargs:
+        if "autoComplete" in kwargs:
             params["autoComplete"] = kwargs["autoComplete"]
+        if "expandAliases" in kwargs:
+            params["expandAliases"] = kwargs["expandAliases"]
         return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
                            "params": params, "id": str(reqid)})
 
@@ -395,9 +401,11 @@ class EapiConnection(object):
 
             if 'error' in decoded:
                 (code, msg, err, out) = self._parse_error_message(decoded)
-                if "unexpected keyword argument 'autoComplete'" in msg:
-                    auto_msg = ("autoComplete parameter is not supported in"
-                                " this version of EOS.")
+                pattern = "unexpected keyword argument '(.*)'"
+                match = re.search(pattern, msg)
+                if match:
+                    auto_msg = ("%s parameter is not supported in this"
+                                " version of EOS." % match.group(1))
                     _LOGGER.error(auto_msg)
                     msg = msg + ". " + auto_msg
                 raise CommandError(code, msg, command_error=err, output=out)

@@ -499,7 +499,7 @@ class Node(object):
         """
         self._enablepwd = str(password).strip()
 
-    def config(self, commands):
+    def config(self, commands, **kwargs):
         """Configures the node with the specified commands
 
         This method is used to send configuration commands to the node.  It
@@ -512,6 +512,9 @@ class Node(object):
                 a list.
                 The list of commands will also be prepended with the
                 necessary commands to put the session in config mode.
+            **kwargs: Additional keyword arguments for expanded eAPI
+                functionality. Only supported eAPI params are used in building
+                the request
 
         Returns:
             The config method will return a list of dictionaries with the
@@ -523,7 +526,7 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
-        response = self.run_commands(commands)
+        response = self.run_commands(commands, **kwargs)
 
         if self.autorefresh:
             self.refresh()
@@ -562,7 +565,7 @@ class Node(object):
         return config[block_start:block_end]
 
     def enable(self, commands, encoding='json', strict=False,
-               send_enable=True):
+               send_enable=True, **kwargs):
         """Sends the array of commands to the node in enable mode
 
         This method will send the commands to the node and evaluate
@@ -580,6 +583,9 @@ class Node(object):
                 command with text encoding if JSON encoding fails
             send_enable (bool): If True the enable command will be
                                prepended to the command list automatically.
+            **kwargs: Additional keyword arguments for expanded eAPI
+                functionality. Only supported eAPI params are used in building
+                the request
 
         Returns:
             A dict object that includes the response for each command along
@@ -608,7 +614,8 @@ class Node(object):
         # there in error and both are now present to avoid breaking
         # existing scripts. 'response' will be removed in a future release.
         if strict:
-            responses = self.run_commands(commands, encoding, send_enable)
+            responses = self.run_commands(commands, encoding, send_enable,
+                                          **kwargs)
             for index, response in enumerate(responses):
                 results.append(dict(command=commands[index],
                                     result=response,
@@ -617,13 +624,15 @@ class Node(object):
         else:
             for command in commands:
                 try:
-                    resp = self.run_commands(command, encoding, send_enable)
+                    resp = self.run_commands(command, encoding, send_enable,
+                                             **kwargs)
                     results.append(dict(command=command,
                                         result=resp[0],
                                         encoding=encoding))
                 except CommandError as exc:
                     if exc.error_code == 1003:
-                        resp = self.run_commands(command, 'text', send_enable)
+                        resp = self.run_commands(command, 'text', send_enable,
+                                                 **kwargs)
                         results.append(dict(command=command,
                                             result=resp[0],
                                             encoding='text'))
@@ -631,12 +640,13 @@ class Node(object):
                         raise
         return results
 
-    def run_commands(self, commands, encoding='json', send_enable=True):
+    def run_commands(self, commands, encoding='json', send_enable=True,
+                     **kwargs):
         """Sends the commands over the transport to the device
 
         This method sends the commands to the device using the nodes
         transport.  This is a lower layer function that shouldn't normally
-        need to be used, prefering instead to use config() or enable().
+        need to be used, preferring instead to use config() or enable().
 
         Args:
             commands (list): The ordered list of commands to send to the
@@ -645,6 +655,9 @@ class Node(object):
                 excpected response.
             send_enable (bool): If True the enable command will be
                                prepended to the command list automatically.
+            **kwargs: Additional keyword arguments for expanded eAPI
+                functionality. Only supported eAPI params are used in building
+                the request
 
         Returns:
             This method will return the raw response from the connection
@@ -670,7 +683,7 @@ class Node(object):
             else:
                 commands.insert(0, 'enable')
 
-        response = self._connection.execute(commands, encoding)
+        response = self._connection.execute(commands, encoding, **kwargs)
 
         # pop enable command from the response only if we sent enable
         if send_enable:
