@@ -293,13 +293,13 @@ class EapiConnection(object):
         """
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
-        params = {"version": 1, "cmds": commands, "format": encoding}
-        if "autoComplete" in kwargs:
-            params["autoComplete"] = kwargs["autoComplete"]
-        if "expandAliases" in kwargs:
-            params["expandAliases"] = kwargs["expandAliases"]
-        return json.dumps({"jsonrpc": "2.0", "method": "runCmds",
-                           "params": params, "id": str(reqid)})
+        params = {'version': 1, 'cmds': commands, 'format': encoding}
+        if 'autoComplete' in kwargs:
+            params['autoComplete'] = kwargs['autoComplete']
+        if 'expandAliases' in kwargs:
+            params['expandAliases'] = kwargs['expandAliases']
+        return json.dumps({'jsonrpc': '2.0', 'method': 'runCmds',
+                           'params': params, 'id': str(reqid)})
 
     def send(self, data):
         """Sends the eAPI request to the destination node
@@ -363,7 +363,7 @@ class EapiConnection(object):
                 code and error message from the eAPI response.
         """
         try:
-            _LOGGER.debug("Request content: {}".format(data))
+            _LOGGER.debug('Request content: {}'.format(data))
             # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
@@ -387,10 +387,10 @@ class EapiConnection(object):
                 response = self.transport.getresponse()
 
             response_content = response.read()
-            _LOGGER.debug("Response: status:{status}, reason:{reason}".format(
+            _LOGGER.debug('Response: status:{status}, reason:{reason}'.format(
                           status=response.status,
                           reason=response.reason))
-            _LOGGER.debug("Response content: {}".format(response_content))
+            _LOGGER.debug('Response content: {}'.format(response_content))
 
             # Work around for Python 2.7/3.x compatibility
             if not type(response_content) == str:
@@ -404,10 +404,10 @@ class EapiConnection(object):
                 pattern = "unexpected keyword argument '(.*)'"
                 match = re.search(pattern, msg)
                 if match:
-                    auto_msg = ("%s parameter is not supported in this"
-                                " version of EOS." % match.group(1))
+                    auto_msg = ('%s parameter is not supported in this'
+                                ' version of EOS.' % match.group(1))
                     _LOGGER.error(auto_msg)
-                    msg = msg + ". " + auto_msg
+                    msg = msg + '. ' + auto_msg
                 raise CommandError(code, msg, command_error=err, output=out)
 
             return decoded
