@@ -311,13 +311,56 @@ class TestClient(unittest.TestCase):
         node.get_config = get_config_mock
         self.assertIsInstance(node.startup_config, str)
 
-    def test_node_returns_cached_startup_confgi(self):
+    def test_node_returns_cached_startup_config(self):
         node = pyeapi.client.Node(None)
         config_file = open(get_fixture('running_config.text'))
         config = config_file.read()
         config_file.close()
         node._startup_config = config
         self.assertEqual(node.startup_config, config)
+
+    def test_node_returns_version(self):
+        node = pyeapi.client.Node(None)
+        version = '4.17.1.1F-3512479.41711F (engineering build)'
+        node.enable = Mock()
+        node.enable.return_value = [{'result': {'version': version,
+                                                'modelName': 'vEOS'}}]
+        self.assertIsInstance(node.version, str)
+        self.assertEqual(node.version, version)
+
+    def test_node_returns_cached_version(self):
+        node = pyeapi.client.Node(None)
+        node._version = '4.16.7R'
+        self.assertEqual(node.version, '4.16.7R')
+
+    def test_node_returns_version_number(self):
+        node = pyeapi.client.Node(None)
+        version = '4.17.1.1F-3512479.41711F (engineering build)'
+        node.enable = Mock()
+        node.enable.return_value = [{'result': {'version': version,
+                                                'modelName': 'vEOS'}}]
+        self.assertIsInstance(node.version_number, str)
+        self.assertIn(node.version_number, version)
+
+    def test_node_returns_cached_version_number(self):
+        node = pyeapi.client.Node(None)
+        node._version_number = '4.16.7'
+        self.assertEqual(node.version_number, '4.16.7')
+
+    def test_node_returns_model(self):
+        node = pyeapi.client.Node(None)
+        version = '4.17.1.1F-3512479.41711F (engineering build)'
+        model = 'DCS-7260QX-64-F'
+        node.enable = Mock()
+        node.enable.return_value = [{'result': {'version': version,
+                                                'modelName': model}}]
+        self.assertIsInstance(node.model, str)
+        self.assertIn(node.model, model)
+
+    def test_node_returns_cached_model(self):
+        node = pyeapi.client.Node(None)
+        node._model = '7777'
+        self.assertEqual(node.model, '7777')
 
     def test_connect_default_type(self):
         transport = Mock()
