@@ -51,6 +51,35 @@ class TestNode(unittest.TestCase):
         self.connection = Mock()
         self.node = pyeapi.client.Node(self.connection)
 
+    def test_get_version_properties_match_version_number_no_match_model(self):
+        self.node.enable = Mock()
+        version = '4.17.1.1F-3512479.41711F (engineering build)'
+        self.node.enable.return_value = [{'result': {'version': version,
+                                                     'modelName': 'vEOS'}}]
+        self.node._get_version_properties()
+        self.assertEqual(self.node.version_number, '4.17.1.1')
+        self.assertEqual(self.node.model, 'vEOS')
+
+    def test_get_version_properties_no_match_version_number_match_model(self):
+        self.node.enable = Mock()
+        version = 'special-4.17.1.1F-3512479.41711F (engineering build)'
+        model = 'DCS-7260QX-64-F'
+        self.node.enable.return_value = [{'result': {'version': version,
+                                                     'modelName': model}}]
+        self.node._get_version_properties()
+        self.assertEqual(self.node.version_number, version)
+        self.assertEqual(self.node.model, '7260')
+
+    def test_version_properties_populate(self):
+        self.node.enable = Mock()
+        version = '4.17.1.1F-3512479.41711F (engineering build)'
+        self.node.enable.return_value = [{'result': {'version': version,
+                                                     'modelName': 'vEOS'}}]
+        self.node.version_number
+        self.assertEqual(self.node.version_number, '4.17.1.1')
+        self.assertEqual(self.node.version, version)
+        self.assertEqual(self.node.model, 'vEOS')
+
     def test_enable_with_single_command(self):
         command = random_string()
         response = ['enable', command]
@@ -70,8 +99,6 @@ class TestNode(unittest.TestCase):
 
         self.connection.execute.assert_called_once_with(response, 'json')
         self.assertEqual(command, result[0]['result'])
-
-
 
     def test_enable_with_multiple_commands(self):
         commands = list()

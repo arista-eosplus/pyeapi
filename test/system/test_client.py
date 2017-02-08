@@ -57,6 +57,13 @@ class TestClient(unittest.TestCase):
                     # enable password on the dut and clear it on tearDown
                     dut.config("enable secret %s" % dut._enablepwd)
 
+    def test_populate_version_properties(self):
+        for dut in self.duts:
+            result = dut.run_commands('show version')
+            self.assertEqual(dut.version, result[0]['version'])
+            self.assertIn(dut.model, result[0]['modelName'])
+            self.assertIn(dut.version_number, result[0]['version'])
+
     def test_enable_single_command(self):
         for dut in self.duts:
             result = dut.run_commands('show version')

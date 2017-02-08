@@ -454,6 +454,9 @@ class Node(object):
         self._connection = connection
         self._running_config = None
         self._startup_config = None
+        self._version = None
+        self._version_number = None
+        self._model = None
 
         self._enablepwd = kwargs.get('enablepwd')
         self.autorefresh = kwargs.get('autorefresh', True)
@@ -484,6 +487,46 @@ class Node(object):
         self._startup_config = self.get_config('startup-config',
                                                as_string=True)
         return self._startup_config
+
+    @property
+    def version(self):
+        if self._version:
+            return self._version
+        self._get_version_properties()
+        return self._version
+
+    @property
+    def version_number(self):
+        if self._version_number:
+            return self._version_number
+        self._get_version_properties()
+        return self._version_number
+
+    @property
+    def model(self):
+        if self._model:
+            return self._model
+        self._get_version_properties()
+        return self._model
+
+    def _get_version_properties(self):
+        """Parses version and model information out of 'show version' output
+        and uses the output to populate class properties.
+        """
+        # Parse out version info
+        output = self.enable('show version')
+        self._version = str(output[0]['result']['version'])
+        match = re.match('[\d.\d]+', output[0]['result']['version'])
+        if match:
+            self._version_number = str(match.group(0))
+        else:
+            self._version_number = str(output[0]['result']['version'])
+        # Parse out model number
+        match = re.search('\d\d\d\d', output[0]['result']['modelName'])
+        if match:
+            self._model = str(match.group(0))
+        else:
+            self._model = str(output[0]['result']['modelName'])
 
     def enable_authentication(self, password):
         """Configures the enable mode authentication password
