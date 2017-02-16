@@ -160,22 +160,77 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
         self.assertEqual(values, result)
 
     def test_instance_functions(self):
+        self.node._version_number = '4.17.1'
         for intf in self.INTERFACES:
             for name in ['create', 'delete', 'default']:
                 if name == 'create':
-                    if intf[0:2] not in ['Et', 'Ma']:
-                        cmds = 'interface %s' % intf
-                        func = function(name, intf)
-                        self.eapi_positive_config_test(func, cmds)
+                    cmds = 'interface %s' % intf
+                    func = function(name, intf)
+                    self.eapi_positive_config_test(func, cmds)
                 elif name == 'delete':
-                    if intf[0:2] not in ['Et', 'Ma']:
-                        cmds = 'no interface %s' % intf
-                        func = function(name, intf)
-                        self.eapi_positive_config_test(func, cmds)
+                    cmds = 'no interface %s' % intf
+                    func = function(name, intf)
+                    self.eapi_positive_config_test(func, cmds)
                 elif name == 'default':
                     cmds = 'default interface %s' % intf
                     func = function(name, intf)
                     self.eapi_positive_config_test(func, cmds)
+
+    def test_instance_functions_exceptions(self):
+        self.node._version_number = '4.14.9'
+        self.node._version = '4.14.9F'
+        for intf in self.INTERFACES:
+            for name in ['create', 'delete']:
+                if name == 'create':
+                    cmds = 'interface %s' % intf
+                    func = function(name, intf)
+                    self.eapi_exception_config_test(func, NotImplementedError,
+                                                    cmds)
+                elif name == 'delete':
+                    cmds = 'no interface %s' % intf
+                    func = function(name, intf)
+                    self.eapi_exception_config_test(func, NotImplementedError,
+                                                    cmds)
+
+    def test_create_subinterface_no_vlan(self):
+        self.node._version_number = '4.17.1'
+        for intf in self.INTERFACES:
+            cmds = ['interface %s.%s' % (intf, 1),
+                    'encapsulation dot1q vlan 1']
+            func = function('create_subinterface', intf, 1)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_create_subinterface_vlan(self):
+        self.node._version_number = '4.17.1'
+        for intf in self.INTERFACES:
+            cmds = ['interface %s.%s' % (intf, 1),
+                    'encapsulation dot1q vlan 2']
+            func = function('create_subinterface', intf, 1, 2)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_create_subinterface_exception(self):
+        self.node._version_number = '4.14.9'
+        self.node._version = '4.14.9F'
+        for intf in self.INTERFACES:
+            cmds = ['interface %s.%s' % (intf, 1),
+                    'encapsulation dot1q vlan 1']
+            func = function('create_subinterface', intf, 1)
+            self.eapi_exception_config_test(func, NotImplementedError, cmds)
+
+    def test_delete_subinterface(self):
+        self.node._version_number = '4.17.1'
+        for intf in self.INTERFACES:
+            cmd = 'no interface %s.%s' % (intf, 1)
+            func = function('delete_subinterface', intf, 1)
+            self.eapi_positive_config_test(func, cmd)
+
+    def test_delete_subinterface_exception(self):
+        self.node._version_number = '4.14.9'
+        self.node._version = '4.14.9F'
+        for intf in self.INTERFACES:
+            cmd = 'no interface %s.%s' % (intf, 1)
+            func = function('delete_subinterface', intf, 1)
+            self.eapi_exception_config_test(func, NotImplementedError, cmd)
 
     def test_set_flowcontrol_with_value(self):
         for intf in self.INTERFACES:
