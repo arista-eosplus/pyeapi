@@ -78,9 +78,11 @@ class TestResourceInterfaces(DutSystemTest):
             self.assertIn('Loopback0', config[0]['interfaces'])
 
     def test_create_ethernet_raises_not_implemented_error(self):
-        with self.assertRaises(NotImplementedError):
-            for dut in self.duts:
-                dut.api('interfaces').create(random_interface(dut))
+        for dut in self.duts:
+            ver = dut.version_number.split('.')
+            if not (int(ver[0]) >= 4 and int(ver[1]) >= 15):
+                with self.assertRaises(NotImplementedError):
+                    dut.api('interfaces').create(random_interface(dut))
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
@@ -91,9 +93,58 @@ class TestResourceInterfaces(DutSystemTest):
             self.assertNotIn('Loopback0', config[0]['interfaces'])
 
     def test_delete_ethernet_raises_not_implemented_error(self):
-        with self.assertRaises(NotImplementedError):
-            for dut in self.duts:
-                dut.api('interfaces').delete(random_interface(dut))
+        for dut in self.duts:
+            ver = dut.version_number.split('.')
+            if not (int(ver[0]) >= 4 and int(ver[1]) >= 15):
+                with self.assertRaises(NotImplementedError):
+                    dut.api('interfaces').delete(random_interface(dut))
+
+    def test_create_and_delete_ethernet_sub_interface_no_vlan(self):
+        for dut in self.duts:
+            ver = dut.version_number.split('.')
+            if int(ver[0]) >= 4 and int(ver[1]) >= 15:
+                # Default Ethernet1
+                dut.api('interfaces').default('Ethernet1')
+                # Create subint Ethernet1.1
+                res = dut.api('interfaces').create_subinterface('Ethernet1', 1)
+                self.assertTrue(res)
+                config = dut.run_commands('show interfaces Ethernet1')
+                self.assertEqual(
+                    config[0]['interfaces']['Ethernet1']['forwardingModel'],
+                    'routed')
+                command = 'show running-config interfaces Ethernet1.1'
+                output = dut.run_commands(command, encoding='text')
+                vlan_config = 'encapsulation dot1q vlan 1'
+                self.assertIn(vlan_config, output[0]['output'])
+                # Delete subint Ethernet1.1
+                res = dut.api('interfaces').delete_subinterface('Ethernet1', 1)
+                self.assertTrue(res)
+                output = dut.run_commands(command, encoding='text')
+                self.assertEqual(output[0]['output'], '')
+
+    def test_create_and_delete_ethernet_sub_interface_with_vlan(self):
+        for dut in self.duts:
+            ver = dut.version_number.split('.')
+            if int(ver[0]) >= 4 and int(ver[1]) >= 15:
+                # Default Ethernet1
+                dut.api('interfaces').default('Ethernet1')
+                # Create subint Ethernet1.1 with vlan 4
+                res = dut.api('interfaces').create_subinterface(
+                    'Ethernet1', 1, 4)
+                self.assertTrue(res)
+                config = dut.run_commands('show interfaces Ethernet1')
+                self.assertEqual(
+                    config[0]['interfaces']['Ethernet1']['forwardingModel'],
+                    'routed')
+                command = 'show running-config interfaces Ethernet1.1'
+                output = dut.run_commands(command, encoding='text')
+                vlan_config = 'encapsulation dot1q vlan 4'
+                self.assertIn(vlan_config, output[0]['output'])
+                # Delete subint Ethernet1.1
+                res = dut.api('interfaces').delete_subinterface('Ethernet1', 1)
+                self.assertTrue(res)
+                output = dut.run_commands(command, encoding='text')
+                self.assertEqual(output[0]['output'], '')
 
     def test_default(self):
         for dut in self.duts:
