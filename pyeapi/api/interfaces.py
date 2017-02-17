@@ -413,10 +413,10 @@ class EthernetInterface(BaseInterface):
         return dict(flowcontrol_receive=value)
 
     def create(self, name):
-        """Create an Ethernet sub interface
+        """Create an Ethernet subinterface
 
         Args:
-            name (string): The sub interface name. Ex: Ethernet1.1
+            name (string): The subinterface name. Ex: Ethernet1.1
 
         Raises:
             NotImplementedError: creating physical Ethernet interfaces is not
@@ -429,10 +429,10 @@ class EthernetInterface(BaseInterface):
         return self.configure(['interface %s' % name])
 
     def delete(self, name):
-        """Delete an Ethernet sub interfaces
+        """Delete an Ethernet subinterfaces
 
         Args:
-            name (string): The sub interface name. Ex: Ethernet1.1
+            name (string): The subinterface name. Ex: Ethernet1.1
 
         Raises:
             NotImplementedError: creating physical Ethernet interfaces is not
