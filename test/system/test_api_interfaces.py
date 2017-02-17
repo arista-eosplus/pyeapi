@@ -79,10 +79,8 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_create_ethernet_raises_not_implemented_error(self):
         for dut in self.duts:
-            ver = dut.version_number.split('.')
-            if not (int(ver[0]) >= 4 and int(ver[1]) >= 15):
-                with self.assertRaises(NotImplementedError):
-                    dut.api('interfaces').create(random_interface(dut))
+            with self.assertRaises(NotImplementedError):
+                dut.api('interfaces').create(random_interface(dut))
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
@@ -94,57 +92,60 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_delete_ethernet_raises_not_implemented_error(self):
         for dut in self.duts:
-            ver = dut.version_number.split('.')
-            if not (int(ver[0]) >= 4 and int(ver[1]) >= 15):
-                with self.assertRaises(NotImplementedError):
-                    dut.api('interfaces').delete(random_interface(dut))
+            with self.assertRaises(NotImplementedError):
+                dut.api('interfaces').delete(random_interface(dut))
 
-    def test_create_and_delete_ethernet_sub_interface_no_vlan(self):
+    def test_create_and_delete_ethernet_sub_interface(self):
         for dut in self.duts:
-            ver = dut.version_number.split('.')
-            if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-                # Default Ethernet1
-                dut.api('interfaces').default('Ethernet1')
-                # Create subint Ethernet1.1
-                res = dut.api('interfaces').create_subinterface('Ethernet1', 1)
-                self.assertTrue(res)
-                config = dut.run_commands('show interfaces Ethernet1')
-                self.assertEqual(
-                    config[0]['interfaces']['Ethernet1']['forwardingModel'],
-                    'routed')
-                command = 'show running-config interfaces Ethernet1.1'
-                output = dut.run_commands(command, encoding='text')
-                vlan_config = 'encapsulation dot1q vlan 1'
-                self.assertIn(vlan_config, output[0]['output'])
-                # Delete subint Ethernet1.1
-                res = dut.api('interfaces').delete_subinterface('Ethernet1', 1)
-                self.assertTrue(res)
-                output = dut.run_commands(command, encoding='text')
-                self.assertEqual(output[0]['output'], '')
+            # Default Ethernet1
+            dut.api('interfaces').default('Ethernet1')
+            # Create subint Ethernet1.1
+            res = dut.api('interfaces').create('Ethernet1.1')
+            self.assertTrue(res)
+            command = 'show running-config interfaces Ethernet1.1'
+            output = dut.run_commands(command, encoding='text')
+            self.assertIn('Ethernet1.1', output[0]['output'])
+            # Delete subint Ethernet1.1
+            res = dut.api('interfaces').delete('Ethernet1.1')
+            self.assertTrue(res)
+            output = dut.run_commands(command, encoding='text')
+            self.assertEqual(output[0]['output'], '')
 
-    def test_create_and_delete_ethernet_sub_interface_with_vlan(self):
+    def test_ethernet_set_and_unset_encapsulation(self):
         for dut in self.duts:
-            ver = dut.version_number.split('.')
-            if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-                # Default Ethernet1
-                dut.api('interfaces').default('Ethernet1')
-                # Create subint Ethernet1.1 with vlan 4
-                res = dut.api('interfaces').create_subinterface(
-                    'Ethernet1', 1, 4)
-                self.assertTrue(res)
-                config = dut.run_commands('show interfaces Ethernet1')
-                self.assertEqual(
-                    config[0]['interfaces']['Ethernet1']['forwardingModel'],
-                    'routed')
-                command = 'show running-config interfaces Ethernet1.1'
-                output = dut.run_commands(command, encoding='text')
-                vlan_config = 'encapsulation dot1q vlan 4'
-                self.assertIn(vlan_config, output[0]['output'])
-                # Delete subint Ethernet1.1
-                res = dut.api('interfaces').delete_subinterface('Ethernet1', 1)
-                self.assertTrue(res)
-                output = dut.run_commands(command, encoding='text')
-                self.assertEqual(output[0]['output'], '')
+            # Default Ethernet1
+            dut.api('interfaces').default('Ethernet1')
+            # Create subint Ethernet1.1
+            res = dut.api('interfaces').create('Ethernet1.1')
+            self.assertTrue(res)
+            # Set encapsulation
+            res = dut.api('interfaces').set_encapsulation('Ethernet1.1', 4)
+            self.assertTrue(res)
+            command = 'show running-config interfaces Ethernet1.1'
+            output = dut.run_commands(command, encoding='text')
+            encap = 'encapsulation dot1q vlan 4'
+            self.assertIn(encap, output[0]['output'])
+            # Remove encapsulation
+            res = dut.api('interfaces').set_encapsulation('Ethernet1.1', 4,
+                                                          disable=True)
+            self.assertTrue(res)
+            output = dut.run_commands(command, encoding='text')
+            self.assertNotIn(encap, output[0]['output'])
+            # Delete subint Ethernet1.1
+            res = dut.api('interfaces').delete('Ethernet1.1')
+            self.assertTrue(res)
+
+    def test_set_encapsulation_non_subintf_exception(self):
+        for dut in self.duts:
+            with self.assertRaises(NotImplementedError):
+                dut.api('interfaces').set_encapsulation(random_interface(dut),
+                                                        1)
+
+    def test_set_encapsulation_non_supported_intf_exception(self):
+        for dut in self.duts:
+            with self.assertRaises(NotImplementedError):
+                dut.api('interfaces').set_encapsulation('Vlan1234',
+                                                        1)
 
     def test_default(self):
         for dut in self.duts:
@@ -376,6 +377,73 @@ class TestPortchannelInterface(DutSystemTest):
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
                                                              minlinks)
             self.assertFalse(result)
+
+    def test_create_and_delete_portchannel_sub_interface(self):
+        for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on'])
+            # Create subint Port-Channel1.1
+            api = dut.api('interfaces')
+            result = api.create('Port-Channel1.1')
+            self.assertTrue(result, 'dut=%s' % dut)
+            command = 'show running-config interfaces Port-Channel1.1'
+            output = dut.run_commands(command, encoding='text')
+            self.assertIn('Port-Channel1.1', output[0]['output'])
+            # Delete subint Port-Channel1.1
+            result = dut.api('interfaces').delete('Port-Channel1.1')
+            self.assertTrue(result)
+            output = dut.run_commands(command, encoding='text')
+            self.assertEqual(output[0]['output'], '')
+            # Remove port-channel and default interfaces
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'default interface %s' % et2])
+
+    def test_set_and_unset_portchannel_sub_intf_encapsulation(self):
+        for dut in self.duts:
+            et1 = random_interface(dut)
+            et2 = random_interface(dut, exclude=[et1])
+
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'interface %s' % et1,
+                        'channel-group 1 mode on',
+                        'default interface %s' % et2,
+                        'interface %s' % et2,
+                        'channel-group 1 mode on'])
+            # Create subint Port-Channel1.1
+            api = dut.api('interfaces')
+            result = api.create('Port-Channel1.1')
+            self.assertTrue(result)
+            # Set encapsulation
+            result = api.set_encapsulation('Port-Channel1.1', 4)
+            self.assertTrue(result)
+            command = 'show running-config interfaces Port-Channel1.1'
+            output = dut.run_commands(command, encoding='text')
+            encap = 'encapsulation dot1q vlan 4'
+            self.assertIn(encap, output[0]['output'])
+            # Unset encapsulation
+            result = api.set_encapsulation('Port-Channel1.1', 4, default=True)
+            self.assertTrue(result)
+            output = dut.run_commands(command, encoding='text')
+            self.assertNotIn(encap, output[0]['output'])
+            # Delete subint Port-Channel1.1
+            result = dut.api('interfaces').delete('Port-Channel1.1')
+            self.assertTrue(result)
+            output = dut.run_commands(command, encoding='text')
+            self.assertEqual(output[0]['output'], '')
+            # Remove port-channel and default interfaces
+            dut.config(['no interface Port-Channel1',
+                        'default interface %s' % et1,
+                        'default interface %s' % et2])
 
 
 class TestApiVxlanInterface(DutSystemTest):

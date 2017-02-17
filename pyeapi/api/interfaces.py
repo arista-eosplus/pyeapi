@@ -253,6 +253,34 @@ class BaseInterface(EntityCollection):
         """
         return self.configure('default interface %s' % name)
 
+    def set_encapsulation(self, name, vid, default=False, disable=False):
+        """Configures the subinterface encapsulation value
+
+        Args:
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
+            vid (int): The vlan id number
+            default (boolean): Specifies to default the subinterface
+                encapsulation
+            disable (boolean): Specifies to disable the subinterface
+                encapsulation
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        if '.' not in name:
+            raise NotImplementedError('parameter encapsulation can only be'
+                                      ' set on subinterfaces')
+        if name[0:2] not in ['Et', 'Po']:
+            raise NotImplementedError('parameter encapsulation can only be'
+                                      ' set on Ethernet and Port-Channel'
+                                      ' subinterfaces')
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('encapsulation dot1q vlan',
+                                             str(vid), default=default,
+                                             disable=disable))
+        return self.configure(commands)
+
     def set_description(self, name, value=None, default=False, disable=False):
         """Configures the interface description
 
@@ -385,81 +413,36 @@ class EthernetInterface(BaseInterface):
         return dict(flowcontrol_receive=value)
 
     def create(self, name):
-        """Creating Ethernet interfaces is currently not supported
+        """Create an Ethernet sub interface
 
         Args:
-            name (string): The interface name
+            name (string): The sub interface name. Ex: Ethernet1.1
 
         Raises:
-            NotImplementedError: creating Ethernet interfaces is not supported
-
+            NotImplementedError: creating physical Ethernet interfaces is not
+            supported. Only subinterfaces can be created.
         """
-        ver = self.node.version_number.split('.')
-        if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-            return self.configure('interface %s' % name)
-        raise NotImplementedError('creating Ethernet interfaces is '
-                                  'not supported in EOS version %s'
-                                  % self.node.version)
+        if '.' not in name:
+            raise NotImplementedError('creating physical Ethernet interfaces'
+                                      ' is not supported. Only subinterfaces'
+                                      ' can be created')
+        return self.configure(['interface %s' % name])
 
     def delete(self, name):
-        """Deleting Ethernet interfaces is currently not supported
+        """Delete an Ethernet sub interfaces
 
         Args:
-            name (string): The interface name
+            name (string): The sub interface name. Ex: Ethernet1.1
 
         Raises:
-            NotImplementedError: Deleting  Ethernet interfaces is not supported
-
+            NotImplementedError: creating physical Ethernet interfaces is not
+            supported. Only subinterfaces can be created.
         """
-        ver = self.node.version_number.split('.')
-        if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-            return self.configure('no interface %s' % name)
-        raise NotImplementedError('deleting Ethernet interfaces is '
-                                  'not supported in EOS version %s'
-                                  % self.node.version)
-
-    def create_subinterface(self, phys_int_name, logical_int, vlan=None):
-        """Create Ethernet sub interface
-
-        Args:
-            phys_int_name (str): The physical interface name
-            logical_int (int): The logical sub interface number
-            vlan (int): The vlan number
-
-        Raises:
-            NotImplementedError: creating sub Ethernet interfaces is not
-            supported in EOS before version 4.15
-
-        """
-        ver = self.node.version_number.split('.')
-        if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-            if self.node.api('ipinterfaces').create(phys_int_name):
-                int_comm = 'interface %s.%s' % (phys_int_name, logical_int)
-                vlan_comm = 'encapsulation dot1q vlan %s' % (vlan or
-                                                             logical_int)
-                return self.configure([int_comm, vlan_comm])
-        raise NotImplementedError('creating Ethernet sub interfaces is '
-                                  'not supported in EOS version %s'
-                                  % self.node.version)
-
-    def delete_subinterface(self, phys_int_name, logical_int):
-        """Delete Ethernet sub interface
-
-        Args:
-            phys_int_name (str): The physical interface name
-            logical_int (int): The logical sub interface number
-
-        Raises:
-            NotImplementedError: Deleting  Ethernet interfaces is not supported
-
-        """
-        ver = self.node.version_number.split('.')
-        if int(ver[0]) >= 4 and int(ver[1]) >= 15:
-            command = 'no interface %s.%s' % (phys_int_name, logical_int)
-            return self.configure(command)
-        raise NotImplementedError('deleting Ethernet sub interfaces is '
-                                  'not supported in EOS version %s'
-                                  % self.node.version)
+        if '.' not in name:
+            raise NotImplementedError('deleting physical Ethernet interfaces'
+                                      ' is not supported. Only subinterfaces'
+                                      ' can be created')
+        return self.configure(['no interface %s' % name])
 
     def set_flowcontrol_send(self, name, value=None, default=False,
                              disable=False):
