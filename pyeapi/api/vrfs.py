@@ -133,7 +133,7 @@ class Vrfs(EntityCollection):
         return response
 
     def _parse_rd(self, config):
-        """ _parse_name scans the provided configuration block and extracts
+        """ _parse_rd scans the provided configuration block and extracts
         the vrf rd. The return dict is intended to be merged into the response
         dict.
 
@@ -153,7 +153,7 @@ class Vrfs(EntityCollection):
 
     def _parse_description(self, config):
         """ _parse_description scans the provided configuration block and
-        extracts the vrf description value. The return dict is inteded to
+        extracts the vrf description value. The return dict is intended to
         be merged into the response dict.
 
         Args:
