@@ -321,6 +321,11 @@ class Vrfs(EntityCollection):
     def set_interface(self, vrf_name, interface, default=False, disable=False):
         """ Adds a VRF to an interface
 
+        Notes:
+            Requires interface to be in routed mode. Must apply ip address
+            after VRF has been applied. This feature can also be accessed
+            through the interfaces api.
+
         EosVersion:
             4.xx.xx
 
