@@ -17,6 +17,7 @@ recursive-include test *.ospf
 recursive-include test *.routemaps
 recursive-include test *.varp
 recursive-include test *.varp_null
+recursive-include test *.vrf
 recursive-include test *.vrrp
 recursive-include test *.yaml
 recursive-include docs description.rst
