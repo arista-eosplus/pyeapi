@@ -54,7 +54,8 @@ from pyeapi.utils import make_iterable
 
 RD_RE = re.compile(r'(?:\srd\s)(?P<value>.*)$', re.M)
 DESCRIPTION_RE = re.compile(r'(?:description\s)(?P<value>.*)$', re.M)
-IP_REGEX = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
+IP_REGEX = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)'
+                      r'{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
 
 
 
