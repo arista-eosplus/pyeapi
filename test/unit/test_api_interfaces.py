@@ -294,6 +294,13 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
             func = function('set_sflow', intf, random_string())
             self.eapi_exception_config_test(func, ValueError)
 
+    def test_set_vrf(self):
+        for intf in INTERFACES:
+            vrf = 'testvrf'
+            cmds = ['interface %s' % intf, 'vrf forwarding %s' % vrf]
+            func = function('set_vrf', intf, vrf)
+            self.eapi_positive_config_test(func, cmds)
+
 
 class TestApiPortchannelInterface(EapiConfigUnitTest):
 

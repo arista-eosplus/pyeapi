@@ -219,6 +219,29 @@ class TestResourceInterfaces(DutSystemTest):
                                       intf, 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
+    def test_set_vrf(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
+            # Verify set_vrf returns False if no vrf by name is configured
+            result = dut.api('interfaces').set_vrf(intf, 'test')
+            self.assertFalse(result)
+            dut.config('vrf definition test')
+            # Verify interface has vrf applied
+            result = dut.api('interfaces').set_vrf(intf, 'test')
+            self.assertTrue(result)
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
+            self.assertIn('vrf forwarding test', config[0]['output'])
+            # Verify interface has vrf removed
+            result = dut.api('interfaces').set_vrf(intf, 'test', disable=True)
+            self.assertTrue(result)
+            config = dut.run_commands('show running-config interfaces %s' %
+                                      intf, 'text')
+            self.assertNotIn('vrf forwarding test', config[0]['output'])
+            # Remove test vrf
+            dut.config('no vrf definition test')
+
 
 class TestPortchannelInterface(DutSystemTest):
 
