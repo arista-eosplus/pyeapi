@@ -26,4 +26,9 @@ router ospf 65000
    point-to-point routes
    no graceful-restart
 !
+router ospf 10 vrf test
+   router-id 2.2.2.2
+   network 172.18.10.0/24 area 0.0.0.0
+   network 172.19.0.0/16 area 0.0.0.0
+   shutdown
 !
