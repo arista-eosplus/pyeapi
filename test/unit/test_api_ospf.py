@@ -17,15 +17,31 @@ class TestApiOspf(EapiConfigUnitTest):
         self.instance = pyeapi.api.ospf.instance(None)
         self.config = open(get_fixture('running_config.ospf')).read()
 
-    def test_get(self):
+    def test_get_no_vrf(self):
         result = self.instance.get()
-        keys = ['networks', 'ospf_process_id', 'redistributions', 'router_id', 'shutdown']
+        keys = ['networks', 'ospf_process_id', 'ospf_vrf', 'redistributions',
+                'router_id', 'shutdown']
         self.assertEqual(sorted(keys), sorted(result.keys()))
+        self.assertEqual(result['ospf_vrf'], 'default')
+
+    def test_get_with_vrf(self):
+        result = self.instance.get(vrf='test')
+        keys = ['networks', 'ospf_process_id', 'ospf_vrf', 'redistributions',
+                'router_id', 'shutdown']
+        self.assertEqual(sorted(keys), sorted(result.keys()))
+        self.assertEqual(result['ospf_vrf'], 'test')
 
     def test_create(self):
         for ospf_id in ['65000', 65000]:
             func = function('create', ospf_id)
             cmds = 'router ospf {}'.format(ospf_id)
+            self.eapi_positive_config_test(func, cmds)
+
+    def test_create_with_vrf(self):
+        for ospf_id in ['65000', 65000]:
+            vrf_name = 'test'
+            func = function('create', ospf_id, vrf_name)
+            cmds = 'router ospf {} vrf {}'.format(ospf_id, vrf_name)
             self.eapi_positive_config_test(func, cmds)
 
     def test_create_invalid_id(self):

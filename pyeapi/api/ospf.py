@@ -48,14 +48,15 @@ class Ospf(Entity):
         super(Ospf, self).__init__(*args, **kwargs)
         pass
 
-    def get(self):
+    def get(self, vrf=None):
         """Returns the OSPF routing configuration
 
            Args:
-                None
+                vrf (str): VRF name to return OSPF routing config for
            Returns:
                dict:
                     keys: router_id (int): OSPF router-id
+                          ospf_vrf (str): VRF of the OSPF process
                           networks (dict): All networks that
                                            are advertised in OSPF
                           ospf_process_id (int): OSPF proc id
@@ -65,13 +66,16 @@ class Ospf(Entity):
                           shutdown (bool): Gives the current shutdown
                                            off the process
         """
-
-        config = self.get_block('^router ospf .*')
+        match = '^router ospf .*'
+        if vrf:
+            match += ' vrf %s' % vrf
+        config = self.get_block(match)
         if not config:
             return None
 
         response = dict()
         response.update(self._parse_router_id(config))
+        response.update(self._parse_vrf(config))
         response.update(self._parse_networks(config))
         response.update(self._parse_ospf_process_id(config))
         response.update(self._parse_redistribution(config))
@@ -89,6 +93,19 @@ class Ospf(Entity):
         """
         match = re.search(r'^router ospf (\d+)', config)
         return dict(ospf_process_id=int(match.group(1)))
+
+    def _parse_vrf(self, config):
+        """Parses config file for the OSPF vrf name
+
+           Args:
+               config(str):  Running configuration
+           Returns:
+               dict: key: ospf_vrf (str)
+        """
+        match = re.search(r'^router ospf \d+ vrf (.*)', config)
+        if match:
+            return dict(ospf_vrf=match.group(1))
+        return dict(ospf_vrf='default')
 
     def _parse_router_id(self, config):
         """Parses config file for the OSPF router ID
@@ -200,11 +217,12 @@ class Ospf(Entity):
         command = 'no router ospf {}'.format(config['ospf_process_id'])
         return self.configure(command)
 
-    def create(self, ospf_process_id):
-        """Creates a OSPF process in the default VRF
+    def create(self, ospf_process_id, vrf=None):
+        """Creates a OSPF process in the specified VRF or the default VRF.
 
            Args:
-                ospf_process_id (str): The OSPF proccess Id value
+                ospf_process_id (str): The OSPF process Id value
+                vrf (str): The VRF to apply this OSPF process to
            Returns:
                 bool: True if the command completed successfully
            Exception:
@@ -215,6 +233,8 @@ class Ospf(Entity):
         if not 0 < value < 65536:
             raise ValueError('ospf as must be between 1 and 65535')
         command = 'router ospf {}'.format(ospf_process_id)
+        if vrf:
+            command += ' vrf %s' % vrf
         return self.configure(command)
 
     def configure_ospf(self, cmd):
