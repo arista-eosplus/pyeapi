@@ -83,6 +83,10 @@ class TestApiVrfs(EapiConfigUnitTest):
         vrf = dict(rd='10:10', vrf_name='blah', description='blah desc',
                    ipv4routing=True, ipv6routing=False)
         self.assertEqual(vrf, result)
+        result2 = self.instance.get('test')
+        vrf2 = dict(rd='200:500', vrf_name='test', description='!',
+                    ipv4routing=False, ipv6routing=True)
+        self.assertEqual(vrf2, result2)
 
     def test_get_not_configured(self):
         self.assertIsNone(self.instance.get('notthere'))
@@ -90,7 +94,7 @@ class TestApiVrfs(EapiConfigUnitTest):
     def test_getall(self):
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
     def test_vrf_functions(self):
         for name in ['create', 'delete', 'default']:
@@ -110,6 +114,12 @@ class TestApiVrfs(EapiConfigUnitTest):
         cmds = ['vrf definition %s' % vrf_name, 'rd %s' % rd]
         func = function('set_rd', vrf_name, rd)
         self.eapi_positive_config_test(func, cmds)
+
+    def test_set_rd_invalid(self):
+        vrf_name = 'testbadrdvrf'
+        rd = '300.199.301.5:10'
+        func = function('set_rd', vrf_name, rd)
+        self.eapi_negative_config_test(func)
 
     def test_set_description(self):
         for state in ['config', 'negate', 'default']:
