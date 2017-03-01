@@ -547,6 +547,28 @@ class EthernetInterface(BaseInterface):
                                              default=default, disable=disable))
         return self.configure(commands)
 
+    def set_vrf(self, name, vrf, default=False, disable=False):
+        """Applies a VRF to the interface
+
+           Note: VRF being applied to interface must already exist in switch
+               config. Ethernet port must be in routed mode. This functionality
+               can also be handled in the VRF api.
+
+           Args:
+               name (str): The interface identifier.  It must be a full
+                   interface name (ie Ethernet, not Et)
+               vrf (str): The vrf name to be applied to the interface
+               default (bool): Specifies the default value for sFlow
+               disable (bool): Specifies to disable sFlow
+
+           Returns:
+               True if the operation succeeds otherwise False is returned
+        """
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('vrf forwarding', vrf,
+                                             default=default, disable=disable))
+        return self.configure(commands)
+
 
 class PortchannelInterface(BaseInterface):
 
