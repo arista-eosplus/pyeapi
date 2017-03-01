@@ -10,6 +10,10 @@ vrf definition blah
 vrf definition second
    no description
 !
+vrf definition test
+   rd 200:500
+   no description
+!
 interface Ethernet1
    no description
    no shutdown
@@ -175,17 +179,22 @@ ip routing vrf blah
 no ip icmp source-interface vrf blah
 no ip routing vrf second
 no ip icmp source-interface vrf second
+no ip routing vrf test
+no ip icmp source-interface vrf test
 !
 no ipv6 unicast-routing vrf blah
 no ipv6 unicast-routing vrf second
+ipv6 unicast-routing vrf test
 !
 control-plane
    ip access-group default-control-plane-acl in
    ip access-group default-control-plane-acl vrf blah in
    ip access-group default-control-plane-acl vrf second in
+   ip access-group default-control-plane-acl vrf test in
    ipv6 access-group default-control-plane-acl in
    ipv6 access-group default-control-plane-acl vrf blah in
    ipv6 access-group default-control-plane-acl vrf second in
+   ipv6 access-group default-control-plane-acl vrf test in
 !
 management api http-commands
    protocol https port 443
