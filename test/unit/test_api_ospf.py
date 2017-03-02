@@ -19,17 +19,17 @@ class TestApiOspf(EapiConfigUnitTest):
 
     def test_get_no_vrf(self):
         result = self.instance.get()
-        keys = ['networks', 'ospf_process_id', 'ospf_vrf', 'redistributions',
+        keys = ['networks', 'ospf_process_id', 'vrf', 'redistributions',
                 'router_id', 'shutdown']
         self.assertEqual(sorted(keys), sorted(result.keys()))
-        self.assertEqual(result['ospf_vrf'], 'default')
+        self.assertEqual(result['vrf'], 'default')
 
     def test_get_with_vrf(self):
         result = self.instance.get(vrf='test')
-        keys = ['networks', 'ospf_process_id', 'ospf_vrf', 'redistributions',
+        keys = ['networks', 'ospf_process_id', 'vrf', 'redistributions',
                 'router_id', 'shutdown']
         self.assertEqual(sorted(keys), sorted(result.keys()))
-        self.assertEqual(result['ospf_vrf'], 'test')
+        self.assertEqual(result['vrf'], 'test')
 
     def test_create(self):
         for ospf_id in ['65000', 65000]:

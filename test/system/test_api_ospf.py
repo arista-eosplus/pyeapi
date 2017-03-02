@@ -58,7 +58,7 @@ class TestApiOspf(DutSystemTest):
                         "network 2.2.2.0/24 area 0", "redistribute bgp"])
             ospf_response = dut.api('ospf').get()
             config = dict(router_id="1.1.1.1", ospf_process_id=1,
-                          ospf_vrf='default',
+                          vrf='default',
                           networks=[dict(netmask='24', network="2.2.2.0",
                                          area="0.0.0.0")],
                           redistributions=[dict(protocol="bgp")],
@@ -71,8 +71,7 @@ class TestApiOspf(DutSystemTest):
             dut.config(["router ospf 10 vrf test", "router-id 1.1.1.2",
                         "network 2.2.2.0/24 area 0", "redistribute bgp"])
             ospf_response = dut.api('ospf').get()
-            config = dict(router_id="1.1.1.2", ospf_process_id=10,
-                          ospf_vrf='test',
+            config = dict(router_id="1.1.1.2", ospf_process_id=10, vrf='test',
                           networks=[dict(netmask='24', network="2.2.2.0",
                                          area="0.0.0.0")],
                           redistributions=[dict(protocol="bgp")],

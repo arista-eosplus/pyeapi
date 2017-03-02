@@ -56,7 +56,7 @@ class Ospf(Entity):
            Returns:
                dict:
                     keys: router_id (int): OSPF router-id
-                          ospf_vrf (str): VRF of the OSPF process
+                          vrf (str): VRF of the OSPF process
                           networks (dict): All networks that
                                            are advertised in OSPF
                           ospf_process_id (int): OSPF proc id
@@ -102,10 +102,10 @@ class Ospf(Entity):
            Returns:
                dict: key: ospf_vrf (str)
         """
-        match = re.search(r'^router ospf \d+ vrf (.*)', config)
+        match = re.search(r'^router ospf \d+ vrf (\w+)', config)
         if match:
-            return dict(ospf_vrf=match.group(1))
-        return dict(ospf_vrf='default')
+            return dict(vrf=match.group(1))
+        return dict(vrf='default')
 
     def _parse_router_id(self, config):
         """Parses config file for the OSPF router ID

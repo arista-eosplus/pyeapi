@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -48,44 +48,14 @@ class TestApiVrfs(EapiConfigUnitTest):
         self.instance = pyeapi.api.vrfs.instance(None)
         self.config = open(get_fixture('running_config.vrf')).read()
 
-    def test_isrd_valid_value_number_number(self):
-        self.assertTrue(pyeapi.api.vrfs.isrd('10:10'))
-
-    def test_isrd_valid_value_ipaddress_number(self):
-        self.assertTrue(pyeapi.api.vrfs.isrd('10.10.10.10:99'))
-
-    def test_isrd_valid_value_number_ipaddress(self):
-        self.assertTrue(pyeapi.api.vrfs.isrd('99:10.10.10.10'))
-
-    def test_isrd_invalid_with_string(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('a' + random_string()))
-
-    def test_isrd_invalid_value_number_one_out_of_range(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('70000:100'))
-
-    def test_isrd_invalid_value_number_two_out_of_range(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('5000:5000000000'))
-
-    def test_isrd_invalid_first_ipaddress(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('255.255.255.300:10'))
-
-    def test_isrd_invalid_second_ipaddress(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('10:355.255.255.0'))
-
-    def test_isrd_invalid_ipaddress_number_two_out_of_range(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('10.10.10.1:70000'))
-
-    def test_isrd_invalid_ipaddress_ipaddress(self):
-        self.assertFalse(pyeapi.api.vrfs.isrd('10.10.10.1:192.168.1.1'))
-
     def test_get(self):
         result = self.instance.get('blah')
         vrf = dict(rd='10:10', vrf_name='blah', description='blah desc',
-                   ipv4routing=True, ipv6routing=False)
+                   ipv4_routing=True, ipv6_routing=False)
         self.assertEqual(vrf, result)
         result2 = self.instance.get('test')
         vrf2 = dict(rd='200:500', vrf_name='test', description='!',
-                    ipv4routing=False, ipv6routing=True)
+                    ipv4_routing=False, ipv6_routing=True)
         self.assertEqual(vrf2, result2)
 
     def test_get_not_configured(self):
@@ -100,7 +70,7 @@ class TestApiVrfs(EapiConfigUnitTest):
         for name in ['create', 'delete', 'default']:
             vrf_name = 'testvrf'
             if name == 'create':
-                cmds = 'vrf definition %s' % vrf_name
+                cmds = ['vrf definition %s' % vrf_name]
             elif name == 'delete':
                 cmds = 'no vrf definition %s' % vrf_name
             elif name == 'default':
@@ -108,18 +78,19 @@ class TestApiVrfs(EapiConfigUnitTest):
             func = function(name, vrf_name)
             self.eapi_positive_config_test(func, cmds)
 
+    def test_vrf_create_with_rd(self):
+        vrf_name = 'testvrfrd'
+        rd = '10:10'
+        cmds = ['vrf definition %s' % vrf_name, 'rd %s' % rd]
+        func = function('create', vrf_name, rd=rd)
+        self.eapi_positive_config_test(func, cmds)
+
     def test_set_rd(self):
         vrf_name = 'testrdvrf'
         rd = '10:10'
         cmds = ['vrf definition %s' % vrf_name, 'rd %s' % rd]
         func = function('set_rd', vrf_name, rd)
         self.eapi_positive_config_test(func, cmds)
-
-    def test_set_rd_invalid(self):
-        vrf_name = 'testbadrdvrf'
-        rd = '300.199.301.5:10'
-        func = function('set_rd', vrf_name, rd)
-        self.eapi_negative_config_test(func)
 
     def test_set_description(self):
         for state in ['config', 'negate', 'default']:
