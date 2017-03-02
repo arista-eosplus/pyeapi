@@ -35,7 +35,7 @@ import unittest
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from testlib import get_fixture, random_string, function
+from testlib import get_fixture, function
 from testlib import EapiConfigUnitTest
 
 import pyeapi.api.vrfs
