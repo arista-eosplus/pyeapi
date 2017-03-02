@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ class TestApiVrfs(DutSystemTest):
                         'rd 10:10', 'description blah desc'])
             response = dut.api('vrfs').get('blah')
             values = dict(rd='10:10', vrf_name='blah', description='blah desc',
-                          ipv4routing=False, ipv6routing=False)
+                          ipv4_routing=False, ipv6_routing=False)
             self.assertEqual(values, response)
             dut.config(['no vrf definition blah'])
 
@@ -71,10 +71,35 @@ class TestApiVrfs(DutSystemTest):
             self.assertIn('blah', config[0]['output'], 'dut=%s' % dut)
             dut.config(['no vrf definition blah'])
 
+    def test_create_with_valid_rd(self):
+        for dut in self.duts:
+            dut.config(['no vrf definition blah', 'vrf definition blah'])
+            result = dut.api('vrfs').create('blah', rd='10:10')
+            self.assertTrue(result, 'dut=%s' % dut)
+            command = 'show running-config section vrf'
+            config = dut.run_commands(command, encoding='text')
+            self.assertIn('vrf definition blah', config[0]['output'],
+                          'dut=%s' % dut)
+            self.assertIn('rd 10:10', config[0]['output'], 'dut=%s' % dut)
+            dut.config(['no vrf definition blah'])
+
     def test_create_and_return_false(self):
         for dut in self.duts:
             result = dut.api('vrfs').create('a%')
             self.assertFalse(result, 'dut=%s' % dut)
+
+    def test_create_with_invalid_rd(self):
+        for dut in self.duts:
+            dut.config(['no vrf definition blah', 'vrf definition blah'])
+            result = dut.api('vrfs').create('blah', rd='192.168.1.1:99999999')
+            self.assertFalse(result, 'dut=%s' % dut)
+            command = 'show running-config section vrf'
+            config = dut.run_commands(command, encoding='text')
+            self.assertIn('vrf definition blah', config[0]['output'],
+                          'dut=%s' % dut)
+            self.assertNotIn('rd', config[0]['output'],
+                             'dut=%s' % dut)
+            dut.config(['no vrf definition blah'])
 
     def test_delete_and_return_true(self):
         for dut in self.duts:

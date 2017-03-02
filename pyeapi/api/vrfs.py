@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@ Parameters:
         underscore up to the maximum number of characters.  This parameter
         is defaultable.
     description (string): The vrf description set by the user
-    ipv4routing (bool): Tells whether IPv4 routing is enabled on the VRF
-    ipv6routing (bool): Tells whether IPv6 unicast routing is enabled on the
+    ipv4_routing (bool): Tells whether IPv4 routing is enabled on the VRF
+    ipv6_routing (bool): Tells whether IPv6 unicast routing is enabled on the
         VRF
 
 """
@@ -54,44 +54,6 @@ from pyeapi.utils import make_iterable
 
 RD_RE = re.compile(r'(?:\srd\s)(?P<value>.*)$', re.M)
 DESCRIPTION_RE = re.compile(r'(?:description\s)(?P<value>.*)$', re.M)
-IP_REGEX = re.compile(r'^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.)'
-                      r'{3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$')
-
-
-
-def isrd(value):
-    """Checks if the argument is a valid VRF RD (route distinguisher)
-
-    A valid RD has the following format admin_ID:local_assignment. The admin_ID
-    can be an AS number or globally assigned IPv4 address. The local_assignment
-    can be an integer between 0-65,535 if the admin_ID is an IPv4 address and
-    can be between 0-4,294,967,295 if the admin_ID is an AS number. If the
-    admin_ID is an AS number the local_assignment could also be in the form of
-    an IPv4 address.
-
-    Args:
-        value: The value to check if is a valid VRF RD
-
-    Returns:
-        True if the supplied value is a valid VRF RD otherwise False
-    """
-    try:
-        admin_id, local_assignment = value.split(':')
-        if IP_REGEX.match(admin_id):
-            local_assignment = int(local_assignment)
-            if 0 <= local_assignment <= 65535:
-                return True
-        else:
-            admin_id = int(admin_id)
-            if 0 <= admin_id <= 65535:
-                if IP_REGEX.match(local_assignment):
-                    return True
-                local_assignment = int(local_assignment)
-                if 0 <= local_assignment <= 4294967295:
-                    return True
-    except ValueError:
-        pass
-    return False
 
 
 class Vrfs(EntityCollection):
@@ -122,14 +84,14 @@ class Vrfs(EntityCollection):
         response.update(self._parse_description(config))
         config = self.get_block('no ip routing vrf %s' % value)
         if config:
-            response['ipv4routing'] = False
+            response['ipv4_routing'] = False
         else:
-            response['ipv4routing'] = True
+            response['ipv4_routing'] = True
         config = self.get_block('no ipv6 unicast-routing vrf %s' % value)
         if config:
-            response['ipv6routing'] = False
+            response['ipv6_routing'] = False
         else:
-            response['ipv6routing'] = True
+            response['ipv6_routing'] = True
 
         return response
 
@@ -181,17 +143,27 @@ class Vrfs(EntityCollection):
             response[vrf] = self.get(vrf)
         return response
 
-    def create(self, vrf_name):
+    def create(self, vrf_name, rd=None):
         """ Creates a new VRF resource
+
+        Note: A valid RD has the following format admin_ID:local_assignment.
+            The admin_ID can be an AS number or globally assigned IPv4 address.
+            The local_assignment can be an integer between 0-65,535 if the
+            admin_ID is an IPv4 address and can be between 0-4,294,967,295 if
+            the admin_ID is an AS number. If the admin_ID is an AS number the
+            local_assignment could also be in the form of an IPv4 address.
 
         Args:
             vrf_name (str): The VRF name to create
+            rd (str): The value to configure the vrf rd
 
         Returns:
             True if create was successful otherwise False
         """
-        command = 'vrf definition %s' % vrf_name
-        return self.configure(command)
+        commands = ['vrf definition %s' % vrf_name]
+        if rd:
+            commands.append('rd %s' % rd)
+        return self.configure(commands)
 
     def delete(self, vrf_name):
         """ Deletes a VRF from the running configuration
@@ -232,10 +204,14 @@ class Vrfs(EntityCollection):
         return self.configure(commands)
 
     def set_rd(self, vrf_name, rd):
-        """ Configures the VRF rd
+        """ Configures the VRF rd (route distinguisher)
 
-        EosVersion:
-            4.xx.xx
+        Note: A valid RD has the following format admin_ID:local_assignment.
+            The admin_ID can be an AS number or globally assigned IPv4 address.
+            The local_assignment can be an integer between 0-65,535 if the
+            admin_ID is an IPv4 address and can be between 0-4,294,967,295 if
+            the admin_ID is an AS number. If the admin_ID is an AS number the
+            local_assignment could also be in the form of an IPv4 address.
 
         Args:
             vrf_name (str): The VRF name to set rd for
@@ -244,17 +220,12 @@ class Vrfs(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if not isrd(rd):
-            return False
         cmds = self.command_builder('rd', value=rd)
         return self.configure_vrf(vrf_name, cmds)
 
     def set_description(self, vrf_name, description=None, default=False,
                         disable=False):
         """ Configures the VRF description
-
-        EosVersion:
-            4.xx.xx
 
         Args:
             vrf_name (str): The VRF name to configure
@@ -271,9 +242,6 @@ class Vrfs(EntityCollection):
 
     def set_ipv4_routing(self, vrf_name, default=False, disable=False):
         """ Configures ipv4 routing for the vrf
-
-        EosVersion:
-            4.xx.xx
 
         Args:
             vrf_name (str): The VRF name to configure
@@ -295,9 +263,6 @@ class Vrfs(EntityCollection):
 
     def set_ipv6_routing(self, vrf_name, default=False, disable=False):
         """ Configures ipv6 unicast routing for the vrf
-
-        EosVersion:
-            4.xx.xx
 
         Args:
             vrf_name (str): The VRF name to configure
@@ -325,9 +290,6 @@ class Vrfs(EntityCollection):
             Requires interface to be in routed mode. Must apply ip address
             after VRF has been applied. This feature can also be accessed
             through the interfaces api.
-
-        EosVersion:
-            4.xx.xx
 
         Args:
             vrf_name (str): The VRF name to configure

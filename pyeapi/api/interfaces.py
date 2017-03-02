@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -558,8 +558,8 @@ class EthernetInterface(BaseInterface):
                name (str): The interface identifier.  It must be a full
                    interface name (ie Ethernet, not Et)
                vrf (str): The vrf name to be applied to the interface
-               default (bool): Specifies the default value for sFlow
-               disable (bool): Specifies to disable sFlow
+               default (bool): Specifies the default value for VRF
+               disable (bool): Specifies to disable VRF
 
            Returns:
                True if the operation succeeds otherwise False is returned
