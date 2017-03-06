@@ -58,7 +58,7 @@ class TestApiStandardAcls(DutSystemTest):
             dut.config(['no ip access-list standard test',
                         'ip access-list standard test'])
             result = dut.api('acl').getall()
-            self.assertIn('test', result)
+            self.assertIn('test', result['standard'])
 
     def test_create(self):
         for dut in self.duts:
@@ -138,7 +138,107 @@ class TestApiStandardAcls(DutSystemTest):
                              api.get_block('ip access-list standard test'))
 
 
+class TestApiExtendedAcls(DutSystemTest):
 
+    def test_get(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest'])
+            response = dut.api('acl').get('exttest')
+            self.assertIsNotNone(response)
+
+    def test_get_none(self):
+        for dut in self.duts:
+            dut.config('no ip access-list exttest')
+            result = dut.api('acl').get('exttest')
+            self.assertIsNone(result)
+
+    def test_getall(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest'])
+            result = dut.api('acl').getall()
+            self.assertIn('exttest', result['extended'])
+
+    def test_create(self):
+        for dut in self.duts:
+            dut.config('no ip access-list exttest')
+            api = dut.api('acl')
+            self.assertIsNone(api.get('exttest'))
+            result = dut.api('acl').create('exttest', 'extended')
+            self.assertTrue(result)
+            self.assertIsNotNone(api.get('exttest'))
+
+    def test_delete(self):
+        for dut in self.duts:
+            dut.config('ip access-list exttest')
+            api = dut.api('acl')
+            self.assertIsNotNone(api.get('exttest'))
+            result = dut.api('acl').delete('exttest')
+            self.assertTrue(result)
+            self.assertIsNone(api.get('exttest'))
+
+    def test_default(self):
+        for dut in self.duts:
+            dut.config('ip access-list exttest')
+            api = dut.api('acl')
+            self.assertIsNotNone(api.get('exttest'))
+            result = dut.api('acl').default('exttest')
+            self.assertTrue(result)
+            self.assertIsNone(api.get('exttest'))
+
+    def test_update_entry(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest'])
+            api = dut.api('acl')
+            self.assertNotIn('10 permit ip any any',
+                             api.get_block('ip access-list exttest'))
+            result = dut.api('acl').update_entry('exttest', '10', 'permit',
+                                                 'ip', '0.0.0.0', '0',
+                                                 '0.0.0.0', '0', False)
+            self.assertTrue(result)
+            self.assertIn('10 permit ip any any',
+                          api.get_block('ip access-list exttest'))
+
+    def test_update_entry_existing(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest', '10 permit ip any any log'])
+            api = dut.api('acl')
+            self.assertIn('10 permit ip any any log',
+                          api.get_block('ip access-list exttest'))
+            result = dut.api('acl').update_entry('exttest', '10', 'deny', 'ip',
+                                                 '0.0.0.0', '0', '0.0.0.0',
+                                                 '0', True)
+            self.assertTrue(result)
+            self.assertIn('10 deny ip any any log',
+                          api.get_block('ip access-list exttest'))
+
+    def test_add_entry(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest'])
+            api = dut.api('acl')
+            self.assertNotIn('10 permit ip any any log',
+                             api.get_block('ip access-list exttest'))
+            result = api.add_entry('exttest', 'permit', 'ip', '0.0.0.0', '0',
+                                   '0.0.0.0', '0', True)
+            self.assertTrue(result)
+            self.assertIn('10 permit ip any any log',
+                          api.get_block('ip access-list exttest'))
+
+    def test_remove_entry(self):
+        for dut in self.duts:
+            dut.config(['no ip access-list exttest',
+                        'ip access-list exttest', '10 permit ip any any log'])
+            api = dut.api('acl')
+            self.assertIn('10 permit ip any any log',
+                          api.get_block('ip access-list exttest'))
+            result = api.remove_entry('exttest', '10')
+            self.assertTrue(result)
+            self.assertNotIn('10 permit ip any any log',
+                             api.get_block('ip access-list exttest'))
 
 
 if __name__ == '__main__':
