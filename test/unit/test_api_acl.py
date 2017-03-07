@@ -203,6 +203,18 @@ class TestApiExtendedAcls(EapiConfigUnitTest):
         keys = ['name', 'type', 'entries']
         self.assertEqual(sorted(keys), sorted(result.keys()))
         self.assertEqual(result['type'], 'extended')
+        self.assertIn('entries', result)
+        self.assertIn('50', result['entries'])
+        entry = dict(action='permit', dstaddr='1.1.1.2', dstlen=None,
+                     dstport=None, other=None, protocol='ip', srcaddr='any',
+                     srclen=None, srcport=None)
+        self.assertEqual(entry, result['entries']['50'])
+        self.assertIn('70', result['entries'])
+        entry = dict(action='permit', dstaddr='3.3.3.3', dstlen=None,
+                     dstport='lt ipp', protocol='tcp', srcaddr='8.8.8.0',
+                     other='urg ttl eq 24 fragments tracked log',
+                     srclen='24', srcport='neq irc')
+        self.assertEqual(entry, result['entries']['70'])
 
     def test_get_not_configured(self):
         self.assertIsNone(self.instance.get('unconfigured'))
