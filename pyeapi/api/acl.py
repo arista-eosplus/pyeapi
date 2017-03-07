@@ -220,17 +220,15 @@ class ExtendedAcls(EntityCollection):
     entry_re = re.compile(r'(\d+)'
                           r'(?: ([p|d]\w+))'
                           r'(?: (\w+|\d+))'
-                          r'(?: (any))?'
-                          r'(?: (host))?'
+                          r'(?: ([a|h]\w+))?'
                           r'(?: ([0-9]+(?:\.[0-9]+){3}))?'
                           r'(?:/([0-9]{1,2}))?'
-                          r'(?: (eq [\w-]+))?'
-                          r'(?: (any))?'
-                          r'(?: (host))?'
+                          r'(?: ((?:eq|gt|lt|neq|range) [\w-]+))?'
+                          r'(?: ([a|h]\w+))?'
                           r'(?: ([0-9]+(?:\.[0-9]+){3}))?'
                           r'(?:/([0-9]{1,2}))?'
                           r'(?: ([0-9]+(?:\.[0-9]+){3}))?'
-                          r'(?: (eq [\w-]+))?'
+                          r'(?: ((?:eq|gt|lt|neq|range) [\w-]+))?'
                           r'(?: (.+))?')
 
     def get(self, name):
@@ -248,13 +246,13 @@ class ExtendedAcls(EntityCollection):
             entry = dict()
             entry['action'] = match.group(2)
             entry['protocol'] = match.group(3)
-            entry['srcaddr'] = match.group(6) or 'any'
-            entry['srclen'] = match.group(7)
-            entry['srcport'] = match.group(8)
-            entry['dstaddr'] = match.group(11) or 'any'
-            entry['dstlen'] = match.group(12)
-            entry['dstport'] = match.group(14)
-            entry['other'] = match.group(15)
+            entry['srcaddr'] = match.group(5) or 'any'
+            entry['srclen'] = match.group(6)
+            entry['srcport'] = match.group(7)
+            entry['dstaddr'] = match.group(9) or 'any'
+            entry['dstlen'] = match.group(10)
+            entry['dstport'] = match.group(12)
+            entry['other'] = match.group(13)
             entries[match.group(1)] = entry
         return dict(entries=entries)
 
