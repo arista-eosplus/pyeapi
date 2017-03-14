@@ -57,6 +57,13 @@ class TestClient(unittest.TestCase):
                     # enable password on the dut and clear it on tearDown
                     dut.config("enable secret %s" % dut._enablepwd)
 
+    def test_populate_version_properties(self):
+        for dut in self.duts:
+            result = dut.run_commands('show version')
+            self.assertEqual(dut.version, result[0]['version'])
+            self.assertIn(dut.model, result[0]['modelName'])
+            self.assertIn(dut.version_number, result[0]['version'])
+
     def test_enable_single_command(self):
         for dut in self.duts:
             result = dut.run_commands('show version')
@@ -71,9 +78,8 @@ class TestClient(unittest.TestCase):
 
     def test_no_enable_single_command_no_auth(self):
         for dut in self.duts:
-            dut.run_commands('disable')
             with self.assertRaises(pyeapi.eapilib.CommandError):
-                dut.run_commands('show running-config', 'json', send_enable=False)
+                dut.run_commands(['disable', 'show running-config'], 'json', send_enable=False)
 
     def test_enable_multiple_commands(self):
         for dut in self.duts:
@@ -143,6 +149,48 @@ class TestClient(unittest.TestCase):
             txtstr = api.get_block('interface Ethernet1', config='config')
             self.assertEqual(txtstr, None)
 
+    def test_execute_with_autocomplete(self):
+        # There are some versions of EOS before 4.17.x that have the
+        # autocomplete feature available. If system tests are run on one of
+        # those version of EOS this system test will fail.
+        for dut in self.duts:
+            version = self._dut_eos_version(dut)
+            version = version.split('.')
+            if int(version[0]) >= 4 and int(version[1]) >= 17:
+                result = dut.connection.execute(['sh ver'], encoding='json',
+                                                autoComplete=True)
+                self.assertIn('version', result['result'][0])
+            else:
+                # Verify exception thrown for EOS version that does not
+                # support autoComplete parameter with EAPI
+                with self.assertRaises(pyeapi.eapilib.CommandError):
+                    dut.connection.execute(['sh ver'], encoding='json',
+                                           autoComplete=True)
+
+    def test_execute_with_expandaliases(self):
+        # There are some versions of EOS before 4.17.x that have the
+        # expandaliases feature available. If system tests are run on one of
+        # those version of EOS this system test will fail.
+        for dut in self.duts:
+            # configure an alias for show version command
+            dut.config(['alias test show version'])
+            version = self._dut_eos_version(dut)
+            version = version.split('.')
+            if int(version[0]) >= 4 and int(version[1]) >= 17:
+                result = dut.connection.execute(['test'], encoding='json',
+                                                expandAliases=True)
+                self.assertIn('version', result['result'][0])
+            else:
+                # Verify exception thrown for EOS version that does not
+                # support expandAliases parameter with EAPI
+                with self.assertRaises(pyeapi.eapilib.CommandError):
+                    dut.connection.execute(['test'], encoding='json',
+                                           expandAliases=True)
+
+    def _dut_eos_version(self, dut):
+        result = dut.connection.execute(['show version'], encoding='json')
+        return result['result'][0]['version']
+
     def tearDown(self):
         for dut in self.duts:
             dut.config("no enable secret")
@@ -187,7 +235,7 @@ class TestNode(unittest.TestCase):
         # Send a continuous command that requires a break
         cases.append(('watch 10 show int e1 count rates', rfmt
                       % (1000, 'could not run command',
-                         'init error \(cbreak\(\) returned ERR\)')))
+                         'init error.*')))
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',

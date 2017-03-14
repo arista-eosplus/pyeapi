@@ -57,10 +57,11 @@ else:
 _LOGGER.addHandler(_syslog_handler)
 
 # Create a handler to log messages to stderr
-_stderr_formatter = logging.Formatter('\n\n******** LOG NOTE ********\n%(message)s\n')
+_stderr_formatter = logging.Formatter('\n\n**** LOG NOTE ****\n%(message)s\n')
 _stderr_handler = logging.StreamHandler()
 _stderr_handler.setFormatter(_stderr_formatter)
 _LOGGER.addHandler(_stderr_handler)
+
 
 def import_module(name):
     """ Imports a module into the current runtime environment

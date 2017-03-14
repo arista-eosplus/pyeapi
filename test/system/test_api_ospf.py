@@ -36,26 +36,48 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 from random import randint
 from systestlib import DutSystemTest
 
-def clear_ospf_config(dut, id=None):
-    if id is None:
+
+def clear_ospf_config(dut, pid=None):
+    if pid is None:
         try:
-            id = int(dut.get_config(params="section ospf")[0].split()[2])
-            dut.config(['no router ospf %d' % id])
+            pid = int(dut.get_config(params="section ospf")[0].split()[2])
+            dut.config(['no router ospf %d' % pid])
         except IndexError:
             '''No OSPF configured'''
             pass
+    else:
+        dut.config(['no router ospf %d' % pid])
+
 
 class TestApiOspf(DutSystemTest):
+
     def test_get(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            dut.config(["router ospf 1", "router-id 1.1.1.1", "network 2.2.2.0/24 area 0",
-                        "redistribute bgp"])
+            dut.config(["router ospf 1", "router-id 1.1.1.1",
+                        "network 2.2.2.0/24 area 0", "redistribute bgp"])
             ospf_response = dut.api('ospf').get()
             config = dict(router_id="1.1.1.1", ospf_process_id=1,
-                          networks=[dict(netmask='24', network="2.2.2.0", area="0.0.0.0")],
-                          redistributions=[dict(protocol="bgp")], shutdown=False)
+                          vrf='default',
+                          networks=[dict(netmask='24', network="2.2.2.0",
+                                         area="0.0.0.0")],
+                          redistributions=[dict(protocol="bgp")],
+                          shutdown=False)
             self.assertEqual(ospf_response, config)
+
+    def test_get_with_vrf(self):
+        for dut in self.duts:
+            clear_ospf_config(dut)
+            dut.config(["router ospf 10 vrf test", "router-id 1.1.1.2",
+                        "network 2.2.2.0/24 area 0", "redistribute bgp"])
+            ospf_response = dut.api('ospf').get()
+            config = dict(router_id="1.1.1.2", ospf_process_id=10, vrf='test',
+                          networks=[dict(netmask='24', network="2.2.2.0",
+                                         area="0.0.0.0")],
+                          redistributions=[dict(protocol="bgp")],
+                          shutdown=False)
+            self.assertEqual(ospf_response, config)
+            clear_ospf_config(dut, 10)
 
     def test_shutdown(self):
         for dut in self.duts:
@@ -88,18 +110,28 @@ class TestApiOspf(DutSystemTest):
     def test_create_valid_id(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            id = randint(1, 65536)
+            pid = randint(1, 65536)
             ospf = dut.api("ospf")
-            response = ospf.create(id)
+            response = ospf.create(pid)
             self.assertTrue(response)
-            self.assertIn("router ospf {}".format(id), dut.get_config())
+            self.assertIn("router ospf {}".format(pid), dut.get_config())
 
     def test_create_invalid_id(self):
         for dut in self.duts:
             clear_ospf_config(dut)
-            id = randint(70000, 100000)
+            pid = randint(70000, 100000)
             with self.assertRaises(ValueError):
-                dut.api("ospf").create(id)
+                dut.api("ospf").create(pid)
+
+    def test_create_with_vrf(self):
+        for dut in self.duts:
+            clear_ospf_config(dut)
+            pid = randint(1, 65536)
+            ospf = dut.api("ospf")
+            response = ospf.create(pid, vrf='test')
+            self.assertTrue(response)
+            self.assertIn("router ospf {} vrf {}".format(pid, 'test'),
+                          dut.get_config())
 
     def test_configure_ospf(self):
         for dut in self.duts:

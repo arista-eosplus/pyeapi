@@ -115,12 +115,13 @@ class Varp(EntityCollection):
                 aa:bb:cc:dd:ee:ff.
             default (bool): Sets the virtual-router mac address to the system
                 default (which is to remove the configuration line).
-            disabel (bool): Negates the virtual-router mac address using
+            disable (bool): Negates the virtual-router mac address using
                 the system no configuration command
 
         Returns:
             True if the set operation succeeds otherwise False.
         """
+        base_command = 'ip virtual-router mac-address'
         if not default and not disable:
             if mac_address is not None:
                 # Check to see if mac_address matches expected format
@@ -131,10 +132,12 @@ class Varp(EntityCollection):
             else:
                 raise ValueError('mac_address must be a properly formatted '
                                  'address string')
-
-        commands = self.command_builder('ip virtual-router mac-address',
-                                        value=mac_address, default=default,
-                                        disable=disable)
+        if default or disable and not mac_address:
+            current_mac = self._parse_mac_address()
+            if current_mac['mac_address']:
+                base_command = base_command + ' ' + current_mac['mac_address']
+        commands = self.command_builder(base_command, value=mac_address,
+                                        default=default, disable=disable)
         return self.configure(commands)
 
 

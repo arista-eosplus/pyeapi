@@ -30,6 +30,7 @@ through Github issues.
    configfile
    modules
    requirements
+   examples
    contribute
    release-notes
    support

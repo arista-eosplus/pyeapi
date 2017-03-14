@@ -49,7 +49,7 @@ class TestApiVlans(EapiConfigUnitTest):
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_isvlan_with_string(self):
-        self.assertFalse(pyeapi.api.vlans.isvlan(random_string()))
+        self.assertFalse(pyeapi.api.vlans.isvlan('a' + random_string()))
 
     def test_isvlan_valid_value(self):
         self.assertTrue(pyeapi.api.vlans.isvlan('1234'))
@@ -149,6 +149,7 @@ class TestApiVlans(EapiConfigUnitTest):
         cmds = ['vlan %s' % vid, 'no trunk group %s' % tg]
         func = function('remove_trunk_group', vid, tg)
         self.eapi_positive_config_test(func, cmds)
+
 
 if __name__ == '__main__':
     unittest.main()

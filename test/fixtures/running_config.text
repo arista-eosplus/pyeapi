@@ -1579,6 +1579,17 @@ ip access-list standard test
    50 permit 16.0.0.0/8
    60 permit any log
 !
+ip access-list exttest
+   no statistics per-entry
+   fragment-rules
+   10 permit tcp host 1.1.1.1 eq telnet host 2.2.2.2 log
+   20 permit icmp 3.3.3.0/24 any ttl eq 2 tracked log
+   30 permit tcp host 7.7.7.7 eq https any eq https log
+   40 permit udp 4.4.0.0/16 any eq pkt-krb-ipsec
+   50 permit ip any host 1.1.1.2
+   60 deny ip any any log
+   70 permit tcp 8.8.8.0/24 neq irc host 3.3.3.3 lt ipp urg ttl eq 24 fragments tracked log
+!
 mac address-table aging-time 300
 !
 monitor hadoop

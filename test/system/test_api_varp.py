@@ -37,37 +37,54 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from systestlib import DutSystemTest
 
-VIRT_NULL = 'no ip virtual-router mac-address'
 VIRT_ENTRY_A = 'ip virtual-router mac-address 00:11:22:33:44:55'
 VIRT_ENTRY_B = 'ip virtual-router mac-address 00:11:22:33:44:56'
 VIRT_ENTRY_C = 'ip virtual-router mac-address 00:11:22:33:44:57'
 IP_CMD = 'ip virtual-router address'
 
+
 class TestApiVarp(DutSystemTest):
+
+    def _null_virtual_mac_command(self, dut):
+        # Default format of ip virtual-router mac-address changed in EOS 4.17.x
+        # pre 4.17.x    - no ip virtual-router mac-address
+        # 4.17.x and on - ip virtual-router mac-address 00:00:00:00:00:00
+        mac_dict = dut.api('varp')._parse_mac_address()
+        virt_null_base = 'no ip virtual-router mac-address'
+        if mac_dict['mac_address']:
+            return virt_null_base + ' ' + mac_dict['mac_address']
+        return virt_null_base
 
     def test_basic_get(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null])
             response = dut.api('varp').get()
             self.assertIsNotNone(response)
 
     def test_get_with_value(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL, VIRT_ENTRY_A])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null, VIRT_ENTRY_A])
             response = dut.api('varp').get()
             self.assertIsNotNone(response)
             self.assertEqual(response['mac_address'], '00:11:22:33:44:55')
 
     def test_get_none(self):
+        # None response is for code versions before 4.17.x due to default
+        # configuration change in 4.17.x. Default configuration difference
+        # shown above in _null_virtual_mac_command
         for dut in self.duts:
-            dut.config([VIRT_NULL])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null])
             response = dut.api('varp').get()
             self.assertIsNotNone(response)
-            self.assertEqual(response['mac_address'], None)
+            self.assertIn(response['mac_address'], [None, '00:00:00:00:00:00'])
 
     def test_set_mac_address_with_value(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null])
             api = dut.api('varp')
             self.assertNotIn(VIRT_ENTRY_A, api.config)
             result = dut.api('varp').set_mac_address('00:11:22:33:44:55')
@@ -76,7 +93,8 @@ class TestApiVarp(DutSystemTest):
 
     def test_change_mac_address(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL, VIRT_ENTRY_A])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null, VIRT_ENTRY_A])
             api = dut.api('varp')
             self.assertIn(VIRT_ENTRY_A, api.config)
             result = dut.api('varp').set_mac_address('00:11:22:33:44:56')
@@ -85,7 +103,8 @@ class TestApiVarp(DutSystemTest):
 
     def test_remove_mac_address(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL, VIRT_ENTRY_A])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null, VIRT_ENTRY_A])
             api = dut.api('varp')
             self.assertIn(VIRT_ENTRY_A, api.config)
             result = dut.api('varp').set_mac_address(disable=True)
@@ -94,12 +113,14 @@ class TestApiVarp(DutSystemTest):
 
     def test_set_mac_address_with_bad_value(self):
         for dut in self.duts:
-            dut.config([VIRT_NULL])
+            virt_null = self._null_virtual_mac_command(dut)
+            dut.config([virt_null])
             api = dut.api('varp')
             self.assertNotIn(VIRT_ENTRY_A, api.config)
 
             with self.assertRaises(ValueError):
                 dut.api('varp').set_mac_address('0011.2233.4455')
+
 
 class TestApiVarpInterfaces(DutSystemTest):
 
@@ -231,6 +252,7 @@ class TestApiVarpInterfaces(DutSystemTest):
                              api.get_block('interface Vlan1000'))
             self.assertNotIn('ip virtual-router address 1.1.1.21',
                              api.get_block('interface Vlan1000'))
+
 
 if __name__ == '__main__':
     unittest.main()

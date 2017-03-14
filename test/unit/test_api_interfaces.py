@@ -141,6 +141,35 @@ class TestApiBaseInterface(EapiConfigUnitTest):
             func = function('set_shutdown', intf, default=True)
             self.eapi_positive_config_test(func, cmds)
 
+    def test_set_encapsulation_non_subintf(self):
+        cmds = ['interface Ethernet1', 'encapsulation dot1q vlan 4']
+        func = function('set_encapsulation', 'Ethernet1', 4)
+        self.eapi_exception_config_test(func, NotImplementedError,
+                                        cmds)
+
+    def test_set_encapsulation_non_supported_intf(self):
+        cmds = ['interface Vlan1234', 'encapsulation dot1q vlan 4']
+        func = function('set_encapsulation', 'Vlan1234', 4)
+        self.eapi_exception_config_test(func, NotImplementedError,
+                                        cmds)
+
+    def test_set_encapsulation_ethernet_subintf(self):
+        cmds = ['interface Ethernet1.1', 'encapsulation dot1q vlan 4']
+        func = function('set_encapsulation', 'Ethernet1.1', 4)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_encapsulation_portchannel_subintf_disable(self):
+        cmds = ['interface Port-Channel1.1', 'no encapsulation dot1q vlan']
+        func = function('set_encapsulation', 'Port-Channel1.1', 4,
+                        disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_encapsulation_ethernet_subintf_default(self):
+        cmds = ['interface Ethernet1.1', 'default encapsulation dot1q vlan']
+        func = function('set_encapsulation', 'Ethernet1.1', 4,
+                        default=True)
+        self.eapi_positive_config_test(func, cmds)
+
 
 class TestApiEthernetInterface(EapiConfigUnitTest):
 
@@ -163,19 +192,35 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
         for intf in self.INTERFACES:
             for name in ['create', 'delete', 'default']:
                 if name == 'create':
-                    if intf[0:2] not in ['Et', 'Ma']:
-                        cmds = 'interface %s' % intf
-                        func = function(name, intf)
-                        self.eapi_positive_config_test(func, cmds)
+                    # Test create for subinterfaces
+                    subintf = intf + '.1'
+                    cmds = ['interface %s' % subintf]
+                    func = function(name, subintf)
+                    self.eapi_positive_config_test(func, cmds)
                 elif name == 'delete':
-                    if intf[0:2] not in ['Et', 'Ma']:
-                        cmds = 'no interface %s' % intf
-                        func = function(name, intf)
-                        self.eapi_positive_config_test(func, cmds)
+                    # Test delete for subinterfaces
+                    subintf = intf + '.1'
+                    cmds = ['no interface %s' % subintf]
+                    func = function(name, subintf)
+                    self.eapi_positive_config_test(func, cmds)
                 elif name == 'default':
                     cmds = 'default interface %s' % intf
                     func = function(name, intf)
                     self.eapi_positive_config_test(func, cmds)
+
+    def test_instance_functions_exceptions(self):
+        intf = 'Ethernet1'
+        for name in ['create', 'delete']:
+            if name == 'create':
+                cmds = 'interface %s' % intf
+                func = function(name, intf)
+                self.eapi_exception_config_test(func, NotImplementedError,
+                                                cmds)
+            elif name == 'delete':
+                cmds = 'no interface %s' % intf
+                func = function(name, intf)
+                self.eapi_exception_config_test(func, NotImplementedError,
+                                                cmds)
 
     def test_set_flowcontrol_with_value(self):
         for intf in self.INTERFACES:
@@ -249,6 +294,13 @@ class TestApiEthernetInterface(EapiConfigUnitTest):
             func = function('set_sflow', intf, random_string())
             self.eapi_exception_config_test(func, ValueError)
 
+    def test_set_vrf(self):
+        for intf in INTERFACES:
+            vrf = 'testvrf'
+            cmds = ['interface %s' % intf, 'vrf forwarding %s' % vrf]
+            func = function('set_vrf', intf, vrf)
+            self.eapi_positive_config_test(func, cmds)
+
 
 class TestApiPortchannelInterface(EapiConfigUnitTest):
 
@@ -268,6 +320,7 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         values = dict(name='Port-Channel1', type='portchannel',
                       description=None, shutdown=False,
                       lacp_mode='on', minimum_links=0,
+                      lacp_fallback='disabled', lacp_timeout=90,
                       members=['Ethernet5', 'Ethernet6'])
 
         self.assertEqual(values, result)
@@ -293,6 +346,31 @@ class TestApiPortchannelInterface(EapiConfigUnitTest):
         cmds = ['interface Port-Channel1', 'no port-channel min-links']
         func = function('set_minimum_links', 'Port-Channel1', disable=True)
         self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_timeout_with_value(self):
+        timeout = random_int(1, 16)
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback timeout %s' % timeout]
+        func = function('set_lacp_timeout', 'Port-Channel1', timeout)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_individual(self):
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback individual']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'individual')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_static(self):
+        cmds = ['interface Port-Channel1', 'port-channel lacp fallback static']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'static')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_with_disabled(self):
+        cmds = ['interface Port-Channel1', 'no port-channel lacp fallback']
+        func = function('set_lacp_fallback', 'Port-Channel1', 'disabled')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_lacp_fallback_invalid_mode(self):
+        func = function('set_lacp_fallback', 'Port-Channel1', random_string())
+        self.eapi_negative_config_test(func)
 
     def test_get_lacp_mode(self):
         result = self.instance.get_lacp_mode('Port-Channel1')
@@ -357,7 +435,8 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
 
     def test_get(self):
         keys = ['name', 'type', 'description', 'shutdown', 'source_interface',
-                'multicast_group', 'udp_port', 'vlans', 'flood_list']
+                'multicast_group', 'udp_port', 'vlans', 'flood_list',
+                'multicast_decap']
         result = self.instance.get('Vxlan1')
         self.assertEqual(sorted(keys), sorted(result.keys()))
 
@@ -389,6 +468,21 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
     def test_set_multicast_group_with_default(self):
         cmds = ['interface Vxlan1', 'default vxlan multicast-group']
         func = function('set_multicast_group', 'Vxlan1', default=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap(self):
+        cmds = ['interface Vxlan1', 'vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1')
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap_with_no_value(self):
+        cmds = ['interface Vxlan1', 'no vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1', disable=True)
+        self.eapi_positive_config_test(func, cmds)
+
+    def test_set_multicast_decap_with_default(self):
+        cmds = ['interface Vxlan1', 'default vxlan multicast-group decap']
+        func = function('set_multicast_decap', 'Vxlan1', default=True)
         self.eapi_positive_config_test(func, cmds)
 
     def test_set_udp_port_with_value(self):
@@ -435,6 +529,7 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         cmds = ['interface Vxlan1', 'vxlan vlan 10 flood vtep remove 1.1.1.1']
         func = function('remove_vtep', 'Vxlan1', '1.1.1.1', vlan='10')
         self.eapi_positive_config_test(func, cmds)
+
 
 if __name__ == '__main__':
     unittest.main()

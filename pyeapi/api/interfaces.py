@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2014, Arista Networks, Inc.
+# Copyright (c) 2017, Arista Networks, Inc.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ from pyeapi.utils import ProxyCall
 MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
 DEFAULT_LACP_MODE = 'on'
+DEFAULT_LACP_FALLBACK = 'disabled'
+DEFAULT_LACP_FALLBACK_TIMEOUT = 90
 
 VALID_INTERFACES = frozenset([
     'Ethernet',
@@ -251,6 +253,34 @@ class BaseInterface(EntityCollection):
         """
         return self.configure('default interface %s' % name)
 
+    def set_encapsulation(self, name, vid, default=False, disable=False):
+        """Configures the subinterface encapsulation value
+
+        Args:
+            name (string): The interface identifier.  It must be a full
+                interface name (ie Ethernet, not Et)
+            vid (int): The vlan id number
+            default (boolean): Specifies to default the subinterface
+                encapsulation
+            disable (boolean): Specifies to disable the subinterface
+                encapsulation
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        if '.' not in name:
+            raise NotImplementedError('parameter encapsulation can only be'
+                                      ' set on subinterfaces')
+        if name[0:2] not in ['Et', 'Po']:
+            raise NotImplementedError('parameter encapsulation can only be'
+                                      ' set on Ethernet and Port-Channel'
+                                      ' subinterfaces')
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('encapsulation dot1q vlan',
+                                             str(vid), default=default,
+                                             disable=disable))
+        return self.configure(commands)
+
     def set_description(self, name, value=None, default=False, disable=False):
         """Configures the interface description
 
@@ -383,30 +413,36 @@ class EthernetInterface(BaseInterface):
         return dict(flowcontrol_receive=value)
 
     def create(self, name):
-        """Creating Ethernet interfaces is currently not supported
+        """Create an Ethernet subinterface
 
         Args:
-            name (string): The interface name
+            name (string): The subinterface name. Ex: Ethernet1.1
 
         Raises:
-            NotImplementedError: creating Ethernet interfaces is not supported
-
+            NotImplementedError: creating physical Ethernet interfaces is not
+            supported. Only subinterfaces can be created.
         """
-        raise NotImplementedError('creating Ethernet interfaces is '
-                                  'not supported')
+        if '.' not in name:
+            raise NotImplementedError('creating physical Ethernet interfaces'
+                                      ' is not supported. Only subinterfaces'
+                                      ' can be created')
+        return self.configure(['interface %s' % name])
 
     def delete(self, name):
-        """Deleting Ethernet interfaces is currently not supported
+        """Delete an Ethernet subinterfaces
 
         Args:
-            name (string): The interface name
+            name (string): The subinterface name. Ex: Ethernet1.1
 
         Raises:
-            NotImplementedError: Deleting  Ethernet interfaces is not supported
-
+            NotImplementedError: creating physical Ethernet interfaces is not
+            supported. Only subinterfaces can be created.
         """
-        raise NotImplementedError('deleting Ethernet interfaces is '
-                                  'not supported')
+        if '.' not in name:
+            raise NotImplementedError('deleting physical Ethernet interfaces'
+                                      ' is not supported. Only subinterfaces'
+                                      ' can be created')
+        return self.configure(['no interface %s' % name])
 
     def set_flowcontrol_send(self, name, value=None, default=False,
                              disable=False):
@@ -511,6 +547,28 @@ class EthernetInterface(BaseInterface):
                                              default=default, disable=disable))
         return self.configure(commands)
 
+    def set_vrf(self, name, vrf, default=False, disable=False):
+        """Applies a VRF to the interface
+
+           Note: VRF being applied to interface must already exist in switch
+               config. Ethernet port must be in routed mode. This functionality
+               can also be handled in the VRF api.
+
+           Args:
+               name (str): The interface identifier.  It must be a full
+                   interface name (ie Ethernet, not Et)
+               vrf (str): The vrf name to be applied to the interface
+               default (bool): Specifies the default value for VRF
+               disable (bool): Specifies to disable VRF
+
+           Returns:
+               True if the operation succeeds otherwise False is returned
+        """
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('vrf forwarding', vrf,
+                                             default=default, disable=disable))
+        return self.configure(commands)
+
 
 class PortchannelInterface(BaseInterface):
 
@@ -548,6 +606,8 @@ class PortchannelInterface(BaseInterface):
         response['members'] = self.get_members(name)
         response['lacp_mode'] = self.get_lacp_mode(name)
         response.update(self._parse_minimum_links(config))
+        response.update(self._parse_lacp_timeout(config))
+        response.update(self._parse_lacp_fallback(config))
         return response
 
     def _parse_minimum_links(self, config):
@@ -556,6 +616,20 @@ class PortchannelInterface(BaseInterface):
         if match:
             value = int(match.group(1))
         return dict(minimum_links=value)
+
+    def _parse_lacp_fallback(self, config):
+        value = DEFAULT_LACP_FALLBACK
+        match = re.search(r'lacp fallback (static|individual)', config)
+        if match:
+            value = match.group(1)
+        return dict(lacp_fallback=value)
+
+    def _parse_lacp_timeout(self, config):
+        value = DEFAULT_LACP_FALLBACK_TIMEOUT
+        match = re.search(r'lacp fallback timeout (\d+)', config)
+        if match:
+            value = int(match.group(1))
+        return dict(lacp_timeout=value)
 
     def get_lacp_mode(self, name):
         """Returns the LACP mode for the specified Port-Channel interface
@@ -689,6 +763,48 @@ class PortchannelInterface(BaseInterface):
                                              disable=disable))
         return self.configure(commands)
 
+    def set_lacp_fallback(self, name, mode=None):
+        """Configures the Port-Channel lacp_fallback
+
+        Args:
+            name(str): The Port-Channel interface name
+
+            mode(str): The Port-Channel LACP fallback setting
+                Valid values are 'disabled', 'static', 'individual':
+
+                * static  - Fallback to static LAG mode
+                * individual - Fallback to individual ports
+                * disabled - Disable LACP fallback
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        if mode not in ['disabled', 'static', 'individual']:
+            return False
+        disable = True if mode == 'disabled' else False
+        commands = ['interface %s' % name]
+        commands.append(self.command_builder('port-channel lacp fallback',
+                                             value=mode, disable=disable))
+        return self.configure(commands)
+
+    def set_lacp_timeout(self, name, value=None):
+        """Configures the Port-Channel LACP fallback timeout
+           The fallback timeout configures the period an interface in
+           fallback mode remains in LACP mode without receiving a PDU.
+
+        Args:
+            name(str): The Port-Channel interface name
+
+            value(int): port-channel lacp fallback timeout in seconds
+
+        Returns:
+            True if the operation succeeds otherwise False is returned
+        """
+        commands = ['interface %s' % name]
+        string = 'port-channel lacp fallback timeout'
+        commands.append(self.command_builder(string, value=value))
+        return self.configure(commands)
+
 
 class VxlanInterface(BaseInterface):
 
@@ -710,6 +826,8 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
+            * multicast_decap (bool): If the mutlicast decap
+                                      feature is configured
 
         Args:
             name (str): The interface identifier to retrieve from the
@@ -732,6 +850,7 @@ class VxlanInterface(BaseInterface):
         response.update(self._parse_udp_port(config))
         response.update(self._parse_vlans(config))
         response.update(self._parse_flood_list(config))
+        response.update(self._parse_multicast_decap(config))
 
         return response
 
@@ -753,9 +872,15 @@ class VxlanInterface(BaseInterface):
         return dict(source_interface=value)
 
     def _parse_multicast_group(self, config):
-        match = re.search(r'vxlan multicast-group ([^\s]+)', config)
+        match = re.search(r'vxlan multicast-group '
+                          r'([\d]{3}\.[\d]+\.[\d]+\.[\d]+)',
+                          config)
         value = match.group(1) if match else self.DEFAULT_MCAST_GRP
         return dict(multicast_group=value)
+
+    def _parse_multicast_decap(self, config):
+        value = 'vxlan mutlicast-group decap' in config
+        return dict(multicast_decap=bool(value))
 
     def _parse_udp_port(self, config):
         match = re.search(r'vxlan udp-port (\d+)', config)
@@ -830,6 +955,31 @@ class VxlanInterface(BaseInterface):
         cmds = self.command_builder(string, value=value, default=default,
                                     disable=disable)
         return self.configure_interface(name, cmds)
+
+    def set_multicast_decap(self, name, default=False,
+                            disable=False):
+        """Configures the Vxlan multicast-group decap feature
+
+        EosVersion:
+            4.15.0M
+
+        Args:
+            name(str): The interface identifier to configure, defaults to
+                Vxlan1
+           default(bool): Configures the mulitcast-group decap value to default
+           disable(bool): Negates the multicast-group decap value
+
+        Returns:
+            True if the operation succeeds otherwise False
+        """
+        string = 'vxlan multicast-group decap'
+        if(default or disable):
+            cmds = self.command_builder(string, value=None, default=default,
+                                        disable=disable)
+        else:
+            cmds = [string]
+        return self.configure_interface(name, cmds)
+
 
     def set_udp_port(self, name, value=None, default=False, disable=False):
         """Configures vxlan udp-port value

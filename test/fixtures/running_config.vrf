@@ -1,0 +1,233 @@
+logging level VRF debugging
+!
+no snmp-server vrf default source-interface
+snmp-server vrf default
+!
+vrf definition blah
+   rd 10:10
+   description blah desc
+!
+vrf definition second
+   no description
+!
+vrf definition test
+   rd 200:500
+   no description
+!
+interface Ethernet1
+   no description
+   no shutdown
+   default load-interval
+   mtu 1500
+   logging event link-status use-global
+   no dcbx mode
+   no mac-address
+   no link-debounce
+   no flowcontrol send
+   no flowcontrol receive
+   no mac timestamp
+   no speed
+   no l2 mtu
+   default logging event congestion-drops
+   default unidirectional
+   no traffic-loopback
+   default error-correction encoding
+   no error-correction reed-solomon bypass
+   switchport dot1q ethertype 0x8100
+   no switchport
+   no encapsulation dot1q vlan
+   no l2-protocol encapsulation dot1q vlan 0
+   snmp trap link-status
+   vrf forwarding blah
+   no ip proxy-arp
+   no ip local-proxy-arp
+   ip address 10.10.10.1/24
+   no ip verify unicast
+   default arp timeout 14400
+   default ipv6 nd cache expire 14400
+   bfd interval 300 min_rx 300 multiplier 3
+   no bfd echo
+   default ip dhcp smart-relay
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   ip dhcp relay information option circuit-id Ethernet1
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   ip igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   no ip igmp host-proxy
+   no ipv6 enable
+   no ipv6 address
+   no ipv6 verify unicast
+   no ipv6 nd ra suppress
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no channel-group
+   lacp rate normal
+   lacp port-priority 32768
+   lldp transmit
+   lldp receive
+   no ip multicast static
+   ip mfib fastdrop
+   mpls ip
+   no msrp
+   no mvrp
+   default ntp serve
+   no ip pim sparse-mode
+   no ip pim bidirectional
+   no ip pim border-router
+   ip pim query-interval 30
+   ip pim query-count 3.5
+   ip pim join-prune-interval 60
+   ip pim dr-priority 1
+   no ip pim neighbor-filter
+   default ip pim bfd-instance
+   no ip pim bsr-border
+   default qos trust
+   qos cos 5
+   qos dscp 2
+   no shape rate
+   mc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   mc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 0
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 1
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 2
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 3
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 4
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 5
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 6
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   !
+   uc-tx-queue 7
+      priority strict
+      no bandwidth percent
+      no shape rate
+      no bandwidth guaranteed
+   no ip rip v2-broadcast
+   sflow enable
+   no ip virtual address
+!
+ip routing vrf blah
+no ip icmp source-interface vrf blah
+no ip routing vrf second
+no ip icmp source-interface vrf second
+no ip routing vrf test
+no ip icmp source-interface vrf test
+!
+no ipv6 unicast-routing vrf blah
+no ipv6 unicast-routing vrf second
+ipv6 unicast-routing vrf test
+!
+control-plane
+   ip access-group default-control-plane-acl in
+   ip access-group default-control-plane-acl vrf blah in
+   ip access-group default-control-plane-acl vrf second in
+   ip access-group default-control-plane-acl vrf test in
+   ipv6 access-group default-control-plane-acl in
+   ipv6 access-group default-control-plane-acl vrf blah in
+   ipv6 access-group default-control-plane-acl vrf second in
+   ipv6 access-group default-control-plane-acl vrf test in
+!
+management api http-commands
+   protocol https port 443
+   protocol http
+   no protocol http localhost port 8080
+   no protocol unix-socket
+   no protocol https certificate
+   no protocol https ssl profile
+   no cors allowed-origin
+   protocol https cipher aes256-cbc aes128-cbc
+   protocol https key-exchange rsa diffie-hellman-ephemeral-rsa
+   protocol https mac hmac-sha1
+   qos dscp 0
+   no shutdown
+   vrf default
+      no shutdown
+!
+management cvx
+   shutdown
+   no server host
+   no source-interface
+   heartbeat-interval 20
+   heartbeat-timeout 60
+   no ssl profile
+   vrf default
+   service debug
+      no shutdown
+      interval 1
+!
+management xmpp
+   shutdown
+   no connection unencrypted permit
+   vrf default
+   session privilege 1
+!
+

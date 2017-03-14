@@ -273,5 +273,6 @@ class TestApiRoutemaps(DutSystemTest):
             self.assertTrue(result)
             self.assertEqual(None, api.get('TEST')['deny'][10]['continue'])
 
+
 if __name__ == '__main__':
     unittest.main()
