@@ -7,13 +7,15 @@ pyeapi simply call create or delete with your subinterface name.
 Subinterfaces require that the primary interface be in routed mode.
 
 .. code-block:: python
+
   import pyeapi
   node = pyeapi.connect_to('veos01')
   node.api('ipinterfaces').create('Ethernet1')
 
 At this point the below should be in your running configuration.
 
-.. code-block::
+.. code-block:: shell
+
   !
   interface Ethernet1
      no switchport
@@ -22,9 +24,11 @@ At this point the below should be in your running configuration.
 Next step is to create the subinterface
 
 .. code-block:: python
+
   node.api('interfaces').create('Ethernet1.1')
 
-.. code-block::
+.. code-block:: shell
+
   !
   interface Ethernet1
      no switchport
@@ -35,9 +39,11 @@ Next step is to create the subinterface
 Subinterfaces also require a vlan to be applied to them.
 
 .. code-block:: python
+
   node.api('interfaces').set_encapsulation('Ethernet1.1', 4)
 
-.. code-block::
+.. code-block:: shell
+
   !
   interface Ethernet1
      no switchport
