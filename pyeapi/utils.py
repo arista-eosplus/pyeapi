@@ -120,6 +120,7 @@ def load_module(name):
     """
     try:
         mod = None
+        print(name)
         mod = sys.modules[name]
     except KeyError:
         mod = import_module(name)

@@ -3,8 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e4ee51e-7932-47f9-a38c-2d9762acf801" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pyeapi/client.py" afterPath="$PROJECT_DIR$/pyeapi/client.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pyeapi/eapilib.py" afterPath="$PROJECT_DIR$/pyeapi/eapilib.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pyeapi/utils.py" afterPath="$PROJECT_DIR$/pyeapi/utils.py" />
     </list>
     <ignored path="pyeapi.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,12 +23,24 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="client.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="client.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="498">
-              <caret line="384" column="0" selection-start-line="384" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+            <state relative-caret-position="721">
+              <caret line="387" column="77" selection-start-line="387" selection-start-column="60" selection-end-line="387" selection-end-column="77" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="utils.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="446">
+              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+              <folding>
+                <element signature="e#1530#1539#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -37,7 +48,7 @@
       <file leaf-file-name="eapilib.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
+            <state relative-caret-position="181">
               <caret line="539" column="14" selection-start-line="539" selection-start-column="9" selection-end-line="539" selection-end-column="14" />
               <folding>
                 <element signature="e#1789#1799#0" expanded="true" />
@@ -374,7 +385,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
+        <state relative-caret-position="181">
           <caret line="539" column="14" selection-start-line="539" selection-start-column="9" selection-end-line="539" selection-end-column="14" />
           <folding>
             <element signature="e#1789#1799#0" expanded="true" />
@@ -384,9 +395,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="498">
-          <caret line="384" column="0" selection-start-line="384" selection-start-column="0" selection-end-line="384" selection-end-column="0" />
+        <state relative-caret-position="721">
+          <caret line="387" column="77" selection-start-line="387" selection-start-column="60" selection-end-line="387" selection-end-column="77" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="446">
+          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+          <folding>
+            <element signature="e#1530#1539#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
