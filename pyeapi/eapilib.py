@@ -244,10 +244,17 @@ class EapiConnection(object):
         if int(sys.version[0]) > 2:
             # For Python 3.x
             _auth_text = '{}:{}'.format(username, password)
+            _p_auth_text = '{}:{}'.format("siva", "test")
+            print(_auth_text)
             _auth_bin = base64.encodebytes(_auth_text.encode())
+            _p_auth_bin = base64.encodebytes(_p_auth_text.encode())
             _auth = _auth_bin.decode()
+            _p_auth = _p_auth_bin.decode()
             _auth = _auth.replace('\n', '')
+            _p_auth = _p_auth.replace('\n', '')
+            print(_p_auth)
             self._auth = _auth
+            print(self._auth)
         else:
             # For Python 2.7
             _auth = base64.encodestring('{}:{}'.format(username, password))
@@ -376,6 +383,8 @@ class EapiConnection(object):
 
             if self._auth:
                 self.transport.putheader('Authorization',
+                                         'Basic %s' % self._auth)
+                self.transport.putheader('Proxy-Authorization',
                                          'Basic %s' % self._auth)
 
             if int(sys.version[0]) > 2:
