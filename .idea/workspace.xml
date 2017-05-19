@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="8e4ee51e-7932-47f9-a38c-2d9762acf801" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pyeapi/utils.py" afterPath="$PROJECT_DIR$/pyeapi/utils.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pyeapi/api/routemaps.py" afterPath="$PROJECT_DIR$/pyeapi/api/routemaps.py" />
     </list>
     <ignored path="pyeapi.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -22,25 +22,91 @@
     <favorites_list name="pyeapi" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="450">
       <file leaf-file-name="client.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="721">
-              <caret line="387" column="77" selection-start-line="387" selection-start-column="60" selection-end-line="387" selection-end-column="77" />
+            <state relative-caret-position="269">
+              <caret line="786" column="6" selection-start-line="786" selection-start-column="6" selection-end-line="786" selection-end-column="6" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="utils.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="bgp.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pyeapi/api/bgp.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="utils.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="446">
-              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+            <state relative-caret-position="704">
+              <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
               <folding>
-                <element signature="e#1530#1539#0" expanded="true" />
+                <marker date="1495025273667" expanded="true" signature="0:1529" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="1530:1661" ph="import ..." />
+                <marker date="1495025273667" expanded="true" signature="1667:1739" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="1759:1855" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="2456:3691" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="2461:2901" ph="&quot;&quot;&quot;Imports a module into the current runtime environment...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="3027:3675" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3169:3547" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3275:3456" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3292:3409" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3564:3675" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3715:4490" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="3720:4236" ph="&quot;&quot;&quot;Attempts to load a module into the current environment...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="4245:4316" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4384:4490" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4516:4710" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4556:4612" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4654:4710" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4736:5166" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="4741:5120" ph="&quot;&quot;&quot;Checks if running locally on EOS device or remotely...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="5184:5476" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="5189:5293" ph="&quot;&quot;&quot;Log a message to syslog and stderr...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="5503:5962" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="5508:5776" ph="&quot;&quot;&quot;Converts the supplied value to a list object...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="5982:6058" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="6124:6830" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="6129:6462" ph="&quot;&quot;&quot;Expands a delimited string of ranged integers into a list of strings...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="6550:6794" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="6586:6746" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="6903:7212" ph="&quot;&quot;&quot;Collapses a list of values into a range set...&quot;&quot;&quot;" />
+                <marker date="1495025273667" expanded="true" signature="7337:7942" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="7352:7736" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="7433:7506" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="7536:7682" ph="..." />
+                <marker date="1495025273667" expanded="true" signature="7762:7896" ph="..." />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="setup.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/setup.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1804">
+              <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+              <folding>
+                <element signature="e#0#43#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Makefile" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Makefile">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1518">
+              <caret line="69" column="16" selection-start-line="69" selection-start-column="16" selection-end-line="69" selection-end-column="16" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -48,11 +114,33 @@
       <file leaf-file-name="eapilib.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="181">
-              <caret line="539" column="14" selection-start-line="539" selection-start-column="9" selection-end-line="539" selection-end-column="14" />
+            <state relative-caret-position="401">
+              <caret line="549" column="44" selection-start-line="549" selection-start-column="44" selection-end-line="549" selection-end-column="44" />
               <folding>
                 <element signature="e#1789#1799#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="routemaps.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/pyeapi/api/routemaps.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="467">
+              <caret line="296" column="0" selection-start-line="296" selection-start-column="0" selection-end-line="296" selection-end-column="0" />
+              <folding>
+                <element signature="e#1970#1979#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="spanningtree.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pyeapi/api/spanningtree.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -67,6 +155,7 @@
       <list>
         <option value="$PROJECT_DIR$/pyeapi/eapilib.py" />
         <option value="$PROJECT_DIR$/pyeapi/client.py" />
+        <option value="$PROJECT_DIR$/pyeapi/api/routemaps.py" />
       </list>
     </option>
   </component>
@@ -132,10 +221,28 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pyeapi" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pyeapi" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pyeapi" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -294,21 +401,21 @@
     <frame x="0" y="24" width="1920" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24986765" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12863949" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
@@ -329,13 +436,293 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding>
+            <marker date="1495025273667" expanded="true" signature="0:1529" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1530:1661" ph="import ..." />
+            <marker date="1495025273667" expanded="true" signature="1667:1739" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1759:1855" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2456:3691" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2461:2901" ph="&quot;&quot;&quot;Imports a module into the current runtime environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="3027:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3169:3547" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3275:3456" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3292:3409" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3564:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3715:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3720:4236" ph="&quot;&quot;&quot;Attempts to load a module into the current environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="4245:4316" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4384:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4516:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4556:4612" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4654:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4736:5166" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4741:5120" ph="&quot;&quot;&quot;Checks if running locally on EOS device or remotely...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5184:5476" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5189:5293" ph="&quot;&quot;&quot;Log a message to syslog and stderr...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5503:5962" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5508:5776" ph="&quot;&quot;&quot;Converts the supplied value to a list object...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5982:6058" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6124:6830" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6129:6462" ph="&quot;&quot;&quot;Expands a delimited string of ranged integers into a list of strings...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="6550:6794" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6586:6746" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6903:7212" ph="&quot;&quot;&quot;Collapses a list of values into a range set...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="7337:7942" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7352:7736" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7433:7506" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7536:7682" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7762:7896" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1804">
+          <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1518">
+          <caret line="69" column="16" selection-start-line="69" selection-start-column="16" selection-end-line="69" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11440">
+          <caret line="526" column="14" selection-start-line="526" selection-start-column="14" selection-end-line="526" selection-end-column="14" />
+          <folding>
+            <element signature="e#1789#1799#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8052">
+          <caret line="367" column="6" selection-start-line="367" selection-start-column="6" selection-end-line="367" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding>
+            <marker date="1495025273667" expanded="true" signature="0:1529" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1530:1661" ph="import ..." />
+            <marker date="1495025273667" expanded="true" signature="1667:1739" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1759:1855" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2456:3691" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2461:2901" ph="&quot;&quot;&quot;Imports a module into the current runtime environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="3027:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3169:3547" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3275:3456" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3292:3409" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3564:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3715:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3720:4236" ph="&quot;&quot;&quot;Attempts to load a module into the current environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="4245:4316" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4384:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4516:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4556:4612" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4654:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4736:5166" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4741:5120" ph="&quot;&quot;&quot;Checks if running locally on EOS device or remotely...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5184:5476" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5189:5293" ph="&quot;&quot;&quot;Log a message to syslog and stderr...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5503:5962" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5508:5776" ph="&quot;&quot;&quot;Converts the supplied value to a list object...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5982:6058" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6124:6830" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6129:6462" ph="&quot;&quot;&quot;Expands a delimited string of ranged integers into a list of strings...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="6550:6794" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6586:6746" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6903:7212" ph="&quot;&quot;&quot;Collapses a list of values into a range set...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="7337:7942" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7352:7736" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7433:7506" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7536:7682" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7762:7896" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1804">
+          <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11440">
+          <caret line="526" column="14" selection-start-line="526" selection-start-column="14" selection-end-line="526" selection-end-column="14" />
+          <folding>
+            <element signature="e#1789#1799#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/base64.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/http/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1210">
+          <caret line="55" column="13" selection-start-line="55" selection-start-column="8" selection-end-line="55" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/http/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="1230" column="26" selection-start-line="1230" selection-start-column="21" selection-end-line="1230" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/urllib/request.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2289">
+          <caret line="1243" column="50" selection-start-line="1243" selection-start-column="50" selection-end-line="1243" selection-end-column="50" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/urllib/parse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="295">
+          <caret line="526" column="4" selection-start-line="526" selection-start-column="4" selection-end-line="526" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1804">
+          <caret line="85" column="14" selection-start-line="85" selection-start-column="14" selection-end-line="85" selection-end-column="14" />
           <folding>
-            <element signature="e#298#307#0" expanded="true" />
+            <element signature="e#0#43#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1518">
+          <caret line="69" column="16" selection-start-line="69" selection-start-column="16" selection-end-line="69" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding>
+            <marker date="1495025273667" expanded="true" signature="0:1529" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1530:1661" ph="import ..." />
+            <marker date="1495025273667" expanded="true" signature="1667:1739" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1759:1855" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2456:3691" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2461:2901" ph="&quot;&quot;&quot;Imports a module into the current runtime environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="3027:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3169:3547" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3275:3456" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3292:3409" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3564:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3715:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3720:4236" ph="&quot;&quot;&quot;Attempts to load a module into the current environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="4245:4316" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4384:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4516:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4556:4612" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4654:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4736:5166" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4741:5120" ph="&quot;&quot;&quot;Checks if running locally on EOS device or remotely...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5184:5476" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5189:5293" ph="&quot;&quot;&quot;Log a message to syslog and stderr...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5503:5962" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5508:5776" ph="&quot;&quot;&quot;Converts the supplied value to a list object...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5982:6058" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6124:6830" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6129:6462" ph="&quot;&quot;&quot;Expands a delimited string of ranged integers into a list of strings...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="6550:6794" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6586:6746" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6903:7212" ph="&quot;&quot;&quot;Collapses a list of values into a range set...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="7337:7942" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7352:7736" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7433:7506" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7536:7682" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7762:7896" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1007">
+          <caret line="734" column="33" selection-start-line="734" selection-start-column="33" selection-end-line="734" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6869">
+          <caret line="485" column="0" selection-start-line="485" selection-start-column="0" selection-end-line="485" selection-end-column="0" />
+          <folding>
+            <element signature="e#1789#1799#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/languages/python-3.5.2/lib/python3.5/base64.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -360,7 +747,7 @@
         <state relative-caret-position="322">
           <caret line="1230" column="26" selection-start-line="1230" selection-start-column="21" selection-end-line="1230" selection-end-column="26" />
           <folding>
-            <element signature="e#2730#2749#0" expanded="true" />
+            <element signature="e#2730#2749#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -369,9 +756,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2289">
           <caret line="1243" column="50" selection-start-line="1243" selection-start-column="50" selection-end-line="1243" selection-end-column="50" />
-          <folding>
-            <element signature="e#3337#3350#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -379,14 +763,73 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="295">
           <caret line="526" column="4" selection-start-line="526" selection-start-column="4" selection-end-line="526" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="704">
+          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding>
+            <marker date="1495025273667" expanded="true" signature="0:1529" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1530:1661" ph="import ..." />
+            <marker date="1495025273667" expanded="true" signature="1667:1739" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="1759:1855" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2456:3691" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="2461:2901" ph="&quot;&quot;&quot;Imports a module into the current runtime environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="3027:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3169:3547" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3275:3456" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3292:3409" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3564:3675" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3715:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="3720:4236" ph="&quot;&quot;&quot;Attempts to load a module into the current environment...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="4245:4316" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4384:4490" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4516:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4556:4612" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4654:4710" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4736:5166" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="4741:5120" ph="&quot;&quot;&quot;Checks if running locally on EOS device or remotely...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5184:5476" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5189:5293" ph="&quot;&quot;&quot;Log a message to syslog and stderr...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5503:5962" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="5508:5776" ph="&quot;&quot;&quot;Converts the supplied value to a list object...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="5982:6058" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6124:6830" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6129:6462" ph="&quot;&quot;&quot;Expands a delimited string of ranged integers into a list of strings...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="6550:6794" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6586:6746" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="6903:7212" ph="&quot;&quot;&quot;Collapses a list of values into a range set...&quot;&quot;&quot;" />
+            <marker date="1495025273667" expanded="true" signature="7337:7942" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7352:7736" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7433:7506" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7536:7682" ph="..." />
+            <marker date="1495025273667" expanded="true" signature="7762:7896" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/api/bgp.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pyeapi/api/spanningtree.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pyeapi/eapilib.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="181">
-          <caret line="539" column="14" selection-start-line="539" selection-start-column="9" selection-end-line="539" selection-end-column="14" />
+        <state relative-caret-position="401">
+          <caret line="549" column="44" selection-start-line="549" selection-start-column="44" selection-end-line="549" selection-end-column="44" />
           <folding>
             <element signature="e#1789#1799#0" expanded="true" />
           </folding>
@@ -395,18 +838,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/pyeapi/client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="721">
-          <caret line="387" column="77" selection-start-line="387" selection-start-column="60" selection-end-line="387" selection-end-column="77" />
+        <state relative-caret-position="269">
+          <caret line="786" column="6" selection-start-line="786" selection-start-column="6" selection-end-line="786" selection-end-column="6" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/pyeapi/utils.py">
+    <entry file="file://$PROJECT_DIR$/pyeapi/api/routemaps.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
+        <state relative-caret-position="467">
+          <caret line="296" column="0" selection-start-line="296" selection-start-column="0" selection-end-line="296" selection-end-column="0" />
           <folding>
-            <element signature="e#1530#1539#0" expanded="true" />
+            <element signature="e#1970#1979#0" expanded="true" />
           </folding>
         </state>
       </provider>
