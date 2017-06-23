@@ -70,6 +70,12 @@ class TestClient(unittest.TestCase):
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
+    def test_enable_single_unicode_command(self):
+        for dut in self.duts:
+            result = dut.run_commands(u'show version')
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
     def test_no_enable_single_command(self):
         for dut in self.duts:
             result = dut.run_commands('show version', 'json', send_enable=False)
@@ -87,6 +93,15 @@ class TestClient(unittest.TestCase):
             for i in range(1, random_int(10, 200)):
                 commands.append('show version')
             result = dut.run_commands(commands[:])
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
+
+    def test_enable_multiple_unicode_commands(self):
+        for dut in self.duts:
+            commands = list()
+            for i in range(1, random_int(10, 200)):
+                commands.append(u'show version')
+            result = dut.enable(commands[:])
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
 
