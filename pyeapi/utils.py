@@ -180,8 +180,10 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
-    if isinstance(value, unicode):
-        value = str(value)
+    if sys.version_info <= (3, 0):
+        # Convert unicode values to strings for Python 2
+        if isinstance(value, unicode):
+            value = str(value)
     if isinstance(value, str):
         value = [value]
 
