@@ -92,7 +92,7 @@ class TestNode(unittest.TestCase):
 
     def test_enable_with_single_unicode_command(self):
         command = random_string()
-        command = unicode(command)
+        command = u'%s' % command
         response = ['enable', command]
 
         self.connection.execute.return_value = {'result': list(response)}
@@ -134,7 +134,7 @@ class TestNode(unittest.TestCase):
     def test_enable_with_multiple_unicode_commands(self):
         commands = list()
         for i in range(0, random_int(2, 5)):
-            commands.append(unicode(random_string()))
+            commands.append(u'%s' % random_string())
 
         def execute_response(cmds, *args):
             return {'result': [x for x in cmds]}
