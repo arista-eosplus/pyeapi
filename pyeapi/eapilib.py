@@ -369,7 +369,7 @@ class EapiConnection(object):
             _LOGGER.debug('Request content: {}'.format(data))
             # debug('eapi_request: %s' % data)
 
-            self.transport.putrequest('POST', self.transport.path)
+            self.transport.putrequest('POST', '/command-api')
 
             self.transport.putheader('Content-type', 'application/json-rpc')
             self.transport.putheader('Content-length', '%d' % len(data))
