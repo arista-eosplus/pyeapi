@@ -384,6 +384,7 @@ def make_connection(transport, **kwargs):
     klass = TRANSPORTS[transport]
     return klass(**kwargs)
 
+
 def connect(transport=None, host='localhost', username='admin',
             password='', port=None, timeout=60, return_node=False, **kwargs):
     """ Creates a connection using the supplied settings
