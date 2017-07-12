@@ -415,8 +415,9 @@ class EapiConnection(object):
 
             return decoded
 
-        except (socket.error, ValueError) as exc:
-            if isinstance(exc, socket.error):
+        # socket.error is deprecated in python 3 and replaced with OSError.
+        except (socket.error, OSError, ValueError) as exc:
+            if isinstance(exc, socket.error) or isinstance(exc, OSError):
                 self.socket_error = exc
             _LOGGER.exception(exc)
             self.error = exc
