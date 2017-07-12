@@ -36,9 +36,11 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_int, random_string, get_fixture
+from mock import patch
 
 import pyeapi.client
 import pyeapi.eapilib
+
 
 class TestClient(unittest.TestCase):
 
@@ -201,6 +203,19 @@ class TestClient(unittest.TestCase):
                 with self.assertRaises(pyeapi.eapilib.CommandError):
                     dut.connection.execute(['test'], encoding='json',
                                            expandAliases=True)
+
+    @patch('pyeapi.eapilib._LOGGER.exception')
+    def test_execute_socket_timeout_error(self, logexception):
+        for dut in self.duts:
+            self.assertEqual(dut.connection.transport.timeout, 60)
+            dut.connection.transport.timeout = 0.001
+            try:
+                dut.connection.execute(['show version'], encoding='json')
+            except pyeapi.eapilib.ConnectionError as err:
+                error_msg = 'Socket error during eAPI connection: timed out'
+                self.assertEqual(err.message, error_msg)
+            logexception.assert_called_once()
+            dut.connection.transport.timeout = 60
 
     def _dut_eos_version(self, dut):
         result = dut.connection.execute(['show version'], encoding='json')

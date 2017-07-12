@@ -1,5 +1,6 @@
 import unittest
 import json
+import socket
 
 from mock import Mock, patch
 
@@ -106,9 +107,24 @@ class TestEapiConnection(unittest.TestCase):
 
         instance = pyeapi.eapilib.EapiConnection()
         instance.transport = mock_transport
-
-        with self.assertRaises(pyeapi.eapilib.ConnectionError):
+        try:
             instance.send('test')
+        except pyeapi.eapilib.ConnectionError as err:
+            self.assertEqual(err.message, 'unable to connect to eAPI')
+
+    def test_send_raises_connection_socket_error(self):
+        mock_transport = Mock(name='transport')
+        mockcfg = {'getresponse.return_value.read.side_effect':
+                   socket.error('timeout')}
+        mock_transport.configure_mock(**mockcfg)
+
+        instance = pyeapi.eapilib.EapiConnection()
+        instance.transport = mock_transport
+        try:
+            instance.send('test')
+        except pyeapi.eapilib.ConnectionError as err:
+            error_msg = 'Socket error during eAPI connection: timeout'
+            self.assertEqual(err.message, error_msg)
 
     def test_send_raises_command_error(self):
         error = dict(code=9999, message='test', data=[{'errors': ['test']}])

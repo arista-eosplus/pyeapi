@@ -420,7 +420,11 @@ class EapiConnection(object):
                 self.socket_error = exc
             _LOGGER.exception(exc)
             self.error = exc
-            raise ConnectionError(str(self), 'unable to connect to eAPI')
+            error_msg = 'unable to connect to eAPI'
+            if self.socket_error:
+                error_msg = ('Socket error during eAPI connection: %s'
+                             % exc.message)
+            raise ConnectionError(str(self), error_msg)
 
         finally:
             self.transport.close()
