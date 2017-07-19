@@ -81,7 +81,12 @@ class TestEapiConnection(unittest.TestCase):
         instance = pyeapi.eapilib.EapiConnection()
         instance.transport = mock_transport
         instance.send('test')
-
+        # HTTP requests to be processed by EAPI should always go to
+        # the /command-api endpoint regardless of using TCP/IP or unix-socket
+        # for the transport. Unix-socket implementation maps localhost to the
+        # unix-socket - /var/run/command-api.sock
+        mock_transport.putrequest.assert_called_once_with('POST',
+                                                          '/command-api')
         self.assertTrue(mock_transport.close.called)
 
     def test_send_with_authentication(self):
