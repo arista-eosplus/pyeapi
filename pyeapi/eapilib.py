@@ -416,17 +416,17 @@ class EapiConnection(object):
             return decoded
 
         # socket.error is deprecated in python 3 and replaced with OSError.
-        except (socket.error, OSError, ValueError) as exc:
-            if isinstance(exc, socket.error) or isinstance(exc, OSError):
-                self.socket_error = exc
+        except (socket.error, OSError) as exc:
             _LOGGER.exception(exc)
+            self.socket_error = exc
             self.error = exc
-            error_msg = 'unable to connect to eAPI'
-            if self.socket_error:
-                error_msg = ('Socket error during eAPI connection: %s'
-                             % str(exc))
+            error_msg = 'Socket error during eAPI connection: %s' % str(exc)
             raise ConnectionError(str(self), error_msg)
-
+        except ValueError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = None
+            self.error = exc
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
         finally:
             self.transport.close()
 
