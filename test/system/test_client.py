@@ -36,9 +36,11 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_int, random_string, get_fixture
+from mock import patch
 
 import pyeapi.client
 import pyeapi.eapilib
+
 
 class TestClient(unittest.TestCase):
 
@@ -70,6 +72,12 @@ class TestClient(unittest.TestCase):
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
+    def test_enable_single_unicode_command(self):
+        for dut in self.duts:
+            result = dut.run_commands(u'show version')
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
     def test_no_enable_single_command(self):
         for dut in self.duts:
             result = dut.run_commands('show version', 'json', send_enable=False)
@@ -87,6 +95,15 @@ class TestClient(unittest.TestCase):
             for i in range(1, random_int(10, 200)):
                 commands.append('show version')
             result = dut.run_commands(commands[:])
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
+
+    def test_enable_multiple_unicode_commands(self):
+        for dut in self.duts:
+            commands = list()
+            for i in range(1, random_int(10, 200)):
+                commands.append(u'show version')
+            result = dut.enable(commands[:])
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), len(commands), 'dut=%s' % dut)
 
@@ -186,6 +203,19 @@ class TestClient(unittest.TestCase):
                 with self.assertRaises(pyeapi.eapilib.CommandError):
                     dut.connection.execute(['test'], encoding='json',
                                            expandAliases=True)
+
+    @patch('pyeapi.eapilib._LOGGER.exception')
+    def test_execute_socket_timeout_error(self, logexception):
+        for dut in self.duts:
+            self.assertEqual(dut.connection.transport.timeout, 60)
+            dut.connection.transport.timeout = 0.001
+            try:
+                dut.connection.execute(['show version'], encoding='json')
+            except pyeapi.eapilib.ConnectionError as err:
+                error_msg = 'Socket error during eAPI connection: timed out'
+                self.assertEqual(err.message, error_msg)
+            logexception.assert_called_once()
+            dut.connection.transport.timeout = 60
 
     def _dut_eos_version(self, dut):
         result = dut.connection.execute(['show version'], encoding='json')

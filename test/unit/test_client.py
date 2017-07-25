@@ -90,6 +90,17 @@ class TestNode(unittest.TestCase):
         self.connection.execute.assert_called_once_with(response, 'json')
         self.assertEqual(command, result[0]['result'])
 
+    def test_enable_with_single_unicode_command(self):
+        command = random_string()
+        command = u'%s' % command
+        response = ['enable', command]
+
+        self.connection.execute.return_value = {'result': list(response)}
+        result = self.node.enable(command)
+
+        self.connection.execute.assert_called_once_with(response, 'json')
+        self.assertEqual(command, result[0]['result'])
+
     def test_no_enable_with_single_command(self):
         command = random_string()
         response = [command]
@@ -104,6 +115,26 @@ class TestNode(unittest.TestCase):
         commands = list()
         for i in range(0, random_int(2, 5)):
             commands.append(random_string())
+
+        def execute_response(cmds, *args):
+            return {'result': [x for x in cmds]}
+
+        self.connection.execute.side_effect = execute_response
+
+        responses = self.node.enable(commands)
+
+        self.assertEqual(self.connection.execute.call_count, len(commands))
+
+        expected_calls = [call(['enable', cmd], 'json') for cmd in commands]
+        self.assertEqual(self.connection.execute.mock_calls, expected_calls)
+
+        for index, response in enumerate(responses):
+            self.assertEqual(commands[index], response['result'])
+
+    def test_enable_with_multiple_unicode_commands(self):
+        commands = list()
+        for i in range(0, random_int(2, 5)):
+            commands.append(u'%s' % random_string())
 
         def execute_response(cmds, *args):
             return {'result': [x for x in cmds]}
