@@ -102,6 +102,7 @@ def import_module(name):
 
     return mod
 
+
 def load_module(name):
     """ Attempts to load a module into the current environment
 
@@ -120,7 +121,6 @@ def load_module(name):
     """
     try:
         mod = None
-        print(name)
         mod = sys.modules[name]
     except KeyError:
         mod = import_module(name)
@@ -128,6 +128,7 @@ def load_module(name):
         if not mod:
             raise ImportError('unable to import module %s' % name)
         return mod
+
 
 class ProxyCall(object):
 
@@ -137,6 +138,7 @@ class ProxyCall(object):
 
     def __call__(self, *args, **kwargs):
         return self.proxy(self.method, *args, **kwargs)
+
 
 def islocalconnection():
     """ Checks if running locally on EOS device or remotely
@@ -151,6 +153,7 @@ def islocalconnection():
     """
     return os.path.exists('/etc/Eos-release')
 
+
 def debug(text):
     """Log a message to syslog and stderr
 
@@ -164,6 +167,7 @@ def debug(text):
     msg = "%s.%s: %s" % (module, func, text)
     _LOGGER.debug(msg)
 
+
 def make_iterable(value):
     """Converts the supplied value to a list object
 
@@ -176,6 +180,10 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
+    if sys.version_info <= (3, 0):
+        # Convert unicode values to strings for Python 2
+        if isinstance(value, unicode):
+            value = str(value)
     if isinstance(value, str):
         value = [value]
 
@@ -184,10 +192,12 @@ def make_iterable(value):
 
     return value
 
+
 def lookahead(it):
     it1, it2 = tee(iter(it))
     next(it2)
     return zip_longest(it1, it2)
+
 
 def expand_range(arg, value_delimiter=',', range_delimiter='-'):
     """
@@ -210,6 +220,7 @@ def expand_range(arg, value_delimiter=',', range_delimiter='-'):
         else:
             values.extend([item])
     return [str(x) for x in values]
+
 
 def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
     """

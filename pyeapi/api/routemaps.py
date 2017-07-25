@@ -102,7 +102,6 @@ class Routemaps(EntityCollection):
         resources = dict()
         routemaps_re = re.compile(r'^route-map\s([\w-]+)\s\w+\s\d+$', re.M)
         for name in routemaps_re.findall(self.config):
-            print(name)
             routemap = self.get(name)
             if routemap:
                 resources[name] = routemap
@@ -258,7 +257,6 @@ class Routemaps(EntityCollection):
         return self.configure(commands) if commands else True
 
     def set_set_statements(self, name, action, seqno, statements):
-        print("set set statement function")
         """Configures the set statements within the routemap clause.
         The final configuration of set statements will reflect the list
         of statements passed into the statements attribute. This implies
@@ -276,10 +274,8 @@ class Routemaps(EntityCollection):
             True if the operation succeeds otherwise False
         """
         try:
-            print("inside try")
             current_statements = self.get(name)[action][seqno]['set']
         except:
-            print("inside except")
             current_statements = []
 
         commands = list()
@@ -294,15 +290,12 @@ class Routemaps(EntityCollection):
             commands.append('route-map %s %s %s' % (name, action, seqno))
             commands.append('set %s' % entry)
 
-        print(commands)
-
         return self.configure(commands) if commands else True
 
     def set_allow_deny(self, name, action, seqno):
 
         commands = list()
         commands.append('route-map %s %s %s' % (name, action, seqno))
-        print(commands)
         return self.configure(commands) if commands else True
 
     def set_continue(self, name, action, seqno, value=None, default=False,
