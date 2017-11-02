@@ -62,11 +62,11 @@ DEFAULT_HTTP_PATH = '/command-api'
 DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
 
-def https_connection_factory(path, host, port,phost, context=None, timeout=60):
+def https_connection_factory(path, host, port, context=None, timeout=60):
     # ignore ssl context for python versions before 2.7.9
     if sys.hexversion < 34015728:
-        return HttpsConnection(path, host, port,phost, timeout=timeout)
-    return HttpsConnection(path, phost, host,port, context=context, timeout=timeout)
+        return HttpsConnection(path, host, port, timeout=timeout)
+    return HttpsConnection(path, host, port, context=context, timeout=timeout)
 
 
 class EapiError(Exception):
@@ -196,9 +196,8 @@ class HttpConnection(HTTPConnection):
 
 class HttpsConnection(HTTPSConnection):
 
-    def __init__(self, path, host, *args, **kwargs):
+    def __init__(self, path, *args, **kwargs):
         HTTPSConnection.__init__(self, *args, **kwargs)
-        self.set_tunnel(host)
         self.path = path
 
     def __str__(self):
@@ -221,7 +220,6 @@ class EapiConnection(object):
         self.error = None
         self.socket_error = None
         self._auth = None
-        self._p_auth = None
 
     def __str__(self):
         return 'EapiConnection(transport=%s)' % str(self.transport)
@@ -246,15 +244,10 @@ class EapiConnection(object):
         if int(sys.version[0]) > 2:
             # For Python 3.x
             _auth_text = '{}:{}'.format(username, password)
-            _p_auth_text = '{}:{}'.format("siva", "test")
             _auth_bin = base64.encodebytes(_auth_text.encode())
-            _p_auth_bin = base64.encodebytes(_p_auth_text.encode())
             _auth = _auth_bin.decode()
-            _p_auth = _p_auth_bin.decode()
             _auth = _auth.replace('\n', '')
-            _p_auth = _p_auth.replace('\n', '')
             self._auth = _auth
-            self._p_auth = _p_auth
         else:
             # For Python 2.7
             _auth = base64.encodestring('{}:{}'.format(username, password))
@@ -376,15 +369,10 @@ class EapiConnection(object):
             _LOGGER.debug('Request content: {}'.format(data))
             # debug('eapi_request: %s' % data)
 
-            self.transport.putrequest('POST', self.transport.path)
+            self.transport.putrequest('POST', '/command-api')
 
             self.transport.putheader('Content-type', 'application/json-rpc')
             self.transport.putheader('Content-length', '%d' % len(data))
-
-            #proxy headers.
-            headers = {}
-            headers['Proxy-Authorization'] = 'Basic %s' % self._p_auth
-            self.transport._tunnel_headers = headers
 
             if self._auth:
                 self.transport.putheader('Authorization',
@@ -427,13 +415,18 @@ class EapiConnection(object):
 
             return decoded
 
-        except (socket.error, ValueError) as exc:
-            if isinstance(exc, socket.error):
-                self.socket_error = exc
+        # socket.error is deprecated in python 3 and replaced with OSError.
+        except (socket.error, OSError) as exc:
             _LOGGER.exception(exc)
+            self.socket_error = exc
+            self.error = exc
+            error_msg = 'Socket error during eAPI connection: %s' % str(exc)
+            raise ConnectionError(str(self), error_msg)
+        except ValueError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = None
             self.error = exc
             raise ConnectionError(str(self), 'unable to connect to eAPI')
-
         finally:
             self.transport.close()
 
@@ -536,8 +529,7 @@ class HttpEapiConnection(EapiConnection):
 
 class HttpsEapiConnection(EapiConnection):
     def __init__(self, host, port=None, path=None, username=None,
-                 password=None, context=None,phost=None, timeout=60, **kwargs):
-        #print(host, port, path, username,password, context,phost, timeout, kwargs)
+                 password=None, context=None, timeout=60, **kwargs):
         super(HttpsEapiConnection, self).__init__()
         port = port or DEFAULT_HTTPS_PORT
         path = path or DEFAULT_HTTP_PATH
@@ -548,7 +540,7 @@ class HttpsEapiConnection(EapiConnection):
             context = self.disable_certificate_verification()
 
         self.transport = https_connection_factory(path, host, int(port),
-                                                  phost, context, timeout)
+                                                  context, timeout)
         self.authentication(username, password)
 
     def disable_certificate_verification(self):
