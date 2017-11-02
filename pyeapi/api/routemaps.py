@@ -102,7 +102,6 @@ class Routemaps(EntityCollection):
         resources = dict()
         routemaps_re = re.compile(r'^route-map\s([\w-]+)\s\w+\s\d+$', re.M)
         for name in routemaps_re.findall(self.config):
-            print(name)
             routemap = self.get(name)
             if routemap:
                 resources[name] = routemap
@@ -276,10 +275,8 @@ class Routemaps(EntityCollection):
             True if the operation succeeds otherwise False
         """
         try:
-            print("inside try")
             current_statements = self.get(name)[action][seqno]['set']
         except:
-            print("inside except")
             current_statements = []
 
         commands = list()
@@ -302,7 +299,7 @@ class Routemaps(EntityCollection):
 
         commands = list()
         commands.append('route-map %s %s %s' % (name, action, seqno))
-        print(commands)
+        #print(commands)
         return self.configure(commands) if commands else True
 
     def set_continue(self, name, action, seqno, value=None, default=False,
