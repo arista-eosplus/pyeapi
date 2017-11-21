@@ -59,6 +59,20 @@ class TestClient(unittest.TestCase):
                     # enable password on the dut and clear it on tearDown
                     dut.config("enable secret %s" % dut._enablepwd)
 
+    def test_unauthorized_user(self):
+        error_string = ('Unauthorized. Unable to authenticate user: Bad'
+                        ' username/password combination')
+        for dut in self.duts:
+            temp_node = pyeapi.connect(host=dut.settings['host'],
+                                       transport=dut.settings['transport'],
+                                       username='wrong', password='nope',
+                                       port=dut.settings['port'],
+                                       return_node=True)
+            try:
+                temp_node.run_commands('show version')
+            except pyeapi.eapilib.ConnectionError as err:
+                self.assertEqual(err.message, error_string)
+
     def test_populate_version_properties(self):
         for dut in self.duts:
             result = dut.run_commands('show version')
