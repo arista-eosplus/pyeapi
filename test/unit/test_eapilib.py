@@ -104,6 +104,25 @@ class TestEapiConnection(unittest.TestCase):
 
         self.assertTrue(mock_transport.close.called)
 
+    def test_send_unauthorized_user(self):
+        error_string = ('Unauthorized. Unable to authenticate user: Bad'
+                        ' username/password combination')
+        response_str = ('Unable to authenticate user: Bad username/password'
+                        ' combination')
+        mock_transport = Mock(name='transport')
+        mockcfg = {'getresponse.return_value.read.return_value': response_str,
+                   'getresponse.return_value.status': 401,
+                   'getresponse.return_value.reason': 'Unauthorized'}
+        mock_transport.configure_mock(**mockcfg)
+
+        instance = pyeapi.eapilib.EapiConnection()
+        instance.authentication('username', 'password')
+        instance.transport = mock_transport
+        try:
+            instance.send('test')
+        except pyeapi.eapilib.ConnectionError as err:
+            self.assertEqual(err.message, error_string)
+
     def test_send_raises_connection_error(self):
         mock_transport = Mock(name='transport')
         mockcfg = {'getresponse.return_value.read.side_effect': ValueError}
