@@ -61,12 +61,12 @@ class TestApiRoutemaps(DutSystemTest):
             dut.config(['no route-map TEST deny 10',
                         'route-map TEST deny 10',
                         'set weight 100',
-                        'no route-map TEST2 permit 50',
-                        'route-map TEST2 permit 50',
+                        'no route-map TEST-2 permit 50',
+                        'route-map TEST-2 permit 50',
                         'match tag 50'])
             result = dut.api('routemaps').getall()
             self.assertIn(('TEST'), result)
-            self.assertIn(('TEST2'), result)
+            self.assertIn(('TEST-2'), result)
 
     def test_create(self):
         for dut in self.duts:

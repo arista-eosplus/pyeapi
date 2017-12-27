@@ -100,7 +100,7 @@ class Routemaps(EntityCollection):
 
     def getall(self):
         resources = dict()
-        routemaps_re = re.compile(r'^route-map\s(\w+)\s\w+\s\d+$', re.M)
+        routemaps_re = re.compile(r'^route-map\s([\w-]+)\s\w+\s\d+$', re.M)
         for name in routemaps_re.findall(self.config):
             routemap = self.get(name)
             if routemap:
