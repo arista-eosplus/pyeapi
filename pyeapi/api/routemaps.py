@@ -292,6 +292,12 @@ class Routemaps(EntityCollection):
 
         return self.configure(commands) if commands else True
 
+    def set_allow_deny(self, name, action, seqno):
+
+        commands = list()
+        commands.append('route-map %s %s %s' % (name, action, seqno))
+        return self.configure(commands) if commands else True
+
     def set_continue(self, name, action, seqno, value=None, default=False,
                      disable=False):
         """Configures the routemap continue value
