@@ -86,6 +86,12 @@ class TestClient(unittest.TestCase):
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
 
+    def test_enable_single_extended_command(self):
+        for dut in self.duts:
+            result = dut.run_commands({'cmd': 'show cvx', 'revision': 2})
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
     def test_enable_single_unicode_command(self):
         for dut in self.duts:
             result = dut.run_commands(u'show version')

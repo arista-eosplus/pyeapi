@@ -101,6 +101,16 @@ class TestNode(unittest.TestCase):
         self.connection.execute.assert_called_once_with(response, 'json')
         self.assertEqual(command, result[0]['result'])
 
+    def test_enable_with_single_extended_command(self):
+        command = {'cmd': 'show cvx', 'revision': 2}
+        response = ['enable', command]
+
+        self.connection.execute.return_value = {'result': list(response)}
+        result = self.node.enable(command)
+
+        self.connection.execute.assert_called_once_with(response, 'json')
+        self.assertEqual(command, result[0]['result'])
+
     def test_no_enable_with_single_command(self):
         command = random_string()
         response = [command]
