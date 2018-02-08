@@ -59,6 +59,20 @@ class TestClient(unittest.TestCase):
                     # enable password on the dut and clear it on tearDown
                     dut.config("enable secret %s" % dut._enablepwd)
 
+    def test_unauthorized_user(self):
+        error_string = ('Unauthorized. Unable to authenticate user: Bad'
+                        ' username/password combination')
+        for dut in self.duts:
+            temp_node = pyeapi.connect(host=dut.settings['host'],
+                                       transport=dut.settings['transport'],
+                                       username='wrong', password='nope',
+                                       port=dut.settings['port'],
+                                       return_node=True)
+            try:
+                temp_node.run_commands('show version')
+            except pyeapi.eapilib.ConnectionError as err:
+                self.assertEqual(err.message, error_string)
+
     def test_populate_version_properties(self):
         for dut in self.duts:
             result = dut.run_commands('show version')
@@ -71,6 +85,18 @@ class TestClient(unittest.TestCase):
             result = dut.run_commands('show version')
             self.assertIsInstance(result, list, 'dut=%s' % dut)
             self.assertEqual(len(result), 1, 'dut=%s' % dut)
+
+    def test_enable_single_extended_command(self):
+        for dut in self.duts:
+            result = dut.run_commands({'cmd': 'show cvx', 'revision': 1})
+            self.assertIsInstance(result, list, 'dut=%s' % dut)
+            self.assertEqual(len(result), 1, 'dut=%s' % dut)
+            self.assertTrue('clusterMode' not in result[0].keys())
+
+            result2 = dut.run_commands({'cmd': 'show cvx', 'revision': 2})
+            self.assertIsInstance(result2, list, 'dut=%s' % dut)
+            self.assertEqual(len(result2), 1, 'dut=%s' % dut)
+            self.assertTrue('clusterMode' in result2[0].keys())
 
     def test_enable_single_unicode_command(self):
         for dut in self.duts:

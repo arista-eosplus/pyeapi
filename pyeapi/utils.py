@@ -184,7 +184,7 @@ def make_iterable(value):
         # Convert unicode values to strings for Python 2
         if isinstance(value, unicode):
             value = str(value)
-    if isinstance(value, str):
+    if isinstance(value, str) or isinstance(value, dict):
         value = [value]
 
     if not isinstance(value, collections.Iterable):

@@ -33,3 +33,15 @@ route-map FOOBAR permit 20
    match interface Ethernet2
    continue 200
 !
+route-map FOO-BAR permit 10
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!
+route-map FOO-BAR deny 20
+   match as 2000
+   match source-protocol ospf
+   match interface Ethernet2
+   continue 200
+!

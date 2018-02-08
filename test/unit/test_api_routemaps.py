@@ -61,8 +61,11 @@ class TestApiRoutemaps(EapiConfigUnitTest):
         self.assertIsNone(self.instance.get('blah'))
 
     def test_getall(self):
+        # Review fixtures/running_config.routemaps to see the default
+        # running-config that is the basis for this test
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
+        self.assertEqual(len(result.keys()), 4)
 
     def test_routemaps_functions(self):
         for name in ['create', 'delete', 'default']:
