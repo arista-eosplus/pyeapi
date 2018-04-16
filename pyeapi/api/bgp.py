@@ -234,7 +234,7 @@ class BgpNeighbors(EntityCollection):
         return dict(description=value)
 
     def _parse_next_hop_self(self, config, name):
-        exp = 'no neighobr {} next-hop-self'.format(name)
+        exp = 'no neighbor {} next-hop-self'.format(name)
         value = exp in config
         return dict(next_hop_self=not value)
 
