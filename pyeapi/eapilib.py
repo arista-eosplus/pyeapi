@@ -240,20 +240,21 @@ class EapiConnection(object):
                 the eAPI connection with
 
         """
+        _auth_text = '{}:{}'.format(username, password)
+
         # Work around for Python 2.7/3.x compatibility
         if int(sys.version[0]) > 2:
             # For Python 3.x
-            _auth_text = '{}:{}'.format(username, password)
             _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
             _auth = _auth.replace('\n', '')
             self._auth = _auth
         else:
             # For Python 2.7
-            _auth = base64.encodestring('{}:{}'.format(username, password))
+            _auth = base64.encodestring(_auth_text)
             self._auth = str(_auth).replace('\n', '')
 
-        _LOGGER.debug('Autentication string is: {}'.format(self._auth))
+        _LOGGER.debug('Autentication string is: {}:***'.format(username))
 
     def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
