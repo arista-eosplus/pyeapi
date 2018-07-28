@@ -1,4 +1,4 @@
-netaddr
+-r requirements.txt
 mock
 coveralls
 twine
@@ -12,5 +12,3 @@ flake8
 flake8-print
 flake8-debugger
 pep8-naming
-
-
