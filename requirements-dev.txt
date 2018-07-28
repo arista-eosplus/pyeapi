@@ -1,5 +1,0 @@
--r requirements.txt
-flake8
-pep8
-pyflakes
-twine
