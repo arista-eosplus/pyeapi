@@ -617,7 +617,7 @@ class HttpsEapiConnection(EapiConnection):
 
 class HttpsEapiCertConnection(EapiConnection):
     def __init__(self, host, port=None, path=None, key_file=None,
-                 cert_file=None, ca_file=None, timeout=60):
+                 cert_file=None, ca_file=None, timeout=60, **kwargs):
         if key_file is None or cert_file is None:
             raise ValueError("For https_cert connections both a key_file and "
                              "cert_file are required. A ca_file is also "
