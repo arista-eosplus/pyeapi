@@ -106,6 +106,7 @@ except ImportError:
 from pyeapi.utils import load_module, make_iterable, debug
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
+from pyeapi.eapilib import HttpsEapiCertConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
@@ -115,7 +116,8 @@ TRANSPORTS = {
     'socket': SocketEapiConnection,
     'http_local': HttpLocalEapiConnection,
     'http': HttpEapiConnection,
-    'https': HttpsEapiConnection
+    'https': HttpsEapiConnection,
+    'https_certs': HttpsEapiCertConnection
 }
 
 DEFAULT_TRANSPORT = 'https'
@@ -327,6 +329,7 @@ def load_config(filename):
     """
     return config.load(filename)
 
+
 def config_for(name):
     """ Function to get settings for named config
 
@@ -344,6 +347,7 @@ def config_for(name):
     """
     return config.get_connection(name)
 
+
 def hosts_for_tag(tag):
     """ Returns the hosts assocated with the specified tag
 
@@ -360,6 +364,7 @@ def hosts_for_tag(tag):
         None: If the specified tag does not exist, then None is returned.
     """
     return config.tags.get(tag)
+
 
 def make_connection(transport, **kwargs):
     """ Creates a connection instance based on the transport
@@ -386,7 +391,8 @@ def make_connection(transport, **kwargs):
 
 
 def connect(transport=None, host='localhost', username='admin',
-            password='', port=None, timeout=60, return_node=False, **kwargs):
+            password='', port=None, key_file=None, cert_file=None,
+            ca_file=None, timeout=60, return_node=False, **kwargs):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -405,6 +411,10 @@ def connect(transport=None, host='localhost', username='admin',
         port (int): The TCP port of the endpoint for the eAPI connection.  If
             this keyword is not specified, the default value is automatically
             determined by the transport type. (http=80, https=443)
+        key_file (str): Path to private key file for ssl validation
+        cert_file (str): Path to PEM formatted cert file for ssl validation
+        ca_file (str): Path to CA PEM formatted cert file for ssl validation
+        timeout (int): timeout
         return_node (bool): Returns a Node object if True, otherwise
             returns an EapiConnection object.
 
@@ -415,10 +425,13 @@ def connect(transport=None, host='localhost', username='admin',
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
-                                 password=password, port=port, timeout=timeout)
+                                 password=password, key_file=key_file,
+                                 cert_file=cert_file, ca_file=ca_file,
+                                 port=port, timeout=timeout)
     if return_node:
         return Node(connection, transport=transport, host=host,
-                    username=username, password=password, port=port, **kwargs)
+                    username=username, password=password, key_file=key_file,
+                    cert_file=cert_file, ca_file=ca_file, port=port, **kwargs)
     return connection
 
 
