@@ -242,19 +242,16 @@ class HTTPSCertConnection(HTTPSConnection):
             to ssl.wrap_socket(), which forces SSL to check server certificate
             against our client certificate.
         """
-        print('IN CONNECT')
         sock = socket.create_connection((self.host, self.port), self.timeout)
         if self._tunnel_host:
             self.sock = sock
             self._tunnel()
         # If there's no CA File, don't force Server Certificate Check
         if self.ca_file:
-            print('VERIFY SERVER USING CA FILE')
             self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
                                         ca_certs=self.ca_file,
                                         cert_reqs=ssl.CERT_REQUIRED)
         else:
-            print('NO VERIFY SERVER. NO CA FILE')
             self.sock = ssl.wrap_socket(sock, self.key_file,
                                         self.cert_file,
                                         cert_reqs=ssl.CERT_NONE)
