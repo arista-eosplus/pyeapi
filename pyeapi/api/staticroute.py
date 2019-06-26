@@ -303,6 +303,7 @@ class StaticRoute(EntityCollection):
             ip_dest (string): The ip address of the destination in the
                 form of A.B.C.D/E
             next_hop (string): The next hop interface or ip address
+            **kwargs['vrf'] (string): The vrf for this route
             **kwargs['next_hop_ip'] (string): The next hop address on
                 destination interface
             **kwargs['distance'] (string): Administrative distance for this
@@ -313,8 +314,11 @@ class StaticRoute(EntityCollection):
         Returns the ip route command string to be sent to the switch for
         the given set of parameters.
         """
-
-        commands = "ip route %s %s" % (ip_dest, next_hop)
+        vrf = kwargs.get('vrf', None)
+        if vrf is not None:
+            commands = "ip route vrf %s %s %s" % (vrf, ip_dest, next_hop)
+        else:
+            commands = "ip route %s %s" % (ip_dest, next_hop)
 
         next_hop_ip = kwargs.get('next_hop_ip', None)
         distance = kwargs.get('distance', None)

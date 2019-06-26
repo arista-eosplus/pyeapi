@@ -40,7 +40,7 @@ from testlib import random_int, random_string
 from systestlib import DutSystemTest
 
 NEXT_HOPS = ['Ethernet1', 'Ethernet2', 'Null0', 'IP']
-DISTANCES = TAGS = ROUTE_NAMES = [None, True]
+DISTANCES = TAGS = ROUTE_NAMES = VRF = [None, True]
 
 
 def _ip_addr():
@@ -76,6 +76,10 @@ def _route_name():
     return random_string(minchar=4, maxchar=10)
 
 
+def _vrf():
+    return random_string(minchar=4, maxchar=10)
+
+
 class TestApiStaticroute(DutSystemTest):
 
     def test_create(self):
@@ -86,26 +90,30 @@ class TestApiStaticroute(DutSystemTest):
             dut.config(['no ip routing delete-static-routes',
                         'ip routing'])
 
-            for t_distance in DISTANCES:
-                for t_tag in TAGS:
-                    for t_route_name in ROUTE_NAMES:
-                        ip_dest = _ip_addr()
-                        (next_hop, next_hop_ip) = _next_hop()
-                        distance = t_distance
-                        if distance is True:
-                            distance = _distance()
-                        tag = t_tag
-                        if tag is True:
-                            tag = _tag()
-                        route_name = t_route_name
-                        if route_name is True:
-                            route_name = _route_name()
+            for t_vrf in VRF:
+                for t_distance in DISTANCES:
+                    for t_tag in TAGS:
+                        for t_route_name in ROUTE_NAMES:
+                            ip_dest = _ip_addr()
+                            (next_hop, next_hop_ip) = _next_hop()
+                            distance = t_distance
+                            if distance is True:
+                                distance = _distance()
+                            tag = t_tag
+                            if tag is True:
+                                tag = _tag()
+                            route_name = t_route_name
+                            if route_name is True:
+                                route_name = _route_name()
+                            vrf = t_vrf
+                            if vrf is True:
+                                vrf = _vrf()
 
-                        result = dut.api('staticroute').create(
-                            ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                            distance=distance, tag=tag, route_name=route_name)
+                            result = dut.api('staticroute').create(
+                                ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                                distance=distance, tag=tag, route_name=route_name, vrf=vrf)
 
-                        self.assertTrue(result)
+                            self.assertTrue(result)
 
     def test_get(self):
         # Validate the get function returns the exact value that
@@ -206,26 +214,30 @@ class TestApiStaticroute(DutSystemTest):
             dut.config(['no ip routing delete-static-routes',
                         'ip routing'])
 
-            for t_distance in DISTANCES:
-                for t_tag in TAGS:
-                    for t_route_name in ROUTE_NAMES:
-                        ip_dest = _ip_addr()
-                        (next_hop, next_hop_ip) = _next_hop()
-                        distance = t_distance
-                        if distance is True:
-                            distance = _distance()
-                        tag = t_tag
-                        if tag is True:
-                            tag = _tag()
-                        route_name = t_route_name
-                        if route_name is True:
-                            route_name = _route_name()
+            for t_vrf in VRF:
+                for t_distance in DISTANCES:
+                    for t_tag in TAGS:
+                        for t_route_name in ROUTE_NAMES:
+                            ip_dest = _ip_addr()
+                            (next_hop, next_hop_ip) = _next_hop()
+                            distance = t_distance
+                            if distance is True:
+                                distance = _distance()
+                            tag = t_tag
+                            if tag is True:
+                                tag = _tag()
+                            route_name = t_route_name
+                            if route_name is True:
+                                route_name = _route_name()
+                            vrf = t_vrf
+                            if vrf is True:
+                                vrf = _vrf()
 
-                        result = dut.api('staticroute').delete(
-                            ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                            distance=distance, tag=tag, route_name=route_name)
+                            result = dut.api('staticroute').delete(
+                                ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                                distance=distance, tag=tag, route_name=route_name, vrf=vrf)
 
-                        self.assertTrue(result)
+                            self.assertTrue(result)
 
     def test_default(self):
         # Validate the default function returns without an error
@@ -238,26 +250,30 @@ class TestApiStaticroute(DutSystemTest):
             dut.config(['no ip routing delete-static-routes',
                         'ip routing'])
 
-            for t_distance in DISTANCES:
-                for t_tag in TAGS:
-                    for t_route_name in ROUTE_NAMES:
-                        ip_dest = _ip_addr()
-                        (next_hop, next_hop_ip) = _next_hop()
-                        distance = t_distance
-                        if distance is True:
-                            distance = _distance()
-                        tag = t_tag
-                        if tag is True:
-                            tag = _tag()
-                        route_name = t_route_name
-                        if route_name is True:
-                            route_name = _route_name()
+            for t_vrf in VRF:
+                for t_distance in DISTANCES:
+                    for t_tag in TAGS:
+                        for t_route_name in ROUTE_NAMES:
+                            ip_dest = _ip_addr()
+                            (next_hop, next_hop_ip) = _next_hop()
+                            distance = t_distance
+                            if distance is True:
+                                distance = _distance()
+                            tag = t_tag
+                            if tag is True:
+                                tag = _tag()
+                            route_name = t_route_name
+                            if route_name is True:
+                                route_name = _route_name()
+                            vrf = t_vrf
+                            if vrf is True:
+                                vrf = _vrf()
 
-                        result = dut.api('staticroute').default(
-                            ip_dest, next_hop, next_hop_ip=next_hop_ip,
-                            distance=distance, tag=tag, route_name=route_name)
+                            result = dut.api('staticroute').default(
+                                ip_dest, next_hop, next_hop_ip=next_hop_ip,
+                                distance=distance, tag=tag, route_name=route_name, vrf=vrf)
 
-                        self.assertTrue(result)
+                            self.assertTrue(result)
 
     def test_set_tag(self):
         # Validate the set_tag function returns without an error
