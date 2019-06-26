@@ -39,13 +39,15 @@ The following configuration options are available for defining node entries:
       - http_local (available in EOS 4.14.5 or later)
       - http
       - https
+      - https_certs
 
 :port: Configures the port to use for the eAPI connection.  A default
     port is used if this parameter is absent, based on the transport setting
     using the following values:
 
       - transport: http, default port: 80
-      - transport: https, deafult port: 443
+      - transport: https, default port: 443
+      - transport: https_certs, default port: 443
       - transport: http_local, default port: 8080
       - transport: socket, default port: n/a
 
@@ -62,6 +64,7 @@ Transport   eapi.conf Required Script run from Authentication Required
 =========== ================== =============== ========================
 http        Yes                On/Off-switch   Yes
 https       Yes                On/Off-switch   Yes
+https_certs Yes                On/Off-switch   Yes (Auth done via certs, not un/pw)
 http_local  Yes                On-switch only  No
 socket      No                 On-switch only  No
 =========== ================== =============== ========================
@@ -168,6 +171,29 @@ As the table above indicates, a pyeapi configuration file is required in
   transport: https
   username: admin
   password: admin
+
+Using HTTPS with Certificates
+=============================
+
+The https_certs transport options allows users to do authentication for pyeapi
+with certificates instead of username/password. This requires functional
+certificate chains are setup, copied to the proper location and trusted by
+EOS beforehand. The ca_file parameter is optional. If provided the switches
+certificate will also be validated against the provided CA cert. If no CA cert
+is provided then no server side validation will be done.
+
+.. code-block:: console
+
+  [connection:veos01]
+  transport: https_certs
+  cert_file: /path/to/certificate/file
+  key_file: /path/to/private/key/file
+  ca_file: /path/to/CA/certificate/file
+
+  [connection:veos02]
+  transport: https_certs
+  cert_file: /path/to/certificate/file
+  key_file: /path/to/private/key/file
 
 *******************
 The DEFAULT Section

@@ -19,6 +19,7 @@ include:
 
   - HTTP
   - HTTPS
+  - HTTPS Certificates
   - HTTP Local
   - Unix Socket
 
