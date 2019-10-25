@@ -48,7 +48,7 @@ Example:
 
     >>> import pyeapi
     >>> conn = pyeapi.connect(host='10.1.1.1', transport='http')
-    >>> conn.execute(['show verson'])
+    >>> conn.execute(['show version'])
     {u'jsonrpc': u'2.0', u'result': [{u'memTotal': 2028008, u'version':
     u'4.14.5F', u'internalVersion': u'4.14.5F-2209869.4145F', u'serialNumber':
     u'', u'systemMacAddress': u'00:0c:29:f5:d2:7d', u'bootupTimestamp':
