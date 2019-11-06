@@ -79,6 +79,7 @@ def import_module(name):
 
     """
     if name in sys.modules:
+        # Be sure not to reload a previously loaded module
         mod = sys.modules[name]
     else:
         mod = importlib.import_module(name)
