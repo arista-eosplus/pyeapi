@@ -31,7 +31,6 @@
 #
 import os
 import sys
-import imp
 import importlib
 import inspect
 import logging
@@ -79,43 +78,10 @@ def import_module(name):
         The module that was imported
 
     """
-    print('import_module')
-    print('name - %s' % name)
-
-    """
-    parts = name.split('.')
-    path = None
-    module_name = ''
-    fhandle = None
-
-    for index, part in enumerate(parts):
-        module_name = part if index == 0 else '%s.%s' % (module_name, part)
-        path = [path] if path is not None else path
-
-        try:
-            print('IN TRY - PART %s' % part)
-            print('IN TRY - PATH %s' % path)
-            fhandle, path, descr = imp.find_module(part, path)
-            if module_name in sys.modules:
-                print('FOUND IN SYS.MODULES %s' % module_name)
-                # since imp.load_module works like reload, need to be sure not
-                # to reload a previously loaded module
-                mod = sys.modules[module_name]
-            else:
-                print('LOAD %s' % module_name)
-                mod = imp.load_module(module_name, fhandle, path, descr)
-        finally:
-            print('IN FINALLY')
-            # lets be sure to clean up after ourselves
-            if fhandle:
-                fhandle.close()
-    """
     if name in sys.modules:
         mod = sys.modules[name]
     else:
         mod = importlib.import_module(name)
-
-    print('PRE RETURN')
     return mod
 
 

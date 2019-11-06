@@ -41,12 +41,10 @@ class TestUtils(unittest.TestCase):
             pyeapi.utils.make_iterable(object())
 
     def test_import_module(self):
-        print('test_import_module')
         result = pyeapi.utils.import_module('pyeapi.api.vlans')
         self.assertIsNotNone(result)
 
     def test_import_module_raises_import_error(self):
-        print('test_import_module_error')
         with self.assertRaises(ImportError):
             pyeapi.utils.import_module('fake.module.test')
 

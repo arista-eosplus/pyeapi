@@ -105,7 +105,7 @@ class System(Entity):
                   into the resource dict
         """
         motd_value = login_value = None
-        matches = re.findall('^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n',
+        matches = re.findall(r'^banner\s+(login|motd)\s?$\n(.*?)$\nEOF$\n',
                              self.config, re.DOTALL | re.M)
         for match in matches:
             if match[0].strip() == "motd":
