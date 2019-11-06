@@ -274,11 +274,11 @@ class TestNode(unittest.TestCase):
         # Send an incomplete command
         cases.append(('show run', rfmt
                       % (1002, 'invalid command',
-                         'incomplete token \(at token \d+: \'.*\'\)')))
+                         r'incomplete token \(at token \d+: \'.*\'\)')))
         # Send a mangled command
         cases.append(('shwo version', rfmt
                       % (1002, 'invalid command',
-                         'Invalid input \(at token \d+: \'.*\'\)')))
+                         r'Invalid input \(at token \d+: \'.*\'\)')))
         # Send a command that cannot be run through the api
         # note the command for reload looks to change in new EOS
         # in 4.15 the  reload now is replaced with 'force' if you are
@@ -295,8 +295,7 @@ class TestNode(unittest.TestCase):
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',
-                         'Invalid input \(privileged mode required\)')))
-
+                         r'Invalid input \(privileged mode required\)')))
 
         for dut in self.duts:
             for (cmd, regex) in cases:

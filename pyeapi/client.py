@@ -530,13 +530,13 @@ class Node(object):
         # Parse out version info
         output = self.enable('show version')
         self._version = str(output[0]['result']['version'])
-        match = re.match('[\d.\d]+', output[0]['result']['version'])
+        match = re.match(r'[\d.\d]+', output[0]['result']['version'])
         if match:
             self._version_number = str(match.group(0))
         else:
             self._version_number = str(output[0]['result']['version'])
         # Parse out model number
-        match = re.search('\d\d\d\d', output[0]['result']['modelName'])
+        match = re.search(r'\d\d\d\d', output[0]['result']['modelName'])
         if match:
             self._model = str(match.group(0))
         else:

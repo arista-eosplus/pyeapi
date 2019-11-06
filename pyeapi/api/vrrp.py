@@ -1156,7 +1156,7 @@ class Vrrp(EntityCollection):
             if primary_ip in ('no', None):
                 cmd = self.set_primary_ip(name, vrid, value=None,
                                           disable=True, run=False)
-            elif primary_ip is 'default':
+            elif primary_ip == 'default':
                 cmd = self.set_primary_ip(name, vrid, value=None,
                                           default=True, run=False)
             else:

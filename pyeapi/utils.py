@@ -31,7 +31,7 @@
 #
 import os
 import sys
-import imp
+import importlib
 import inspect
 import logging
 import logging.handlers
@@ -78,28 +78,11 @@ def import_module(name):
         The module that was imported
 
     """
-    parts = name.split('.')
-    path = None
-    module_name = ''
-    fhandle = None
-
-    for index, part in enumerate(parts):
-        module_name = part if index == 0 else '%s.%s' % (module_name, part)
-        path = [path] if path is not None else path
-
-        try:
-            fhandle, path, descr = imp.find_module(part, path)
-            if module_name in sys.modules:
-                # since imp.load_module works like reload, need to be sure not
-                # to reload a previously loaded module
-                mod = sys.modules[module_name]
-            else:
-                mod = imp.load_module(module_name, fhandle, path, descr)
-        finally:
-            # lets be sure to clean up after ourselves
-            if fhandle:
-                fhandle.close()
-
+    if name in sys.modules:
+        # Be sure not to reload a previously loaded module
+        mod = sys.modules[name]
+    else:
+        mod = importlib.import_module(name)
     return mod
 
 

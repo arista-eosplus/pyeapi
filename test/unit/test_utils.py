@@ -5,6 +5,7 @@ from mock import patch, Mock
 
 import pyeapi.utils
 
+
 class TestUtils(unittest.TestCase):
 
     @patch('pyeapi.utils.import_module')

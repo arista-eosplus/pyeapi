@@ -158,13 +158,13 @@ class StaticRoute(EntityCollection):
             # Get the four identifying components
             ip_dest = match[0]
             next_hop = match[1]
-            next_hop_ip = None if match[2] is '' else match[2]
+            next_hop_ip = None if match[2] == '' else match[2]
             distance = int(match[3])
 
             # Create the data dict with the remaining components
             data = {}
-            data['tag'] = None if match[4] is '' else int(match[4])
-            data['route_name'] = None if match[5] is '' else match[5]
+            data['tag'] = None if match[4] == '' else int(match[4])
+            data['route_name'] = None if match[5] == '' else match[5]
 
             # Build the complete dict entry from the four components
             # and the data.

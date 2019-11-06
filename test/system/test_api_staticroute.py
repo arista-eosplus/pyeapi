@@ -52,14 +52,14 @@ def _ip_addr():
 
 def _next_hop():
     next_hop = choice(NEXT_HOPS)
-    if next_hop is 'Null0':
+    if next_hop == 'Null0':
         return (next_hop, None)
     ip1 = random_int(0, 223)
     ip2 = random_int(0, 255)
     ip3 = random_int(0, 255)
     ip4 = random_int(0, 255)
     ip_addr = "%s.%s.%s.%s" % (ip1, ip2, ip3, ip4)
-    if next_hop is 'IP':
+    if next_hop == 'IP':
         return (ip_addr, None)
     return (next_hop, ip_addr)
 
