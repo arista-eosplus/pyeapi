@@ -39,18 +39,18 @@ from systestlib import DutSystemTest
 
 IP_PREFIX = '10.10.10.'
 VR_CONFIG = {
-    'primary_ip': '10.10.10.2',
-    'priority': 200,
-    'description': 'modified vrrp 10 on an interface',
-    'secondary_ip': ['10.10.10.11'],
-    'ip_version': 3,
-    'enable': False,
-    'timers_advertise': 2,
-    'mac_addr_adv_interval': 3,
+    'primary_ipv4': '10.10.10.2',
+    'priority_level': 200,
+    'session_description': 'modified vrrp 10 on an interface',
+    'secondary_ipv4': ['10.10.10.11'],
+    'ipv4_version': 3,
+    'enabled': False,
+    'advertisement_interval': 2,
+    'mac_addr_adv_interval': 30,
     'preempt': False,
     'preempt_delay_min': 1,
     'preempt_delay_reload': None,
-    'delay_reload': 1,
+    'timers_delay_reload': 1,
     'track': [
         {'name': 'Ethernet1', 'action': 'shutdown'},
         {'name': 'Ethernet2', 'action': 'decrement', 'amount': 10},
@@ -74,7 +74,7 @@ class TestApiVrrp(DutSystemTest):
         for dut in self.duts:
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
             response = dut.api('vrrp').get(interface)
 
@@ -86,11 +86,11 @@ class TestApiVrrp(DutSystemTest):
         for dut in self.duts:
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit',
                         'interface vlan $',
-                        'vrrp %d shutdown' % vrid,
-                        'vrrp %d shutdown' % vrid2,
+                        'vrrp %d disabled' % vrid,
+                        'vrrp %d disabled' % vrid2,
                         'exit'])
             response = dut.api('vrrp').getall()
 
@@ -124,7 +124,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             response = dut.api('vrrp').delete(interface, vrid)
@@ -136,7 +136,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             response = dut.api('vrrp').delete(interface, vrid)
@@ -160,10 +160,10 @@ class TestApiVrrp(DutSystemTest):
 
             # Update some of the information on the vrrp
             vrrp_update = {
-                'primary_ip': '10.10.10.12',
-                'priority': 200,
-                'description': 'updated vrrp 10 on an interface',
-                'secondary_ip': ['10.10.10.13', '10.10.10.23'],
+                'primary_ipv4': '10.10.10.12',
+                'priority_level': 200,
+                'session_description': 'updated vrrp 10 on an interface',
+                'secondary_ipv4': ['10.10.10.13', '10.10.10.23'],
                 'ip_version': 2,
                 'enable': True,
                 'timers_advertise': None,
@@ -171,7 +171,7 @@ class TestApiVrrp(DutSystemTest):
                 'preempt': True,
                 'preempt_delay_min': 'default',
                 'preempt_delay_reload': 'default',
-                'delay_reload': 'default',
+                'timers_delay_reload': 'default',
                 'track': [
                     {'name': 'Ethernet2', 'action': 'shutdown'},
                     {'name': 'Ethernet2', 'action': 'decrement', 'amount': 1},
@@ -200,7 +200,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'vrrp %d ip 10.10.10.2' % vrid,
                         'exit'])
 
@@ -222,11 +222,11 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for p_ip in primary_ip_cases:
-                response = dut.api('vrrp').set_primary_ip(
+                response = dut.api('vrrp').set_primary_ipv4(
                     interface, vrid, **p_ip)
                 self.assertIs(response, True)
 
@@ -243,11 +243,11 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for priority in priority_cases:
-                response = dut.api('vrrp').set_priority(
+                response = dut.api('vrrp').set_priority_level(
                     interface, vrid, **priority)
                 self.assertIs(response, True)
 
@@ -264,11 +264,11 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for description in desc_cases:
-                response = dut.api('vrrp').set_description(
+                response = dut.api('vrrp').set_session_description(
                     interface, vrid, **description)
                 self.assertIs(response, True)
 
@@ -283,7 +283,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for s_ip_list in secondary_ip_cases:
@@ -305,7 +305,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for ip_version in ip_version_cases:
@@ -326,7 +326,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for timers_advertise in timers_adv_cases:
@@ -347,7 +347,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for mac_addr_adv_intvl in mac_addr_adv_int_cases:
@@ -369,7 +369,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for preempt in preempt_cases:
@@ -390,7 +390,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for preempt_delay_min in preempt_delay_min_cases:
@@ -411,7 +411,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for preempt_delay_reload in preempt_delay_reload_cases:
@@ -419,9 +419,9 @@ class TestApiVrrp(DutSystemTest):
                     interface, vrid, **preempt_delay_reload)
                 self.assertIs(response, True)
 
-    def test_set_delay_reload(self):
+    def test_set_timers_delay_reload(self):
         vrid = 104
-        delay_reload_cases = [
+        timers_delay_reload_cases = [
             {'value': 30},
             {'default': True},
             {'value': 25},
@@ -432,12 +432,12 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
-            for delay_reload in delay_reload_cases:
-                response = dut.api('vrrp').set_delay_reload(
-                    interface, vrid, **delay_reload)
+            for timers_delay_reload in timers_delay_reload_cases:
+                response = dut.api('vrrp').set_timers_delay_reload(
+                    interface, vrid, **timers_delay_reload)
                 self.assertIs(response, True)
 
     def test_set_tracks(self):
@@ -465,7 +465,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for track_list in track_cases:
@@ -486,7 +486,7 @@ class TestApiVrrp(DutSystemTest):
             interface = self._vlan_setup(dut)
             dut.config(['interface %s' % interface,
                         'no vrrp %d' % vrid,
-                        'vrrp %d shutdown' % vrid,
+                        'vrrp %d disabled' % vrid,
                         'exit'])
 
             for bfd_ip in bfd_ip_cases:

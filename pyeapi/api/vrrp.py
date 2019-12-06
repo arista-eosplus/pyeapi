@@ -157,11 +157,20 @@ import re
 
 from pyeapi.api import EntityCollection
 
-PROPERTIES = ['primary_ip', 'priority', 'description', 'secondary_ip',
-              'ip_version', 'enable', 'timers_advertise',
-              'mac_addr_adv_interval', 'preempt',
-              'preempt_delay_min', 'preempt_delay_reload',
-              'delay_reload', 'track', 'bfd_ip']
+PROPERTIES = ['primary_ip', 'primary_ipv4', 
+              'priority', 'priority_level',
+              'description', 'session_description',
+              'secondary_ip', 'secondary_ipv4',
+              'ip_version', 'ipv4_version',
+              'enable', 'enabled',
+              'timers_advertise', 'advertisement interval',
+              'mac_addr_adv_interval',
+              'preempt',
+              'preempt_delay_min',
+              'preempt_delay_reload',
+              'delay_reload', 'timers_delay_reload',
+              'track',
+              'bfd_ip']
 
 
 class Vrrp(EntityCollection):
@@ -256,22 +265,53 @@ class Vrrp(EntityCollection):
             return dict(enable=False)
         return dict(enable=True)
 
+    def _parse_enabled(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s disabled$' % vrid, config, re.M)
+        if match:
+            return dict(enabled=False)
+        return dict(enabled=True)
+
     def _parse_primary_ip(self, config, vrid):
         match = re.search(r'^\s+vrrp %s ip (\d+\.\d+\.\d+\.\d+)$' %
                           vrid, config, re.M)
         value = match.group(1) if match else None
         return dict(primary_ip=value)
 
+    def _parse_primary_ipv4(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s ipv4 (\d+\.\d+\.\d+\.\d+)$' %
+                          vrid, config, re.M)
+        value = match.group(1) if match else None
+        return dict(primary_ipv4=value)
+
+    def _parse_primary_ipv6(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s '
+                          r'ipv6 (^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4})$' %
+                          vrid, config, re.M)
+        value = match.group(1) if match else None
+        return dict(primary_ipv6=value)
+
     def _parse_priority(self, config, vrid):
         match = re.search(r'^\s+vrrp %s priority (\d+)$' % vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(priority=value)
+
+    def _parse_priority_level(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s '
+                          r'priority-level (\d+)$' % vrid, config, re.M)
+        value = int(match.group(1)) if match else None
+        return dict(priority_level=value)
 
     def _parse_timers_advertise(self, config, vrid):
         match = re.search(r'^\s+vrrp %s timers advertise (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(timers_advertise=value)
+
+    def _parse_advertisement_interval(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s advertisement interval (\d+)$' %
+                          vrid, config, re.M)
+        value = int(match.group(1)) if match else None
+        return dict(advertisement_interval=value)
 
     def _parse_preempt(self, config, vrid):
         match = re.search(r'^\s+vrrp %s preempt$' % vrid, config, re.M)
@@ -285,12 +325,25 @@ class Vrrp(EntityCollection):
         value = matches if matches else []
         return dict(secondary_ip=value)
 
+    def _parse_secondary_ipv4(self, config, vrid):
+        matches = re.findall(r'^\s+vrrp %s ipv4 (\d+\.\d+\.\d+\.\d+) '
+                             r'secondary$' % vrid, config, re.M)
+        value = matches if matches else []
+        return dict(secondary_ipv4=value)
+
     def _parse_description(self, config, vrid):
         match = re.search(r'^\s+vrrp %s description(.*)$' %
                           vrid, config, re.M)
         if match:
             return dict(description=match.group(1).lstrip())
         return dict(description='')
+
+    def _parse_session_description(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s session description(.*)$' %
+                          vrid, config, re.M)
+        if match:
+            return dict(description=match.group(1).lstrip())
+        return dict(session_description='')
 
     def _parse_mac_addr_adv_interval(self, config, vrid):
         match = re.search(r'^\s+vrrp %s mac-address advertisement-interval '
@@ -324,11 +377,29 @@ class Vrrp(EntityCollection):
         value = int(match.group(1)) if match else None
         return dict(ip_version=value)
 
+    def _parse_ipv4_version(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s ipv4 version (\d+)$' %
+                          vrid, config, re.M)
+        value = int(match.group(1)) if match else None
+        return dict(ipv4_version=value)
+
+    def _parse_ipv6_version(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s ipv6 version (\d+)$' %
+                          vrid, config, re.M)
+        value = int(match.group(1)) if match else None
+        return dict(ipv6_version=value)
+
     def _parse_delay_reload(self, config, vrid):
         match = re.search(r'^\s+vrrp %s delay reload (\d+)$' %
                           vrid, config, re.M)
         value = int(match.group(1)) if match else None
         return dict(delay_reload=value)
+
+    def _parse_timers_delay_reload(self, config, vrid):
+        match = re.search(r'^\s+vrrp %s timers delay reload (\d+)$' %
+                          vrid, config, re.M)
+        value = int(match.group(1)) if match else None
+        return dict(timers_delay_reload=value)
 
     def _parse_track(self, config, vrid):
         matches = re.findall(r'^\s+vrrp %s track (\S+) '
@@ -459,6 +530,44 @@ class Vrrp(EntityCollection):
         # Otherwise return the formatted command
         return cmd
 
+    def set_enabled(self, name, vrid, value=False, run=True):
+        """Set the enabled property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (boolean): True to enable the vrrp, False to disable.
+            run (boolean): True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if value is False:
+            cmd = "vrrp %d disabled" % vrid
+        elif value is True:
+            cmd = "no vrrp %d disabled" % vrid
+        else:
+            raise ValueError("vrrp property 'enabled' must be "
+                             "True or False")
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
     def set_primary_ip(self, name, vrid, value=None, disable=False,
                        default=False, run=True):
         """Set the primary_ip property of the vrrp
@@ -505,10 +614,98 @@ class Vrrp(EntityCollection):
 
         # Otherwise return the formatted command
         return cmd
+    
+    def set_primary_ipv4(self, name, vrid, value=None, disable=False,
+                         default=False, run=True):
+        """Set the primary_ipv4 property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (string): IP address to be set.
+            disable (boolean): Unset primary ip if True.
+            default (boolean): Set primary ip to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if default is True:
+            vrrps = self.get(name)
+            primary_ipv4 = vrrps[vrid]['primary_ipv4']
+            cmd = "default vrrp %d ipv4 %s" % (vrid, primary_ipv4)
+        elif disable is True or value is None:
+            vrrps = self.get(name)
+            primary_ipv4 = vrrps[vrid]['primary_ipv4']
+            cmd = "no vrrp %d ipv4 %s" % (vrid, primary_ipv4)
+        elif re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
+            cmd = "vrrp %d ipv4 %s" % (vrid, value)
+        else:
+            raise ValueError("vrrp property 'primary_ipv4' must be "
+                             "a properly formatted IP address")
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
 
     def set_priority(self, name, vrid, value=None, disable=False,
                      default=False, run=True):
-        """Set the primary_ip property of the vrrp
+        """Set the priority property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (integer): Priority to assign to the vrrp.
+            disable (boolean): Unset priority if True.
+            default (boolean): Set priority to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if not default and not disable:
+            if not str(value).isdigit() or value < 1 or value > 254:
+                raise ValueError("vrrp property 'priority' must be "
+                                 "an integer in the range 1-254")
+
+        cmd = self.command_builder('vrrp %d priority' % vrid, value=value,
+                                   default=default, disable=disable)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
+    def set_priority_level(self, name, vrid, value=None, disable=False,
+                           default=False, run=True):
+        """Set the priority_level property of the vrrp
 
         Args:
             name (string): The interface to configure.
@@ -583,6 +780,42 @@ class Vrrp(EntityCollection):
         # Otherwise return the formatted command
         return cmd
 
+    def set_session_description(self, name, vrid, value=None, disable=False,
+                                default=False, run=True):
+        """Set the session_description property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (string): Session_description to assign to the vrrp.
+            disable (boolean): Unset session_description if True.
+            default (boolean): Set session_description to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        cmd = self.command_builder('vrrp %d session description' % vrid, value=value,
+                                   default=default, disable=disable)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
     def set_ip_version(self, name, vrid, value=None, disable=False,
                        default=False, run=True):
         """Set the ip_version property of the vrrp
@@ -610,6 +843,46 @@ class Vrrp(EntityCollection):
                 raise ValueError("vrrp property 'ip_version' must be 2 or 3")
 
         cmd = self.command_builder('vrrp %d ip version' % vrid, value=value,
+                                   default=default, disable=disable)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
+    def set_ipv4_version(self, name, vrid, value=None, disable=False,
+                         default=False, run=True):
+        """Set the ipv4_version property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (integer): IPv4 version to assign to the vrrp.
+            disable (boolean): Unset ipv4_version if True.
+            default (boolean): Set ipv4_version to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if not default and not disable:
+            if value not in (2, 3):
+                raise ValueError("vrrp property 'ipv4_version' must be 2 or 3")
+
+        cmd = self.command_builder('vrrp %d ipv4 version' % vrid, value=value,
                                    default=default, disable=disable)
 
         # Run the command if requested
@@ -693,9 +966,80 @@ class Vrrp(EntityCollection):
         # Otherwise return the formatted command
         return cmds
 
+    def set_secondary_ipv4s(self, name, vrid, secondary_ipv4s, run=True):
+        """Configure the secondary_ipv4 property of the vrrp
+
+        Notes:
+            set_secondary_ipv4s takes a list of secondary ipv4 addresses
+            which are to be set on the virtal router. An empty list will
+            remove any existing secondary ipv4 addresses from the vrrp.
+            A list containing addresses will configure the virtual router
+            with only the addresses specified in the list - any existing
+            addresses not included in the list will be removed.
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            secondary_ips (list): A list of secondary ipv4 addresses to
+                be assigned to the virtual router.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        cmds = []
+
+        # Get the current set of tracks defined for the vrrp
+        curr_sec_ips = []
+        vrrps = self.get(name)
+        if vrrps and vrid in vrrps:
+            curr_sec_ips = vrrps[vrid]['secondary_ipv4']
+
+        # Validate the list of ip addresses
+        for sec_ip in secondary_ipv4s:
+            if type(sec_ip) is not str or \
+                    not re.match(r'^\d+\.\d+\.\d+\.\d+$', sec_ip):
+                raise ValueError("vrrp property 'secondary_ipv4' "
+                                 "must be a list "
+                                 "of properly formatted ip address strings")
+
+        intersection = list(set(curr_sec_ips) & set(secondary_ipv4s))
+
+        # Delete the intersection from both lists to determine which
+        # addresses need to be added or removed from the vrrp
+        remove = list(set(curr_sec_ips) - set(intersection))
+        add = list(set(secondary_ipv4s) - set(intersection))
+
+        # Build the commands to add and remove the secondary ip addresses
+        for sec_ip in remove:
+            cmds.append("no vrrp %d ipv4 %s secondary" % (vrid, sec_ip))
+
+        for sec_ip in add:
+            cmds.append("vrrp %d ipv4 %s secondary" % (vrid, sec_ip))
+
+        cmds = sorted(cmds)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmds)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmds
+
     def set_timers_advertise(self, name, vrid, value=None, disable=False,
                              default=False, run=True):
-        """Set the ip_version property of the vrrp
+        """Set the timers_advertise property of the vrrp
 
         Args:
             name (string): The interface to configure.
@@ -721,6 +1065,49 @@ class Vrrp(EntityCollection):
                                  "in the range 1-255")
 
         cmd = self.command_builder('vrrp %d timers advertise' % vrid,
+                                   value=value, default=default,
+                                   disable=disable)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
+    def set_advertisement_interval(self, name, vrid, value=None, disable=False,
+                                   default=False, run=True):
+        """Set the advertisement_interval property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (integer): Advertisement interval value 
+                            to assign to the vrrp.
+            disable (boolean): Unset interval advertise if True.
+            default (boolean): Set interval advertise to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 255:
+                raise ValueError("vrrp property 'advertisement_interval' must be"
+                                 "in the range 1-255")
+
+        cmd = self.command_builder('vrrp %d advertisement interval' % vrid,
                                    value=value, default=default,
                                    disable=disable)
 
@@ -908,14 +1295,14 @@ class Vrrp(EntityCollection):
 
     def set_delay_reload(self, name, vrid, value=None, disable=False,
                          default=False, run=True):
-        """Set the preempt_delay_min property of the vrrp
+        """Set the delay_reload property of the vrrp
 
         Args:
             name (string): The interface to configure.
             vrid (integer): The vrid number for the vrrp to be managed.
-            value (integer): Preempt delay reload value to set on the vrrp.
-            disable (boolean): Unset preempt delay reload if True.
-            default (boolean): Set preempt delay reload to default if True.
+            value (integer): Delay reload value to set on the vrrp.
+            disable (boolean): Unset delay reload if True.
+            default (boolean): Set delay reload to default if True.
             run (boolean): Set to True to execute the command, False to
                 return a string with the formatted command.
 
@@ -934,6 +1321,48 @@ class Vrrp(EntityCollection):
                                  "in the range 0-3600 %r" % value)
 
         cmd = self.command_builder('vrrp %d delay reload' % vrid, value=value,
+                                   default=default, disable=disable)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmd)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmd
+
+    def set_timers_delay_reload(self, name, vrid, value=None, disable=False,
+                                default=False, run=True):
+        """Set the timers_delay_reload property of the vrrp
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            value (integer): Timers delay_reload value to set on the vrrp.
+            disable (boolean): Unset preempt delay reload if True.
+            default (boolean): Set timers delay reload to default if True.
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        if not default and not disable:
+            if not int(value) or int(value) < 1 or int(value) > 3600:
+                raise ValueError("vrrp property 'timers_delay_reload' must be"
+                                 "in the range 0-3600 %r" % value)
+
+        cmd = self.command_builder('vrrp %d timers delay reload' 
+                                   % vrid, value=value,
                                    default=default, disable=disable)
 
         # Run the command if requested
@@ -1151,6 +1580,11 @@ class Vrrp(EntityCollection):
             cmd = self.set_enable(name, vrid, value=enable, run=False)
             commands.append(cmd)
 
+        enabled = vrconf.get('enabled', '__NONE__')
+        if enabled != '__NONE__':
+            cmd = self.set_enabled(name, vrid, value=enabled, run=False)
+            commands.append(cmd)
+
         primary_ip = vrconf.get('primary_ip', '__NONE__')
         if primary_ip != '__NONE__':
             if primary_ip in ('no', None):
@@ -1164,6 +1598,19 @@ class Vrrp(EntityCollection):
                                           run=False)
             commands.append(cmd)
 
+        primary_ipv4 = vrconf.get('primary_ipv4', '__NONE__')
+        if primary_ipv4 != '__NONE__':
+            if primary_ipv4 in ('no', None):
+                cmd = self.set_primary_ipv4(name, vrid, value=None,
+                                            disable=True, run=False)
+            elif primary_ipv4 == 'default':
+                cmd = self.set_primary_ipv4(name, vrid, value=None,
+                                            default=True, run=False)
+            else:
+                cmd = self.set_primary_ipv4(name, vrid, value=primary_ipv4,
+                                            run=False)
+            commands.append(cmd)
+
         priority = vrconf.get('priority', '__NONE__')
         if priority != '__NONE__':
             if priority in ('no', None):
@@ -1173,20 +1620,61 @@ class Vrrp(EntityCollection):
                 cmd = self.set_priority(name, vrid, value=priority,
                                         default=True, run=False)
             else:
-                cmd = self.set_priority(name, vrid, value=priority, run=False)
+                cmd = self.set_priority(name, vrid, 
+                                        value=priority, run=False)
+            commands.append(cmd)
+
+        priority_level = vrconf.get('priority_level', '__NONE__')
+        if priority_level != '__NONE__':
+            if priority_level in ('no', None):
+                cmd = self.set_priority_level(name, vrid, 
+                                              value=priority_level,
+                                              disable=True, run=False)
+            elif priority == 'default':
+                cmd = self.set_priority_level(name, vrid, 
+                                              value=priority_level,
+                                              default=True, run=False)
+            else:
+                cmd = self.set_priority_level(name, vrid, 
+                                              value=priority_level, run=False)
             commands.append(cmd)
 
         description = vrconf.get('description', '__NONE__')
         if description != '__NONE__':
             if description in ('no', None):
-                cmd = self.set_description(name, vrid, value=description,
+                cmd = self.set_description(name, 
+                                           vrid, 
+                                           value=description,
                                            disable=True, run=False)
             elif description == 'default':
-                cmd = self.set_description(name, vrid, value=description,
+                cmd = self.set_description(name, 
+                                           vrid, 
+                                           value=description,
                                            default=True, run=False)
             else:
-                cmd = self.set_description(name, vrid, value=description,
+                cmd = self.set_description(name, 
+                                           vrid, 
+                                           value=description,
                                            run=False)
+            commands.append(cmd)
+
+        session_description = vrconf.get('session_description', '__NONE__')
+        if session_description != '__NONE__':
+            if session_description in ('no', None):
+                cmd = self.set_session_description(name, 
+                                                   vrid, 
+                                                   value=session_description,
+                                                   disable=True, run=False)
+            elif session_description == 'default':
+                cmd = self.set_session_description(name, 
+                                                   vrid, 
+                                                   value=session_description,
+                                                   default=True, run=False)
+            else:
+                cmd = self.set_session_description(name, 
+                                                   vrid, 
+                                                   value=session_description,
+                                                   run=False)
             commands.append(cmd)
 
         ip_version = vrconf.get('ip_version', '__NONE__')
@@ -1202,9 +1690,28 @@ class Vrrp(EntityCollection):
                                           run=False)
             commands.append(cmd)
 
+        ipv4_version = vrconf.get('ipv4_version', '__NONE__')
+        if ipv4_version != '__NONE__':
+            if ipv4_version in ('no', None):
+                cmd = self.set_ipv4_version(name, vrid, value=ipv4_version,
+                                            disable=True, run=False)
+            elif ipv4_version == 'default':
+                cmd = self.set_ipv4_version(name, vrid, value=ipv4_version,
+                                            default=True, run=False)
+            else:
+                cmd = self.set_ipv4_version(name, vrid, value=ipv4_version,
+                                            run=False)
+            commands.append(cmd)
+
         secondary_ip = vrconf.get('secondary_ip', '__NONE__')
         if secondary_ip != '__NONE__':
             cmds = self.set_secondary_ips(name, vrid, secondary_ip, run=False)
+            for cmd in cmds:
+                commands.append(cmd)
+
+        secondary_ipv4 = vrconf.get('secondary_ipv4', '__NONE__')
+        if secondary_ip != '__NONE__':
+            cmds = self.set_secondary_ipv4s(name, vrid, secondary_ipv4, run=False)
             for cmd in cmds:
                 commands.append(cmd)
 
@@ -1222,6 +1729,22 @@ class Vrrp(EntityCollection):
                 cmd = self.set_timers_advertise(name, vrid,
                                                 value=timers_advertise,
                                                 run=False)
+            commands.append(cmd)
+
+        advertisement_interval = vrconf.get('advertisement_interval', '__NONE__')
+        if advertisement_interval != '__NONE__':
+            if advertisement_interval in ('no', None):
+                cmd = self.set_advertisement_interval(
+                    name, vrid, value=advertisement_interval,
+                    disable=True, run=False)
+            elif advertisement_interval == 'default':
+                cmd = self.set_advertisement_interval(
+                    name, vrid, value=advertisement_interval,
+                    default=True, run=False)
+            else:
+                cmd = self.set_advertisement_interval(
+                    name, vrid, value=advertisement_interval,
+                    run=False)
             commands.append(cmd)
 
         mac_addr_adv_interval = \
@@ -1301,6 +1824,22 @@ class Vrrp(EntityCollection):
                                             run=False)
             commands.append(cmd)
 
+        timers_delay_reload = vrconf.get('timers_delay_reload', '__NONE__')
+        if timers_delay_reload != '__NONE__':
+            if timers_delay_reload in ('no', None):
+                cmd = self.set_timers_delay_reload(name, vrid, 
+                                                   value=timers_delay_reload,
+                                                   disable=True, run=False)
+            elif delay_reload == 'default':
+                cmd = self.set_timers_delay_reload(name, vrid, 
+                                                   value=timers_delay_reload,
+                                                   default=True, run=False)
+            else:
+                cmd = self.set_timers_delay_reload(name, vrid, 
+                                                   value=timers_delay_reload,
+                                                   run=False)
+            commands.append(cmd)
+
         track = vrconf.get('track', '__NONE__')
         if track != '__NONE__':
             cmds = self.set_tracks(name, vrid, track, run=False)
@@ -1343,22 +1882,41 @@ class Vrrp(EntityCollection):
         # primary_ip: default, no, None results in address of 0.0.0.0
         if fixed['primary_ip'] in ('no', 'default', None):
             fixed['primary_ip'] = '0.0.0.0'
+        # primary_ipv4: default, no, None results in address of 0.0.0.0
+        if fixed['primary_ipv4'] in ('no', 'default', None):
+            fixed['primary_ipv4'] = '0.0.0.0'
         # priority: default, no, None results in priority of 100
         if fixed['priority'] in ('no', 'default', None):
             fixed['priority'] = 100
+        # priority-level: default, no, None results in priority of 100
+        if fixed['priority_level'] in ('no', 'default', None):
+            fixed['priority-level'] = 100
         # description: default, no, None results in None
         if fixed['description'] in ('no', 'default', None):
             fixed['description'] = None
+        # session_description: default, no, None results in None
+        if fixed['session_description'] in ('no', 'default', None):
+            fixed['session_description'] = None
         # secondary_ip: list should be exactly what is required,
         # just sort it for easier comparison
         if 'secondary_ip' in fixed:
             fixed['secondary_ip'] = sorted(fixed['secondary_ip'])
+        # secondary_ipv4: list should be exactly what is required,
+        # just sort it for easier comparison
+        if 'secondary_ipv4' in fixed:
+            fixed['secondary_ipv4'] = sorted(fixed['secondary_ipv4'])
         # ip_version: default, no, None results in value of 2
         if fixed['ip_version'] in ('no', 'default', None):
             fixed['ip_version'] = 2
+        # ipv4_version: default, no, None results in value of 2
+        if fixed['ipv4_version'] in ('no', 'default', None):
+            fixed['ipv4_version'] = 2
         # timers_advertise: default, no, None results in value of 1
         if fixed['timers_advertise'] in ('no', 'default', None):
             fixed['timers_advertise'] = 1
+        # advertisement_interval: default, no, None results in value of 1
+        if fixed['advertisement_interval'] in ('no', 'default', None):
+            fixed['advertisement_interval'] = 1
         # mac_address_advertisement_interaval:
         #    default, no, None results in value of 30
         if fixed['mac_addr_adv_interval'] in \
@@ -1376,6 +1934,9 @@ class Vrrp(EntityCollection):
         # delay_reload: default, no, None results in value of 0
         if fixed['delay_reload'] in ('no', 'default', None):
             fixed['delay_reload'] = 0
+        # timers_delay_reload: default, no, None results in value of 0
+        if fixed['timers_delay_reload'] in ('no', 'default', None):
+            fixed['timers_delay_reload'] = 0
         # track: list should be exactly what is required,
         # just sort it for easier comparison
         if 'track' in fixed:
