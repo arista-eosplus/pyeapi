@@ -57,7 +57,7 @@ class TestClient(unittest.TestCase):
                 if dut._enablepwd is not None:
                     # If enable password defined for dut, set the
                     # enable password on the dut and clear it on tearDown
-                    dut.config("enable secret %s" % dut._enablepwd)
+                    dut.config("enable password %s" % dut._enablepwd)
 
     def test_unauthorized_user(self):
         error_string = ('Unauthorized. Unable to authenticate user: Bad'
@@ -249,7 +249,7 @@ class TestClient(unittest.TestCase):
 
     def tearDown(self):
         for dut in self.duts:
-            dut.config("no enable secret")
+            dut.config("no enable password")
 
 
 class TestNode(unittest.TestCase):

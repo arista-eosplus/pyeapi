@@ -114,6 +114,15 @@ class TestApiMlag(DutSystemTest):
             self.assertTrue(result)
             self.assertIn('peer-address 1.2.3.4', api.get_block('mlag configuration'))
 
+    def test_set_peer_address_heartbeat_with_value(self):
+        for dut in self.duts:
+            dut.config('default mlag configuration')
+            api = dut.api('mlag')
+            self.assertIn('no peer-address heartbeat', api.get_block('mlag configuration'))
+            result = dut.api('mlag').set_peer_address_heartbeat('1.2.3.4')
+            self.assertTrue(result)
+            self.assertIn('peer-address heartbeat 1.2.3.4', api.get_block('mlag configuration'))
+
     def test_set_peer_address_with_no_value(self):
         for dut in self.duts:
             dut.config(['interface Vlan1234', 'ip address 1.2.3.1/24',

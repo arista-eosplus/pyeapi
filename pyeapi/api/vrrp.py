@@ -157,19 +157,19 @@ import re
 
 from pyeapi.api import EntityCollection
 
-PROPERTIES = ['primary_ip', 'primary_ipv4', 
+PROPERTIES = ['primary_ip', 'primary_ipv4',
               'priority', 'priority_level',
               'description', 'session_description',
               'secondary_ip', 'secondary_ipv4',
               'ip_version', 'ipv4_version',
-              'enable', 'enabled',
-              'timers_advertise', 'advertisement interval',
+              'enable',
+              'timers_advertise', 'advertisement_interval',
               'mac_addr_adv_interval',
               'preempt',
               'preempt_delay_min',
               'preempt_delay_reload',
               'delay_reload', 'timers_delay_reload',
-              'track',
+              'track', 'tracked_object',
               'bfd_ip']
 
 
@@ -218,18 +218,26 @@ class Vrrp(EntityCollection):
 
             # Parse the vrrp configuration for the vrid(s) in the list
             subd.update(self._parse_delay_reload(config, vrid))
+            subd.update(self._parse_timers_delay_reload(config, vrid))
+            subd.update(self._parse_advertisement_interval(config, vrid))
             subd.update(self._parse_description(config, vrid))
+            subd.update(self._parse_session_description(config, vrid))
             subd.update(self._parse_enable(config, vrid))
             subd.update(self._parse_ip_version(config, vrid))
+            subd.update(self._parse_ipv4_version(config, vrid))
             subd.update(self._parse_mac_addr_adv_interval(config, vrid))
             subd.update(self._parse_preempt(config, vrid))
             subd.update(self._parse_preempt_delay_min(config, vrid))
             subd.update(self._parse_preempt_delay_reload(config, vrid))
             subd.update(self._parse_primary_ip(config, vrid))
+            subd.update(self._parse_primary_ipv4(config, vrid))
             subd.update(self._parse_priority(config, vrid))
+            subd.update(self._parse_priority_level(config, vrid))
             subd.update(self._parse_secondary_ip(config, vrid))
+            subd.update(self._parse_secondary_ipv4(config, vrid))
             subd.update(self._parse_timers_advertise(config, vrid))
             subd.update(self._parse_track(config, vrid))
+            subd.update(self._parse_tracked_object(config, vrid))
             subd.update(self._parse_bfd_ip(config, vrid))
 
             result.update({int(vrid): subd})
@@ -260,16 +268,10 @@ class Vrrp(EntityCollection):
         return vrrps
 
     def _parse_enable(self, config, vrid):
-        match = re.search(r'^\s+vrrp %s shutdown$' % vrid, config, re.M)
+        match = re.search(r'^\s+vrrp %s disabled$' % vrid, config, re.M)
         if match:
             return dict(enable=False)
         return dict(enable=True)
-
-    def _parse_enabled(self, config, vrid):
-        match = re.search(r'^\s+vrrp %s disabled$' % vrid, config, re.M)
-        if match:
-            return dict(enabled=False)
-        return dict(enabled=True)
 
     def _parse_primary_ip(self, config, vrid):
         match = re.search(r'^\s+vrrp %s ip (\d+\.\d+\.\d+\.\d+)$' %
@@ -342,7 +344,7 @@ class Vrrp(EntityCollection):
         match = re.search(r'^\s+vrrp %s session description(.*)$' %
                           vrid, config, re.M)
         if match:
-            return dict(description=match.group(1).lstrip())
+            return dict(session_description=match.group(1).lstrip())
         return dict(session_description='')
 
     def _parse_mac_addr_adv_interval(self, config, vrid):
@@ -383,12 +385,6 @@ class Vrrp(EntityCollection):
         value = int(match.group(1)) if match else None
         return dict(ipv4_version=value)
 
-    def _parse_ipv6_version(self, config, vrid):
-        match = re.search(r'^\s+vrrp %s ipv6 version (\d+)$' %
-                          vrid, config, re.M)
-        value = int(match.group(1)) if match else None
-        return dict(ipv6_version=value)
-
     def _parse_delay_reload(self, config, vrid):
         match = re.search(r'^\s+vrrp %s delay reload (\d+)$' %
                           vrid, config, re.M)
@@ -421,6 +417,27 @@ class Vrrp(EntityCollection):
         # Return the list, sorted for easier comparison
         track_list = sorted(value, key=lambda k: (k['name'], k['action']))
         return dict(track=track_list)
+
+    def _parse_tracked_object(self, config, vrid):
+        matches = re.findall(r'^\s+vrrp %s tracked-object (\S+) '
+                             r'(decrement|shutdown)(?:( \d+$|$))' %
+                             vrid, config, re.M)
+        value = []
+        for match in matches:
+            tr_obj = match[0]
+            action = match[1]
+            amount = None if match[2] == '' else int(match[2])
+            entry = {
+                'name': tr_obj,
+                'action': action,
+            }
+            if amount:
+                entry.update({'amount': amount})
+            value.append(entry)
+
+        # Return the list, sorted for easier comparison
+        track_list = sorted(value, key=lambda k: (k['name'], k['action']))
+        return dict(tracked_object=track_list)
 
     def create(self, interface, vrid, **kwargs):
         """Creates a vrrp instance from an interface
@@ -512,49 +529,11 @@ class Vrrp(EntityCollection):
         """
 
         if value is False:
-            cmd = "vrrp %d shutdown" % vrid
-        elif value is True:
-            cmd = "no vrrp %d shutdown" % vrid
-        else:
-            raise ValueError("vrrp property 'enable' must be "
-                             "True or False")
-
-        # Run the command if requested
-        if run:
-            result = self.configure_interface(name, cmd)
-            # And verify the command succeeded
-            if result is False:
-                return self.error
-            return result
-
-        # Otherwise return the formatted command
-        return cmd
-
-    def set_enabled(self, name, vrid, value=False, run=True):
-        """Set the enabled property of the vrrp
-
-        Args:
-            name (string): The interface to configure.
-            vrid (integer): The vrid number for the vrrp to be managed.
-            value (boolean): True to enable the vrrp, False to disable.
-            run (boolean): True to execute the command, False to
-                return a string with the formatted command.
-
-        Returns:
-            If run is True, returns True if the command executed successfully,
-            error if failure
-
-            If run is False, returns the formatted command string which can
-            be passed to the node
-
-        """
-
-        if value is False:
             cmd = "vrrp %d disabled" % vrid
         elif value is True:
             cmd = "no vrrp %d disabled" % vrid
         else:
-            raise ValueError("vrrp property 'enabled' must be "
+            raise ValueError("vrrp property 'enable' must be "
                              "True or False")
 
         # Run the command if requested
@@ -614,8 +593,9 @@ class Vrrp(EntityCollection):
 
         # Otherwise return the formatted command
         return cmd
-    
-    def set_primary_ipv4(self, name, vrid, value=None, disable=False,
+
+    def set_primary_ipv4(self, name, vrid,
+                         value=None, disable=False,
                          default=False, run=True):
         """Set the primary_ipv4 property of the vrrp
 
@@ -727,10 +707,11 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not str(value).isdigit() or value < 1 or value > 254:
-                raise ValueError("vrrp property 'priority' must be "
+                raise ValueError("vrrp property 'priority_level' must be "
                                  "an integer in the range 1-254")
 
-        cmd = self.command_builder('vrrp %d priority' % vrid, value=value,
+        cmd = self.command_builder('vrrp %d priority-level' % vrid,
+                                   value=value,
                                    default=default, disable=disable)
 
         # Run the command if requested
@@ -802,7 +783,8 @@ class Vrrp(EntityCollection):
 
         """
 
-        cmd = self.command_builder('vrrp %d session description' % vrid, value=value,
+        cmd = self.command_builder('vrrp %d session description' % vrid,
+                                   value=value,
                                    default=default, disable=disable)
 
         # Run the command if requested
@@ -926,7 +908,7 @@ class Vrrp(EntityCollection):
 
         cmds = []
 
-        # Get the current set of tracks defined for the vrrp
+        # Get the current set of secondary ips defined for the vrrp
         curr_sec_ips = []
         vrrps = self.get(name)
         if vrrps and vrid in vrrps:
@@ -996,7 +978,7 @@ class Vrrp(EntityCollection):
 
         cmds = []
 
-        # Get the current set of tracks defined for the vrrp
+        # Get the current set of secondary ipv4s defined for the vrrp
         curr_sec_ips = []
         vrrps = self.get(name)
         if vrrps and vrid in vrrps:
@@ -1061,7 +1043,7 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 255:
-                raise ValueError("vrrp property 'timers_advertise' must be"
+                raise ValueError("vrrp property 'timers_advertise' must be "
                                  "in the range 1-255")
 
         cmd = self.command_builder('vrrp %d timers advertise' % vrid,
@@ -1086,7 +1068,7 @@ class Vrrp(EntityCollection):
         Args:
             name (string): The interface to configure.
             vrid (integer): The vrid number for the vrrp to be managed.
-            value (integer): Advertisement interval value 
+            value (integer): Advertisement interval value
                             to assign to the vrrp.
             disable (boolean): Unset interval advertise if True.
             default (boolean): Set interval advertise to default if True.
@@ -1104,7 +1086,8 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 255:
-                raise ValueError("vrrp property 'advertisement_interval' must be"
+                raise ValueError("vrrp property "
+                                 "'advertisement_interval' must be "
                                  "in the range 1-255")
 
         cmd = self.command_builder('vrrp %d advertisement interval' % vrid,
@@ -1233,7 +1216,7 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'preempt_delay_min' must be"
+                raise ValueError("vrrp property 'preempt_delay_min' must be "
                                  "in the range 0-3600 %r" % value)
 
         cmd = self.command_builder('vrrp %d preempt delay minimum'
@@ -1275,8 +1258,8 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'preempt_delay_reload' must be"
-                                 "in the range 0-3600 %r" % value)
+                raise ValueError("vrrp property 'preempt_delay_reload' "
+                                 "must be in the range 0-3600 %r" % value)
 
         cmd = self.command_builder('vrrp %d preempt delay reload'
                                    % vrid, value=value, default=default,
@@ -1317,7 +1300,7 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'delay_reload' must be"
+                raise ValueError("vrrp property 'delay_reload' must be "
                                  "in the range 0-3600 %r" % value)
 
         cmd = self.command_builder('vrrp %d delay reload' % vrid, value=value,
@@ -1358,10 +1341,10 @@ class Vrrp(EntityCollection):
 
         if not default and not disable:
             if not int(value) or int(value) < 1 or int(value) > 3600:
-                raise ValueError("vrrp property 'timers_delay_reload' must be"
+                raise ValueError("vrrp property 'timers_delay_reload' must be "
                                  "in the range 0-3600 %r" % value)
 
-        cmd = self.command_builder('vrrp %d timers delay reload' 
+        cmd = self.command_builder('vrrp %d timers delay reload'
                                    % vrid, value=value,
                                    default=default, disable=disable)
 
@@ -1526,6 +1509,160 @@ class Vrrp(EntityCollection):
         # Otherwise return the formatted command
         return cmds
 
+    def set_tracked_objects(self, name, vrid, tracked_objects, run=True):
+        """Configure the tracked_object property of the vrrp
+
+        Notes:
+            set_tracked_objects takes a list of tracked objects which are
+            to be set on the virtual router. An empty list will remove
+            any existing tracked objects from the vrrp. A list containing
+            tracked_object entries configures the virtual router to track
+            only the
+            objects specified in the list - any existing tracked objects
+            on the vrrp not included in the list will be removed.
+
+        Args:
+            name (string): The interface to configure.
+            vrid (integer): The vrid number for the vrrp to be managed.
+            tracked_objects (list): A list of track definition dictionaries.
+                Each dictionary is a definition of a tracked object in one
+                of the two formats::
+
+                    {'name': tracked_object_name,
+                     'action': 'shutdown'}
+                    {'name': tracked_object_name,
+                     'action': 'decrement',
+                     'amount': amount_of_decrement}
+
+            run (boolean): Set to True to execute the command, False to
+                return a string with the formatted command.
+
+        Returns:
+            If run is True, returns True if the command executed successfully,
+            error if failure.
+
+            If run is False, returns the formatted command string which can
+            be passed to the node
+
+        """
+
+        cmds = []
+
+        # Get the current set of tracked_objects defined for the vrrp
+        curr_tracks = []
+        vrrps = self.get(name)
+        if vrrps and vrid in vrrps:
+            curr_tracks = vrrps[vrid]['tracked_object']
+
+        # Determine which tracked objects are in both lists using
+        # sets of temporary strings built from the track specifications
+        unset = '_none_'
+        tracks_set = []
+        for track in tracked_objects:
+            keys = track.keys()
+
+            # Validate no extraneous keys in track definition
+            err_keys = set(keys).difference(('name', 'action', 'amount'))
+            if err_keys:
+                err_keys = ', '.join(err_keys)
+                raise ValueError("Error found in vrrp property "
+                                 "'tracked_object': "
+                                 "unknown key(s) '%s' found. Valid keys are "
+                                 "name, action, and amount" % err_keys)
+
+            # Validate required keys in track definition
+            if not set(keys).issuperset(('name', 'action')):
+                raise ValueError("Error found in vrrp property "
+                                 "'tracked_object': "
+                                 "track definition must contain 'name' and "
+                                 "'action' keys")
+
+            tr_obj = track['name']
+            action = track['action']
+            amount = track['amount'] if 'amount' in track else unset
+
+            # Validate values in track definition
+            error = False
+            if action not in ('shutdown', 'decrement'):
+                error = True
+            if action == 'shutdown' and amount != unset:
+                error = True
+            if amount != unset and not str(amount).isdigit():
+                error = True
+            if error:
+                raise ValueError("Error found in vrrp property 'track'. "
+                                 "See documentation for format specification.")
+
+            tid = "%s   %s   %s" % (tr_obj, action, amount)
+            tracks_set.append(tid)
+
+        curr_set = []
+        for track in curr_tracks:
+            tr_obj = track['name']
+            action = track['action']
+            amount = track['amount'] if 'amount' in track else unset
+
+            # Validate track definition
+            error = False
+            if action not in ('shutdown', 'decrement'):
+                error = True
+            if action == 'shutdown' and amount != unset:
+                error = True
+            if amount != unset and not str(amount).isdigit():
+                error = True
+            if error:
+                raise ValueError("Error found in vrrp property "
+                                 "'tracked_object'. "
+                                 "See documentation for format specification.")
+
+            tid = "%s   %s   %s" % (tr_obj, action, amount)
+            curr_set.append(tid)
+
+        intersection = list(set(tracks_set) & set(curr_set))
+
+        # Delete the intersection from both lists to determine which
+        # track definitions need to be added or removed from the vrrp
+        remove = list(set(curr_set) - set(intersection))
+        add = list(set(tracks_set) - set(intersection))
+
+        # Build the commands to add and remove the tracked objects
+        for track in remove:
+            match = re.match(r'(\S+)\s+(\S+)\s+(\S+)', track)
+            if match:
+                (tr_obj, action, amount) = \
+                    (match.group(1), match.group(2), match.group(3))
+
+                if amount == unset:
+                    amount = ''
+                t_cmd = ("no vrrp %d tracked-object %s %s %s"
+                         % (vrid, tr_obj, action, amount))
+                cmds.append(t_cmd.rstrip())
+
+        for track in add:
+            match = re.match(r'(\S+)\s+(\S+)\s+(\S+)', track)
+            if match:
+                (tr_obj, action, amount) = \
+                    (match.group(1), match.group(2), match.group(3))
+
+                if amount == unset:
+                    amount = ''
+                t_cmd = ("vrrp %d tracked-object %s %s %s"
+                         % (vrid, tr_obj, action, amount))
+                cmds.append(t_cmd.rstrip())
+
+        cmds = sorted(cmds)
+
+        # Run the command if requested
+        if run:
+            result = self.configure_interface(name, cmds)
+            # And verify the command succeeded
+            if result is False:
+                return self.error
+            return result
+
+        # Otherwise return the formatted command
+        return cmds
+
     def set_bfd_ip(self, name, vrid, value=None, disable=False,
                    default=False, run=True):
         """Set the bfd_ip property of the vrrp
@@ -1580,11 +1717,6 @@ class Vrrp(EntityCollection):
             cmd = self.set_enable(name, vrid, value=enable, run=False)
             commands.append(cmd)
 
-        enabled = vrconf.get('enabled', '__NONE__')
-        if enabled != '__NONE__':
-            cmd = self.set_enabled(name, vrid, value=enabled, run=False)
-            commands.append(cmd)
-
         primary_ip = vrconf.get('primary_ip', '__NONE__')
         if primary_ip != '__NONE__':
             if primary_ip in ('no', None):
@@ -1620,40 +1752,40 @@ class Vrrp(EntityCollection):
                 cmd = self.set_priority(name, vrid, value=priority,
                                         default=True, run=False)
             else:
-                cmd = self.set_priority(name, vrid, 
+                cmd = self.set_priority(name, vrid,
                                         value=priority, run=False)
             commands.append(cmd)
 
         priority_level = vrconf.get('priority_level', '__NONE__')
         if priority_level != '__NONE__':
             if priority_level in ('no', None):
-                cmd = self.set_priority_level(name, vrid, 
+                cmd = self.set_priority_level(name, vrid,
                                               value=priority_level,
                                               disable=True, run=False)
-            elif priority == 'default':
-                cmd = self.set_priority_level(name, vrid, 
+            elif priority_level == 'default':
+                cmd = self.set_priority_level(name, vrid,
                                               value=priority_level,
                                               default=True, run=False)
             else:
-                cmd = self.set_priority_level(name, vrid, 
+                cmd = self.set_priority_level(name, vrid,
                                               value=priority_level, run=False)
             commands.append(cmd)
 
         description = vrconf.get('description', '__NONE__')
         if description != '__NONE__':
             if description in ('no', None):
-                cmd = self.set_description(name, 
-                                           vrid, 
+                cmd = self.set_description(name,
+                                           vrid,
                                            value=description,
                                            disable=True, run=False)
             elif description == 'default':
-                cmd = self.set_description(name, 
-                                           vrid, 
+                cmd = self.set_description(name,
+                                           vrid,
                                            value=description,
                                            default=True, run=False)
             else:
-                cmd = self.set_description(name, 
-                                           vrid, 
+                cmd = self.set_description(name,
+                                           vrid,
                                            value=description,
                                            run=False)
             commands.append(cmd)
@@ -1661,18 +1793,18 @@ class Vrrp(EntityCollection):
         session_description = vrconf.get('session_description', '__NONE__')
         if session_description != '__NONE__':
             if session_description in ('no', None):
-                cmd = self.set_session_description(name, 
-                                                   vrid, 
+                cmd = self.set_session_description(name,
+                                                   vrid,
                                                    value=session_description,
                                                    disable=True, run=False)
             elif session_description == 'default':
-                cmd = self.set_session_description(name, 
-                                                   vrid, 
+                cmd = self.set_session_description(name,
+                                                   vrid,
                                                    value=session_description,
                                                    default=True, run=False)
             else:
-                cmd = self.set_session_description(name, 
-                                                   vrid, 
+                cmd = self.set_session_description(name,
+                                                   vrid,
                                                    value=session_description,
                                                    run=False)
             commands.append(cmd)
@@ -1710,8 +1842,9 @@ class Vrrp(EntityCollection):
                 commands.append(cmd)
 
         secondary_ipv4 = vrconf.get('secondary_ipv4', '__NONE__')
-        if secondary_ip != '__NONE__':
-            cmds = self.set_secondary_ipv4s(name, vrid, secondary_ipv4, run=False)
+        if secondary_ipv4 != '__NONE__':
+            cmds = self.set_secondary_ipv4s(name, vrid,
+                                            secondary_ipv4, run=False)
             for cmd in cmds:
                 commands.append(cmd)
 
@@ -1731,7 +1864,8 @@ class Vrrp(EntityCollection):
                                                 run=False)
             commands.append(cmd)
 
-        advertisement_interval = vrconf.get('advertisement_interval', '__NONE__')
+        advertisement_interval = vrconf.get('advertisement_interval',
+                                            '__NONE__')
         if advertisement_interval != '__NONE__':
             if advertisement_interval in ('no', None):
                 cmd = self.set_advertisement_interval(
@@ -1827,15 +1961,15 @@ class Vrrp(EntityCollection):
         timers_delay_reload = vrconf.get('timers_delay_reload', '__NONE__')
         if timers_delay_reload != '__NONE__':
             if timers_delay_reload in ('no', None):
-                cmd = self.set_timers_delay_reload(name, vrid, 
+                cmd = self.set_timers_delay_reload(name, vrid,
                                                    value=timers_delay_reload,
                                                    disable=True, run=False)
-            elif delay_reload == 'default':
-                cmd = self.set_timers_delay_reload(name, vrid, 
+            elif timers_delay_reload == 'default':
+                cmd = self.set_timers_delay_reload(name, vrid,
                                                    value=timers_delay_reload,
                                                    default=True, run=False)
             else:
-                cmd = self.set_timers_delay_reload(name, vrid, 
+                cmd = self.set_timers_delay_reload(name, vrid,
                                                    value=timers_delay_reload,
                                                    run=False)
             commands.append(cmd)
@@ -1843,6 +1977,12 @@ class Vrrp(EntityCollection):
         track = vrconf.get('track', '__NONE__')
         if track != '__NONE__':
             cmds = self.set_tracks(name, vrid, track, run=False)
+            for cmd in cmds:
+                commands.append(cmd)
+        tracked_object = vrconf.get('tracked_object', '__NONE__')
+        if tracked_object != '__NONE__':
+            cmds = self.set_tracked_objects(name, vrid,
+                                            tracked_object, run=False)
             for cmd in cmds:
                 commands.append(cmd)
 
@@ -1890,7 +2030,7 @@ class Vrrp(EntityCollection):
             fixed['priority'] = 100
         # priority-level: default, no, None results in priority of 100
         if fixed['priority_level'] in ('no', 'default', None):
-            fixed['priority-level'] = 100
+            fixed['priority_level'] = 100
         # description: default, no, None results in None
         if fixed['description'] in ('no', 'default', None):
             fixed['description'] = None
@@ -1942,6 +2082,10 @@ class Vrrp(EntityCollection):
         if 'track' in fixed:
             fixed['track'] = \
                 sorted(fixed['track'], key=lambda k: (k['name'], k['action']))
+        if 'tracked_object' in fixed:
+            fixed['tracked_object'] = \
+                sorted(fixed['tracked_object'],
+                       key=lambda k: (k['name'], k['action']))
         # bfd_ip: default, no, None results in ''
         if fixed['bfd_ip'] in ('no', 'default', None):
             fixed['bfd_ip'] = ''
