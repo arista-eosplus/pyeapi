@@ -76,7 +76,7 @@ class Vrfs(EntityCollection):
                 key/value pairs.
 
         """
-        if self.version_number >= '4.23':
+        if self.version_id >= '4.23':
             config = self.get_block('vrf instance %s' % value)
         else:
             config = self.get_block('vrf definition %s' % value)

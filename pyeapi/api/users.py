@@ -108,8 +108,8 @@ class Users(EntityCollection):
                                        r'(?: role ([^\s]+))?'
                                        r'(?: (nopassword))?'
                                        r'(?: secret (0|5|7|sha512) (.+))?'
-                                       r'.*$\n(?:usernamed (?P=user) '
-                                       r'ssh-key (.+)$)?', re.M)
+                                       r'.*$\n(?:username (?P=user) '
+                                       r'ssh.key (.+)$)?', re.M)
         else:
             self.users_re = re.compile(r'username (?P<user>[^\s]+) '
                                        r'privilege (\d+)'

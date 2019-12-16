@@ -57,7 +57,6 @@ class TestApiUsers(DutSystemTest):
                             'username test sshkey %s' % TEST_SSH_KEY])
 
             result = dut.api('users').get('test')
-            print(result)
             if dut.version_number >= '4.23':
                 values = dict(nopassword=True, privilege='1', secret='',
                               role='', format='')

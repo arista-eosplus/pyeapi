@@ -43,18 +43,17 @@ class TestApiVrfs(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            if dut.version_number >= '4.23':
+            if dut.version_id >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'rd 10:10', 'description blah desc'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah',
                             'rd 10:10', 'description blah desc'])
             response = dut.api('vrfs').get('blah')
-            print(response)
             values = dict(rd='10:10', vrf_name='blah', description='blah desc',
                           ipv4_routing=False, ipv6_routing=False)
             self.assertEqual(values, response)
-            if dut.version_number >= '4.23':
+            if dut.version_id >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
