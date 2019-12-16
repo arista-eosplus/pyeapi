@@ -148,21 +148,6 @@ class Mlag(Entity):
         value = match.group(1) if match else None
         return dict(peer_address=value)
 
-    def _parse_peer_address_heartbeat(self, config):
-        """Scans the config block and parses the peer-address heartbeat value
-
-        Args:
-            config (str): The config block to scan
-
-        Returns:
-            dict: A dict object that is intended to be merged into the
-                resource dict
-        """
-        match = re.search(r'peer-address heartbeat '
-                          r'(\d+\.\d+\.\d+\.\d+)$', config)
-        value = match.group(1) if match else None
-        return dict(peer_address_heartbeat=value)
-
     def _parse_peer_link(self, config):
         """Scans the config block and parses the peer-link value
 
@@ -252,23 +237,6 @@ class Mlag(Entity):
             bool: Returns True if the commands complete successfully
         """
         return self._configure_mlag('peer-address', value, default, disable)
-
-    def set_peer_address_heartbeat(self,
-                                   value=None, default=False, disable=False):
-        """Configures the mlag peer-address heartbeat value
-
-        Args:
-            value (str): The value to configure the peer-address
-            default (bool): Configures the peer-address heartbeat using the
-                default keyword
-            disable (bool): Negates the peer-address heartbeat using the
-                no keyword
-
-        Returns:
-            bool: Returns True if the commands complete successfully
-        """
-        return self._configure_mlag('peer-address heartbeat',
-                                    value, default, disable)
 
     def set_peer_link(self, value=None, default=False, disable=False):
         """Configures the mlag peer-link value

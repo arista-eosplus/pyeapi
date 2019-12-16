@@ -88,7 +88,10 @@ class Ntp(Entity):
         return response
 
     def _parse_source_interface(self, config):
-        match = re.search(r'^ntp source ([^\s]+)', config, re.M)
+        if self.version_id >= '4.23':
+            match = re.search(r'^ntp local-interface ([^\s]+)', config, re.M)
+        else:
+            match = re.search(r'^ntp source ([^\s]+)', config, re.M)
         value = match.group(1) if match else None
         return dict(source_interface=value)
 
@@ -118,7 +121,10 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        cmd = self.command_builder('ntp source', disable=True)
+        if self.version_id >= '4.23':
+            cmd = self.command_builder('ntp local-interface', disable=True)
+        else:
+            cmd = self.command_builder('ntp source', disable=True)
         return self.configure(cmd)
 
     def default(self):
@@ -127,7 +133,10 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        cmd = self.command_builder('ntp source', default=True)
+        if self.version_id >= '4.23':
+            cmd = self.command_builder('ntp local-interface', default=True)
+        else:
+            cmd = self.command_builder('ntp source', default=True)
         return self.configure(cmd)
 
     def set_source_interface(self, name):
@@ -139,7 +148,10 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        cmd = self.command_builder('ntp source', value=name)
+        if self.version_id >= '4.23':
+            cmd = self.command_builder('ntp local-interface', value=name)
+        else:
+            cmd = self.command_builder('ntp source', value=name)
         return self.configure(cmd)
 
     def add_server(self, name, prefer=False):

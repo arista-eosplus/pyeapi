@@ -73,7 +73,7 @@ class TestApiSystem(DutSystemTest):
 
     def test_get_banner_with_EOF(self):
         for dut in self.duts:
-            motd_banner_value = '!!!newlinebaner\n\nSecondLIneEOF!!!newlinebanner\n'
+            motd_banner_value = '!!!newlinebaner\nSecondLIneEOF!!!newlinebanner\n'
             dut.config([dict(cmd="banner motd", input=motd_banner_value)])
             resp = dut.api('system').get()
             self.assertEqual(resp['banner_motd'], motd_banner_value.rstrip())

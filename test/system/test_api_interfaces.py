@@ -226,21 +226,32 @@ class TestResourceInterfaces(DutSystemTest):
             # Verify set_vrf returns False if no vrf by name is configured
             result = dut.api('interfaces').set_vrf(intf, 'test')
             self.assertFalse(result)
-            dut.config('vrf definition test')
+            if dut.version_number >= '4.23':
+                dut.config('vrf instance test')
+            else:
+                dut.config('vrf definition test')
             # Verify interface has vrf applied
             result = dut.api('interfaces').set_vrf(intf, 'test')
             self.assertTrue(result)
             config = dut.run_commands('show running-config interfaces %s' %
                                       intf, 'text')
-            self.assertIn('vrf forwarding test', config[0]['output'])
+            if dut.version_number >= '4.23':
+                self.assertIn('vrf test', config[0]['output'])
+            else:
+                self.assertIn('vrf forwarding test', config[0]['output'])
             # Verify interface has vrf removed
             result = dut.api('interfaces').set_vrf(intf, 'test', disable=True)
             self.assertTrue(result)
             config = dut.run_commands('show running-config interfaces %s' %
                                       intf, 'text')
-            self.assertNotIn('vrf forwarding test', config[0]['output'])
-            # Remove test vrf
-            dut.config('no vrf definition test')
+            if dut.version_number >= '4.23':
+                self.assertIn('vrf test', config[0]['output'])
+                # Remove test vrf
+                dut.config('no vrf instance test')
+            else:
+                self.assertIn('vrf forwarding test', config[0]['output'])
+                # Remove test vrf
+                dut.config('no vrf definition test')
 
 
 class TestPortchannelInterface(DutSystemTest):

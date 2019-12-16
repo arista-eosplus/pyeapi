@@ -43,14 +43,20 @@ class TestApiNtp(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'ntp server 99.99.1.1'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'ntp server 99.99.1.1'])
+            else:
+                dut.config(['ntp source Ethernet1', 'ntp server 99.99.1.1'])
             response = dut.api('ntp').get()
             self.assertIsNotNone(response)
 
     def test_create(self):
         intf = 'Ethernet1'
         for dut in self.duts:
-            dut.config(['no ntp source'])
+            if dut.version_number >= '4.23':
+                dut.config(['no ntp local-interface'])
+            else:
+                dut.config(['no ntp source'])
             response = dut.api('ntp').create(intf)
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -58,7 +64,10 @@ class TestApiNtp(DutSystemTest):
 
     def test_delete(self):
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1'])
+            else:
+                dut.config(['ntp source Ethernet1'])
             response = dut.api('ntp').delete()
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -66,7 +75,10 @@ class TestApiNtp(DutSystemTest):
 
     def test_default(self):
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1'])
+            else:
+                dut.config(['ntp source Ethernet1'])
             response = dut.api('ntp').default()
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -75,7 +87,10 @@ class TestApiNtp(DutSystemTest):
     def test_set_source_interface(self):
         intf = 'Ethernet1'
         for dut in self.duts:
-            dut.config(['ntp source Loopback0'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Loopback0'])
+            else:
+                dut.config(['ntp source Loopback0'])
             response = dut.api('ntp').set_source_interface(intf)
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -84,7 +99,10 @@ class TestApiNtp(DutSystemTest):
     def test_add_server_single(self):
         server = '10.10.10.35'
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp'])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp'])
             response = dut.api('ntp').add_server(server)
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -95,7 +113,10 @@ class TestApiNtp(DutSystemTest):
     def test_add_server_multiple(self):
         servers = ['10.10.10.37', '10.10.10.36', '10.10.10.34']
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp'])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp'])
             for server in servers:
                 response = dut.api('ntp').add_server(server)
             self.assertTrue(response)
@@ -107,7 +128,10 @@ class TestApiNtp(DutSystemTest):
     def test_add_server_prefer(self):
         server = '10.10.10.35'
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp'])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp'])
             response = dut.api('ntp').add_server(server, prefer=False)
             self.assertTrue(response)
             response = dut.api('ntp').get()
@@ -120,7 +144,10 @@ class TestApiNtp(DutSystemTest):
 
     def test_add_server_invalid(self):
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp'])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp'])
             with self.assertRaises(ValueError):
                 dut.api('ntp').add_server(None)
                 dut.api('ntp').add_server('')
@@ -130,8 +157,12 @@ class TestApiNtp(DutSystemTest):
         server = '10.10.10.35'
         servers = ['10.10.10.37', '10.10.10.36', '10.10.10.34']
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp',
-                        'ntp server %s' % server])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp',
+                            'ntp server %s' % server])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp',
+                            'ntp server %s' % server])
             for addserver in servers:
                 dut.config(['ntp server %s' % addserver])
             response = dut.api('ntp').remove_server(server)
@@ -144,7 +175,10 @@ class TestApiNtp(DutSystemTest):
     def test_remove_all_servers(self):
         servers = ['10.10.10.37', '10.10.10.36', '10.10.10.34']
         for dut in self.duts:
-            dut.config(['ntp source Ethernet1', 'no ntp'])
+            if dut.version_number >= '4.23':
+                dut.config(['ntp local-interface Ethernet1', 'no ntp'])
+            else:
+                dut.config(['ntp source Ethernet1', 'no ntp'])
             for addserver in servers:
                 dut.config(['ntp server %s' % addserver])
             response = dut.api('ntp').remove_all_servers()

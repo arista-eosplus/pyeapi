@@ -470,6 +470,7 @@ class Node(object):
         self._startup_config = None
         self._version = None
         self._version_number = None
+        self._version_id = None
         self._model = None
 
         self._enablepwd = kwargs.get('enablepwd')
@@ -515,6 +516,14 @@ class Node(object):
             return self._version_number
         self._get_version_properties()
         return self._version_number
+
+    @property
+    def version_id(self):
+        if self._version_id:
+            return self._version_id
+        output = self.enable('show version')
+        self._version_id = output[0]['result']['version'].split()[0][:-1]
+        return self._version_id
 
     @property
     def model(self):

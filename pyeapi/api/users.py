@@ -82,12 +82,6 @@ class Users(EntityCollection):
     following configuration line that might contain the users sshkey.
     """
 
-    users_re = re.compile(r'username (?P<user>[^\s]+) privilege (\d+)'
-                          r'(?: role ([^\s]+))?'
-                          r'(?: (nopassword))?'
-                          r'(?: secret (0|5|7|sha512) (.+))?'
-                          r'.*$\n(?:username (?P=user) sshkey (.+)$)?', re.M)
-
     def get(self, name):
         """Returns the local user configuration as a resource dict
 
@@ -108,6 +102,23 @@ class Users(EntityCollection):
         Returns:
             dict: A dict of usernames with a nested resource dict object
         """
+        if self.version_id >= '4.23':
+            self.users_re = re.compile(r'username (?P<user>[^\s]+) '
+                                       r'privilege (\d+)'
+                                       r'(?: role ([^\s]+))?'
+                                       r'(?: (nopassword))?'
+                                       r'(?: secret (0|5|7|sha512) (.+))?'
+                                       r'.*$\n(?:usernamed (?P=user) '
+                                       r'ssh-key (.+)$)?', re.M)
+        else:
+            self.users_re = re.compile(r'username (?P<user>[^\s]+) '
+                                       r'privilege (\d+)'
+                                       r'(?: role ([^\s]+))?'
+                                       r'(?: (nopassword))?'
+                                       r'(?: secret (0|5|7|sha512) (.+))?'
+                                       r'.*$\n(?:username (?P=user) '
+                                       r'sshkey (.+)$)?', re.M)
+
         users = self.users_re.findall(self.config, re.M)
         resources = dict()
         for user in users:
@@ -131,7 +142,10 @@ class Users(EntityCollection):
         resource['nopassword'] = nopass == 'nopassword'
         resource['format'] = fmt
         resource['secret'] = secret
-        resource['sshkey'] = sshkey
+        if self.version_id >= '4.23':
+            resource['ssh-key'] = sshkey
+        else:
+            resource['sshkey'] = sshkey
         return {username: resource}
 
     def create(self, name, nopassword=None, secret=None, encryption=None):
@@ -287,8 +301,14 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        cmd = self.command_builder('username %s sshkey' % name, value=value,
-                                   default=default, disable=disable)
+        if self.version_id >= '4.23':
+            cmd = self.command_builder('username %s ssh-key' % name,
+                                       value=value,
+                                       default=default, disable=disable)
+        else:
+            cmd = self.command_builder('username %s sshkey' % name,
+                                       value=value,
+                                       default=default, disable=disable)
         return self.configure(cmd)
 
 

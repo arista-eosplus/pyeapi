@@ -245,29 +245,22 @@ interface Port-Channel10
    no switchport tap default group
    no switchport tool group
    no switchport tool dot1q remove outer
-   vrrp 10 priority-level 150
    vrrp 10 priority 150
    vrrp 10 timers advertise 1
-   vrrp 10 advertisement interval 1
    vrrp 10 mac-address advertisement-interval 30
    vrrp 10 preempt
    vrrp 10 preempt delay minimum 0
    vrrp 10 preempt delay reload 0
-   vrrp 10 timers delay reload 0
    vrrp 10 delay reload 0
    no vrrp 10 authentication
-   vrrp 10 ipv4 10.10.5.10
-   vrrp 10 ipv4 10.10.5.20 secondary
-   vrrp 10 ip 10.10.5.11
-   vrrp 10 ip 10.10.5.21 secondary
+   vrrp 10 ip 10.10.5.10
+   vrrp 10 ip 10.10.5.20 secondary
    vrrp 10 ipv6 ::
    vrrp 10 description vrrp 10 on Port-Channel10
-   vrrp 10 session description vrrp 10 on Port-Channel10
-   no vrrp 10 disabled
+   no vrrp 10 shutdown
    no vrrp 10 bfd ip
    no vrrp 10 bfd ipv6
    vrrp 10 ip version 2
-   vrrp 10 ipv4 version 2
 !
 interface Ethernet1
    no description
@@ -403,27 +396,21 @@ interface Ethernet1
    no switchport tap default group
    no switchport tool group
    no switchport tool dot1q remove outer
-   vrrp 10 priority 100
-   vrrp 10 priority-level 175
+   vrrp 10 priority 175
    vrrp 10 timers advertise 1
-   vrrp 10 advertisement interval 1
    vrrp 10 mac-address advertisement-interval 30
    vrrp 10 preempt
    vrrp 10 preempt delay minimum 0
    vrrp 10 preempt delay reload 0
-   vrrp 10 timers delay reload 0
    vrrp 10 delay reload 0
    no vrrp 10 authentication
-   vrrp 10 ip 10.10.6.11
-   vrrp 10 ipv4 10.10.6.10
+   vrrp 10 ip 10.10.6.10
    vrrp 10 ipv6 ::
-   vrrp 10 session description vrrp 10 on Ethernet1
    vrrp 10 description vrrp 10 on Ethernet1
-   no vrrp 10 disable
+   no vrrp 10 shutdown
    no vrrp 10 bfd ip
    no vrrp 10 bfd ipv6
    vrrp 10 ip version 2
-   vrrp 10 ipv4 version 2
 !
 interface Vlan50
    no description
@@ -485,93 +472,62 @@ interface Vlan50
    no ip pim bsr-border
    no ip virtual address
    vrrp 10 priority 200
-   vrrp 10 priority-level 200
-   vrrp 10 advertisement interval 3
-   vrrp 10 timers advertise 1
+   vrrp 10 timers advertise 3
    vrrp 10 mac-address advertisement-interval 30
    vrrp 10 preempt
    vrrp 10 preempt delay minimum 0
    vrrp 10 preempt delay reload 0
    vrrp 10 delay reload 0
-   vrrp 10 timers delay reload 0
    no vrrp 10 authentication
    vrrp 10 ip 10.10.4.10
    vrrp 10 ip 10.10.4.21 secondary
    vrrp 10 ip 10.10.4.22 secondary
    vrrp 10 ip 10.10.4.23 secondary
    vrrp 10 ip 10.10.4.24 secondary
-   vrrp 10 ipv4 10.10.4.11
-   vrrp 10 ipv4 10.10.4.21 secondary
-   vrrp 10 ipv4 10.10.4.22 secondary
-   vrrp 10 ipv4 10.10.4.23 secondary
-   vrrp 10 ipv4 10.10.4.24 secondary
    vrrp 10 ipv6 ::
-   no vrrp 10 session description
    no vrrp 10 description
-   no vrrp 10 disabled
+   no vrrp 10 shutdown
    vrrp 10 track Ethernet1 decrement 10
    vrrp 10 track Ethernet1 shutdown
    vrrp 10 track Ethernet2 decrement 50
    vrrp 10 track Ethernet2 shutdown
    vrrp 10 track Ethernet11 decrement 75
    vrrp 10 track Ethernet11 shutdown
-   vrrp 10 tracked-object Ethernet1 decrement 10
-   vrrp 10 tracked-object Ethernet1 shutdown
-   vrrp 10 tracked-object Ethernet2 decrement 50
-   vrrp 10 tracked-object Ethernet2 shutdown
-   vrrp 10 tracked-object Ethernet11 decrement 75
-   vrrp 10 tracked-object Ethernet11 shutdown
    no vrrp 10 bfd ip
    no vrrp 10 bfd ipv6
    vrrp 10 ip version 2
-   vrrp 10 ipv4 version 2
    vrrp 20 priority 100
-   vrrp 20 priority-level 100
-   vrrp 20 advertisement interval 5
-   vrrp 20 timers advertise 1
+   vrrp 20 timers advertise 5
    vrrp 20 mac-address advertisement-interval 30
    no vrrp 20 preempt
    vrrp 20 preempt delay minimum 0
    vrrp 20 preempt delay reload 0
    vrrp 20 delay reload 0
-   vrrp 20 timers delay reload 0
    vrrp 20 authentication text 12345
    vrrp 20 ip 10.10.4.20
-   vrrp 20 ipv4 10.10.4.20
    vrrp 20 ipv6 ::
-   no vrrp 20 session description
    no vrrp 20 description
-   vrrp 20 disabled
+   vrrp 20 shutdown
    vrrp 20 track Ethernet1 shutdown
    vrrp 20 track Ethernet2 decrement 1
    vrrp 20 track Ethernet2 shutdown
-   vrrp 20 tracked-object Ethernet1 shutdown
-   vrrp 20 tracked-object Ethernet2 decrement 1
-   vrrp 20 tracked-object Ethernet2 shutdown
    no vrrp 20 bfd ip
    no vrrp 20 bfd ipv6
    vrrp 20 ip version 2
-   vrrp 20 ipv4 version 2
-   vrrp 30 priority 100
-   vrrp 30 priority-level 50
-   vrrp 30 advertisement interval 1
+   vrrp 30 priority 50
    vrrp 30 timers advertise 1
    vrrp 30 mac-address advertisement-interval 30
    vrrp 30 preempt
    vrrp 30 preempt delay minimum 0
    vrrp 30 preempt delay reload 0
    vrrp 30 delay reload 0
-   vrrp 30 timers delay reload 0
    vrrp 30 authentication ietf-md5 key-string 7 bu1yTgzm0RDgraNS0MNkaA==
    vrrp 30 ip 10.10.4.30
-   vrrp 30 ipv4 10.10.4.30
    vrrp 30 ipv6 ::
-   no vrrp 30 session description
    no vrrp 30 description
-   no vrrp 30 disable
+   no vrrp 30 shutdown
    vrrp 30 bfd ip 10.10.4.33
    no vrrp 30 bfd ipv6
    vrrp 30 ip version 2
-   vrrp 30 ipv4 version 2
 !
 !

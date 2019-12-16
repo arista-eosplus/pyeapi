@@ -565,10 +565,16 @@ class EthernetInterface(BaseInterface):
                True if the operation succeeds otherwise False is returned
         """
         commands = ['interface %s' % name]
-        commands.append(self.command_builder('vrf forwarding', vrf,
-                                             default=default, disable=disable))
-        return self.configure(commands)
 
+        if self.version_id >= '4.23':
+            commands.append(self.command_builder('vrf', vrf,
+                                                 default=default,
+                                                 disable=disable))
+        else:
+            commands.append(self.command_builder('vrf forwarding', vrf,
+                                                 default=default,
+                                                 disable=disable))
+        return self.configure(commands)
 
 class PortchannelInterface(BaseInterface):
 

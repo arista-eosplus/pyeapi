@@ -29,6 +29,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
 import os
 import unittest
 
@@ -57,7 +58,10 @@ class TestClient(unittest.TestCase):
                 if dut._enablepwd is not None:
                     # If enable password defined for dut, set the
                     # enable password on the dut and clear it on tearDown
-                    dut.config("enable password %s" % dut._enablepwd)
+                    if dut.version_number >= '4.23':
+                        dut.config("enable password %s" % dut._enablepwd)
+                    else:
+                        dut.config("enable secret %s" % dut._enablepwd)
 
     def test_unauthorized_user(self):
         error_string = ('Unauthorized. Unable to authenticate user: Bad'
@@ -183,7 +187,7 @@ class TestClient(unittest.TestCase):
             config = api.config
             running = api.get_block('interface Ethernet1')
             txtstr = api.get_block('interface Ethernet1', config=config)
-            self.assertEqual(running, txtstr)
+            self.assertEqual(running, txtstr, msg='{} eee {}'.format(txtstr, 'DEBUG:'))
 
     def test_get_block_none(self):
         # Verify get_block using a config string where match fails returns None
@@ -249,7 +253,10 @@ class TestClient(unittest.TestCase):
 
     def tearDown(self):
         for dut in self.duts:
-            dut.config("no enable password")
+            if dut.version_number >= '4.23':
+                dut.config("no enable password")
+            else:
+                dut.config("no enable secret")
 
 
 class TestNode(unittest.TestCase):
@@ -288,10 +295,6 @@ class TestNode(unittest.TestCase):
         cases.append(('reload', rfmt
                       % (1004, 'incompatible command',
                          'Command not permitted via API access..*')))
-        # Send a continuous command that requires a break
-        cases.append(('watch 10 show int e1 count rates', rfmt
-                      % (1000, 'could not run command',
-                         'init error.*')))
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',
