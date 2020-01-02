@@ -233,18 +233,18 @@ class TestClient(unittest.TestCase):
         conf = get_fixture('eapi.conf')
         pyeapi.client.load_config(filename=conf)
         cfg = pyeapi.client.config.get_connection('test1')
-        self.assertEqual(cfg['host'], '10.16.129.149')
-        self.assertEqual(cfg['username'], 'arista')
-        self.assertEqual(cfg['password'], 'arista')
+        self.assertEqual(cfg['host'], '192.168.1.16')
+        self.assertEqual(cfg['username'], 'eapi')
+        self.assertEqual(cfg['password'], 'password')
         self.assertEqual(cfg['enablepwd'], 'enablepwd')
 
     def test_load_config_for_connection_with_env(self):
         os.environ['EAPI_CONF'] = get_fixture('eapi.conf')
         pyeapi.client.load_config(random_string())
         cfg = pyeapi.client.config.get_connection('test1')
-        self.assertEqual(cfg['host'], '10.16.129.149')
-        self.assertEqual(cfg['username'], 'arista')
-        self.assertEqual(cfg['password'], 'arista')
+        self.assertEqual(cfg['host'], '192.168.1.16')
+        self.assertEqual(cfg['username'], 'eapi')
+        self.assertEqual(cfg['password'], 'password')
         self.assertEqual(cfg['enablepwd'], 'enablepwd')
 
     def test_load_config(self):
@@ -418,11 +418,11 @@ class TestClient(unittest.TestCase):
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
             pyeapi.client.load_config(filename=conf)
-            node = pyeapi.client.connect(host='10.16.129.149', username='arista',
-                                         password='arista', port=None,
+            node = pyeapi.client.connect(host='192.168.1.16', username='eapi',
+                                         password='password', port=None,
                                          timeout=60, return_node=True)
-            kwargs = dict(host='10.16.129.149', username='arista',
-                          password='arista', port=None, key_file=None,
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None, key_file=None,
                           cert_file=None, ca_file=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
             self.assertIsNone(node._enablepwd)
@@ -432,12 +432,12 @@ class TestClient(unittest.TestCase):
         with patch.dict(pyeapi.client.TRANSPORTS, {'https': transport}):
             conf = get_fixture('eapi.conf')
             pyeapi.client.load_config(filename=conf)
-            node = pyeapi.client.connect(host='10.16.129.149', username='arista',
-                                         password='arista', port=None,
+            node = pyeapi.client.connect(host='192.168.1.16', username='eapi',
+                                         password='password', port=None,
                                          timeout=60, enablepwd='enablepwd',
                                          return_node=True)
-            kwargs = dict(host='10.16.129.149', username='arista',
-                          password='arista', port=None, key_file=None,
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None, key_file=None,
                           cert_file=None, ca_file=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
             self.assertEqual(node._enablepwd, 'enablepwd')
@@ -448,8 +448,8 @@ class TestClient(unittest.TestCase):
             conf = get_fixture('eapi.conf')
             pyeapi.client.load_config(filename=conf)
             node = pyeapi.client.connect_to('test1')
-            kwargs = dict(host='10.16.129.149', username='arista',
-                          password='arista', port=None, key_file=None,
+            kwargs = dict(host='192.168.1.16', username='eapi',
+                          password='password', port=None, key_file=None,
                           cert_file=None, ca_file=None, timeout=60)
             transport.assert_called_once_with(**kwargs)
             self.assertEqual(node._enablepwd, 'enablepwd')

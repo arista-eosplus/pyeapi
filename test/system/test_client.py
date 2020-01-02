@@ -187,7 +187,7 @@ class TestClient(unittest.TestCase):
             config = api.config
             running = api.get_block('interface Ethernet1')
             txtstr = api.get_block('interface Ethernet1', config=config)
-            self.assertEqual(running, txtstr, msg='{} eee {}'.format(txtstr, 'DEBUG:'))
+            self.assertEqual(running, txtstr)
 
     def test_get_block_none(self):
         # Verify get_block using a config string where match fails returns None
