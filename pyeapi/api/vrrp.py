@@ -251,7 +251,7 @@ class Vrrp(EntityCollection):
         return vrrps
 
     def _parse_enable(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s disabled$' % vrid, config, re.M)
         else:
             match = re.search(r'^\s+vrrp %s shutdown$' % vrid, config, re.M)
@@ -260,7 +260,7 @@ class Vrrp(EntityCollection):
         return dict(enable=True)
 
     def _parse_primary_ip(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s ipv4 (\d+\.\d+\.\d+\.\d+)$' %
                               vrid, config, re.M)
         else:
@@ -270,7 +270,7 @@ class Vrrp(EntityCollection):
         return dict(primary_ip=value)
 
     def _parse_priority(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s priority-level (\d+)$' %
                               vrid, config, re.M)
         else:
@@ -280,7 +280,7 @@ class Vrrp(EntityCollection):
         return dict(priority=value)
 
     def _parse_timers_advertise(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s advertisement interval (\d+)$' %
                               vrid, config, re.M)
         else:
@@ -296,7 +296,7 @@ class Vrrp(EntityCollection):
         return dict(preempt=False)
 
     def _parse_secondary_ip(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             matches = re.findall(r'^\s+vrrp %s ipv4 (\d+\.\d+\.\d+\.\d+) '
                                  r'secondary$' % vrid, config, re.M)
         else:
@@ -306,7 +306,7 @@ class Vrrp(EntityCollection):
         return dict(secondary_ip=value)
 
     def _parse_description(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s session description(.*)$' %
                               vrid, config, re.M)
         else:
@@ -343,7 +343,7 @@ class Vrrp(EntityCollection):
         return dict(bfd_ip='')
 
     def _parse_ip_version(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s ipv4 version (\d+)$' %
                               vrid, config, re.M)
         else:
@@ -353,7 +353,7 @@ class Vrrp(EntityCollection):
         return dict(ip_version=value)
 
     def _parse_delay_reload(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             match = re.search(r'^\s+vrrp %s timers delay reload (\d+)$' %
                               vrid, config, re.M)
         else:
@@ -363,7 +363,7 @@ class Vrrp(EntityCollection):
         return dict(delay_reload=value)
 
     def _parse_track(self, config, vrid):
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             matches = re.findall(r'^\s+vrrp %s tracked-object (\S+) '
                                  r'(decrement|shutdown)(?:( \d+$|$))' %
                                  vrid, config, re.M)
@@ -478,12 +478,12 @@ class Vrrp(EntityCollection):
         """
 
         if value is False:
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmd = "vrrp %d disabled" % vrid
             else:
                 cmd = "vrrp %d shutdown" % vrid
         elif value is True:
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmd = "no vrrp %d disabled" % vrid
             else:
                 cmd = "no vrrp %d shutdown" % vrid
@@ -527,19 +527,19 @@ class Vrrp(EntityCollection):
         if default is True:
             vrrps = self.get(name)
             primary_ip = vrrps[vrid]['primary_ip']
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmd = "default vrrp %d ipv4 %s" % (vrid, primary_ip)
             else:
                 cmd = "default vrrp %d ip %s" % (vrid, primary_ip)
         elif disable is True or value is None:
             vrrps = self.get(name)
             primary_ip = vrrps[vrid]['primary_ip']
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmd = "no vrrp %d ipv4 %s" % (vrid, primary_ip)
             else:
                 cmd = "no vrrp %d ip %s" % (vrid, primary_ip)
         elif re.match(r'^\d+\.\d+\.\d+\.\d+$', str(value)):
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmd = "vrrp %d ipv4 %s" % (vrid, value)
             else:
                 cmd = "vrrp %d ip %s" % (vrid, value)
@@ -584,7 +584,7 @@ class Vrrp(EntityCollection):
             if not str(value).isdigit() or value < 1 or value > 254:
                 raise ValueError("vrrp property 'priority' must be "
                                  "an integer in the range 1-254")
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             cmd = self.command_builder('vrrp %d priority-level' %
                                        vrid, value=value,
                                        default=default, disable=disable)
@@ -625,7 +625,7 @@ class Vrrp(EntityCollection):
             be passed to the node
 
         """
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             cmd = self.command_builder('vrrp %d session description' %
                                        vrid, value=value,
                                        default=default, disable=disable)
@@ -670,7 +670,7 @@ class Vrrp(EntityCollection):
         if not default and not disable:
             if value not in (2, 3):
                 raise ValueError("vrrp property 'ip_version' must be 2 or 3")
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             cmd = self.command_builder('vrrp %d ipv4 version' %
                                        vrid, value=value,
                                        default=default, disable=disable)
@@ -742,13 +742,13 @@ class Vrrp(EntityCollection):
 
         # Build the commands to add and remove the secondary ip addresses
         for sec_ip in remove:
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmds.append("no vrrp %d ipv4 %s secondary" % (vrid, sec_ip))
             else:
                 cmds.append("no vrrp %d ip %s secondary" % (vrid, sec_ip))
 
         for sec_ip in add:
-            if self.version_id >= '4.21.3':
+            if self.version_number >= '4.21.3':
                 cmds.append("vrrp %d ipv4 %s secondary" % (vrid, sec_ip))
             else:
                 cmds.append("vrrp %d ip %s secondary" % (vrid, sec_ip))
@@ -792,7 +792,7 @@ class Vrrp(EntityCollection):
             if not int(value) or int(value) < 1 or int(value) > 255:
                 raise ValueError("vrrp property 'timers_advertise' must be"
                                  "in the range 1-255")
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             cmd = self.command_builder('vrrp %d advertisement interval' %
                                        vrid,
                                        value=value, default=default,
@@ -1011,7 +1011,7 @@ class Vrrp(EntityCollection):
             if not int(value) or int(value) < 1 or int(value) > 3600:
                 raise ValueError("vrrp property 'delay_reload' must be"
                                  "in the range 0-3600 %r" % value)
-        if self.version_id >= '4.21.3':
+        if self.version_number >= '4.21.3':
             cmd = self.command_builder('vrrp %d timers delay reload' %
                                        vrid, value=value,
                                        default=default, disable=disable)
@@ -1152,7 +1152,7 @@ class Vrrp(EntityCollection):
 
                 if amount == unset:
                     amount = ''
-                if self.version_id >= '4.21.3':
+                if self.version_number >= '4.21.3':
                     t_cmd = ("no vrrp %d tracked-object %s %s %s"
                              % (vrid, tr_obj, action, amount))
                 else:
@@ -1168,7 +1168,7 @@ class Vrrp(EntityCollection):
 
                 if amount == unset:
                     amount = ''
-                if self.version_id >= '4.21.3':
+                if self.version_number >= '4.21.3':
                     t_cmd = ("vrrp %d tracked-object %s %s %s"
                              % (vrid, tr_obj, action, amount))
                 else:

@@ -102,7 +102,7 @@ class Users(EntityCollection):
         Returns:
             dict: A dict of usernames with a nested resource dict object
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             self.users_re = re.compile(r'username (?P<user>[^\s]+) '
                                        r'privilege (\d+)'
                                        r'(?: role ([^\s]+))?'
@@ -142,7 +142,7 @@ class Users(EntityCollection):
         resource['nopassword'] = nopass == 'nopassword'
         resource['format'] = fmt
         resource['secret'] = secret
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             resource['ssh-key'] = sshkey
         else:
             resource['sshkey'] = sshkey
@@ -301,7 +301,7 @@ class Users(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             cmd = self.command_builder('username %s ssh-key' % name,
                                        value=value,
                                        default=default, disable=disable)

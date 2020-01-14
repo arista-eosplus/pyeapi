@@ -73,7 +73,7 @@ class TestApiVrrp(DutSystemTest):
         vrid = 98
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'vrrp %d disabled' % vrid,
                             'exit'])
@@ -90,7 +90,7 @@ class TestApiVrrp(DutSystemTest):
         vrid2 = 198
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'vrrp %d disabled' % vrid,
                             'exit',
@@ -136,7 +136,7 @@ class TestApiVrrp(DutSystemTest):
         vrid = 101
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -154,7 +154,7 @@ class TestApiVrrp(DutSystemTest):
         vrid = 102
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -224,7 +224,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -253,7 +253,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -280,7 +280,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -307,7 +307,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -332,7 +332,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -360,7 +360,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -387,7 +387,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -414,7 +414,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -442,7 +442,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -469,7 +469,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -496,7 +496,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -523,7 +523,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -562,7 +562,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,
@@ -589,7 +589,7 @@ class TestApiVrrp(DutSystemTest):
         ]
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['interface %s' % interface,
                             'no vrrp %d' % vrid,
                             'vrrp %d disabled' % vrid,

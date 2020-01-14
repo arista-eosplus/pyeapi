@@ -43,7 +43,7 @@ class TestApiVrfs(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'rd 10:10', 'description blah desc'])
             else:
@@ -53,14 +53,14 @@ class TestApiVrfs(DutSystemTest):
             values = dict(rd='10:10', vrf_name='blah', description='blah desc',
                           ipv4_routing=False, ipv6_routing=False)
             self.assertEqual(values, response)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_getall(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'no vrf instance second', 'vrf instance second'])
             else:
@@ -71,14 +71,14 @@ class TestApiVrfs(DutSystemTest):
             self.assertEqual(len(response), 2)
             for vrf_name in ['blah', 'second']:
                 self.assertIn(vrf_name, response, 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'no vrf instance second'])
             else:
                 dut.config(['no vrf definition blah', 'no vrf definition second'])
 
     def test_create_and_return_true(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah'])
@@ -86,14 +86,14 @@ class TestApiVrfs(DutSystemTest):
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.run_commands('show vrf', encoding='text')
             self.assertIn('blah', config[0]['output'], 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_create_with_valid_rd(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah'])
@@ -101,14 +101,14 @@ class TestApiVrfs(DutSystemTest):
             self.assertTrue(result, 'dut=%s' % dut)
             command = 'show running-config section vrf'
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertIn('vrf instance blah', config[0]['output'],
                               'dut=%s' % dut)
             else:
                 self.assertIn('vrf definition blah', config[0]['output'],
                               'dut=%s' % dut)
             self.assertIn('rd 10:10', config[0]['output'], 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
@@ -120,7 +120,7 @@ class TestApiVrfs(DutSystemTest):
 
     def test_create_with_invalid_rd(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah'])
@@ -128,7 +128,7 @@ class TestApiVrfs(DutSystemTest):
             self.assertFalse(result, 'dut=%s' % dut)
             command = 'show running-config section vrf'
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertIn('vrf instance blah', config[0]['output'],
                               'dut=%s' % dut)
             else:
@@ -136,14 +136,14 @@ class TestApiVrfs(DutSystemTest):
                               'dut=%s' % dut)
             self.assertNotIn('rd', config[0]['output'],
                              'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_delete_and_return_true(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config('vrf instance blah')
             else:
                 dut.config('vrf definition blah')
@@ -151,7 +151,7 @@ class TestApiVrfs(DutSystemTest):
             self.assertTrue(result, 'dut=%s' % dut)
             command = 'show running-config section vrf'
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertNotIn('vrf instance blah', config[0]['output'],
                                  'dut=%s' % dut)
             else:
@@ -165,7 +165,7 @@ class TestApiVrfs(DutSystemTest):
 
     def test_default(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'description test desc'])
             else:
@@ -175,7 +175,7 @@ class TestApiVrfs(DutSystemTest):
             self.assertTrue(result, 'dut=%s' % dut)
             command = 'show running-config section vrf'
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertNotIn('vrf instance blah', config[0]['output'],
                                  'dut=%s' % dut)
                 dut.config(['no vrf instance blah'])
@@ -186,7 +186,7 @@ class TestApiVrfs(DutSystemTest):
 
     def test_set_rd(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah'])
@@ -196,7 +196,7 @@ class TestApiVrfs(DutSystemTest):
             config = dut.run_commands(command, encoding='text')
             self.assertIn('blah', config[0]['output'], 'dut=%s' % dut)
             self.assertIn('10:10', config[0]['output'], 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
@@ -204,7 +204,7 @@ class TestApiVrfs(DutSystemTest):
     def test_set_description(self):
         for dut in self.duts:
             description = random_string()
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah', 'vrf definition blah'])
@@ -219,14 +219,14 @@ class TestApiVrfs(DutSystemTest):
             config = dut.run_commands(command, encoding='text')
             self.assertNotIn('description %s' % description,
                              config[0]['output'], 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_set_ipv4_routing(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'rd 10:10', 'description test'])
             else:
@@ -243,14 +243,14 @@ class TestApiVrfs(DutSystemTest):
             config = dut.run_commands(command, encoding='text')
             self.assertIn('no ip routing vrf blah', config[0]['output'],
                           'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_set_ipv6_routing(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'rd 10:10', 'description test'])
             else:
@@ -267,14 +267,14 @@ class TestApiVrfs(DutSystemTest):
             config = dut.run_commands(command, encoding='text')
             self.assertIn('no ipv6 unicast-routing vrf blah',
                           config[0]['output'], 'dut=%s' % dut)
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah'])
             else:
                 dut.config(['no vrf definition blah'])
 
     def test_set_interface(self):
         for dut in self.duts:
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 dut.config(['no vrf instance blah', 'vrf instance blah',
                             'rd 10:10', 'default interface Ethernet1',
                             'interface Ethernet1', 'no switchport'])
@@ -286,7 +286,7 @@ class TestApiVrfs(DutSystemTest):
             self.assertTrue(result, 'dut=%s' % dut)
             command = 'show running-config interfaces Ethernet1'
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertIn('vrf blah', config[0]['output'],
                               'dut=%s' % dut)
             else:
@@ -296,7 +296,7 @@ class TestApiVrfs(DutSystemTest):
                                                    disable=True)
             self.assertTrue(result, 'dut=%s' % dut)
             config = dut.run_commands(command, encoding='text')
-            if dut.version_id >= '4.23':
+            if dut.version_number >= '4.23':
                 self.assertNotIn('vrf blah', config[0]['output'],
                                  'dut=%s' % dut)
                 dut.config(['no vrf instance blah',

@@ -76,7 +76,7 @@ class Vrfs(EntityCollection):
                 key/value pairs.
 
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             config = self.get_block('vrf instance %s' % value)
         else:
             config = self.get_block('vrf definition %s' % value)
@@ -139,7 +139,7 @@ class Vrfs(EntityCollection):
             A dict object of VRF attributes
 
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             vrfs_re = re.compile(r'(?<=^vrf instance\s)(\w+)', re.M)
         else:
             vrfs_re = re.compile(r'(?<=^vrf definition\s)(\w+)', re.M)
@@ -166,7 +166,7 @@ class Vrfs(EntityCollection):
         Returns:
             True if create was successful otherwise False
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             commands = ['vrf instance %s' % vrf_name]
         else:
             commands = ['vrf definition %s' % vrf_name]
@@ -183,7 +183,7 @@ class Vrfs(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             command = 'no vrf instance %s' % vrf_name
         else:
             command = 'no vrf definition %s' % vrf_name
@@ -198,7 +198,7 @@ class Vrfs(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             command = 'default vrf instance %s' % vrf_name
         else:
             command = 'default vrf definition %s' % vrf_name
@@ -215,7 +215,7 @@ class Vrfs(EntityCollection):
             True if the commands completed successfully
         """
         commands = make_iterable(commands)
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             commands.insert(0, 'vrf instance %s' % vrf_name)
         else:
             commands.insert(0, 'vrf definition %s' % vrf_name)
@@ -320,7 +320,7 @@ class Vrfs(EntityCollection):
             True if the operation was successful otherwise False
         """
         cmds = ['interface %s' % interface]
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             cmds.append(self.command_builder('vrf', value=vrf_name,
                         default=default, disable=disable))
         else:

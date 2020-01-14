@@ -470,7 +470,6 @@ class Node(object):
         self._startup_config = None
         self._version = None
         self._version_number = None
-        self._version_id = None
         self._model = None
 
         self._enablepwd = kwargs.get('enablepwd')
@@ -518,14 +517,6 @@ class Node(object):
         return self._version_number
 
     @property
-    def version_id(self):
-        if self._version_id:
-            return self._version_id
-        output = self.enable('show version')
-        self._version_id = output[0]['result']['version'].split()[0][:-1]
-        return self._version_id
-
-    @property
     def model(self):
         if self._model:
             return self._model
@@ -539,13 +530,13 @@ class Node(object):
         # Parse out version info
         output = self.enable('show version')
         self._version = str(output[0]['result']['version'])
-        match = re.match(r'[\d.\d]+', output[0]['result']['version'])
+        match = re.match(r'[\d.\d]+', str(output[0]['result']['version']))
         if match:
             self._version_number = str(match.group(0))
         else:
             self._version_number = str(output[0]['result']['version'])
         # Parse out model number
-        match = re.search(r'\d\d\d\d', output[0]['result']['modelName'])
+        match = re.search(r'\d\d\d\d', str(output[0]['result']['modelName']))
         if match:
             self._model = str(match.group(0))
         else:

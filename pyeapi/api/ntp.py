@@ -88,7 +88,7 @@ class Ntp(Entity):
         return response
 
     def _parse_source_interface(self, config):
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             match = re.search(r'^ntp local-interface ([^\s]+)', config, re.M)
         else:
             match = re.search(r'^ntp source ([^\s]+)', config, re.M)
@@ -121,7 +121,7 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             cmd = self.command_builder('ntp local-interface', disable=True)
         else:
             cmd = self.command_builder('ntp source', disable=True)
@@ -133,7 +133,7 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             cmd = self.command_builder('ntp local-interface', default=True)
         else:
             cmd = self.command_builder('ntp source', default=True)
@@ -148,7 +148,7 @@ class Ntp(Entity):
         Returns:
             True if the operation succeeds, otherwise False.
         """
-        if self.version_id >= '4.23':
+        if self.version_number >= '4.23':
             cmd = self.command_builder('ntp local-interface', value=name)
         else:
             cmd = self.command_builder('ntp source', value=name)
