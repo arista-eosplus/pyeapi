@@ -315,8 +315,8 @@ spanning-tree transmit hold-count 6
 spanning-tree max-hops 20
 no spanning-tree portfast bpduguard default
 no spanning-tree portfast bpdufilter default
-spanning-tree bridge assurance
-no spanning-tree loopguard default
+spanning-tree transmit active
+no spanning-tree guard loop default
 no spanning-tree portchannel guard misconfig
 spanning-tree bpduguard rate-limit default
 logging event spanning-tree global
@@ -348,7 +348,7 @@ no aaa accounting system default
 no aaa accounting dot1x default
 no aaa accounting commands all default
 !
-no enable secret
+no enable password
 no aaa root
 aaa authentication policy local allow-nopassword-remote-login
 no aaa authorization policy local default-role

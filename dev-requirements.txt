@@ -3,7 +3,7 @@ mock
 coveralls
 twine
 check-manifest
-pep8
+pycodestyle
 pyflakes
 coverage
 sphinx
@@ -11,4 +11,3 @@ sphinxcontrib-napoleon
 flake8
 flake8-print
 flake8-debugger
-pep8-naming

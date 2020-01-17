@@ -205,7 +205,10 @@ class BgpNeighbors(EntityCollection):
         return collection
 
     def _parse_peer_group(self, config, name):
-        regexp = r'neighbor {} peer-group ([^\s]+)'.format(name)
+        if self.version_number >= '4.23':
+            regexp = r'neighbor {} peer group ([^\s]+)'.format(name)
+        else:
+            regexp = r'neighbor {} peer-group ([^\s]+)'.format(name)
         match = re.search(regexp, config)
         value = match.group(1) if match else None
         return dict(peer_group=value)
@@ -263,7 +266,12 @@ class BgpNeighbors(EntityCollection):
     def delete(self, name):
         response = self.configure('no neighbor {}'.format(name))
         if not response:
-            response = self.configure('no neighbor {} peer-group'.format(name))
+            if self.version_number >= '4.23':
+                response = self.configure('no neighbor {} '
+                                          'peer group'.format(name))
+            else:
+                response = self.configure('no neighbor {} '
+                                          'peer-group'.format(name))
         return response
 
     def configure(self, cmd):
@@ -280,8 +288,12 @@ class BgpNeighbors(EntityCollection):
 
     def set_peer_group(self, name, value=None, default=False, disable=False):
         if not self.ispeergroup(name):
-            cmd = self.command_builder(name, 'peer-group', value, default,
-                                       disable)
+            if self.version_number >= '4.23':
+                cmd = self.command_builder(name, 'peer group', value, default,
+                                           disable)
+            else:
+                cmd = self.command_builder(name, 'peer-group', value, default,
+                                           disable)
             return self.configure(cmd)
         return False
 

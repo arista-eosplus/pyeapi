@@ -244,17 +244,17 @@ class ExtendedAcls(EntityCollection):
         for item in re.finditer(r'\d+ [p|d].*$', config, re.M):
             match = self.entry_re.match(item.group(0))
             if match:
-               entry = dict()
-               entry['action'] = match.group(2)
-               entry['protocol'] = match.group(3)
-               entry['srcaddr'] = match.group(5) or 'any'
-               entry['srclen'] = match.group(6)
-               entry['srcport'] = match.group(7)
-               entry['dstaddr'] = match.group(9) or 'any'
-               entry['dstlen'] = match.group(10)
-               entry['dstport'] = match.group(12)
-               entry['other'] = match.group(13)
-               entries[match.group(1)] = entry
+                entry = dict()
+                entry['action'] = match.group(2)
+                entry['protocol'] = match.group(3)
+                entry['srcaddr'] = match.group(5) or 'any'
+                entry['srclen'] = match.group(6)
+                entry['srcport'] = match.group(7)
+                entry['dstaddr'] = match.group(9) or 'any'
+                entry['dstlen'] = match.group(10)
+                entry['dstport'] = match.group(12)
+                entry['other'] = match.group(13)
+                entries[match.group(1)] = entry
         return dict(entries=entries)
 
     def create(self, name):

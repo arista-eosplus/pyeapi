@@ -144,7 +144,7 @@ class Mlag(Entity):
             dict: A dict object that is intended to be merged into the
                 resource dict
         """
-        match = re.search(r'peer-address ([^\s]+)', config)
+        match = re.search(r'peer-address (\d+\.\d+\.\d+\.\d+)$', config)
         value = match.group(1) if match else None
         return dict(peer_address=value)
 
