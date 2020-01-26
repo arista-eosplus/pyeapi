@@ -76,7 +76,10 @@ class Vrfs(EntityCollection):
                 key/value pairs.
 
         """
-        config = self.get_block('vrf definition %s' % value)
+        if self.version_number >= '4.23':
+            config = self.get_block('vrf instance %s' % value)
+        else:
+            config = self.get_block('vrf definition %s' % value)
         if not config:
             return None
         response = dict(vrf_name=value)
@@ -136,7 +139,10 @@ class Vrfs(EntityCollection):
             A dict object of VRF attributes
 
         """
-        vrfs_re = re.compile(r'(?<=^vrf definition\s)(\w+)', re.M)
+        if self.version_number >= '4.23':
+            vrfs_re = re.compile(r'(?<=^vrf instance\s)(\w+)', re.M)
+        else:
+            vrfs_re = re.compile(r'(?<=^vrf definition\s)(\w+)', re.M)
 
         response = dict()
         for vrf in vrfs_re.findall(self.config):
@@ -160,7 +166,10 @@ class Vrfs(EntityCollection):
         Returns:
             True if create was successful otherwise False
         """
-        commands = ['vrf definition %s' % vrf_name]
+        if self.version_number >= '4.23':
+            commands = ['vrf instance %s' % vrf_name]
+        else:
+            commands = ['vrf definition %s' % vrf_name]
         if rd:
             commands.append('rd %s' % rd)
         return self.configure(commands)
@@ -174,7 +183,10 @@ class Vrfs(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        command = 'no vrf definition %s' % vrf_name
+        if self.version_number >= '4.23':
+            command = 'no vrf instance %s' % vrf_name
+        else:
+            command = 'no vrf definition %s' % vrf_name
         return self.configure(command)
 
     def default(self, vrf_name):
@@ -186,7 +198,10 @@ class Vrfs(EntityCollection):
         Returns:
             True if the operation was successful otherwise False
         """
-        command = 'default vrf definition %s' % vrf_name
+        if self.version_number >= '4.23':
+            command = 'default vrf instance %s' % vrf_name
+        else:
+            command = 'default vrf definition %s' % vrf_name
         return self.configure(command)
 
     def configure_vrf(self, vrf_name, commands):
@@ -200,7 +215,11 @@ class Vrfs(EntityCollection):
             True if the commands completed successfully
         """
         commands = make_iterable(commands)
-        commands.insert(0, 'vrf definition %s' % vrf_name)
+        if self.version_number >= '4.23':
+            commands.insert(0, 'vrf instance %s' % vrf_name)
+        else:
+            commands.insert(0, 'vrf definition %s' % vrf_name)
+
         return self.configure(commands)
 
     def set_rd(self, vrf_name, rd):
@@ -301,8 +320,12 @@ class Vrfs(EntityCollection):
             True if the operation was successful otherwise False
         """
         cmds = ['interface %s' % interface]
-        cmds.append(self.command_builder('vrf forwarding', value=vrf_name,
-                                         default=default, disable=disable))
+        if self.version_number >= '4.23':
+            cmds.append(self.command_builder('vrf', value=vrf_name,
+                        default=default, disable=disable))
+        else:
+            cmds.append(self.command_builder('vrf forwarding', value=vrf_name,
+                        default=default, disable=disable))
         return self.configure(cmds)
 
 

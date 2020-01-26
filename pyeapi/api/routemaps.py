@@ -239,7 +239,7 @@ class Routemaps(EntityCollection):
         """
         try:
             current_statements = self.get(name)[action][seqno]['match']
-        except:
+        except Exception:
             current_statements = []
 
         commands = list()
@@ -275,7 +275,7 @@ class Routemaps(EntityCollection):
         """
         try:
             current_statements = self.get(name)[action][seqno]['set']
-        except:
+        except Exception:
             current_statements = []
 
         commands = list()

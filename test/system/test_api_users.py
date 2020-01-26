@@ -49,14 +49,21 @@ class TestApiUsers(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            dut.config(['no username test', 'username test nopassword',
-                        'username test sshkey %s' % TEST_SSH_KEY])
+            if dut.version_number >= '4.23':
+                dut.config(['no username test', 'username test nopassword',
+                            'username test ssh-key %s' % TEST_SSH_KEY])
+            else:
+                dut.config(['no username test', 'username test nopassword',
+                            'username test sshkey %s' % TEST_SSH_KEY])
 
             result = dut.api('users').get('test')
-            values = dict(nopassword=True, privilege='1', secret='',
-                          role='', format='',
-                          sshkey=TEST_SSH_KEY)
-
+            if dut.version_number >= '4.23':
+                values = dict(nopassword=True, privilege='1', secret='',
+                              role='', format='')
+                values["ssh-key"] = TEST_SSH_KEY
+            else:
+                values = dict(nopassword=True, privilege='1', secret='',
+                              role='', format='', sshkey=TEST_SSH_KEY)
             result = self.sort_dict_by_keys(result)
             values = self.sort_dict_by_keys(values)
 
@@ -139,32 +146,52 @@ class TestApiUsers(DutSystemTest):
             dut.config(['no username test', 'username test nopassword'])
             api = dut.api('users')
             self.assertIn('username test privilege 1 nopassword', api.config)
-            self.assertNotIn('username test sshkey', api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key', api.config)
+            else:
+                self.assertNotIn('username test sshkey', api.config)
             result = api.set_sshkey('test', TEST_SSH_KEY)
             self.assertTrue(result)
-            self.assertIn('username test sshkey %s' % TEST_SSH_KEY, api.config)
+            if dut.version_number >= '4.23':
+                self.assertIn('username test ssh-key %s' % TEST_SSH_KEY, api.config)
+            else:
+                self.assertIn('username test sshkey %s' % TEST_SSH_KEY, api.config)
 
     def test_set_sshkey_with_empty_string(self):
         for dut in self.duts:
             dut.config(['no username test', 'username test nopassword'])
             api = dut.api('users')
             self.assertIn('username test privilege 1 nopassword', api.config)
-            self.assertNotIn('username test sshkey', api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key', api.config)
+            else:
+                self.assertNotIn('username test sshkey', api.config)
             result = api.set_sshkey('test', '')
             self.assertTrue(result)
-            self.assertNotIn('username test sshkey %s'
-                             % TEST_SSH_KEY, api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key %s'
+                                 % TEST_SSH_KEY, api.config)
+            else:
+                self.assertNotIn('username test sshkey %s'
+                                 % TEST_SSH_KEY, api.config)
 
     def test_set_sshkey_with_None(self):
         for dut in self.duts:
             dut.config(['no username test', 'username test nopassword'])
             api = dut.api('users')
             self.assertIn('username test privilege 1 nopassword', api.config)
-            self.assertNotIn('username test sshkey', api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key', api.config)
+            else:
+                self.assertNotIn('username test sshkey', api.config)
             result = api.set_sshkey('test', None)
             self.assertTrue(result)
-            self.assertNotIn('username test sshkey %s'
-                             % TEST_SSH_KEY, api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key %s'
+                                 % TEST_SSH_KEY, api.config)
+            else:
+                self.assertNotIn('username test sshkey %s'
+                                 % TEST_SSH_KEY, api.config)
 
     def test_set_sshkey_with_no_value(self):
         for dut in self.duts:
@@ -174,8 +201,12 @@ class TestApiUsers(DutSystemTest):
             self.assertIn('username test privilege 1 nopassword', api.config)
             result = api.set_sshkey('test', disable=True)
             self.assertTrue(result)
-            self.assertNotIn('username test sshkey %s' % TEST_SSH_KEY,
-                             api.config)
+            if dut.version_number >= '4.23':
+                self.assertNotIn('username test ssh-key %s' % TEST_SSH_KEY,
+                                 api.config)
+            else:
+                self.assertNotIn('username test sshkey %s' % TEST_SSH_KEY,
+                                 api.config)
 
 
 if __name__ == '__main__':

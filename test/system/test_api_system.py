@@ -73,7 +73,7 @@ class TestApiSystem(DutSystemTest):
 
     def test_get_banner_with_EOF(self):
         for dut in self.duts:
-            motd_banner_value = '!!!newlinebaner\n\nSecondLIneEOF!!!newlinebanner\n'
+            motd_banner_value = '!!!newlinebaner\nSecondLIneEOF!!!newlinebanner\n'
             dut.config([dict(cmd="banner motd", input=motd_banner_value)])
             resp = dut.api('system').get()
             self.assertEqual(resp['banner_motd'], motd_banner_value.rstrip())
@@ -160,7 +160,7 @@ class TestApiSystem(DutSystemTest):
 
     def test_set_banner_motd_donkey(self):
         for dut in self.duts:
-            donkey_chicken = """
+            donkey_chicken = r"""
                                   /\          /\
                                  ( \\        // )
                                   \ \\      // /
@@ -186,8 +186,6 @@ class TestApiSystem(DutSystemTest):
             resp = dut.api('system').set_banner("motd", donkey_chicken)
             self.assertTrue(resp, 'dut=%s' % dut)
             self.assertIn(donkey_chicken, dut.running_config)
-
-
 
     def test_set_banner_motd_default(self):
         for dut in self.duts:

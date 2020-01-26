@@ -419,7 +419,6 @@ class TestApiVrrp(EapiConfigUnitTest):
 
     def test_set_ip_version(self):
         # vrrp 10 ip version 2
-
         # Test set_description gives properly formatted commands
         cases = [
             (2, None, None, 'vrrp %d ip version 2' % upd_vrid),

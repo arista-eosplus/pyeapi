@@ -31,6 +31,7 @@
 #
 import os
 import unittest
+import time
 
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
@@ -56,6 +57,7 @@ class TestResourceIpinterfaces(DutSystemTest):
             intf = random_interface(dut)
             dut.config(['default interface %s' % intf, 'interface %s' % intf,
                         'no switchport'])
+            time.sleep(2)
             result = dut.api('ipinterfaces').get(intf)
             self.assertIsNone(result['address'])
 

@@ -34,7 +34,7 @@ import random
 import string
 import unittest
 
-from mock import Mock
+from mock import MagicMock as Mock
 
 from pyeapi.client import Node
 
@@ -71,7 +71,7 @@ class EapiConfigUnitTest(unittest.TestCase):
 
     def setUp(self):
         self.node = Node(None)
-
+        self.node._version_number = '4.17.1.1'
         self.node._running_config = self.config
 
         self.mock_config = Mock(name='node.config')

@@ -68,6 +68,10 @@ class BaseEntity(object):
         self.node = node
 
     @property
+    def version_number(self):
+        return self.node.version_number
+
+    @property
     def config(self):
         return self.node.running_config
 

@@ -29,6 +29,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+
 import os
 import unittest
 
@@ -57,7 +58,10 @@ class TestClient(unittest.TestCase):
                 if dut._enablepwd is not None:
                     # If enable password defined for dut, set the
                     # enable password on the dut and clear it on tearDown
-                    dut.config("enable secret %s" % dut._enablepwd)
+                    if dut.version_number >= '4.23':
+                        dut.config("enable password %s" % dut._enablepwd)
+                    else:
+                        dut.config("enable secret %s" % dut._enablepwd)
 
     def test_unauthorized_user(self):
         error_string = ('Unauthorized. Unable to authenticate user: Bad'
@@ -249,7 +253,10 @@ class TestClient(unittest.TestCase):
 
     def tearDown(self):
         for dut in self.duts:
-            dut.config("no enable secret")
+            if dut.version_number >= '4.23':
+                dut.config("no enable password")
+            else:
+                dut.config("no enable secret")
 
 
 class TestNode(unittest.TestCase):
@@ -274,11 +281,11 @@ class TestNode(unittest.TestCase):
         # Send an incomplete command
         cases.append(('show run', rfmt
                       % (1002, 'invalid command',
-                         'incomplete token \(at token \d+: \'.*\'\)')))
+                         r'incomplete token \(at token \d+: \'.*\'\)')))
         # Send a mangled command
         cases.append(('shwo version', rfmt
                       % (1002, 'invalid command',
-                         'Invalid input \(at token \d+: \'.*\'\)')))
+                         r'Invalid input \(at token \d+: \'.*\'\)')))
         # Send a command that cannot be run through the api
         # note the command for reload looks to change in new EOS
         # in 4.15 the  reload now is replaced with 'force' if you are
@@ -288,15 +295,10 @@ class TestNode(unittest.TestCase):
         cases.append(('reload', rfmt
                       % (1004, 'incompatible command',
                          'Command not permitted via API access..*')))
-        # Send a continuous command that requires a break
-        cases.append(('watch 10 show int e1 count rates', rfmt
-                      % (1000, 'could not run command',
-                         'init error.*')))
         # Send a command that has insufficient priv
         cases.append(('show running-config', rfmt
                       % (1002, 'invalid command',
-                         'Invalid input \(privileged mode required\)')))
-
+                         r'Invalid input \(privileged mode required\)')))
 
         for dut in self.duts:
             for (cmd, regex) in cases:

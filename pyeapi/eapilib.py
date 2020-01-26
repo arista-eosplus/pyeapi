@@ -58,6 +58,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_HTTP_PORT = 80
 DEFAULT_HTTPS_PORT = 443
 DEFAULT_HTTP_LOCAL_PORT = 8080
+DEFAULT_HTTPS_LOCAL_PORT = 8443
 DEFAULT_HTTP_PATH = '/command-api'
 DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
@@ -207,6 +208,55 @@ class HttpsConnection(HTTPSConnection):
         return 'https://%s:%s/%s' % (self.host, self.port, self.path)
 
 
+class HTTPSCertConnection(HTTPSConnection):
+    """ Class to make a HTTPS connection, with support
+        for full client-based SSL Authentication.
+    """
+
+    def __init__(self, path, host, port, key_file, cert_file, ca_file,
+                 timeout=None):
+        HTTPSConnection.__init__(self, host, key_file=key_file,
+                                 cert_file=cert_file)
+        self.key_file = key_file
+        self.cert_file = cert_file
+        self.ca_file = ca_file
+        self.timeout = timeout
+        self.path = path
+        self.port = port
+
+    def __str__(self):
+        return 'https://%s:%s/%s - %s,%s' % (self.host, self.port, self.path,
+                                             self.key_file, self.cert_file)
+
+    def __repr__(self):
+        return 'https://%s:%s/%s - %s,%s' % (self.host, self.port, self.path,
+                                             self.key_file, self.cert_file)
+
+    def connect(self):
+        """ Connect to a host on a given (SSL) port.
+            If ca_file is pointing somewhere, use it
+            to check Server Certificate.
+
+            Redefined/copied and extended from httplib.py:1105 (Python 2.6.x).
+            This is needed to pass cert_reqs=ssl.CERT_REQUIRED as parameter
+            to ssl.wrap_socket(), which forces SSL to check server certificate
+            against our client certificate.
+        """
+        sock = socket.create_connection((self.host, self.port), self.timeout)
+        if self._tunnel_host:
+            self.sock = sock
+            self._tunnel()
+        # If there's no CA File, don't force Server Certificate Check
+        if self.ca_file:
+            self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
+                                        ca_certs=self.ca_file,
+                                        cert_reqs=ssl.CERT_REQUIRED)
+        else:
+            self.sock = ssl.wrap_socket(sock, self.key_file,
+                                        self.cert_file,
+                                        cert_reqs=ssl.CERT_NONE)
+
+
 class EapiConnection(object):
     """Creates a connection to eAPI for sending and receiving eAPI requests
 
@@ -240,20 +290,21 @@ class EapiConnection(object):
                 the eAPI connection with
 
         """
+        _auth_text = '{}:{}'.format(username, password)
+
         # Work around for Python 2.7/3.x compatibility
         if int(sys.version[0]) > 2:
             # For Python 3.x
-            _auth_text = '{}:{}'.format(username, password)
             _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
             _auth = _auth.replace('\n', '')
             self._auth = _auth
         else:
             # For Python 2.7
-            _auth = base64.encodestring('{}:{}'.format(username, password))
+            _auth = base64.encodestring(_auth_text)
             self._auth = str(_auth).replace('\n', '')
 
-        _LOGGER.debug('Autentication string is: {}'.format(self._auth))
+        _LOGGER.debug('Autentication string is: {}:***'.format(username))
 
     def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
@@ -550,7 +601,7 @@ class HttpsEapiConnection(EapiConnection):
     def disable_certificate_verification(self):
         # SSL/TLS certificate verification is enabled by default in latest
         # Python releases and causes self-signed certificates generated
-        # on EOS to fail validation (unless explicitely imported).
+        # on EOS to fail validation (unless explicitly imported).
         # Disable the SSL/TLS certificate verification for now.
         # Use the approach in PEP476 to disable certificate validation.
         # TODO:
@@ -559,3 +610,20 @@ class HttpsEapiConnection(EapiConnection):
         # temporary until a proper fix is implemented.
         if hasattr(ssl, '_create_unverified_context'):
             return ssl._create_unverified_context()
+
+
+class HttpsEapiCertConnection(EapiConnection):
+    def __init__(self, host, port=None, path=None, key_file=None,
+                 cert_file=None, ca_file=None, timeout=60, **kwargs):
+        if key_file is None or cert_file is None:
+            raise ValueError("For https_cert connections both a key_file and "
+                             "cert_file are required. A ca_file is also "
+                             "recommended")
+        super(HttpsEapiCertConnection, self).__init__()
+        port = port or DEFAULT_HTTPS_PORT
+        path = path or DEFAULT_HTTP_PATH
+
+        self.transport = HTTPSCertConnection(path, host, int(port),
+                                             key_file=key_file,
+                                             cert_file=cert_file,
+                                             ca_file=ca_file, timeout=timeout)

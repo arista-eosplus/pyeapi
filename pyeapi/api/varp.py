@@ -178,7 +178,7 @@ class VarpInterfaces(EntityCollection):
         elif addresses is not None:
             try:
                 current_addresses = self.get(name)['addresses']
-            except:
+            except Exception:
                 current_addresses = []
 
             # remove virtual-router addresses not present in addresses list
