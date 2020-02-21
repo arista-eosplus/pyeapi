@@ -90,6 +90,7 @@ configuration file.  The configuration file is an INI style file that
 contains the settings for nodes used by the connect_to function.
 
 """
+from uuid import uuid4
 import os
 import re
 
@@ -471,6 +472,7 @@ class Node(object):
         self._version = None
         self._version_number = None
         self._model = None
+        self._session_name = None
 
         self._enablepwd = kwargs.get('enablepwd')
         self.autorefresh = kwargs.get('autorefresh', True)
@@ -578,6 +580,14 @@ class Node(object):
                 output from each command.  The function will strip the
                 response from any commands it prepends.
         """
+        if self._session_name:  # If in a config session
+            return self._configure_session(commands, **kwargs)
+
+        return self._configure_terminal(commands, **kwargs)
+
+    def _configure_terminal(self, commands, **kwargs):
+        """Configures the node with the specified commands with leading "configure terminal"
+        """
         commands = make_iterable(commands)
         commands = list(commands)
 
@@ -587,6 +597,24 @@ class Node(object):
 
         if self.autorefresh:
             self.refresh()
+
+        # pop the configure command output off the stack
+        response.pop(0)
+
+        return response
+
+    def _configure_session(self, commands, **kwargs):
+        """Configures the node with the specified commands with leading "configure session <session name>"
+        """
+        if not self._session_name:
+            raise CommandError('Not currently in a session')
+
+        commands = make_iterable(commands)
+        commands = list(commands)
+
+        # push the configure command onto the command stack
+        commands.insert(0, 'configure session %s' % self._session_name)
+        response = self.run_commands(commands, **kwargs)
 
         # pop the configure command output off the stack
         response.pop(0)
@@ -823,6 +851,41 @@ class Node(object):
         """
         self._running_config = None
         self._startup_config = None
+
+    def configure_session(self):
+        """Enter a config session
+        """
+        self._session_name = self._session_name or uuid4()
+
+    def diff(self):
+        """Returns session-config diffs in text encoding
+
+        Note: "show session-config diffs" doesn't support json encoding
+        """
+        response = self._configure_session(['show session-config diffs'], encoding='text')
+
+        return response[0]['output']
+
+    def commit(self):
+        """Commits the current config session
+        """
+        return self._configure_and_exit_session(['commit'])
+
+    def abort(self):
+        """Aborts the current config session
+        """
+        return self._configure_session(['abort'])
+
+    def _configure_and_exit_session(self, commands, **kwargs):
+        response = self._configure_session(commands, **kwargs)
+
+        if self.autorefresh:
+            self.refresh()
+
+        # Exit the current config session
+        self._session_name = None
+
+        return response
 
 
 def connect_to(name):
