@@ -643,7 +643,7 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.remove_vlan('Vxlan1', '10')
             self.assertTrue(instance)
-            self.notcontains('vxlan vlan 10 vni 10', dut)
+            self.notcontains('vxlan vlan remove 10 vni 10', dut)
 
 
 if __name__ == '__main__':

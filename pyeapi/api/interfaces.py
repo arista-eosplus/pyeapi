@@ -1080,7 +1080,7 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        return self.configure_interface(name, 'no vxlan vlan %s vni' % vid)
+        return self.configure_interface(name, 'vxlan vlan remove %s vni' % vid)
 
 
 INTERFACE_CLASS_MAP = {
