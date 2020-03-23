@@ -635,7 +635,7 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.update_vlan('Vxlan1', '10', '10')
             self.assertTrue(instance)
-            self.contains('vxlan vlan 10 vni 10', dut)
+            self.contains('vxlan vlan add 10 vni 10', dut)
 
     def test_remove_vlan(self):
         for dut in self.duts:

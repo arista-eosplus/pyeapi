@@ -501,7 +501,7 @@ class TestApiVxlanInterface(EapiConfigUnitTest):
         self.eapi_positive_config_test(func, cmds)
 
     def test_update_vlan(self):
-        cmds = ['interface Vxlan1', 'vxlan vlan 10 vni 10']
+        cmds = ['interface Vxlan1', 'vxlan vlan add 10 vni 10']
         func = function('update_vlan', 'Vxlan1', 10, 10)
         self.eapi_positive_config_test(func, cmds)
 
