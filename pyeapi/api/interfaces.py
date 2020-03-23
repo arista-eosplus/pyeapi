@@ -1064,7 +1064,7 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        cmd = 'vxlan vlan %s vni %s' % (vid, vni)
+        cmd = 'vxlan vlan add %s vni %s' % (vid, vni)
         return self.configure_interface(name, cmd)
 
     def remove_vlan(self, name, vid):
