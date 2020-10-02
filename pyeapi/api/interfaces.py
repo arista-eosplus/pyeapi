@@ -831,7 +831,7 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
-            * multicast_decap (bool): If the mutlicast decap
+            * multicast_decap (bool): If the multicast decap
                                       feature is configured
 
         Args:
@@ -884,7 +884,7 @@ class VxlanInterface(BaseInterface):
         return dict(multicast_group=value)
 
     def _parse_multicast_decap(self, config):
-        value = 'vxlan mutlicast-group decap' in config
+        value = 'vxlan multicast-group decap' in config
         return dict(multicast_decap=bool(value))
 
     def _parse_udp_port(self, config):
