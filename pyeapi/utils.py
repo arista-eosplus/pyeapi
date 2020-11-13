@@ -170,8 +170,12 @@ def make_iterable(value):
     if isinstance(value, str) or isinstance(value, dict):
         value = [value]
 
-    if not isinstance(value, collections.abc.Iterable):
-        raise TypeError('value must be an iterable object')
+    if sys.version_info <= (3, 3):
+        if not isinstance(value, collections.Iterable):
+            raise TypeError('value must be an iterable object')
+    else:
+        if not isinstance(value, collections.abc.Iterable):
+            raise TypeError('value must be an iterable object')
 
     return value
 
