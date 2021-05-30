@@ -123,7 +123,7 @@ class BaseEntity(object):
         try:
             self.node.config(commands)
             return True
-        except (CommandError, ConnectionError):
+        except (CommandError):
             return False
 
     def command_builder(self, string, value=None, default=None, disable=None):
