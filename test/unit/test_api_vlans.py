@@ -63,13 +63,19 @@ class TestApiVlans(EapiConfigUnitTest):
                     trunk_groups=[])
         self.assertEqual(vlan, result)
 
+        # ensure capturing grouppped vlans
+        result = self.instance.get('200-.*')
+        vlan = dict(vlan_id='200-.*', name='grouping', state='active',
+                    trunk_groups=[])
+        self.assertEqual(vlan, result)
+
     def test_get_not_configured(self):
         self.assertIsNone(self.instance.get('1000'))
 
     def test_getall(self):
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result), 5)
 
     def test_vlan_functions(self):
         for name in ['create', 'delete', 'default']:
