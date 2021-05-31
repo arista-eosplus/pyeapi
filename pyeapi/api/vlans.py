@@ -166,7 +166,8 @@ class Vlans(EntityCollection):
             A dict object of Vlan attributes
 
         """
-        vlans_re = re.compile(r'(?<=^vlan\s)(\d+)', re.M)
+        # regex to find standalone and grouped (ranged, enumerated) vlans (#197)
+        vlans_re = re.compile(r'(?<=^vlan\s)[\d,\-]+', re.M)
 
         response = dict()
         for vid in vlans_re.findall(self.config):
