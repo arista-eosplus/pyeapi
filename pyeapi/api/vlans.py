@@ -54,6 +54,7 @@ import re
 from pyeapi.api import EntityCollection
 from pyeapi.utils import make_iterable
 
+VLAN_ID_RE = re.compile(r'(?:vlan\s)(?P<value>.*)$', re.M)
 NAME_RE = re.compile(r'(?:name\s)(?P<value>.*)$', re.M)
 STATE_RE = re.compile(r'(?:state\s)(?P<value>.*)$', re.M)
 TRUNK_GROUP_RE = re.compile(r'(?:trunk\sgroup\s)(?P<value>.*)$', re.M)
@@ -104,12 +105,28 @@ class Vlans(EntityCollection):
         if not config:
             return None
 
-        response = dict(vlan_id=value)
+        response = dict(vlan_id=self._parse_vlan_id(config))
         response.update(self._parse_name(config))
         response.update(self._parse_state(config))
         response.update(self._parse_trunk_groups(config))
 
         return response
+
+    def _parse_vlan_id(self, config):
+        """ _parse_vlan_id scans the provided configuration block and extracts
+        the vlan id.  The config block is expected to always return the
+        vlan id.  The return dict is intended to be merged into the response
+        dict.
+
+        Args:
+            config (str): The vlan configuration block from the nodes running
+                configuration
+
+        Returns:
+            Str: vlan id (or range/list of vlan ids)
+        """
+        value = VLAN_ID_RE.search(config).group('value')
+        return value
 
     def _parse_name(self, config):
         """ _parse_name scans the provided configuration block and extracts
