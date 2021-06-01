@@ -394,6 +394,11 @@ vlan 100
    state active
    no private-vlan
 !
+vlan 200-202,204
+   name grouping
+   state active
+   no private-vlan
+!
 vlan 300
    name VLAN0300
    state active
