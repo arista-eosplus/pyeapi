@@ -54,9 +54,11 @@ except ImportError:
 try:
     # Try Python 3.x import first
     from http.client import HTTPConnection, HTTPSConnection
+    from http.cookies import SimpleCookie
 except ImportError:
     # Use Python 2.7 import as a fallback
     from httplib import HTTPConnection, HTTPSConnection
+    from Cookie import SimpleCookie
 
 from pyeapi.utils import make_iterable
 
@@ -727,3 +729,44 @@ class HttpsEapiCertConnection(EapiConnection):
                                              key_file=key_file,
                                              cert_file=cert_file,
                                              ca_file=ca_file, timeout=timeout)
+
+
+class SessionApiConnection(object):
+    def authentication(self, username, password):
+        try:
+            data = json.dumps({"username": username, "password": password})
+            self.transport.putrequest("POST", "/login")
+            self.transport.putheader("Content-type", "application/json")
+            self.transport.putheader("Content-length", "%d" % len(data))
+
+            if int(sys.version[0]) > 2:
+                data = data.encode()
+            self.transport.endheaders(message_body=data)
+            resp = self.transport.getresponse()
+            if resp.status != 200:
+                raise ConnectionError(str(self), '%s. %s' % (resp.reason,
+                                                             resp.read()))
+            session = SimpleCookie(resp.getheader("Set-Cookie"))
+            self._auth = ("Cookie", session.output(header="", attrs=[]))
+
+        except (socket.error, OSError) as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = exc
+            self.error = exc
+            error_msg = 'Socket error during eAPI authentication: %s' % str(exc)
+            raise ConnectionError(str(self), error_msg)
+        except ValueError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = None
+            self.error = exc
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
+        finally:
+            self.transport.close()
+
+
+class HttpEapiSessionConnection(SessionApiConnection, HttpEapiConnection):
+    pass
+
+
+class HttpsEapiSessionConnection(SessionApiConnection, HttpsEapiConnection):
+    pass
