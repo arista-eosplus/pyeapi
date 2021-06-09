@@ -309,14 +309,13 @@ class EapiConnection(object):
             # For Python 3.x
             _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
-            _auth = _auth.replace('\n', '')
-            self._auth = _auth
         else:
             # For Python 2.7
-            _auth = base64.encodestring(_auth_text)
-            self._auth = str(_auth).replace('\n', '')
+            _auth = str(base64.encodestring(_auth_text))
+        _auth = _auth.replace('\n', '')
+        self._auth = ("Authorization", "Basic %s" % _auth)
 
-        _LOGGER.debug('Autentication string is: {}:***'.format(username))
+        _LOGGER.debug('Authentication string is: {}:***'.format(username))
 
     def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
@@ -443,8 +442,7 @@ class EapiConnection(object):
             self.transport.putheader('Content-length', '%d' % len(data))
 
             if self._auth:
-                self.transport.putheader('Authorization',
-                                         'Basic %s' % self._auth)
+                self.transport.putheader(*self._auth)
 
             if int(sys.version[0]) > 2:
                 # For Python 3.x compatibility
