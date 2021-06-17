@@ -40,7 +40,7 @@ provide parent class for API implementations.  All API modules will
 ultimately derive from BaseEntity which provides some common functions to
 make building API modules easier.
 """
-from collections import Callable, Mapping
+from collections.abc import Callable, Mapping
 
 from pyeapi.eapilib import CommandError, ConnectionError
 from pyeapi.utils import make_iterable
