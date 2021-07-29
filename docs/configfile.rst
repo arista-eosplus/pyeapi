@@ -172,6 +172,10 @@ As the table above indicates, a pyeapi configuration file is required in
   username: admin
   password: admin
 
+.. Note:: avoid using ``localhost`` name in the connection description (i.e.: ``[connection:localhost]``). 
+          The connection name ``localhost`` is reserved solely for on-box uses and won't work upon
+          off-box usage, even if the host is valid  
+
 Using HTTPS with Certificates
 =============================
 
