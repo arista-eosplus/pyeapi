@@ -271,6 +271,9 @@ class TestNode(unittest.TestCase):
                 name = name.split(':')[1]
                 self.duts.append(pyeapi.client.connect_to(name))
 
+        if not hasattr(self, 'assertRegex'):
+            self.assertRegex = self.assertRegexpMatches
+
     def test_exception_trace(self):
         # Send commands that will return an error and validate the errors
 
@@ -321,7 +324,7 @@ class TestNode(unittest.TestCase):
                     self.assertIsNotNone(exc.command_error)
                     self.assertIsNotNone(exc.output)
                     self.assertIsNotNone(exc.commands)
-                    self.assertRegexpMatches(exc.message, regex)
+                    self.assertRegex(exc.message, regex)
 
 
 if __name__ == '__main__':
