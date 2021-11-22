@@ -119,6 +119,16 @@ As the table above indicates, a pyeapi configuration file is required in
   [connection:localhost]
   transport: http_local
 
+Pay attention: once ``eapi.conf`` exists, the respective protocol method must be
+configured on the box. E.g., for the above ``eapi.conf`` sample, the following
+configuration must also exist:
+
+.. code-block:: console
+
+  switch(config)#management http-server
+  switch(config-mgmt-http-server)#protocol http localhost
+
+
 Using HTTP or HTTPS
 ===================
 
