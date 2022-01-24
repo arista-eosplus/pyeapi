@@ -126,7 +126,7 @@ class Switchports(EntityCollection):
                 resource dict
         """
         value = re.search(r'switchport access vlan (\d+)', config)
-        return dict(access_vlan=value.group(1))
+        return dict(access_vlan=value.group(1) if value else None)
 
     def _parse_trunk_native_vlan(self, config):
         """Scans the specified config and parse the trunk native vlan value
