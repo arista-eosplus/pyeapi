@@ -166,7 +166,7 @@ class Switchports(EntityCollection):
             A Python dictionary object that represents all configured
                 switchports in the current running configuration
         """
-        interfaces_re = re.compile(r'(?<=^interface\s)([Et|Po][^.]+)$', re.M)
+        interfaces_re = re.compile(r'(?<=^interface\s)([Et|Po][^.\s]+)$', re.M)
 
         response = dict()
         for name in interfaces_re.findall(self.config):
