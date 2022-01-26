@@ -1449,6 +1449,107 @@ interface Ethernet7
    no switchport tap default group
    no switchport tool group
 !
+interface Ethernet48.2044
+   description some port description
+   no shutdown
+   default load-interval
+   logging event link-status use-global
+   encapsulation dot1q vlan 2044
+   snmp trap link-change
+   vrf DAT
+   no ip proxy-arp
+   no ip local-proxy-arp
+   no arp gratuitous accept
+   ip address 100.76.1.41/31
+   no ip verify unicast
+   no ip directed-broadcast
+   ip attached-routes
+   default arp aging timeout
+   default ipv6 nd cache expire
+   no bfd echo
+   no bfd authentication mode
+   default ip dhcp relay all-subnets
+   no ip helper-address
+   no ipv6 dhcp relay destination
+   no ipv6 dhcp relay add vendor-option ccap-core
+   no ipv6 dhcp relay install routes
+   ip dhcp relay information option circuit-id Ethernet48.2044
+   no dhcp server ipv4
+   no dhcp server ipv6
+   no ip attached-host route export
+   no ipv6 attached-host route export
+   no ip igmp
+   ip igmp version 3
+   ip igmp last-member-query-count 2
+   ip igmp last-member-query-interval 10
+   igmp query-max-response-time 100
+   ip igmp query-interval 125
+   ip igmp startup-query-count 2
+   ip igmp startup-query-interval 310
+   ip igmp router-alert optional connected
+   no ip igmp host-proxy
+   no ipv6 enable
+   default ipv6 nd dad
+   no ipv6 address
+   no ipv6 nd ra rx accept default-route
+   ipv6 attached-routes
+   no ipv6 verify unicast
+   no ipv6 nd ra disabled
+   ipv6 nd ra interval msec 200000
+   ipv6 nd ra lifetime 1800
+   no ipv6 nd ra mtu suppress
+   no ipv6 nd managed-config-flag
+   no ipv6 nd other-config-flag
+   ipv6 nd reachable-time 0
+   ipv6 nd router-preference medium
+   ipv6 nd ra dns-servers lifetime 300
+   ipv6 nd ra dns-suffixes lifetime 300
+   ipv6 nd ra hop-limit 64
+   no tcp mss ceiling
+   no multicast ipv4 source route export
+   no multicast ipv6 source route export
+   no multicast ipv4 static
+   no multicast ipv6 static
+   mfib ipv4 fastdrop
+   no mld
+   no mld static-group access-list
+   mld query-interval 125
+   mld query-response-interval 10
+   no mld startup-query-interval
+   mld startup-query-count 2
+   mld robustness 2
+   mld last-listener-query-interval 1
+   mld last-listener-query-count 2
+   mpls ip
+   default ntp serve
+   no pim ipv4 sparse-mode
+   no pim ipv4 bidirectional
+   no pim ipv4 border-router
+   pim ipv4 hello interval 30
+   pim ipv4 hello count 3.5
+   pim ipv4 dr-priority 1
+   pim ipv4 join-prune interval 60
+   pim ipv4 join-prune count 3.5
+   no pim ipv4 neighbor filter 
+   default pim ipv4 bfd
+   no  pim ipv4 join-prune transport sctp
+   no  pim ipv4 local-interface
+   no  pim ipv4 non-dr install-oifs
+   no pim ipv6 sparse-mode
+   no pim ipv6 border-router
+   pim ipv6 hello interval 30
+   pim ipv6 hello count 3.5
+   pim ipv6 dr-priority 1
+   pim ipv6 join-prune interval 60
+   pim ipv6 join-prune count 3.5
+   no pim ipv6 neighbor filter 
+   default pim ipv6 bfd
+   no pim bsr ipv4 border
+   no pim bsr ipv6 border
+   no rip v2 multicast disable
+   no node-segment ipv4 index
+   no node-segment ipv6 index
+!
 interface Loopback0
    no description
    no shutdown
