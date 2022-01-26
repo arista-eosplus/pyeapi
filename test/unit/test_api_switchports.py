@@ -201,6 +201,14 @@ class TestApiSwitchports(EapiConfigUnitTest):
             func = function('remove_trunk_group', intf, 'foo')
             self.eapi_positive_config_test(func, cmds)
 
+    def test_getall(self):
+        expected = sorted(['Port-Channel10',
+                           'Ethernet1', 'Ethernet2',
+                           'Ethernet3', 'Ethernet4',
+                           'Ethernet5', 'Ethernet6',
+                           'Ethernet7'])
+        assert sorted(self.instance.getall().keys()) == expected
+
 
 if __name__ == '__main__':
     unittest.main()
