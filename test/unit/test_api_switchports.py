@@ -206,7 +206,7 @@ class TestApiSwitchports(EapiConfigUnitTest):
                            'Ethernet1', 'Ethernet2',
                            'Ethernet3', 'Ethernet4',
                            'Ethernet5', 'Ethernet6',
-                           'Ethernet7'])
+                           'Ethernet7', 'Ethernet8'])
         assert sorted(self.instance.getall().keys()) == expected
 
 
