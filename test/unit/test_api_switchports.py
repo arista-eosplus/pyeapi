@@ -58,8 +58,14 @@ class TestApiSwitchports(EapiConfigUnitTest):
         self.assertEqual(sorted(result.keys()), sorted(keys))
 
     def test_getall(self):
+        expected = sorted(['Port-Channel10',
+                           'Ethernet1', 'Ethernet2',
+                           'Ethernet3', 'Ethernet4',
+                           'Ethernet5', 'Ethernet6',
+                           'Ethernet7', 'Ethernet8'])
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
+        self.assertEqual(sorted(self.instance.getall().keys()), expected)
 
     def test_instance_functions(self):
         for intf in self.INTERFACES:
@@ -200,14 +206,6 @@ class TestApiSwitchports(EapiConfigUnitTest):
                     'no switchport trunk group foo']
             func = function('remove_trunk_group', intf, 'foo')
             self.eapi_positive_config_test(func, cmds)
-
-    def test_getall(self):
-        expected = sorted(['Port-Channel10',
-                           'Ethernet1', 'Ethernet2',
-                           'Ethernet3', 'Ethernet4',
-                           'Ethernet5', 'Ethernet6',
-                           'Ethernet7', 'Ethernet8'])
-        assert sorted(self.instance.getall().keys()) == expected
 
 
 if __name__ == '__main__':
