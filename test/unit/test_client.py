@@ -333,6 +333,18 @@ class TestClient(unittest.TestCase):
         node = pyeapi.client.Node(None)
         self.assertTrue(hasattr(node, 'connection'))
 
+    @patch('pyeapi.client.Node.get_config')
+    def test_node_calls_running_config_with_all_by_default(self, get_config_mock):
+        node = pyeapi.client.Node(None)
+        _ = node.running_config
+        get_config_mock.assert_called_once_with(params='all', as_string=True)
+
+    @patch('pyeapi.client.Node.get_config')
+    def test_node_calls_running_config_without_params_if_config_defaults_false(self, get_config_mock):
+        node = pyeapi.client.Node(None, config_defaults=False)
+        _ = node.running_config
+        get_config_mock.assert_called_once_with(params=None, as_string=True)
+
     def test_node_returns_running_config(self):
         node = pyeapi.client.Node(None)
         get_config_mock = Mock(name='get_config')

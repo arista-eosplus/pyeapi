@@ -457,6 +457,8 @@ class Node(object):
         autorefresh (bool): If True, the running-config and startup-config are
             refreshed on config events.  If False, then the config properties
             must be manually refreshed.
+        config_defaults (bool): If True, the default config options will be
+            shown in the running-config output
         settings (dict): Provides access to the settings used to create the
             Node instance.
 
@@ -476,6 +478,7 @@ class Node(object):
 
         self._enablepwd = kwargs.get('enablepwd')
         self.autorefresh = kwargs.get('autorefresh', True)
+        self.config_defaults = kwargs.get('config_defaults', True)
         self.settings = kwargs
 
     def __str__(self):
@@ -492,7 +495,8 @@ class Node(object):
     def running_config(self):
         if self._running_config is not None:
             return self._running_config
-        self._running_config = self.get_config(params='all',
+        params = 'all' if self.config_defaults else None
+        self._running_config = self.get_config(params=params,
                                                as_string=True)
         return self._running_config
 
