@@ -44,7 +44,7 @@ import pyeapi.api.staticroute
 IP_DESTS = ['11.111.11.0/24', '222.22.222.0/24', '33.34.35.0/24']
 NEXT_HOPS = [('Ethernet1', '3.3.3.3'), ('Ethernet2', '2.2.2.2'),
              ('Null0', None), ('44.44.44.0', None)]
-DISTANCES = TAGS = ROUTE_NAMES = [None, True]
+DISTANCES = TAGS = ROUTE_NAMES = VRF = [None, True]
 
 
 class TestApiStaticroute(EapiConfigUnitTest):
@@ -162,12 +162,16 @@ class TestApiStaticroute(EapiConfigUnitTest):
             route_name = choice(ROUTE_NAMES)
             if route_name:
                 route_name = random_string(minchar=4, maxchar=10)
+            vrf = choice(VRF)
+            if vrf:
+                vrf = random_string(minchar=4, maxchar=10)
 
             func = function('create', ip_dest, next_hop,
                             next_hop_ip=next_hop_ip,
                             distance=distance,
                             tag=tag,
-                            route_name=route_name)
+                            route_name=route_name,
+                            vrf=vrf)
 
             # Build the expected string for comparison
             # A value of None will default to an empty string, and
@@ -181,9 +185,14 @@ class TestApiStaticroute(EapiConfigUnitTest):
                 cmd_tag = " tag %d" % tag
             if route_name is not None:
                 cmd_route_name = " name %s" % route_name
-            cmds = "ip route %s %s%s%s%s%s" % \
-                   (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
-                    cmd_tag, cmd_route_name)
+            if vrf:
+                cmds = "ip route vrf %s %s %s%s%s%s%s" % \
+                    (vrf, ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
+            else:
+                cmds = "ip route %s %s%s%s%s%s" % \
+                    (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
 
             self.eapi_positive_config_test(func, cmds)
 
@@ -201,12 +210,16 @@ class TestApiStaticroute(EapiConfigUnitTest):
             route_name = choice(ROUTE_NAMES)
             if route_name:
                 route_name = random_string(minchar=4, maxchar=10)
+            vrf = choice(VRF)
+            if vrf:
+                vrf = random_string(minchar=4, maxchar=10)
 
             func = function('delete', ip_dest, next_hop,
                             next_hop_ip=next_hop_ip,
                             distance=distance,
                             tag=tag,
-                            route_name=route_name)
+                            route_name=route_name,
+                            vrf=vrf)
 
             # Build the expected string for comparison
             # A value of None will default to an empty string, and
@@ -220,9 +233,14 @@ class TestApiStaticroute(EapiConfigUnitTest):
                 cmd_tag = " tag %d" % tag
             if route_name is not None:
                 cmd_route_name = " name %s" % route_name
-            cmds = "no ip route %s %s%s%s%s%s" % \
-                   (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
-                    cmd_tag, cmd_route_name)
+            if vrf:
+                cmds = "no ip route vrf %s %s %s%s%s%s%s" % \
+                    (vrf, ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
+            else:
+                cmds = "no ip route %s %s%s%s%s%s" % \
+                    (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
 
             self.eapi_positive_config_test(func, cmds)
 
@@ -240,12 +258,16 @@ class TestApiStaticroute(EapiConfigUnitTest):
             route_name = choice(ROUTE_NAMES)
             if route_name:
                 route_name = random_string(minchar=4, maxchar=10)
+            vrf = choice(VRF)
+            if vrf:
+                vrf = random_string(minchar=4, maxchar=10)
 
             func = function('default', ip_dest, next_hop,
                             next_hop_ip=next_hop_ip,
                             distance=distance,
                             tag=tag,
-                            route_name=route_name)
+                            route_name=route_name,
+                            vrf=vrf)
 
             # Build the expected string for comparison
             # A value of None will default to an empty string, and
@@ -259,9 +281,14 @@ class TestApiStaticroute(EapiConfigUnitTest):
                 cmd_tag = " tag %d" % tag
             if route_name is not None:
                 cmd_route_name = " name %s" % route_name
-            cmds = "default ip route %s %s%s%s%s%s" % \
-                   (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
-                    cmd_tag, cmd_route_name)
+            if vrf:
+                cmds = "default ip route vrf %s %s %s%s%s%s%s" % \
+                    (vrf, ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
+            else:
+                cmds = "default ip route %s %s%s%s%s%s" % \
+                    (ip_dest, next_hop, cmd_next_hop_ip, cmd_distance,
+                        cmd_tag, cmd_route_name)
 
             self.eapi_positive_config_test(func, cmds)
 
