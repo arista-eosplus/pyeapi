@@ -23,17 +23,17 @@ class TestUtils(unittest.TestCase):
 
     def test_make_iterable_from_string(self):
         result = pyeapi.utils.make_iterable('test')
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, collections.abc.Iterable)
         self.assertEqual(len(result), 1)
 
     def test_make_iterable_from_unicode(self):
         result = pyeapi.utils.make_iterable(u'test')
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, collections.abc.Iterable)
         self.assertEqual(len(result), 1)
 
     def test_make_iterable_from_iterable(self):
         result = pyeapi.utils.make_iterable(['test'])
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, collections.abc.Iterable)
         self.assertEqual(len(result), 1)
 
     def test_make_iterable_raises_type_error(self):
