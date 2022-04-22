@@ -423,6 +423,21 @@ def connect(transport=None, host='localhost', username='admin',
     Returns:
         An instance of an EapiConnection object for the specified transport.
 
+    Note:
+        Python 3.10 increases security strength of the TLS stack by among other
+        things using a stronger (than 3.9) default cypher suite. Thus programs
+        relying on the https transport and using the default cypher suite that
+        used to work in prior python versions may fail with the error:
+        `[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure`
+        The solution to that issue is to configure the https web server to use
+        a stronger cipher suite.
+        If the solution is not attainable, then a work-around might be
+        considered (weighing all due implications): the pyeapi client
+        connection could be forced to use a weaker cypher suite, e.g.:
+        ```
+        cc = pyeapi.client.connect( transport='https', host=host_name )
+        cc.transport._context.set_ciphers('DEFAULT')
+        ```
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
