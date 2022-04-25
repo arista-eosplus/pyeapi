@@ -37,12 +37,19 @@ for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
 import sys
-import json
 import socket
 import base64
 import logging
 import ssl
 import re
+
+try:
+    import ujson as json
+except ImportError:
+    try:
+        import rapidjson as json
+    except ImportError:
+        import json
 
 try:
     # Try Python 3.x import first
