@@ -433,11 +433,10 @@ def connect(transport=None, host='localhost', username='admin',
         a stronger cipher suite.
         If the solution is not attainable, then a work-around might be
         considered (weighing all due implications): the pyeapi client
-        connection could be forced to use a weaker cypher suite, e.g.:
-        ```
+        connection could be forced to use a weaker cypher suite, e.g.::
+
         cc = pyeapi.client.connect( transport='https', host=host_name )
         cc.transport._context.set_ciphers('DEFAULT')
-        ```
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
