@@ -486,7 +486,7 @@ class EapiConnection(object):
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
-            error_msg = 'Socket error during eAPI connection: %s' % str(exc)
+            error_msg = 'Socket error during eAPI connection: %s' % exc
             raise ConnectionError(str(self), error_msg)
         except ValueError as exc:
             _LOGGER.exception(exc)

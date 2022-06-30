@@ -388,12 +388,17 @@ def make_connection(transport, **kwargs):
     if transport not in TRANSPORTS:
         raise TypeError('invalid transport specified')
     klass = TRANSPORTS[transport]
+
+    # we don't want these parameters being passed to the transport constructor
+    # as they're not relevant
+    for k in ['enablepwd', 'tags']:
+        if k in kwargs:
+            del kwargs[k]
+
     return klass(**kwargs)
 
 
-def connect(transport=None, host='localhost', username='admin',
-            password='', port=None, key_file=None, cert_file=None,
-            ca_file=None, timeout=60, return_node=False, **kwargs):
+def connect(transport=None, return_node=False, **kwargs):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -438,15 +443,18 @@ def connect(transport=None, host='localhost', username='admin',
           cc = pyeapi.client.connect( transport='https', host=host_name )
           cc.transport._context.set_ciphers('DEFAULT')
     """
+    connect_args = {
+        'host': 'localhost',
+        'username': 'admin',
+        'password': '',
+        'timeout': 60,
+    }
+    connect_args.update(kwargs)
     transport = transport or DEFAULT_TRANSPORT
-    connection = make_connection(transport, host=host, username=username,
-                                 password=password, key_file=key_file,
-                                 cert_file=cert_file, ca_file=ca_file,
-                                 port=port, timeout=timeout)
+
+    connection = make_connection(transport, **connect_args)
     if return_node:
-        return Node(connection, transport=transport, host=host,
-                    username=username, password=password, key_file=key_file,
-                    cert_file=cert_file, ca_file=ca_file, port=port, **kwargs)
+        return Node(connection, **connect_args)
     return connection
 
 
