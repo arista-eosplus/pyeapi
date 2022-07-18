@@ -311,7 +311,7 @@ class TestClient(unittest.TestCase):
         transports = list(pyeapi.client.TRANSPORTS.keys())
         kwargs = dict(host='localhost', username='admin', password='',
                       port=None, key_file=None, cert_file=None,
-                      ca_file=None, timeout=60)
+                      ca_file=None, timeout=60, context=None)
 
         for transport in transports:
             pyeapi.client.connect(transport)
@@ -410,7 +410,7 @@ class TestClient(unittest.TestCase):
             pyeapi.client.connect()
             kwargs = dict(host='localhost', username='admin', password='',
                           port=None, key_file=None, cert_file=None,
-                          ca_file=None, timeout=60)
+                          ca_file=None, timeout=60, context=None)
             transport.assert_called_once_with(**kwargs)
 
     def test_connect_return_node(self):
@@ -423,7 +423,8 @@ class TestClient(unittest.TestCase):
                                          timeout=60, return_node=True)
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60)
+                          cert_file=None, ca_file=None, timeout=60,
+                          context=None)
             transport.assert_called_once_with(**kwargs)
             self.assertIsNone(node._enablepwd)
 
@@ -438,7 +439,8 @@ class TestClient(unittest.TestCase):
                                          return_node=True)
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60)
+                          cert_file=None, ca_file=None, timeout=60,
+                          context=None)
             transport.assert_called_once_with(**kwargs)
             self.assertEqual(node._enablepwd, 'enablepwd')
 
@@ -450,7 +452,8 @@ class TestClient(unittest.TestCase):
             node = pyeapi.client.connect_to('test1')
             kwargs = dict(host='192.168.1.16', username='eapi',
                           password='password', port=None, key_file=None,
-                          cert_file=None, ca_file=None, timeout=60)
+                          cert_file=None, ca_file=None, timeout=60,
+                          context=None)
             transport.assert_called_once_with(**kwargs)
             self.assertEqual(node._enablepwd, 'enablepwd')
 
