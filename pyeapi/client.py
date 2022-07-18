@@ -393,7 +393,8 @@ def make_connection(transport, **kwargs):
 
 def connect(transport=None, host='localhost', username='admin',
             password='', port=None, key_file=None, cert_file=None,
-            ca_file=None, timeout=60, return_node=False, **kwargs):
+            ca_file=None, timeout=60, return_node=False, context=None,
+            **kwargs):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -416,6 +417,7 @@ def connect(transport=None, host='localhost', username='admin',
         cert_file (str): Path to PEM formatted cert file for ssl validation
         ca_file (str): Path to CA PEM formatted cert file for ssl validation
         timeout (int): timeout
+        context (ssl.SSLContext) - ssl object's context. The default is None
         return_node (bool): Returns a Node object if True, otherwise
             returns an EapiConnection object.
 
@@ -425,24 +427,32 @@ def connect(transport=None, host='localhost', username='admin',
 
     Note:
         Python 3.10 increases security strength of the TLS stack by among other
-        things using a stronger (than 3.9) default cypher suite. Thus programs
+        things using a stronger (than 3.9) default cipher suite. Thus programs
         relying on the https transport and using the default cypher suite that
         used to work in prior python versions may fail with the error:
         ``[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure``.
         The solution to that issue is to configure the https web server to use
         a stronger cipher suite.
-        If the solution is not attainable, then a work-around might be
-        considered (weighing all due implications): the pyeapi client
-        connection could be forced to use a weaker cypher suite, e.g.::
 
-          cc = pyeapi.client.connect( transport='https', host=host_name )
-          cc.transport._context.set_ciphers('DEFAULT')
+        If the solution is not attainable, then a work-around might be
+        considered (weighing all due implications) - one could pass an ssl
+        context where cipher can be specified::
+
+          import pyeapi
+          import ssl
+          ...
+          ctx = ssl.create_default_context()
+          ctx.set_ciphers('DEFAULT')          # set a preferred cipher
+          ctx.check_hostname = False          # for the sake of example
+          ctx.verify_mode = ssl.CERT_NONE     # do it w/o certificate
+          ...
+          cc = pyeapi.client.connect( host=host_name, context=ctx )
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
                                  password=password, key_file=key_file,
                                  cert_file=cert_file, ca_file=ca_file,
-                                 port=port, timeout=timeout)
+                                 port=port, timeout=timeout, context=context)
     if return_node:
         return Node(connection, transport=transport, host=host,
                     username=username, password=password, key_file=key_file,
