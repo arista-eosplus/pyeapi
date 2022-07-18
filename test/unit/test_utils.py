@@ -1,3 +1,4 @@
+import sys
 import unittest
 import collections
 
@@ -5,6 +6,8 @@ from mock import patch, Mock
 
 import pyeapi.utils
 
+COLLECTIONS_ITERABLE = (collections.Iterable if sys.version_info <= (3, 3)
+    else collections.abc.Iterable)
 
 class TestUtils(unittest.TestCase):
 
@@ -23,18 +26,19 @@ class TestUtils(unittest.TestCase):
 
     def test_make_iterable_from_string(self):
         result = pyeapi.utils.make_iterable('test')
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, COLLECTIONS_ITERABLE)
         self.assertEqual(len(result), 1)
 
     def test_make_iterable_from_unicode(self):
         result = pyeapi.utils.make_iterable(u'test')
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, COLLECTIONS_ITERABLE)
         self.assertEqual(len(result), 1)
 
     def test_make_iterable_from_iterable(self):
         result = pyeapi.utils.make_iterable(['test'])
-        self.assertIsInstance(result, collections.Iterable)
+        self.assertIsInstance(result, COLLECTIONS_ITERABLE)
         self.assertEqual(len(result), 1)
+
 
     def test_make_iterable_raises_type_error(self):
         with self.assertRaises(TypeError):
