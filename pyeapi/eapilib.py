@@ -116,6 +116,11 @@ class CommandError(EapiError):
         if int(code) in [1000, 1002, 1004]:
             msg_fmt = 'Error [{}]: {} [{}]'.format(code, message, cmd_err)
         else:
+            # error code 1005: 'Command unauthorized: user has insufficient
+            # permissions to run the command'. The message contains a user
+            # sensitive input, which has to be removed
+            if int(code) == 1005: #
+                message = re.sub(r"(?<=input=)[^ ]+", r'<removed>)', message)
             msg_fmt = 'Error [{}]: {}'.format(code, message)
 
         super(CommandError, self).__init__(msg_fmt)
@@ -520,7 +525,10 @@ class EapiConnection(object):
         out = None
 
         if 'data' in message['error']:
-            err = ' '.join(message['error']['data'][-1]['errors'])
+            err = []
+            for dct in message['error']['data']:
+                err.extend( [ '%s: %s' % (k, repr(v)) for k,v in dct.items() ]  )
+            err = ', '.join(err)
             out = message['error']['data']
 
         return code, msg, err, out
