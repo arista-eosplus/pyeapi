@@ -417,7 +417,7 @@ def connect(transport=None, host='localhost', username='admin',
         cert_file (str): Path to PEM formatted cert file for ssl validation
         ca_file (str): Path to CA PEM formatted cert file for ssl validation
         timeout (int): timeout
-        context (ssl.SSLContext) - ssl object's context. The default is None
+        context (ssl.SSLContext): ssl object's context. The default is None
         return_node (bool): Returns a Node object if True, otherwise
             returns an EapiConnection object.
 
