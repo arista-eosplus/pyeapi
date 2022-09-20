@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import absolute_import, division, print_function
 
 from os import listdir, path, makedirs
 from os.path import isfile, join, exists
@@ -22,7 +23,7 @@ def get_module_names(p):
     mods = list()
     mods = [f.split('.')[0] for f in listdir(p)
             if isfile(join(p, f)) and not f.endswith('.pyc') and not f.startswith('__')]
-    print len(mods)
+    print( len(mods) )
     return mods
 
 def process_modules(modules):

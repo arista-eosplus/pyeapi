@@ -35,7 +35,11 @@ import importlib
 import inspect
 import logging
 import logging.handlers
-import collections
+if sys.version_info < (3, 3):
+    from collections import Iterable
+else:
+    from collections.abc import Iterable
+
 
 from itertools import tee
 
@@ -170,12 +174,8 @@ def make_iterable(value):
     if isinstance(value, str) or isinstance(value, dict):
         value = [value]
 
-    if sys.version_info <= (3, 3):
-        if not isinstance(value, collections.Iterable):
-            raise TypeError('value must be an iterable object')
-    else:
-        if not isinstance(value, collections.abc.Iterable):
-            raise TypeError('value must be an iterable object')
+    if not isinstance(value, Iterable):
+        raise TypeError('value must be an iterable object')
 
     return value
 
