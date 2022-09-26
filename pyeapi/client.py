@@ -610,7 +610,8 @@ class Node(object):
         return self._configure_terminal(commands, **kwargs)
 
     def _configure_terminal(self, commands, **kwargs):
-        """Configures the node with the specified commands with leading "configure terminal"
+        """Configures the node with the specified commands with leading
+        "configure terminal"
         """
         commands = make_iterable(commands)
         commands = list(commands)
@@ -628,7 +629,8 @@ class Node(object):
         return response
 
     def _configure_session(self, commands, **kwargs):
-        """Configures the node with the specified commands with leading "configure session <session name>"
+        """Configures the node with the specified commands with leading
+        "configure session <session name>"
         """
         if not self._session_name:
             raise CommandError('Not currently in a session')
@@ -886,7 +888,8 @@ class Node(object):
 
         Note: "show session-config diffs" doesn't support json encoding
         """
-        response = self._configure_session(['show session-config diffs'], encoding='text')
+        response = self._configure_session(
+            ['show session-config diffs'], encoding='text' )
 
         return response[0]['output']
 
