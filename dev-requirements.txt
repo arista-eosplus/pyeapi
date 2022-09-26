@@ -9,5 +9,7 @@ coverage
 sphinx
 sphinxcontrib-napoleon
 flake8
-flake8-print
-flake8-debugger
+#commenting below 2 lines until switchover to python3 is complete
+#flake8-print
+#flake8-debugger
+sphinx_rtd_theme

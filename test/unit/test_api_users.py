@@ -75,6 +75,11 @@ class TestApiUsers(EapiConfigUnitTest):
         func = function('create', 'test', secret='pass', encryption='md5')
         self.eapi_positive_config_test(func, cmds)
 
+    def test_create_with_secret_nologin(self):
+        cmds = 'username test secret *'
+        func = function('create', 'test', secret='', encryption='nologin')
+        self.eapi_positive_config_test(func, cmds)
+
     def test_create_with_secret_sha512(self):
         cmds = 'username test secret sha512 pass'
         func = function('create', 'test', secret='pass', encryption='sha512')

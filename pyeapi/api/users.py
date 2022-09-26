@@ -46,7 +46,7 @@ Parameters:
         This parameter is mutually exclusive with secret and is used in
         conjunction with format.
     format (string): Configures the format of the secret value.  Accepted
-        values for format are "cleartext", "md5" and "sha512"
+        values for format are "cleartext", "md5", "nologin" and "sha512"
 
 """
 
@@ -55,7 +55,7 @@ import re
 from pyeapi.api import EntityCollection
 
 DEFAULT_ENCRYPTION = 'cleartext'
-ENCRYPTION_MAP = {'cleartext': 0, 'md5': 5, 'sha512': 'sha512'}
+ENCRYPTION_MAP = {'cleartext': 0, 'md5': 5, 'sha512': 'sha512', 'nologin': '*'}
 
 
 def isprivilege(value):
@@ -163,8 +163,8 @@ class Users(EntityCollection):
             secret (str): The secret (password) to assign to this user
 
             encryption (str): Specifies how the secret is encoded.  Valid
-                values are "cleartext", "md5", "sha512".  The default is
-                "cleartext"
+                values are "cleartext", "md5", "nologin", "sha512".
+                The default is "cleartext"
 
         Returns:
             True if the operation was successful otherwise False
@@ -172,7 +172,7 @@ class Users(EntityCollection):
         Raises:
             TypeError: if the required arguments are not satisfied
         """
-        if secret is not None:
+        if secret is not None or encryption == 'nologin':
             return self.create_with_secret(name, secret, encryption)
         elif nopassword is True:
             return self.create_with_nopassword(name)
@@ -189,8 +189,8 @@ class Users(EntityCollection):
             secret (str): The secret (password) to assign to this user
 
             encryption (str): Specifies how the secret is encoded.  Valid
-                values are "cleartext", "md5", "sha512".  The default is
-                "cleartext"
+                values are "cleartext", "md5", "nologin" and "sha512".
+                The default is "cleartext"
 
         Returns:
             True if the operation was successful otherwise False
@@ -200,9 +200,11 @@ class Users(EntityCollection):
             enc = ENCRYPTION_MAP[encryption]
         except KeyError:
             raise TypeError('encryption must be one of "cleartext", "md5"'
-                            ' or "sha512"')
+                            ' "nologin" or "sha512"')
 
         cmd = 'username %s secret %s %s' % (name, enc, secret)
+        if encryption == 'nologin':
+            cmd = 'username %s secret %s' % (name, enc)
         return self.configure(cmd)
 
     def create_with_nopassword(self, name):
