@@ -46,7 +46,7 @@ if sys.version_info < (3, 3):
 else:
     from collections.abc import Callable, Mapping
 
-from pyeapi.eapilib import CommandError, ConnectionError
+from pyeapi.eapilib import CommandError
 from pyeapi.utils import make_iterable
 
 

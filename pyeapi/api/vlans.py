@@ -183,7 +183,7 @@ class Vlans(EntityCollection):
             A dict object of Vlan attributes
 
         """
-        # regex to find standalone and grouped (ranged, enumerated) vlans (#197)
+        # RE to find standalone and grouped (ranged, enumerated) vlans (#197)
         vlans_re = re.compile(r'(?<=^vlan\s)[\d,\-]+', re.M)
 
         response = dict()

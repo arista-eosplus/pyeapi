@@ -978,7 +978,7 @@ class VxlanInterface(BaseInterface):
             True if the operation succeeds otherwise False
         """
         string = 'vxlan multicast-group decap'
-        if(default or disable):
+        if default or disable:
             cmds = self.command_builder(string, value=None, default=default,
                                         disable=disable)
         else:
