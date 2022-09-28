@@ -523,7 +523,7 @@ class EapiConnection(object):
         A json label cannot be wildcarded. A single wildcard represent a single
         json entry. E.g.:
 
-            _find_sub_json( jsn, { 'foo'': () } )
+            _find_sub_json( jsn, { 'foo': () } )
 
         Returned value is a Match class with attributes:
         - entry: an iterable containing a matching `sbj`
