@@ -520,10 +520,10 @@ class EapiConnection(object):
     def _find_sub_json( self, jsn, sbj, instance=0 ):
         """finds a subset (sbj) in json. `sbj` must be a subset and json must
         not be atomic. Wildcard(s) in `sbj` can be specified with tuple type.
-        A json label canot be wildcarded. A single wildcard represent a single
+        A json label cannot be wildcarded. A single wildcard represent a single
         json entry. E.g.:
 
-            _find_sub_json( jsn, { "foo": () } )
+            _find_sub_json( jsn, { 'foo'': () } )
 
         Returned value is a Match class with attributes:
         - entry: an iterable containing a matching `sbj`
@@ -531,7 +531,7 @@ class EapiConnection(object):
         If no match found None is returned - that way is possible to get a
         reference to the sought json and modify it, e.g:
 
-            match = _find_sub_json( jsn, { 'foo'':(), 'bar': [123, (), ()] } )
+            match = _find_sub_json( jsn, { 'foo':(), 'bar': [123, (), ()] } )
             if match:
                 match.entry[ match.idx ][ 'foo' ] = 'bar'
 
