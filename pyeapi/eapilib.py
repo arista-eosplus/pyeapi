@@ -434,7 +434,7 @@ class EapiConnection(object):
         """
         try:
             _LOGGER.debug(
-                'Request content: {}'.format(self._sanitize_request( data )))
+                'Request content: {}'.format(self._sanitize_request( data )) )
             # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
@@ -505,11 +505,15 @@ class EapiConnection(object):
 
     def _sanitize_request( self, data ):
         """remove user-sensitive input from data response"""
-        data_json = json.loads( data )
-        match = self._find_sub_json( data_json, {'cmd': 'enable', 'input':()} )
-        if match:
-            match.entry[ match.idx ][ 'input' ] = '<removed>'
-            return json.dumps( data_json )
+        try:
+            data_json = json.loads( data )
+            match = self._find_sub_json(
+                data_json, {'cmd': 'enable', 'input':()} )
+            if match:
+                match.entry[ match.idx ][ 'input' ] = '<removed>'
+                return json.dumps( data_json )
+        except ValueError:
+            pass
         return data
 
 
