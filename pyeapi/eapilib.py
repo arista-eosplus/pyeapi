@@ -573,7 +573,7 @@ class EapiConnection(object):
                 else:
                     return Match( jsn, key )
             if is_iterable( val ):
-                match =  self._find_sub_json( val, sbj, instance )
+                match = self._find_sub_json( val, sbj, instance )
                 if match:
                     return match
         return None

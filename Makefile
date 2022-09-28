@@ -31,7 +31,7 @@ VERSION := $(shell cat VERSION)
 all: clean check pep8 flake8 tests
 
 pep8:
-	pycodestyle -r --ignore=E402,E731,E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E202,E225,E261,E241 pyeapi/ test/
+	pycodestyle -r --ignore=E402,E731,E501,E221,W291,W391,E302,E251,E203,W293,E231,E303,E201,E202,E225,E261,E241,E128 pyeapi/ test/
 
 pyflakes:
 	pyflakes pyeapi/ test/
