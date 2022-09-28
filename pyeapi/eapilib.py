@@ -433,7 +433,8 @@ class EapiConnection(object):
                 code and error message from the eAPI response.
         """
         try:
-            _LOGGER.debug('Request content: {}'.format(data))
+            _LOGGER.debug(
+                'Request content: {}'.format(self._sanitize_request( data )))
             # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
@@ -500,6 +501,83 @@ class EapiConnection(object):
             raise ConnectionError(str(self), 'unable to connect to eAPI')
         finally:
             self.transport.close()
+
+
+    def _sanitize_request( self, data ):
+        """remove user-sensitive input from data response"""
+        data_json = json.loads( data )
+        match = self._find_sub_json( data_json, {'cmd': 'enable', 'input':()} )
+        if match:
+            match.entry[ match.idx ][ 'input' ] = '<removed>'
+            return json.dumps( data_json )
+        return data
+
+
+    def _find_sub_json( self, jsn, sbj, instance=0 ):
+        """finds a subset (sbj) in json. `sbj` must be a subset and json must
+        not be atomic. Wildcard(s) in `sbj` can be specified with tuple type.
+        A json label canot be wildcarded. A single wildcard represent a single
+        json entry. E.g.:
+
+            _find_sub_json( jsn, { "foo": () } )
+
+        Returned value is a Match class with attributes:
+        - entry: an iterable containing a matching `sbj`
+        - idx: index or key pointing to the match in the iterable
+        If no match found None is returned - that way is possible to get a
+        reference to the sought json and modify it, e.g:
+
+            match = _find_sub_json( jsn, { 'foo'':(), 'bar': [123, (), ()] } )
+            if match:
+                match.entry[ match.idx ][ 'foo' ] = 'bar'
+
+        It's also possible to specify an occurrence of the match via `instance`
+        parameter - by default a first found match is returned"""
+        class Match():
+            def __init__( self, entry, idx ):
+                self.entry = entry
+                self.idx = idx
+
+        def is_iterable( val ):
+            return True if isinstance( val, (list, dict) ) else False
+
+        def is_atomic( val ):
+            return not is_iterable( val )
+
+        def is_match( jsn, sbj ):
+            if isinstance( sbj, tuple ):              # sbj is a wildcard
+                return True
+            if is_atomic( sbj ):
+                return False if is_iterable( jsn ) else sbj == jsn
+            if type( jsn ) is not type( sbj ) or len( jsn ) != len( sbj ):
+                return False
+            for left, right in zip(
+                    sorted(jsn.items() if isinstance( jsn, dict )
+                        else enumerate( jsn )),
+                    sorted(sbj.items() if isinstance( sbj, dict )
+                        else enumerate( sbj )) ):
+                if left[ 0 ] != right[ 0 ]:
+                    return False
+                if not is_match( left[ 1 ], right[ 1 ]):
+                    return False
+            return True
+
+        if is_atomic( jsn ):
+            return None
+        instance = [ instance ] if isinstance( instance, int ) else instance
+        for key, val in jsn.items() if isinstance( jsn,
+                dict ) else enumerate( jsn ):
+            if is_match( val, sbj ):
+                if instance[ 0 ] > 0:
+                    instance[ 0 ] -= 1
+                else:
+                    return Match( jsn, key )
+            if is_iterable( val ):
+                match =  self._find_sub_json( val, sbj, instance )
+                if match:
+                    return match
+        return None
+
 
     def _parse_error_message(self, message):
         """Parses the eAPI failure response message
