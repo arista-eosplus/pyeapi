@@ -19,6 +19,8 @@ jobs:
         run: pip install wheel
       - name: Install dev requirements
         run: pip install -r dev-requirements.txt
+      - name: Upgrade flake8
+        run: pip install --upgrade flake8
       - name: Clean
         run: make clean
       - name: pep8
