@@ -911,7 +911,7 @@ class VxlanInterface(BaseInterface):
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
-        match = re.search(r'vxlan flood vtep (.+)$', config, re.M)
+        match = re.search(r'^ *vxlan flood vtep +([\d. ]+)$', config, re.M)
         values = list()
         if match:
             values = match.group(1).split(' ')
