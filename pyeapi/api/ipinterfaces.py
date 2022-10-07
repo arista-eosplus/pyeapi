@@ -117,7 +117,7 @@ class Ipinterfaces(EntityCollection):
             dict: A dict object intended to be merged into the resource dict
         """
         match = re.search(r'mtu (\d+)', config)
-        return dict(mtu=int(match.group(1)))
+        return dict( mtu=int(match.group( 1 )) if match else None )
 
     def getall(self):
         """ Returns all of the IP interfaces found in the running-config
