@@ -508,7 +508,7 @@ class EapiConnection(object):
         try:
             data_json = json.loads( data )
             match = self._find_sub_json(
-                data_json, {'cmd': 'enable', 'input':()} )
+                data_json, {'cmd': 'enable', 'input': ()} )
             if match:
                 match.entry[ match.idx ][ 'input' ] = '<removed>'
                 return json.dumps( data_json )
@@ -610,7 +610,7 @@ class EapiConnection(object):
             err = []
             for dct in message['error']['data']:
                 err.extend(
-                    ['%s: %s' % ( k, repr(v) ) for k,v in dct.items()] )
+                    ['%s: %s' % ( k, repr(v) ) for k, v in dct.items()] )
             err = ', '.join(err)
             out = message['error']['data']
 
