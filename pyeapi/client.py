@@ -94,6 +94,8 @@ from uuid import uuid4
 import os
 import re
 
+from functools import lru_cache
+
 try:
     # Try Python 3.x import first
     # Note: SafeConfigParser is deprecated and replaced by ConfigParser
@@ -651,6 +653,18 @@ class Node(object):
 
         return response
 
+    @lru_cache(maxsize=None)
+    def _chunkify(self, config):
+        sections = {}
+        key = None
+        for line in config.splitlines(keepends=True):
+            if not line.startswith(' '):
+                key = line.strip()
+                sections[key] = line
+            else:
+                sections[key] += line
+        return sections
+
     def section(self, regex, config='running_config'):
         """Returns a section of the config
 
@@ -666,18 +680,14 @@ class Node(object):
         """
         if config in ['running_config', 'startup_config']:
             config = getattr(self, config)
-        match = re.search(regex, config, re.M)
-        if not match:
+        chunked = self._chunkify(config)
+        r = re.compile(regex)
+        matching_keys = [k for k in chunked.keys() if r.match(k)]
+        if len(matching_keys) == 0:
             raise TypeError('config section not found')
-        block_start, line_end = match.regs[0]
-
-        match = re.search(r'^[^\s]', config[line_end:], re.M)
-        if not match:
-            raise TypeError('could not find end block')
-        _, block_end = match.regs[0]
-
-        block_end = line_end + block_end
-        return config[block_start:block_end]
+        matching_key = matching_keys[0]
+        match = chunked[matching_key]
+        return match
 
     def enable(self, commands, encoding='json', strict=False,
                send_enable=True, **kwargs):

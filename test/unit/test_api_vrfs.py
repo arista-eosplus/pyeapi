@@ -54,7 +54,7 @@ class TestApiVrfs(EapiConfigUnitTest):
                    ipv4_routing=True, ipv6_routing=False)
         self.assertEqual(vrf, result)
         result2 = self.instance.get('test')
-        vrf2 = dict(rd='200:500', vrf_name='test', description='!',
+        vrf2 = dict(rd='200:500', vrf_name='test', description='',
                     ipv4_routing=False, ipv6_routing=True)
         self.assertEqual(vrf2, result2)
 
