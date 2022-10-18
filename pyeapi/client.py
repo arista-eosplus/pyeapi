@@ -665,15 +665,15 @@ class Node(object):
                 continue
             # new section is found (if key is not None)
             if key: # process prior (last recorded) section
-               section_lines = sections[key].splitlines()[ 1: ]
-               if len( section_lines ): # section may contain sub-sections, process
-                   ind = len( section_lines[0] ) - len( section_lines[0].lstrip() )
-                   if is_subsection_present( section_lines, ind ):
-                       sub_sections = self._chunkify( sections[key], indent=ind )
-                       sub_sections.update( sections )
-                       sections = sub_sections
-               elif indent > 0: # record only subsections
-                   del( sections[key] )
+                section_lines = sections[key].splitlines()[ 1: ]
+                if len( section_lines ): # section may contain sub-sections, process
+                    ind = len( section_lines[0] ) - len( section_lines[0].lstrip() )
+                    if is_subsection_present( section_lines, ind ):
+                        sub_sections = self._chunkify( sections[key], indent=ind )
+                        sub_sections.update( sections )
+                        sections = sub_sections
+                elif indent > 0: # record only subsections
+                    del sections[key]
             key = line.rstrip()
             sections[key] = line
         return sections
