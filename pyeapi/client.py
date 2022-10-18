@@ -654,15 +654,28 @@ class Node(object):
         return response
 
     @lru_cache(maxsize=None)
-    def _chunkify(self, config):
+    def _chunkify( self, config, indent=0 ):
+        def is_subsection_present( section, indent ):
+            return any( [line[ indent ] == ' ' for line in section] )
         sections = {}
         key = None
-        for line in config.splitlines(keepends=True):
-            if not line.startswith(' '):
-                key = line.strip()
-                sections[key] = line
-            else:
+        for line in config.splitlines( keepends=True )[ indent > 0: ]:
+            if line[ indent ] == ' ':  # section continuation
                 sections[key] += line
+                continue
+            # new section is found (if key is not None)
+            if key: # process prior (last recorded) section
+               section_lines = sections[key].splitlines()[ 1: ]
+               if len( section_lines ): # section may contain sub-sections, process
+                   ind = len( section_lines[0] ) - len( section_lines[0].lstrip() )
+                   if is_subsection_present( section_lines, ind ):
+                       sub_sections = self._chunkify( sections[key], indent=ind )
+                       sub_sections.update( sections )
+                       sections = sub_sections
+               elif indent > 0: # record only subsections
+                   del( sections[key] )
+            key = line.rstrip()
+            sections[key] = line
         return sections
 
     def section(self, regex, config='running_config'):
@@ -682,7 +695,7 @@ class Node(object):
             config = getattr(self, config)
         chunked = self._chunkify(config)
         r = re.compile(regex)
-        matching_keys = [k for k in chunked.keys() if r.match(k)]
+        matching_keys = [k for k in chunked.keys() if r.search(k)]
         if len(matching_keys) == 0:
             raise TypeError('config section not found')
         matching_key = matching_keys[0]
