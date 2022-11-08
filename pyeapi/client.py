@@ -110,6 +110,7 @@ from pyeapi.utils import load_module, make_iterable, debug
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import HttpsEapiCertConnection
+from pyeapi.eapilib import HttpEapiSessionConnection, HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
@@ -119,8 +120,10 @@ TRANSPORTS = {
     'socket': SocketEapiConnection,
     'http_local': HttpLocalEapiConnection,
     'http': HttpEapiConnection,
+    'http_session': HttpEapiSessionConnection,
     'https': HttpsEapiConnection,
-    'https_certs': HttpsEapiCertConnection
+    'https_certs': HttpsEapiCertConnection,
+    'https_session': HttpsEapiSessionConnection,
 }
 
 DEFAULT_TRANSPORT = 'https'
@@ -404,8 +407,9 @@ def connect(transport=None, host='localhost', username='admin',
 
     Args:
         transport (str): Specifies the type of connection transport to use.
-            Valid values for the connection are socket, http_local, http, and
-            https.  The default value is specified in DEFAULT_TRANSPORT
+            Valid values for the connection are socket, http_local, http,
+            https, https_certs, http_session, and https_session.  The default
+            value is specified in DEFAULT_TRANSPORT
         host (str): The IP addres or DNS host name of the connection device.
             The default value is 'localhost'
         username (str): The username to pass to the device to authenticate

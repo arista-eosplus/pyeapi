@@ -54,9 +54,11 @@ except ImportError:
 try:
     # Try Python 3.x import first
     from http.client import HTTPConnection, HTTPSConnection
+    from http.cookies import SimpleCookie
 except ImportError:
     # Use Python 2.7 import as a fallback
     from httplib import HTTPConnection, HTTPSConnection
+    from Cookie import SimpleCookie
 
 from pyeapi.utils import make_iterable
 
@@ -309,14 +311,13 @@ class EapiConnection(object):
             # For Python 3.x
             _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
-            _auth = _auth.replace('\n', '')
-            self._auth = _auth
         else:
             # For Python 2.7
-            _auth = base64.encodestring(_auth_text)
-            self._auth = str(_auth).replace('\n', '')
+            _auth = str(base64.encodestring(_auth_text))
+        _auth = _auth.replace('\n', '')
+        self._auth = ("Authorization", "Basic %s" % _auth)
 
-        _LOGGER.debug('Autentication string is: {}:***'.format(username))
+        _LOGGER.debug('Authentication string is: {}:***'.format(username))
 
     def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
@@ -443,8 +444,7 @@ class EapiConnection(object):
             self.transport.putheader('Content-length', '%d' % len(data))
 
             if self._auth:
-                self.transport.putheader('Authorization',
-                                         'Basic %s' % self._auth)
+                self.transport.putheader(*self._auth)
 
             if int(sys.version[0]) > 2:
                 # For Python 3.x compatibility
@@ -729,3 +729,44 @@ class HttpsEapiCertConnection(EapiConnection):
                                              key_file=key_file,
                                              cert_file=cert_file,
                                              ca_file=ca_file, timeout=timeout)
+
+
+class SessionApiConnection(object):
+    def authentication(self, username, password):
+        try:
+            data = json.dumps({"username": username, "password": password})
+            self.transport.putrequest("POST", "/login")
+            self.transport.putheader("Content-type", "application/json")
+            self.transport.putheader("Content-length", "%d" % len(data))
+
+            if int(sys.version[0]) > 2:
+                data = data.encode()
+            self.transport.endheaders(message_body=data)
+            resp = self.transport.getresponse()
+            if resp.status != 200:
+                raise ConnectionError(str(self), '%s. %s' % (resp.reason,
+                                                             resp.read()))
+            session = SimpleCookie(resp.getheader("Set-Cookie"))
+            self._auth = ("Cookie", session.output(header="", attrs=[]))
+
+        except (socket.error, OSError) as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = exc
+            self.error = exc
+            error_msg = 'Socket error during eAPI authentication: %s' % str(exc)
+            raise ConnectionError(str(self), error_msg)
+        except ValueError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = None
+            self.error = exc
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
+        finally:
+            self.transport.close()
+
+
+class HttpEapiSessionConnection(SessionApiConnection, HttpEapiConnection):
+    pass
+
+
+class HttpsEapiSessionConnection(SessionApiConnection, HttpsEapiConnection):
+    pass
