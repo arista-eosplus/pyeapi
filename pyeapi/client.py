@@ -106,7 +106,7 @@ except ImportError:
     from ConfigParser import SafeConfigParser
     from ConfigParser import Error as SafeConfigParserError
 
-from pyeapi.utils import load_module, make_iterable, debug
+from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import HttpsEapiCertConnection
@@ -605,6 +605,9 @@ class Node(object):
                 a list.
                 The list of commands will also be prepended with the
                 necessary commands to put the session in config mode.
+                commands might be given in a form, or contain ``CliVariants``
+                object, which provides alternative cli syntax, e.g.:
+                ``config( pyeapi.utils.CliVariants(new_cli, old_cli) )``
             **kwargs: Additional keyword arguments for expanded eAPI
                 functionality. Only supported eAPI params are used in building
                 the request
@@ -614,10 +617,29 @@ class Node(object):
                 output from each command.  The function will strip the
                 response from any commands it prepends.
         """
-        if self._session_name:  # If in a config session
-            return self._configure_session(commands, **kwargs)
+        def variant_cli_idx( cmds ):
+            try:
+                return [ type(v) for v in cmds ].index( CliVariants )
+            except (ValueError):
+                return -1
 
-        return self._configure_terminal(commands, **kwargs)
+        cfg_call = self._configure_session if self._session_name \
+            else self._configure_terminal
+
+        if isinstance( commands, CliVariants ):
+            commands = [ commands ]
+        idx = variant_cli_idx( commands )
+        if idx == -1:
+            return cfg_call( commands, **kwargs )
+
+        # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
+        for variant in commands[ idx ].variants:
+            cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
+            try:
+                return cfg_call( cmd, **kwargs )
+            except (CommandError) as e:
+                pass
+        raise CommandError( e.message )
 
     def _configure_terminal(self, commands, **kwargs):
         """Configures the node with the specified commands with leading
