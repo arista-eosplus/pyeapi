@@ -633,14 +633,17 @@ class Node(object):
             return cfg_call( commands, **kwargs )
 
         # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
-        exp = None
+        e = None
         for variant in commands[ idx ].variants:
             cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
             try:
                 return cfg_call( cmd, **kwargs )
-            except (CommandError) as e:
-                exp = (e.error_code, e.error_text)
-        raise CommandError( *exp )
+            except (CommandError) as exp:
+                e = exp
+        # re-raising last occurred CommandError
+        raise CommandError( e.error_code, e.error_text, output=e.output,
+            commands=e.commands, command_error=e.command_error )
+
 
     def _configure_terminal(self, commands, **kwargs):
         """Configures the node with the specified commands with leading
