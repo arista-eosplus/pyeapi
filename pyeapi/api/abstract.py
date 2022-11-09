@@ -47,7 +47,7 @@ else:
     from collections.abc import Callable, Mapping
 
 from pyeapi.eapilib import CommandError
-from pyeapi.utils import make_iterable
+from pyeapi.utils import make_iterable, CliVariants
 
 
 class BaseEntity(object):
@@ -118,17 +118,38 @@ class BaseEntity(object):
 
         Args:
             commands (list): A list of commands to be sent to the node in
-                config mode
+                config mode. *list* may contain ``pyeapi.utils.CliVariants``
+                object, which provides alternative cli syntax, e.g.:
+                ``configure( pyeapi.utils.CliVariants(new_cli, old_cli) )``
 
         Returns:
             True if the commands are executed without exception otherwise
                 False is returned
         """
-        try:
-            self.node.config(commands)
-            return True
-        except (CommandError):
-            return False
+        def non_variant_config( commands ):
+            try:
+                self.node.config( commands )
+                return True
+            except (CommandError):
+                return False
+
+        def variant_cli_idx( cmds ):
+            try:
+                return [ type(v) for v in cmds ].index( CliVariants )
+            except (ValueError):
+                return -1
+
+        idx = variant_cli_idx( commands )
+        if idx == -1:
+            return non_variant_config( commands )
+
+        # commands contain CliVariants obj, e.g.: [ 'cli', CliVariants, ... ]
+        for variant in commands[ idx ].variants:
+            cmd = commands[ :idx ] + variant + commands[idx + 1:]
+            if non_variant_config( cmd ):
+                return True
+        return False
+
 
     def command_builder(self, string, value=None, default=None, disable=None):
         """Builds a command with keywords
