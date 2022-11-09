@@ -633,13 +633,14 @@ class Node(object):
             return cfg_call( commands, **kwargs )
 
         # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
+        exp = None
         for variant in commands[ idx ].variants:
             cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
             try:
                 return cfg_call( cmd, **kwargs )
             except (CommandError) as e:
-                pass
-        raise CommandError( e.message )
+                exp = (e.error_code, e.error_text)
+        raise CommandError( *exp )
 
     def _configure_terminal(self, commands, **kwargs):
         """Configures the node with the specified commands with leading
@@ -665,7 +666,7 @@ class Node(object):
         "configure session <session name>"
         """
         if not self._session_name:
-            raise CommandError('Not currently in a session')
+            raise CommandError(-1, 'Not currently in a session')
 
         commands = make_iterable(commands)
         commands = list(commands)
