@@ -252,10 +252,10 @@ class CliVariants:
     Provides an interface for cli variants (typically to handle a transition
     period for a deprecated cli)
 
-    Instance must be initialized either with 2 (or more) str variants:
+    Instance must be initialized either with 2 or more str variants:
         ``CliVariants( 'new cli', 'legacy cli' )``,
-    or with 2 or more sequences of cli (or a mix):
-        ``CliVariants( ['new cli 1', 'new cli 2'], 'legacy cli' )``
+    or with 2 or more sequences of cli (or a mix of list and str types), e.g.:
+        ``CliVariants( ['new cli1', 'new cli2'], 'alt cli3', 'legacy cli4' )``
     """
     def __init__(self, *cli):
         assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'

@@ -596,18 +596,31 @@ class Node(object):
         """Configures the node with the specified commands
 
         This method is used to send configuration commands to the node.  It
-        will take either a string or a list and prepend the necessary commands
-        to put the session into config mode.
+        will take either a string, list or CliVariants type and prepend the
+        necessary commands to put the session into config mode.
+        pyeapi.utils.CliVariants facilitates alternative executions to commands
+        sequence until one variant succeeds or all fail
 
         Args:
-            commands (str, list): The commands to send to the node in config
-                mode.  If the commands argument is a string it will be cast to
-                a list.
-                The list of commands will also be prepended with the
-                necessary commands to put the session in config mode.
-                commands might be given in a form, or contain ``CliVariants``
-                object, which provides alternative cli syntax, e.g.:
-                ``config( pyeapi.utils.CliVariants(new_cli, old_cli) )``
+            commands (str, list, CliVariants): The commands to send to the node
+                in config mode. If the commands argument is an str or
+                CliVariants type, it will be cast to a list.
+                The list of commands will also be prepended with the necessary
+                commands to put the session in config mode.
+                CliVariants could be part of a list too, however only a single
+                occurrence of CliVariants type in commands is supported.
+                CliVariants type facilitates execution of alternative commands
+                sequences, e.g.:
+                ``config( [cli1, CliVariants( cli2, cli3 ), cli4] )``
+                the example above can be translated into following sequence:
+               ``config( [cli1, cli2, cli4] )``
+               ``config( [cli1, cli3, cli4] )``
+                CliVariants accepts 2 or more arguments of str, list type, or
+                their mix. Each argument to CliVariants will be joined with the
+                rest of commands and all command sequences will be tried until
+                one variant succeeds. If all variants fail the last failure
+                exception will be re-raised.
+
             **kwargs: Additional keyword arguments for expanded eAPI
                 functionality. Only supported eAPI params are used in building
                 the request
@@ -618,6 +631,7 @@ class Node(object):
                 response from any commands it prepends.
         """
         def variant_cli_idx( cmds ):
+            # return index of first occurrence of CliVariants type in cmds
             try:
                 return [ type(v) for v in cmds ].index( CliVariants )
             except (ValueError):
@@ -633,16 +647,14 @@ class Node(object):
             return cfg_call( commands, **kwargs )
 
         # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
-        e = None
+        err = None
         for variant in commands[ idx ].variants:
             cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
             try:
                 return cfg_call( cmd, **kwargs )
             except (CommandError) as exp:
-                e = exp
-        # re-raising last occurred CommandError
-        raise CommandError( e.error_code, e.error_text, output=e.output,
-            commands=e.commands, command_error=e.command_error )
+                err = exp
+        raise err  # re-raising last occurred CommandError
 
 
     def _configure_terminal(self, commands, **kwargs):
