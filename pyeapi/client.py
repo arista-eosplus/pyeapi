@@ -613,8 +613,8 @@ class Node(object):
                 sequences, e.g.:
                 ``config( [cli1, CliVariants( cli2, cli3 ), cli4] )``
                 the example above can be translated into following sequence:
-               ``config( [cli1, cli2, cli4] )``
-               ``config( [cli1, cli3, cli4] )``
+                ``config( [cli1, cli2, cli4] )``
+                ``config( [cli1, cli3, cli4] )``
                 CliVariants accepts 2 or more arguments of str, list type, or
                 their mix. Each argument to CliVariants will be joined with the
                 rest of commands and all command sequences will be tried until
