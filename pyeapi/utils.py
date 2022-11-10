@@ -171,7 +171,8 @@ def make_iterable(value):
         # Convert unicode values to strings for Python 2
         if isinstance(value, unicode):
             value = str(value)
-    if isinstance(value, str) or isinstance(value, dict):
+    if isinstance(value, str) or isinstance(
+            value, dict) or isinstance(value, CliVariants):
         value = [value]
 
     if not isinstance(value, Iterable):
@@ -244,3 +245,19 @@ def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
         else:
             values.extend([v1])
     return [str(x) for x in values]
+
+
+class CliVariants:
+    """
+    Provides an interface for cli variants (typically to handle a transition
+    period for a deprecated cli)
+
+    Instance must be initialized either with 2 or more str variants:
+        ``CliVariants( 'new cli', 'legacy cli' )``,
+    or with 2 or more sequences of cli (or a mix of list and str types), e.g.:
+        ``CliVariants( ['new cli1', 'new cli2'], 'alt cli3', 'legacy cli4' )``
+    """
+    def __init__(self, *cli):
+        assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
+        self.variants = [ v if not isinstance(v, str) and isinstance(v, Iterable)
+            else [v] for v in cli ]
