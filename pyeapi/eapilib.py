@@ -692,6 +692,9 @@ class HttpsEapiConnection(EapiConnection):
         path = path or DEFAULT_HTTP_PATH
 
         enforce_verification = kwargs.get('enforce_verification')
+        # after fix #236 (allowing passing ssl context), this parameter
+        # is deprecated - will be release noted and removed in the respective
+        # release versions
 
         if context is None and not enforce_verification:
             context = self.disable_certificate_verification()
