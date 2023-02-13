@@ -167,10 +167,6 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
-    if sys.version_info <= (3, 0):
-        # Convert unicode values to strings for Python 2
-        if isinstance(value, unicode):
-            value = str(value)
     if isinstance(value, str) or isinstance(
             value, dict) or isinstance(value, CliVariants):
         value = [value]
@@ -259,5 +255,5 @@ class CliVariants:
     """
     def __init__(self, *cli):
         assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
-        self.variants = [ v if not isinstance(v, str) and isinstance(v, Iterable)
-            else [v] for v in cli ]
+        self.variants = [ v if not isinstance(v,
+            str) and isinstance(v, Iterable) else [v] for v in cli ]

@@ -63,8 +63,8 @@ class Ipinterfaces( EntityCollection ):
             * name (str): The name of the interface
             * address (str): The IP address of the interface in the form
                 of A.B.C.D/E (None if no ip configured)
-            * secondary (list): The list of secondary IP addresses of the interface
-                (if any configured)
+            * secondary (list): The list of secondary IP addresses of the
+                interface (if any configured)
             * mtu (int): The configured value for IP MTU.
 
 
@@ -101,7 +101,8 @@ class Ipinterfaces( EntityCollection ):
             dict: A dict object intended to be merged into the resource dict
         """
         match = re.findall( r'ip address ([^\s]+)', config, re.M )
-        primary, secondary = ( match[0], match[1:] ) if match else ( None, None )
+        primary, secondary = ( match[0],
+                match[1:] ) if match else ( None, None )
         return dict( address=primary,
          secondary=secondary ) if secondary else dict( address=primary )
 

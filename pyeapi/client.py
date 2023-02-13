@@ -110,7 +110,8 @@ from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import HttpsEapiCertConnection
-from pyeapi.eapilib import HttpEapiSessionConnection, HttpsEapiSessionConnection
+from pyeapi.eapilib import HttpEapiSessionConnection
+from pyeapi.eapilib import HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
