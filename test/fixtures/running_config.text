@@ -1581,6 +1581,12 @@ interface Loopback0
    bfd interval 300 min_rx 300 multiplier 3
    default ntp serve
 !
+interface Loopback2
+   description test fixture with secondary ip
+   ip address 2.2.2.2/32
+   ip address 3.255.255.1/24 secondary
+   ip address 4.255.255.1/24 secondary
+!
 interface Ethernet8
    ! the interface config is added separately covering test for issue #213
    ! it might be inconsistend with the rest of config, though all unit tests pass 
