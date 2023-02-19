@@ -53,16 +53,18 @@ from pyeapi.api import EntityCollection
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
 
-class Ipinterfaces(EntityCollection):
+class Ipinterfaces( EntityCollection ):
 
-    def get(self, name):
+    def get( self, name ):
         """Returns the specific IP interface properties
 
         The Ipinterface resource returns the following:
 
             * name (str): The name of the interface
             * address (str): The IP address of the interface in the form
-                of A.B.C.D/E
+                of A.B.C.D/E (None if no ip configured)
+            * secondary (list): The list of secondary IP addresses of the
+                interface (if any configured)
             * mtu (int): The configured value for IP MTU.
 
 
@@ -75,22 +77,21 @@ class Ipinterfaces(EntityCollection):
                 the current configuration of the node.  If the specified
                 interface does not exist then None is returned.
         """
-        config = self.get_block('interface %s' % name)
-
-        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config,
-                                                                  re.M):
+        config = self.get_block( 'interface %s' % name )
+        if name[ 0:2 ] in [
+                'Et', 'Po' ] and not SWITCHPORT_RE.search( config, re.M ):
             return None
 
-        resource = dict(name=name)
-        resource.update(self._parse_address(config))
-        resource.update(self._parse_mtu(config))
+        resource = dict( name=name )
+        resource.update( self._parse_address(config) )
+        resource.update( self._parse_mtu(config) )
         return resource
 
-    def _parse_address(self, config):
+    def _parse_address( self, config ):
         """Parses the config block and returns the ip address value
 
-        The provided configuration block is scaned and the configured value
-        for the IP address is returned as a dict object.  If the IP address
+        The provided configuration block is scanned and the configured value
+        for the IP address is returned as a dict object. If the IP address
         value is not configured, then None is returned for the value
 
         Args:
@@ -99,9 +100,11 @@ class Ipinterfaces(EntityCollection):
         Return:
             dict: A dict object intended to be merged into the resource dict
         """
-        match = re.search(r'ip address ([^\s]+)', config)
-        value = match.group(1) if match else None
-        return dict(address=value)
+        match = re.findall( r'ip address ([^\s]+)', config, re.M )
+        primary, secondary = ( match[0],
+                match[1:] ) if match else ( None, None )
+        return dict( address=primary,
+         secondary=secondary ) if secondary else dict( address=primary )
 
     def _parse_mtu(self, config):
         """Parses the config block and returns the configured IP MTU value

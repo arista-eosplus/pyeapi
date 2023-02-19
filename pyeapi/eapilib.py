@@ -756,7 +756,7 @@ class SessionApiConnection(object):
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
-            error_msg = 'Socket error during eAPI authentication: %s' % str(exc)
+            error_msg = f'Socket error during eAPI authentication: {exc}'
             raise ConnectionError(str(self), error_msg)
         except ValueError as exc:
             _LOGGER.exception(exc)

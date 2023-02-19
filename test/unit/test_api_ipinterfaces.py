@@ -53,14 +53,19 @@ class TestApiIpinterfaces(EapiConfigUnitTest):
         self.config = open(get_fixture('running_config.text')).read()
 
     def test_get(self):
-        result = self.instance.get('Loopback0')
-        values = dict(name='Loopback0', address='1.1.1.1/32', mtu=1500)
+        result = self.instance.get( 'Loopback0' )
+        values = dict( name='Loopback0', address='1.1.1.1/32', mtu=1500 )
+        self.assertEqual( result, values )
+        # test interface with secondary ip
+        result = self.instance.get( 'Loopback2' )
+        values = dict( name='Loopback2', address='2.2.2.2/32',
+            secondary=['3.255.255.1/24', '4.255.255.1/24'], mtu=None )
         self.assertEqual(result, values)
 
     def test_getall(self):
         result = self.instance.getall()
         self.assertIsInstance(result, dict)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
     def test_instance_functions(self):
         for intf in self.INTERFACES:
