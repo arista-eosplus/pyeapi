@@ -115,7 +115,7 @@ class CommandError(EapiError):
     """
     def __init__(self, code, message, **kwargs):
         cmd_err = kwargs.get('command_error')
-        if int(code) in [1000, 1002, 1004]:
+        if int(code) in [1000, 1001, 1002, 1004]:
             msg_fmt = 'Error [{}]: {} [{}]'.format(code, message, cmd_err)
         else:
             # error code 1005: 'Command unauthorized: user has insufficient
