@@ -83,7 +83,7 @@ class Bgp(Entity):
         if isinstance(value, int):
             return dict(bgp_as=int(match.group(1)))
         else:
-            return dict(bgp_as=match.group())
+            return dict(bgp_as='.'.join(match.group(1,2)))
 
     def _parse_router_id(self, config):
         match = re.search(r'router-id ([^\s]+)', config)
