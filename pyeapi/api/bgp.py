@@ -79,7 +79,10 @@ class Bgp(Entity):
 
     def _parse_bgp_as(self, config):
         match = re.search(r'^router bgp (\d+.\d+)', config)
-        return dict(bgp_as=int(match.group(1)))
+        if match.lastindex == 2:
+            return dict(bgp_as='.'.join(match.grou(1,2)))
+        else:
+            return dict(bgp_as=int(match.group(1)))
 
     def _parse_router_id(self, config):
         match = re.search(r'router-id ([^\s]+)', config)
