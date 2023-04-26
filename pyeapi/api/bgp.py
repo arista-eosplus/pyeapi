@@ -79,7 +79,7 @@ class Bgp(Entity):
 
     def _parse_bgp_as(self, config):
         match = re.search(r'^router bgp (\d+.\d+)', config)
-        value = match.split(None, 1)[-1]
+        value = (match.group()).split(None, 1)[-1]
         if isinstance(value, int):
             return dict(bgp_as=int(match.group(1)))
         else:
