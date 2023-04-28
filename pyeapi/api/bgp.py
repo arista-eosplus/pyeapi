@@ -220,7 +220,7 @@ class BgpNeighbors(EntityCollection):
     def _parse_remote_as(self, config, name):
         regexp = r'neighbor {} remote-as (\d+).(\d+)'.format(name)
         match = re.search(regexp, config)
-        value = (match.group()).split(None, -1)[-1]
+        value = (match.group()).split(None, -1)[-1] if match else None
         if isinstance(value, int):
             return dict(remote_as=int(match.group(1)))
         else:
