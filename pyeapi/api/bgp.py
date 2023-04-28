@@ -218,10 +218,13 @@ class BgpNeighbors(EntityCollection):
         return dict(peer_group=value)
 
     def _parse_remote_as(self, config, name):
-        regexp = r'neighbor {} remote-as (\d+)'.format(name)
+        regexp = r'neighbor {} remote-as (\d+).(\d+)'.format(name)
         match = re.search(regexp, config)
-        value = match.group(1) if match else None
-        return dict(remote_as=value)
+        value = (match.group()).split(None, -1)[-1]
+        if isinstance(value, int):
+            return dict(bgp_as=int(match.group(1)))
+        else:
+            return dict(bgp_as=value)
 
     def _parse_send_community(self, config, name):
         exp = 'no neighbor {} send-community'.format(name)
