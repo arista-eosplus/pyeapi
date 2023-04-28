@@ -222,9 +222,9 @@ class BgpNeighbors(EntityCollection):
         match = re.search(regexp, config)
         value = (match.group()).split(None, -1)[-1]
         if isinstance(value, int):
-            return dict(bgp_as=int(match.group(1)))
+            return dict(remote_as=int(match.group(1)))
         else:
-            return dict(bgp_as=value)
+            return dict(remote_as=value)
 
     def _parse_send_community(self, config, name):
         exp = 'no neighbor {} send-community'.format(name)
