@@ -36,19 +36,22 @@ EOS and eAPI.
 
 Parameters:
     name (string): The interface name the configuration is in reference
-        to.  The interface name is the full interface identifier
+        to.  The interface name is the full interface identifier.
 
     address (string): The interface IP address in the form of
         address/len.
 
     mtu (integer): The interface MTU value.  The MTU value accepts
-        integers in the range of 68 to 65535 bytes
+        integers in the range of 68 to 65535 bytes.  See RFC 791 and
+        RFC 8200 for more information.
 """
 
 import re
 
 from pyeapi.api import EntityCollection
 
+IP_MTU_MIN = 68
+IP_MTU_MAX = 65535
 
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
@@ -222,7 +225,7 @@ class Ipinterfaces( EntityCollection ):
                 config to
 
             value (integer): The MTU value to set the interface to.  Accepted
-                values include 68 to 65535
+                values include IP_MTU_MIN to IP_MTU_MAX
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
@@ -240,7 +243,7 @@ class Ipinterfaces( EntityCollection ):
         """
         if value is not None:
             value = int(value)
-            if not 68 <= value <= 65535:
+            if not IP_MTU_MIN <= value <= IP_MTU_MAX:
                 raise ValueError('invalid mtu value')
 
         commands = ['interface %s' % name]
