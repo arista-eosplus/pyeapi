@@ -225,7 +225,7 @@ class Ipinterfaces( EntityCollection ):
                 config to
 
             value (integer): The MTU value to set the interface to.  Accepted
-                values include IP_MTU_MIN to IP_MTU_MAX
+                values include IP_MTU_MIN (68) to IP_MTU_MAX (65535)
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
