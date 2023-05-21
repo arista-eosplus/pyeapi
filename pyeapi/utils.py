@@ -277,16 +277,16 @@ class CliVariants:
 # could be imported, thus the current (importing) module needs to be resolved
 
 def _interpolate_docstr( *tkns ):
-   def docstr_decorator( user_fn ):
-      """update user_fn_wrapper doc string with the interpolated user_fn's
-      """
-      def user_fn_wrapper( *args, **kwargs ):
-          return user_fn( *args, **kwargs )
-      module = sys.modules[ tkns[-1] ]
-      docstr = user_fn.__doc__
-      for tkn in tkns[:-1]:
-          sval = str( getattr(module, tkn) )
-          docstr = docstr.replace( tkn, sval )
-      user_fn_wrapper.__doc__ = docstr
-      return user_fn_wrapper
-   return docstr_decorator
+    def docstr_decorator( user_fn ):
+        """update user_fn_wrapper doc string with the interpolated user_fn's
+        """
+        def user_fn_wrapper( *args, **kwargs ):
+            return user_fn( *args, **kwargs )
+        module = sys.modules[ tkns[-1] ]
+        docstr = user_fn.__doc__
+        for tkn in tkns[:-1]:
+            sval = str( getattr(module, tkn) )
+            docstr = docstr.replace( tkn, sval )
+        user_fn_wrapper.__doc__ = docstr
+        return user_fn_wrapper
+    return docstr_decorator
