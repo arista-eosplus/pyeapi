@@ -1,5 +1,4 @@
-#!/usr/bin/python
-from __future__ import absolute_import, division, print_function
+#!/usr/bin/python3
 
 from os import listdir, path, makedirs
 from os.path import isfile, join, exists

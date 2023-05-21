@@ -49,6 +49,7 @@ Parameters:
 import re
 
 from pyeapi.api import EntityCollection
+from pyeapi.utils import _interpolate_docstr
 
 IP_MTU_MIN = 68
 IP_MTU_MAX = 65535
@@ -217,6 +218,7 @@ class Ipinterfaces( EntityCollection ):
                                              default=default, disable=disable))
         return self.configure(commands)
 
+    @_interpolate_docstr( 'IP_MTU_MIN', 'IP_MTU_MAX', __name__ )
     def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 
@@ -225,7 +227,7 @@ class Ipinterfaces( EntityCollection ):
                 config to
 
             value (integer): The MTU value to set the interface to.  Accepted
-                values include IP_MTU_MIN (68) to IP_MTU_MAX (65535)
+                values include IP_MTU_MIN to IP_MTU_MAX
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
