@@ -259,24 +259,25 @@ class CliVariants:
             str) and isinstance(v, Iterable) else [v] for v in cli ]
 
 
-# Docstring decorator.
-# SYNOPSIS:
-#
-# MIN_MTU=68
-# MAX_MTU=65535
-#
-# @interpolate_docstr( 'MIN_MTU', 'MAX_MTU', __name__ )
-# def mtu_check( val ):
-#    """ check mtu against its min value (MIN_MTU) and max value (MAX_MTU)"""
-#    ...
-#
-# print( mtu_check.__doc__ )
-#  check mtu against its min value (68) and max value (65535)
-#
-# Note: `__name__` must be provided as the last argument because the decorator
-# could be imported, thus the current (importing) module needs to be resolved
 
 def _interpolate_docstr( *tkns ):
+    """Docstring decorator.
+    SYNOPSIS:
+    
+         MIN_MTU=68
+         MAX_MTU=65535
+         
+         @_interpolate_docstr( 'MIN_MTU', 'MAX_MTU', __name__ )
+         def mtu_check( val ):
+            "check mtu against its min value (MIN_MTU) and max value (MAX_MTU)"
+            ...
+         
+         print( mtu_check.__doc__ )
+         check mtu against its min value (68) and max value (65535)
+    
+    Note: `__name__` must be provided as the last argument because the decorator
+    could be imported, thus the current (importing) module needs to be resolved
+    """
     def docstr_decorator( user_fn ):
         """update user_fn_wrapper doc string with the interpolated user_fn's
         """
