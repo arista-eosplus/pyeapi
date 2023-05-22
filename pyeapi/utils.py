@@ -257,3 +257,37 @@ class CliVariants:
         assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
         self.variants = [ v if not isinstance(v,
             str) and isinstance(v, Iterable) else [v] for v in cli ]
+
+
+
+def _interpolate_docstr( *tkns ):
+    """Docstring decorator.
+    SYNOPSIS:
+    
+         MIN_MTU=68
+         MAX_MTU=65535
+         
+         @_interpolate_docstr( 'MIN_MTU', 'MAX_MTU', __name__ )
+         def mtu_check( val ):
+            "check mtu against its min value (MIN_MTU) and max value (MAX_MTU)"
+            ...
+         
+         print( mtu_check.__doc__ )
+         check mtu against its min value (68) and max value (65535)
+    
+    Note: `__name__` must be provided as the last argument because the decorator
+    could be imported, thus the current (importing) module needs to be resolved
+    """
+    def docstr_decorator( user_fn ):
+        """update user_fn_wrapper doc string with the interpolated user_fn's
+        """
+        def user_fn_wrapper( *args, **kwargs ):
+            return user_fn( *args, **kwargs )
+        module = sys.modules[ tkns[-1] ]
+        docstr = user_fn.__doc__
+        for tkn in tkns[:-1]:
+            sval = str( getattr(module, tkn) )
+            docstr = docstr.replace( tkn, sval )
+        user_fn_wrapper.__doc__ = docstr
+        return user_fn_wrapper
+    return docstr_decorator

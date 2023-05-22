@@ -8,7 +8,7 @@ PAPER         =
 BUILDDIR      = _build
 APIDIR   	    = api_modules
 CLIENTDIR     = client_modules
-CWD						:= $(shell pwd)
+CWD						:= '$(shell pwd)'
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
