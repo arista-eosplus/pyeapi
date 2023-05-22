@@ -73,9 +73,6 @@ DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
 
 def https_connection_factory(path, host, port, context=None, timeout=60):
-    # ignore ssl context for python versions before 2.7.9
-    if sys.hexversion < 34015728:
-        return HttpsConnection(path, host, port, timeout=timeout)
     return HttpsConnection(path, host, port, context=context, timeout=timeout)
 
 
