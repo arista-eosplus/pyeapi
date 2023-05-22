@@ -35,12 +35,8 @@ import importlib
 import inspect
 import logging
 import logging.handlers
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable
 
-
+from collections.abc import Iterable
 from itertools import tee
 
 try:
@@ -263,19 +259,19 @@ class CliVariants:
 def _interpolate_docstr( *tkns ):
     """Docstring decorator.
     SYNOPSIS:
-    
+
          MIN_MTU=68
          MAX_MTU=65535
-         
+
          @_interpolate_docstr( 'MIN_MTU', 'MAX_MTU', __name__ )
          def mtu_check( val ):
             "check mtu against its min value (MIN_MTU) and max value (MAX_MTU)"
             ...
-         
+
          print( mtu_check.__doc__ )
          check mtu against its min value (68) and max value (65535)
-    
-    Note: `__name__` must be provided as the last argument because the decorator
+
+    Note: `__name__` must be provided as the last argument, b/c the decorator
     could be imported, thus the current (importing) module needs to be resolved
     """
     def docstr_decorator( user_fn ):
