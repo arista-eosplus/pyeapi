@@ -102,9 +102,8 @@ try:
     from configparser import ConfigParser as SafeConfigParser
     from configparser import Error as SafeConfigParserError
 except ImportError:
-    # Use Python 2.7 import as a fallback
-    from ConfigParser import SafeConfigParser
-    from ConfigParser import Error as SafeConfigParserError
+    # Throw incompatible version error
+    print("A supported version of configParser is missing. Please upgrade to a higher version that is supported by Python 3.7 or higher.")
 
 from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 

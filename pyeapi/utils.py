@@ -43,8 +43,8 @@ try:
     # Try Python 3.x import first
     from itertools import zip_longest
 except ImportError:
-    # Use Python 2.7 import as a fallback
-    from itertools import izip_longest as zip_longest
+    # Throw incompatible version error
+    print("A supported version of itertools is missing. Please upgrade to a higher version that is supported by Python 3.7 or higher.")
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)

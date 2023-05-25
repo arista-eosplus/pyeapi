@@ -56,9 +56,9 @@ try:
     from http.client import HTTPConnection, HTTPSConnection
     from http.cookies import SimpleCookie
 except ImportError:
-    # Use Python 2.7 import as a fallback
-    from httplib import HTTPConnection, HTTPSConnection
-    from Cookie import SimpleCookie
+    # Throw incompatible version error
+    print("Could not find a suitable import for HTTPConnection, HTTPSConnection and SimpleCookie. Please install or upgrade to a higher version that is supported by Python 3.7 or higher.")
+
 
 from pyeapi.utils import make_iterable
 
@@ -250,7 +250,7 @@ class HTTPSCertConnection(HTTPSConnection):
 
             Redefined/copied and extended from httplib.py:1105 (Python 2.6.x).
             This is needed to pass cert_reqs=ssl.CERT_REQUIRED as parameter
-            to ssl.wrap_socket(), which forces SSL to check server certificate
+            to ssl.wrap_socket()(Now changed to ssl.SSLContext.wrap_socket() as the former has been deprecated from python 3.7), which forces SSL to check server certificate
             against our client certificate.
         """
         sock = socket.create_connection((self.host, self.port), self.timeout)
@@ -259,11 +259,11 @@ class HTTPSCertConnection(HTTPSConnection):
             self._tunnel()
         # If there's no CA File, don't force Server Certificate Check
         if self.ca_file:
-            self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file, self.cert_file,
                                         ca_certs=self.ca_file,
                                         cert_reqs=ssl.CERT_REQUIRED)
         else:
-            self.sock = ssl.wrap_socket(sock, self.key_file,
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
                                         self.cert_file,
                                         cert_reqs=ssl.CERT_NONE)
 
@@ -309,8 +309,7 @@ class EapiConnection(object):
             _auth_bin = base64.encodebytes(_auth_text.encode())
             _auth = _auth_bin.decode()
         else:
-            # For Python 2.7
-            _auth = str(base64.encodestring(_auth_text))
+            raise Exception("Incompatible python version.") 
         _auth = _auth.replace('\n', '')
         self._auth = ("Authorization", "Basic %s" % _auth)
 
@@ -449,10 +448,11 @@ class EapiConnection(object):
 
             self.transport.endheaders(message_body=data)
 
-            try:  # Python 2.7: use buffering of HTTP responses
-                response = self.transport.getresponse(buffering=True)
-            except TypeError:  # Python 2.6: older, and 3.x on
+            try: #For Python 3.x+
                 response = self.transport.getresponse()
+            except TypeError: #For < Python3.x 
+                print("Incompatible python version")
+
 
             response_content = response.read()
             _LOGGER.debug('Response: status:{status}, reason:{reason}'.format(
