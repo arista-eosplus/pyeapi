@@ -218,7 +218,7 @@ class Ipinterfaces( EntityCollection ):
                                              default=default, disable=disable))
         return self.configure(commands)
 
-    @_interpolate_docstr( 'IP_MTU_MIN', 'IP_MTU_MAX', __name__ )
+    @_interpolate_docstr( 'IP_MTU_MIN', 'IP_MTU_MAX' )
     def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 
