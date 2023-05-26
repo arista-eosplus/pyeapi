@@ -36,7 +36,6 @@ instance of Connection.  The connection module provides an easy implementation
 for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
-import sys
 import socket
 import base64
 import logging
@@ -51,14 +50,8 @@ except ImportError:
     except ImportError:
         import json
 
-try:
-    # Try Python 3.x import first
-    from http.client import HTTPConnection, HTTPSConnection
-    from http.cookies import SimpleCookie
-except ImportError:
-    # Use Python 2.7 import as a fallback
-    from httplib import HTTPConnection, HTTPSConnection
-    from Cookie import SimpleCookie
+from http.client import HTTPConnection, HTTPSConnection
+from http.cookies import SimpleCookie
 
 from pyeapi.utils import make_iterable
 
@@ -250,8 +243,9 @@ class HTTPSCertConnection(HTTPSConnection):
 
             Redefined/copied and extended from httplib.py:1105 (Python 2.6.x).
             This is needed to pass cert_reqs=ssl.CERT_REQUIRED as parameter
-            to ssl.wrap_socket(), which forces SSL to check server certificate
-            against our client certificate.
+            to ssl.wrap_socket() (Now changed to ssl.SSLContext.wrap_socket()
+            as the former has been deprecated from python 3.7), which forces
+            SSL to check server certificate against our client certificate.
         """
         sock = socket.create_connection((self.host, self.port), self.timeout)
         if self._tunnel_host:
@@ -259,13 +253,14 @@ class HTTPSCertConnection(HTTPSConnection):
             self._tunnel()
         # If there's no CA File, don't force Server Certificate Check
         if self.ca_file:
-            self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
-                                        ca_certs=self.ca_file,
-                                        cert_reqs=ssl.CERT_REQUIRED)
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
+                                                   self.cert_file,
+                                                   ca_certs=self.ca_file,
+                                                   cert_reqs=ssl.CERT_REQUIRED)
         else:
-            self.sock = ssl.wrap_socket(sock, self.key_file,
-                                        self.cert_file,
-                                        cert_reqs=ssl.CERT_NONE)
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
+                                                   self.cert_file,
+                                                   cert_reqs=ssl.CERT_NONE)
 
 
 class EapiConnection(object):
@@ -302,16 +297,8 @@ class EapiConnection(object):
 
         """
         _auth_text = '{}:{}'.format(username, password)
-
-        # Work around for Python 2.7/3.x compatibility
-        if int(sys.version[0]) > 2:
-            # For Python 3.x
-            _auth_bin = base64.encodebytes(_auth_text.encode())
-            _auth = _auth_bin.decode()
-        else:
-            # For Python 2.7
-            _auth = str(base64.encodestring(_auth_text))
-        _auth = _auth.replace('\n', '')
+        _auth_bin = base64.encodebytes(_auth_text.encode())
+        _auth = _auth_bin.decode().replace('\n', '')
         self._auth = ("Authorization", "Basic %s" % _auth)
 
         _LOGGER.debug('Authentication string is: {}:***'.format(username))
@@ -436,24 +423,15 @@ class EapiConnection(object):
             # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
-
             self.transport.putheader('Content-type', 'application/json-rpc')
             self.transport.putheader('Content-length', '%d' % len(data))
 
             if self._auth:
                 self.transport.putheader(*self._auth)
-
-            if int(sys.version[0]) > 2:
-                # For Python 3.x compatibility
-                data = data.encode()
+            data = data.encode()
 
             self.transport.endheaders(message_body=data)
-
-            try:  # Python 2.7: use buffering of HTTP responses
-                response = self.transport.getresponse(buffering=True)
-            except TypeError:  # Python 2.6: older, and 3.x on
-                response = self.transport.getresponse()
-
+            response = self.transport.getresponse()
             response_content = response.read()
             _LOGGER.debug('Response: status:{status}, reason:{reason}'.format(
                           status=response.status,
@@ -739,8 +717,7 @@ class SessionApiConnection(object):
             self.transport.putheader("Content-type", "application/json")
             self.transport.putheader("Content-length", "%d" % len(data))
 
-            if int(sys.version[0]) > 2:
-                data = data.encode()
+            data = data.encode()
             self.transport.endheaders(message_body=data)
             resp = self.transport.getresponse()
             if resp.status != 200:

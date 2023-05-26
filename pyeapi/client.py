@@ -96,15 +96,9 @@ import re
 
 from functools import lru_cache
 
-try:
-    # Try Python 3.x import first
-    # Note: SafeConfigParser is deprecated and replaced by ConfigParser
-    from configparser import ConfigParser as SafeConfigParser
-    from configparser import Error as SafeConfigParserError
-except ImportError:
-    # Use Python 2.7 import as a fallback
-    from ConfigParser import SafeConfigParser
-    from ConfigParser import Error as SafeConfigParserError
+# Note: SafeConfigParser is deprecated and replaced by ConfigParser
+from configparser import ConfigParser as SafeConfigParser
+from configparser import Error as SafeConfigParserError
 
 from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 

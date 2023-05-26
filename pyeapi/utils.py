@@ -37,14 +37,8 @@ import logging
 import logging.handlers
 
 from collections.abc import Iterable
-from itertools import tee
+from itertools import tee, zip_longest
 
-try:
-    # Try Python 3.x import first
-    from itertools import zip_longest
-except ImportError:
-    # Use Python 2.7 import as a fallback
-    from itertools import izip_longest as zip_longest
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
