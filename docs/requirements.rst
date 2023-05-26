@@ -2,7 +2,7 @@
 Requirements
 ############
 
-* Arista EOS 4.12 or later
+* Arista EOS 4.22 or later
 * Arista eAPI enabled for at least one transport (see Official EOS Config Guide
   at arista.com for details)
 * Python 3.7+
