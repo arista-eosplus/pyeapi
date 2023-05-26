@@ -36,7 +36,6 @@ instance of Connection.  The connection module provides an easy implementation
 for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
-import sys
 import socket
 import base64
 import logging
@@ -718,8 +717,7 @@ class SessionApiConnection(object):
             self.transport.putheader("Content-type", "application/json")
             self.transport.putheader("Content-length", "%d" % len(data))
 
-            if int(sys.version[0]) > 2:
-                data = data.encode()
+            data = data.encode()
             self.transport.endheaders(message_body=data)
             resp = self.transport.getresponse()
             if resp.status != 200:
