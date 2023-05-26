@@ -37,14 +37,8 @@ import logging
 import logging.handlers
 
 from collections.abc import Iterable
-from itertools import tee
+from itertools import tee, zip_longest
 
-try:
-    # Try Python 3.x import first
-    from itertools import zip_longest
-except ImportError:
-    # Throw incompatible version error
-    print("A supported version of itertools is missing. Please upgrade to a higher version that is supported by Python 3.7 or higher.")
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)

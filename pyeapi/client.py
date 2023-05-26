@@ -96,14 +96,9 @@ import re
 
 from functools import lru_cache
 
-try:
-    # Try Python 3.x import first
-    # Note: SafeConfigParser is deprecated and replaced by ConfigParser
-    from configparser import ConfigParser as SafeConfigParser
-    from configparser import Error as SafeConfigParserError
-except ImportError:
-    # Throw incompatible version error
-    print("A supported version of configParser is missing. Please upgrade to a higher version that is supported by Python 3.7 or higher.")
+# Note: SafeConfigParser is deprecated and replaced by ConfigParser
+from configparser import ConfigParser as SafeConfigParser
+from configparser import Error as SafeConfigParserError
 
 from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 
