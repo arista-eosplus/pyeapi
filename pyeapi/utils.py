@@ -152,7 +152,7 @@ def make_iterable(value):
     iterable in the form of a list.
 
     Args:
-        value (object): An valid Python object
+        value (object): A valid Python object
 
     Returns:
         An iterable object of type list
