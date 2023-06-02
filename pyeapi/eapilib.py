@@ -724,7 +724,7 @@ class SessionApiConnection(object):
             session = SimpleCookie(resp.getheader("Set-Cookie"))
             self._auth = ("Cookie", session.output(header="", attrs=[]))
 
-        except (socket.error, OSError) as exc:
+        except OSError as exc:
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
