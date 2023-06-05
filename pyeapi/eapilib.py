@@ -442,10 +442,8 @@ class EapiConnection(object):
                 raise ConnectionError(str(self), '%s. %s' % (response.reason,
                                                              response_content))
 
-            # Work around for Python 2.7/3.x compatibility
-            if not type(response_content) == str:
-                # For Python 3.x - decode bytes into string
-                response_content = response_content.decode()
+            # Python 3.7 json.loads() works with bytes or strings,
+            # thus no decoding is required
             decoded = json.loads(response_content)
             _LOGGER.debug('eapi_response: %s' % decoded)
 
@@ -462,8 +460,8 @@ class EapiConnection(object):
 
             return decoded
 
-        # socket.error is deprecated in python 3 and replaced with OSError.
-        except (socket.error, OSError) as exc:
+        # removed socket.error as it's deprecated in python 3
+        except OSError as exc:
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
@@ -726,7 +724,7 @@ class SessionApiConnection(object):
             session = SimpleCookie(resp.getheader("Set-Cookie"))
             self._auth = ("Cookie", session.output(header="", attrs=[]))
 
-        except (socket.error, OSError) as exc:
+        except OSError as exc:
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
