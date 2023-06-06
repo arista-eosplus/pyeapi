@@ -36,8 +36,6 @@ instance of Connection.  The connection module provides an easy implementation
 for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
-import sys
-import json
 import socket
 import base64
 import logging
@@ -45,11 +43,15 @@ import ssl
 import re
 
 try:
-    # Try Python 3.x import first
-    from http.client import HTTPConnection, HTTPSConnection
+    import ujson as json
 except ImportError:
-    # Use Python 2.7 import as a fallback
-    from httplib import HTTPConnection, HTTPSConnection
+    try:
+        import rapidjson as json
+    except ImportError:
+        import json
+
+from http.client import HTTPConnection, HTTPSConnection
+from http.cookies import SimpleCookie
 
 from pyeapi.utils import make_iterable
 
@@ -64,9 +66,6 @@ DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
 
 
 def https_connection_factory(path, host, port, context=None, timeout=60):
-    # ignore ssl context for python versions before 2.7.9
-    if sys.hexversion < 34015728:
-        return HttpsConnection(path, host, port, timeout=timeout)
     return HttpsConnection(path, host, port, context=context, timeout=timeout)
 
 
@@ -106,9 +105,14 @@ class CommandError(EapiError):
     """
     def __init__(self, code, message, **kwargs):
         cmd_err = kwargs.get('command_error')
-        if int(code) in [1000, 1002, 1004]:
+        if int(code) in [1000, 1001, 1002, 1004]:
             msg_fmt = 'Error [{}]: {} [{}]'.format(code, message, cmd_err)
         else:
+            # error code 1005: 'Command unauthorized: user has insufficient
+            # permissions to run the command'. The message contains a user
+            # sensitive input, which has to be removed
+            if int(code) == 1005:
+                message = re.sub(r"(?<=input=)[^ ]+", r'<removed>)', message)
             msg_fmt = 'Error [{}]: {}'.format(code, message)
 
         super(CommandError, self).__init__(msg_fmt)
@@ -239,8 +243,9 @@ class HTTPSCertConnection(HTTPSConnection):
 
             Redefined/copied and extended from httplib.py:1105 (Python 2.6.x).
             This is needed to pass cert_reqs=ssl.CERT_REQUIRED as parameter
-            to ssl.wrap_socket(), which forces SSL to check server certificate
-            against our client certificate.
+            to ssl.wrap_socket() (Now changed to ssl.SSLContext.wrap_socket()
+            as the former has been deprecated from python 3.7), which forces
+            SSL to check server certificate against our client certificate.
         """
         sock = socket.create_connection((self.host, self.port), self.timeout)
         if self._tunnel_host:
@@ -248,13 +253,14 @@ class HTTPSCertConnection(HTTPSConnection):
             self._tunnel()
         # If there's no CA File, don't force Server Certificate Check
         if self.ca_file:
-            self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file,
-                                        ca_certs=self.ca_file,
-                                        cert_reqs=ssl.CERT_REQUIRED)
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
+                                                   self.cert_file,
+                                                   ca_certs=self.ca_file,
+                                                   cert_reqs=ssl.CERT_REQUIRED)
         else:
-            self.sock = ssl.wrap_socket(sock, self.key_file,
-                                        self.cert_file,
-                                        cert_reqs=ssl.CERT_NONE)
+            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
+                                                   self.cert_file,
+                                                   cert_reqs=ssl.CERT_NONE)
 
 
 class EapiConnection(object):
@@ -291,20 +297,11 @@ class EapiConnection(object):
 
         """
         _auth_text = '{}:{}'.format(username, password)
+        _auth_bin = base64.encodebytes(_auth_text.encode())
+        _auth = _auth_bin.decode().replace('\n', '')
+        self._auth = ("Authorization", "Basic %s" % _auth)
 
-        # Work around for Python 2.7/3.x compatibility
-        if int(sys.version[0]) > 2:
-            # For Python 3.x
-            _auth_bin = base64.encodebytes(_auth_text.encode())
-            _auth = _auth_bin.decode()
-            _auth = _auth.replace('\n', '')
-            self._auth = _auth
-        else:
-            # For Python 2.7
-            _auth = base64.encodestring(_auth_text)
-            self._auth = str(_auth).replace('\n', '')
-
-        _LOGGER.debug('Autentication string is: {}:***'.format(username))
+        _LOGGER.debug('Authentication string is: {}:***'.format(username))
 
     def request(self, commands, encoding=None, reqid=None, **kwargs):
         """Generates an eAPI request object
@@ -348,12 +345,16 @@ class EapiConnection(object):
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         params = {'version': 1, 'cmds': commands, 'format': encoding}
+        streaming = False
         if 'autoComplete' in kwargs:
             params['autoComplete'] = kwargs['autoComplete']
         if 'expandAliases' in kwargs:
             params['expandAliases'] = kwargs['expandAliases']
+        if 'streaming' in kwargs:
+            streaming = kwargs['streaming']
         return json.dumps({'jsonrpc': '2.0', 'method': 'runCmds',
-                           'params': params, 'id': str(reqid)})
+                           'params': params, 'id': str(reqid),
+                           'streaming': streaming})
 
     def send(self, data):
         """Sends the eAPI request to the destination node
@@ -417,29 +418,20 @@ class EapiConnection(object):
                 code and error message from the eAPI response.
         """
         try:
-            _LOGGER.debug('Request content: {}'.format(data))
+            _LOGGER.debug(
+                'Request content: {}'.format(self._sanitize_request( data )) )
             # debug('eapi_request: %s' % data)
 
             self.transport.putrequest('POST', '/command-api')
-
             self.transport.putheader('Content-type', 'application/json-rpc')
             self.transport.putheader('Content-length', '%d' % len(data))
 
             if self._auth:
-                self.transport.putheader('Authorization',
-                                         'Basic %s' % self._auth)
-
-            if int(sys.version[0]) > 2:
-                # For Python 3.x compatibility
-                data = data.encode()
+                self.transport.putheader(*self._auth)
+            data = data.encode()
 
             self.transport.endheaders(message_body=data)
-
-            try:  # Python 2.7: use buffering of HTTP responses
-                response = self.transport.getresponse(buffering=True)
-            except TypeError:  # Python 2.6: older, and 3.x on
-                response = self.transport.getresponse()
-
+            response = self.transport.getresponse()
             response_content = response.read()
             _LOGGER.debug('Response: status:{status}, reason:{reason}'.format(
                           status=response.status,
@@ -450,10 +442,8 @@ class EapiConnection(object):
                 raise ConnectionError(str(self), '%s. %s' % (response.reason,
                                                              response_content))
 
-            # Work around for Python 2.7/3.x compatibility
-            if not type(response_content) == str:
-                # For Python 3.x - decode bytes into string
-                response_content = response_content.decode()
+            # Python 3.7 json.loads() works with bytes or strings,
+            # thus no decoding is required
             decoded = json.loads(response_content)
             _LOGGER.debug('eapi_response: %s' % decoded)
 
@@ -470,8 +460,8 @@ class EapiConnection(object):
 
             return decoded
 
-        # socket.error is deprecated in python 3 and replaced with OSError.
-        except (socket.error, OSError) as exc:
+        # removed socket.error as it's deprecated in python 3
+        except OSError as exc:
             _LOGGER.exception(exc)
             self.socket_error = exc
             self.error = exc
@@ -484,6 +474,87 @@ class EapiConnection(object):
             raise ConnectionError(str(self), 'unable to connect to eAPI')
         finally:
             self.transport.close()
+
+
+    def _sanitize_request( self, data ):
+        """remove user-sensitive input from data response"""
+        try:
+            data_json = json.loads( data )
+            match = self._find_sub_json(
+                data_json, {'cmd': 'enable', 'input': ()} )
+            if match:
+                match.entry[ match.idx ][ 'input' ] = '<removed>'
+                return json.dumps( data_json )
+        except ValueError:
+            pass
+        return data
+
+
+    def _find_sub_json( self, jsn, sbj, instance=0 ):
+        """finds a subset (sbj) in json. `sbj` must be a subset and json must
+        not be atomic. Wildcard(s) in `sbj` can be specified with tuple type.
+        A json label cannot be wildcarded. A single wildcard represent a single
+        json entry. E.g.:
+
+            _find_sub_json( jsn, { 'foo': () } )
+
+        Returned value is a Match class with attributes:
+        - entry: an iterable containing a matching `sbj`
+        - idx: index or key pointing to the match in the iterable
+        If no match found None is returned - that way is possible to get a
+        reference to the sought json and modify it, e.g:
+
+            match = _find_sub_json( jsn, { 'foo':(), 'bar': [123, (), ()] } )
+            if match:
+                match.entry[ match.idx ][ 'foo' ] = 'bar'
+
+        It's also possible to specify an occurrence of the match via `instance`
+        parameter - by default a first found match is returned"""
+        class Match():
+            def __init__( self, entry, idx ):
+                self.entry = entry
+                self.idx = idx
+
+        def is_iterable( val ):
+            return True if isinstance( val, (list, dict) ) else False
+
+        def is_atomic( val ):
+            return not is_iterable( val )
+
+        def is_match( jsn, sbj ):
+            if isinstance( sbj, tuple ):              # sbj is a wildcard
+                return True
+            if is_atomic( sbj ):
+                return False if is_iterable( jsn ) else sbj == jsn
+            if type( jsn ) is not type( sbj ) or len( jsn ) != len( sbj ):
+                return False
+            for left, right in zip(
+                    sorted(jsn.items() if isinstance( jsn, dict )
+                        else enumerate( jsn )),
+                    sorted(sbj.items() if isinstance( sbj, dict )
+                        else enumerate( sbj )) ):
+                if left[ 0 ] != right[ 0 ]:
+                    return False
+                if not is_match( left[ 1 ], right[ 1 ]):
+                    return False
+            return True
+
+        if is_atomic( jsn ):
+            return None
+        instance = [ instance ] if isinstance( instance, int ) else instance
+        for key, val in jsn.items() if isinstance( jsn,
+                dict ) else enumerate( jsn ):
+            if is_match( val, sbj ):
+                if instance[ 0 ] > 0:
+                    instance[ 0 ] -= 1
+                else:
+                    return Match( jsn, key )
+            if is_iterable( val ):
+                match = self._find_sub_json( val, sbj, instance )
+                if match:
+                    return match
+        return None
+
 
     def _parse_error_message(self, message):
         """Parses the eAPI failure response message
@@ -509,7 +580,11 @@ class EapiConnection(object):
         out = None
 
         if 'data' in message['error']:
-            err = ' '.join(message['error']['data'][-1]['errors'])
+            err = []
+            for dct in message['error']['data']:
+                err.extend(
+                    ['%s: %s' % ( k, repr(v) ) for k, v in dct.items()] )
+            err = ', '.join(err)
             out = message['error']['data']
 
         return code, msg, err, out
@@ -550,7 +625,7 @@ class EapiConnection(object):
             response = self.send(request)
             return response
 
-        except(ConnectionError, CommandError, TypeError) as exc:
+        except (ConnectionError, CommandError, TypeError) as exc:
             exc.commands = commands
             self.error = exc
             raise
@@ -590,6 +665,9 @@ class HttpsEapiConnection(EapiConnection):
         path = path or DEFAULT_HTTP_PATH
 
         enforce_verification = kwargs.get('enforce_verification')
+        # after fix #236 (allowing passing ssl context), this parameter
+        # is deprecated - will be release noted and removed in the respective
+        # release versions
 
         if context is None and not enforce_verification:
             context = self.disable_certificate_verification()
@@ -627,3 +705,43 @@ class HttpsEapiCertConnection(EapiConnection):
                                              key_file=key_file,
                                              cert_file=cert_file,
                                              ca_file=ca_file, timeout=timeout)
+
+
+class SessionApiConnection(object):
+    def authentication(self, username, password):
+        try:
+            data = json.dumps({"username": username, "password": password})
+            self.transport.putrequest("POST", "/login")
+            self.transport.putheader("Content-type", "application/json")
+            self.transport.putheader("Content-length", "%d" % len(data))
+
+            data = data.encode()
+            self.transport.endheaders(message_body=data)
+            resp = self.transport.getresponse()
+            if resp.status != 200:
+                raise ConnectionError(str(self), '%s. %s' % (resp.reason,
+                                                             resp.read()))
+            session = SimpleCookie(resp.getheader("Set-Cookie"))
+            self._auth = ("Cookie", session.output(header="", attrs=[]))
+
+        except OSError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = exc
+            self.error = exc
+            error_msg = f'Socket error during eAPI authentication: {exc}'
+            raise ConnectionError(str(self), error_msg)
+        except ValueError as exc:
+            _LOGGER.exception(exc)
+            self.socket_error = None
+            self.error = exc
+            raise ConnectionError(str(self), 'unable to connect to eAPI')
+        finally:
+            self.transport.close()
+
+
+class HttpEapiSessionConnection(SessionApiConnection, HttpEapiConnection):
+    pass
+
+
+class HttpsEapiSessionConnection(SessionApiConnection, HttpsEapiConnection):
+    pass

@@ -48,7 +48,7 @@ Example:
 
     >>> import pyeapi
     >>> conn = pyeapi.connect(host='10.1.1.1', transport='http')
-    >>> conn.execute(['show verson'])
+    >>> conn.execute(['show version'])
     {u'jsonrpc': u'2.0', u'result': [{u'memTotal': 2028008, u'version':
     u'4.14.5F', u'internalVersion': u'4.14.5F-2209869.4145F', u'serialNumber':
     u'', u'systemMacAddress': u'00:0c:29:f5:d2:7d', u'bootupTimestamp':
@@ -90,23 +90,22 @@ configuration file.  The configuration file is an INI style file that
 contains the settings for nodes used by the connect_to function.
 
 """
+from uuid import uuid4
 import os
 import re
 
-try:
-    # Try Python 3.x import first
-    # Note: SafeConfigParser is deprecated and replaced by ConfigParser
-    from configparser import ConfigParser as SafeConfigParser
-    from configparser import Error as SafeConfigParserError
-except ImportError:
-    # Use Python 2.7 import as a fallback
-    from ConfigParser import SafeConfigParser
-    from ConfigParser import Error as SafeConfigParserError
+from functools import lru_cache
 
-from pyeapi.utils import load_module, make_iterable, debug
+# Note: SafeConfigParser is deprecated and replaced by ConfigParser
+from configparser import ConfigParser as SafeConfigParser
+from configparser import Error as SafeConfigParserError
+
+from pyeapi.utils import load_module, make_iterable, debug, CliVariants
 
 from pyeapi.eapilib import HttpEapiConnection, HttpsEapiConnection
 from pyeapi.eapilib import HttpsEapiCertConnection
+from pyeapi.eapilib import HttpEapiSessionConnection
+from pyeapi.eapilib import HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import CommandError
 
@@ -116,8 +115,10 @@ TRANSPORTS = {
     'socket': SocketEapiConnection,
     'http_local': HttpLocalEapiConnection,
     'http': HttpEapiConnection,
+    'http_session': HttpEapiSessionConnection,
     'https': HttpsEapiConnection,
-    'https_certs': HttpsEapiCertConnection
+    'https_certs': HttpsEapiCertConnection,
+    'https_session': HttpsEapiSessionConnection,
 }
 
 DEFAULT_TRANSPORT = 'https'
@@ -392,7 +393,8 @@ def make_connection(transport, **kwargs):
 
 def connect(transport=None, host='localhost', username='admin',
             password='', port=None, key_file=None, cert_file=None,
-            ca_file=None, timeout=60, return_node=False, **kwargs):
+            ca_file=None, timeout=60, return_node=False, context=None,
+            **kwargs):
     """ Creates a connection using the supplied settings
 
     This function will create a connection to an Arista EOS node using
@@ -400,8 +402,9 @@ def connect(transport=None, host='localhost', username='admin',
 
     Args:
         transport (str): Specifies the type of connection transport to use.
-            Valid values for the connection are socket, http_local, http, and
-            https.  The default value is specified in DEFAULT_TRANSPORT
+            Valid values for the connection are socket, http_local, http,
+            https, https_certs, http_session, and https_session.  The default
+            value is specified in DEFAULT_TRANSPORT
         host (str): The IP addres or DNS host name of the connection device.
             The default value is 'localhost'
         username (str): The username to pass to the device to authenticate
@@ -415,6 +418,7 @@ def connect(transport=None, host='localhost', username='admin',
         cert_file (str): Path to PEM formatted cert file for ssl validation
         ca_file (str): Path to CA PEM formatted cert file for ssl validation
         timeout (int): timeout
+        context (ssl.SSLContext): ssl object's context. The default is None
         return_node (bool): Returns a Node object if True, otherwise
             returns an EapiConnection object.
 
@@ -422,12 +426,34 @@ def connect(transport=None, host='localhost', username='admin',
     Returns:
         An instance of an EapiConnection object for the specified transport.
 
+    Note:
+        Python 3.10 increases security strength of the TLS stack by among other
+        things using a stronger (than 3.9) default cipher suite. Thus programs
+        relying on the https transport and using the default cypher suite that
+        used to work in prior python versions may fail with the error:
+        ``[SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure``.
+        The solution to that issue is to configure the https web server to use
+        a stronger cipher suite.
+
+        If the solution is not attainable, then a work-around might be
+        considered (weighing all due implications) - one could pass an ssl
+        context where cipher can be specified::
+
+          import pyeapi
+          import ssl
+          ...
+          ctx = ssl.create_default_context()
+          ctx.set_ciphers('DEFAULT')          # set a preferred cipher
+          ctx.check_hostname = False          # for the sake of example
+          ctx.verify_mode = ssl.CERT_NONE     # do it w/o certificate
+          ...
+          cc = pyeapi.client.connect( host=host_name, context=ctx )
     """
     transport = transport or DEFAULT_TRANSPORT
     connection = make_connection(transport, host=host, username=username,
                                  password=password, key_file=key_file,
                                  cert_file=cert_file, ca_file=ca_file,
-                                 port=port, timeout=timeout)
+                                 port=port, timeout=timeout, context=context)
     if return_node:
         return Node(connection, transport=transport, host=host,
                     username=username, password=password, key_file=key_file,
@@ -456,6 +482,8 @@ class Node(object):
         autorefresh (bool): If True, the running-config and startup-config are
             refreshed on config events.  If False, then the config properties
             must be manually refreshed.
+        config_defaults (bool): If True, the default config options will be
+            shown in the running-config output
         settings (dict): Provides access to the settings used to create the
             Node instance.
 
@@ -471,9 +499,11 @@ class Node(object):
         self._version = None
         self._version_number = None
         self._model = None
+        self._session_name = None
 
         self._enablepwd = kwargs.get('enablepwd')
         self.autorefresh = kwargs.get('autorefresh', True)
+        self.config_defaults = kwargs.get('config_defaults', True)
         self.settings = kwargs
 
     def __str__(self):
@@ -490,7 +520,8 @@ class Node(object):
     def running_config(self):
         if self._running_config is not None:
             return self._running_config
-        self._running_config = self.get_config(params='all',
+        params = 'all' if self.config_defaults else None
+        self._running_config = self.get_config(params=params,
                                                as_string=True)
         return self._running_config
 
@@ -560,15 +591,31 @@ class Node(object):
         """Configures the node with the specified commands
 
         This method is used to send configuration commands to the node.  It
-        will take either a string or a list and prepend the necessary commands
-        to put the session into config mode.
+        will take either a string, list or CliVariants type and prepend the
+        necessary commands to put the session into config mode.
+        pyeapi.utils.CliVariants facilitates alternative executions to commands
+        sequence until one variant succeeds or all fail
 
         Args:
-            commands (str, list): The commands to send to the node in config
-                mode.  If the commands argument is a string it will be cast to
-                a list.
-                The list of commands will also be prepended with the
-                necessary commands to put the session in config mode.
+            commands (str, list, CliVariants): The commands to send to the node
+                in config mode. If the commands argument is an str or
+                CliVariants type, it will be cast to a list.
+                The list of commands will also be prepended with the necessary
+                commands to put the session in config mode.
+                CliVariants could be part of a list too, however only a single
+                occurrence of CliVariants type in commands is supported.
+                CliVariants type facilitates execution of alternative commands
+                sequences, e.g.:
+                ``config( [cli1, CliVariants( cli2, cli3 ), cli4] )``
+                the example above can be translated into following sequence:
+                ``config( [cli1, cli2, cli4] )``
+                ``config( [cli1, cli3, cli4] )``
+                CliVariants accepts 2 or more arguments of str, list type, or
+                their mix. Each argument to CliVariants will be joined with the
+                rest of commands and all command sequences will be tried until
+                one variant succeeds. If all variants fail the last failure
+                exception will be re-raised.
+
             **kwargs: Additional keyword arguments for expanded eAPI
                 functionality. Only supported eAPI params are used in building
                 the request
@@ -577,6 +624,37 @@ class Node(object):
             The config method will return a list of dictionaries with the
                 output from each command.  The function will strip the
                 response from any commands it prepends.
+        """
+        def variant_cli_idx( cmds ):
+            # return index of first occurrence of CliVariants type in cmds
+            try:
+                return [ type(v) for v in cmds ].index( CliVariants )
+            except (ValueError):
+                return -1
+
+        cfg_call = self._configure_session if self._session_name \
+            else self._configure_terminal
+
+        if isinstance( commands, CliVariants ):
+            commands = [ commands ]
+        idx = variant_cli_idx( commands )
+        if idx == -1:
+            return cfg_call( commands, **kwargs )
+
+        # commands contain CliVariants obj, e.g.: [ '...', CliVariants, ... ]
+        err = None
+        for variant in commands[ idx ].variants:
+            cmd = commands[ :idx ] + variant + commands[ idx + 1: ]
+            try:
+                return cfg_call( cmd, **kwargs )
+            except (CommandError) as exp:
+                err = exp
+        raise err  # re-raising last occurred CommandError
+
+
+    def _configure_terminal(self, commands, **kwargs):
+        """Configures the node with the specified commands with leading
+        "configure terminal"
         """
         commands = make_iterable(commands)
         commands = list(commands)
@@ -593,6 +671,72 @@ class Node(object):
 
         return response
 
+    def _configure_session(self, commands, **kwargs):
+        """Configures the node with the specified commands with leading
+        "configure session <session name>"
+        """
+        if not self._session_name:
+            raise CommandError(-1, 'Not currently in a session')
+
+        commands = make_iterable(commands)
+        commands = list(commands)
+
+        # push the configure command onto the command stack
+        commands.insert(0, 'configure session %s' % self._session_name)
+        response = self.run_commands(commands, **kwargs)
+
+        # pop the configure command output off the stack
+        response.pop(0)
+
+        return response
+
+    @lru_cache(maxsize=None)
+    def _chunkify( self, config, indent=0 ):
+        """parse device config and return a dict holding sections and
+        sub-sections:
+        - a section always begins with a line with zero indents,
+        - a sub-section always begins with an indented line
+        a (sub)section typically contains a begin line (with a lower indent)
+        and a body (with a higher indent). A section might be degenerative (no
+        body, just the section line itself), while sub-sections always contain
+        a sub-section line plus some body). E.g., here's a snippet of a section
+        dict:
+        { ...
+          'spanning-tree mode none': 'spanning-tree mode none\n',
+          ...
+          'mac security': 'mac security\n  profile PR\n    cipher aes256-gcm',
+          '   profile PR': '  profile PR\n    cipher aes256-gcm'
+          ... }
+
+        it's imperative that the most outer call is made with indent=0, as the
+        indent parameter defines processing of nested sub-sections, i.e., if
+        indent > 0, then it's a recursive call and `config` argument contains
+        last parsed (sub)section, which in turn may contain sub-sections
+        """
+        def is_subsection_present( section, indent ):
+            return any( [line[ indent ] == ' ' for line in section] )
+        sections = {}
+        key = None
+        for line in config.splitlines( keepends=True )[ indent > 0: ]:
+            # indent > 0: no need processing subsection line, which is 1st line
+            if line[ indent ] == ' ':  # section continuation
+                sections[key] += line
+                continue
+            # new section is found (if key is not None)
+            if key:  # process prior (last recorded) section
+                lines = sections[key].splitlines()[ 1: ]
+                if len( lines ):  # section may contain sub-sections
+                    ind = len( lines[0] ) - len( lines[0].lstrip() )
+                    if is_subsection_present( lines, ind ):
+                        subs = self._chunkify( sections[key], indent=ind )
+                        subs.update( sections )
+                        sections = subs
+                elif indent > 0:  # record only subsections
+                    del sections[key]
+            key = line.rstrip()
+            sections[key] = line
+        return sections
+
     def section(self, regex, config='running_config'):
         """Returns a section of the config
 
@@ -608,18 +752,14 @@ class Node(object):
         """
         if config in ['running_config', 'startup_config']:
             config = getattr(self, config)
-        match = re.search(regex, config, re.M)
-        if not match:
+        chunked = self._chunkify(config)
+        r = re.compile(regex)
+        matching_keys = [k for k in chunked.keys() if r.search(k)]
+        if len(matching_keys) == 0:
             raise TypeError('config section not found')
-        block_start, line_end = match.regs[0]
-
-        match = re.search(r'^[^\s]', config[line_end:], re.M)
-        if not match:
-            raise TypeError('could not find end block')
-        _, block_end = match.regs[0]
-
-        block_end = line_end + block_end
-        return config[block_start:block_end]
+        matching_key = matching_keys[0]
+        match = chunked[matching_key]
+        return match
 
     def enable(self, commands, encoding='json', strict=False,
                send_enable=True, **kwargs):
@@ -823,6 +963,42 @@ class Node(object):
         """
         self._running_config = None
         self._startup_config = None
+
+    def configure_session(self):
+        """Enter a config session
+        """
+        self._session_name = self._session_name or uuid4()
+
+    def diff(self):
+        """Returns session-config diffs in text encoding
+
+        Note: "show session-config diffs" doesn't support json encoding
+        """
+        response = self._configure_session(
+            ['show session-config diffs'], encoding='text' )
+
+        return response[0]['output']
+
+    def commit(self):
+        """Commits the current config session
+        """
+        return self._configure_and_exit_session(['commit'])
+
+    def abort(self):
+        """Aborts the current config session
+        """
+        return self._configure_session(['abort'])
+
+    def _configure_and_exit_session(self, commands, **kwargs):
+        response = self._configure_session(commands, **kwargs)
+
+        if self.autorefresh:
+            self.refresh()
+
+        # Exit the current config session
+        self._session_name = None
+
+        return response
 
 
 def connect_to(name):

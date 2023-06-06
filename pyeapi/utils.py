@@ -35,16 +35,10 @@ import importlib
 import inspect
 import logging
 import logging.handlers
-import collections
 
-from itertools import tee
+from collections.abc import Iterable
+from itertools import tee, zip_longest
 
-try:
-    # Try Python 3.x import first
-    from itertools import zip_longest
-except ImportError:
-    # Use Python 2.7 import as a fallback
-    from itertools import izip_longest as zip_longest
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
@@ -158,19 +152,16 @@ def make_iterable(value):
     iterable in the form of a list.
 
     Args:
-        value (object): An valid Python object
+        value (object): A valid Python object
 
     Returns:
         An iterable object of type list
     """
-    if sys.version_info <= (3, 0):
-        # Convert unicode values to strings for Python 2
-        if isinstance(value, unicode):
-            value = str(value)
-    if isinstance(value, str) or isinstance(value, dict):
+    if isinstance(value, str) or isinstance(
+            value, dict) or isinstance(value, CliVariants):
         value = [value]
 
-    if not isinstance(value, collections.Iterable):
+    if not isinstance(value, Iterable):
         raise TypeError('value must be an iterable object')
 
     return value
@@ -240,3 +231,49 @@ def collapse_range(arg, value_delimiter=',', range_delimiter='-'):
         else:
             values.extend([v1])
     return [str(x) for x in values]
+
+
+class CliVariants:
+    """
+    Provides an interface for cli variants (typically to handle a transition
+    period for a deprecated cli)
+
+    Instance must be initialized either with 2 or more str variants:
+        ``CliVariants( 'new cli', 'legacy cli' )``,
+    or with 2 or more sequences of cli (or a mix of list and str types), e.g.:
+        ``CliVariants( ['new cli1', 'new cli2'], 'alt cli3', 'legacy cli4' )``
+    """
+    def __init__(self, *cli):
+        assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
+        self.variants = [ v if not isinstance(v,
+            str) and isinstance(v, Iterable) else [v] for v in cli ]
+
+
+def _interpolate_docstr( *tkns ):
+    """Docstring decorator.
+    SYNOPSIS:
+
+         MIN_MTU=68
+         MAX_MTU=65535
+
+         @_interpolate_docstr( 'MIN_MTU', 'MAX_MTU' )
+         def mtu_check( val ):
+            "check mtu against its min value (MIN_MTU) and max value (MAX_MTU)"
+            ...
+
+         print( mtu_check.__doc__ )
+         check mtu against its min value (68) and max value (65535)
+    """
+    def docstr_decorator( user_fn ):
+        """update user_fn_wrapper doc string with the interpolated user_fn's
+        """
+        def user_fn_wrapper( *args, **kwargs ):
+            return user_fn( *args, **kwargs )
+        module = sys.modules[ user_fn.__module__ ]
+        docstr = user_fn.__doc__
+        for tkn in tkns:
+            sval = str( getattr(module, tkn) )
+            docstr = docstr.replace( tkn, sval )
+        user_fn_wrapper.__doc__ = docstr
+        return user_fn_wrapper
+    return docstr_decorator

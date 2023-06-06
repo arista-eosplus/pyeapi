@@ -40,9 +40,9 @@ provide parent class for API implementations.  All API modules will
 ultimately derive from BaseEntity which provides some common functions to
 make building API modules easier.
 """
-from collections import Callable, Mapping
 
-from pyeapi.eapilib import CommandError, ConnectionError
+from collections.abc import Callable, Mapping
+from pyeapi.eapilib import CommandError
 from pyeapi.utils import make_iterable
 
 
@@ -123,7 +123,7 @@ class BaseEntity(object):
         try:
             self.node.config(commands)
             return True
-        except (CommandError, ConnectionError):
+        except (CommandError):
             return False
 
     def command_builder(self, string, value=None, default=None, disable=None):

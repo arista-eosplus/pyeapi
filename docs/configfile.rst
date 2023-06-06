@@ -119,6 +119,16 @@ As the table above indicates, a pyeapi configuration file is required in
   [connection:localhost]
   transport: http_local
 
+Pay attention: once ``eapi.conf`` exists, the respective protocol method must be
+configured on the box. E.g., for the above ``eapi.conf`` sample, the following
+configuration must also exist:
+
+.. code-block:: console
+
+  switch(config)#management http-server
+  switch(config-mgmt-http-server)#protocol http localhost
+
+
 Using HTTP or HTTPS
 ===================
 
@@ -171,6 +181,11 @@ As the table above indicates, a pyeapi configuration file is required in
   transport: https
   username: admin
   password: admin
+
+.. Note:: avoid using ``localhost`` name in the connection description (i.e.: ``[connection:localhost]``). 
+          The name ``localhost`` is reserved solely for ``on-box`` connection method and it won't work when
+          connecting ``off-box``
+
 
 Using HTTPS with Certificates
 =============================

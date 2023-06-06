@@ -831,7 +831,7 @@ class VxlanInterface(BaseInterface):
             * udp_port (int): The vxlan udp-port value
             * vlans (dict): The vlan to vni mappings
             * flood_list (list): The list of global VTEP flood list
-            * multicast_decap (bool): If the mutlicast decap
+            * multicast_decap (bool): If the multicast decap
                                       feature is configured
 
         Args:
@@ -884,7 +884,7 @@ class VxlanInterface(BaseInterface):
         return dict(multicast_group=value)
 
     def _parse_multicast_decap(self, config):
-        value = 'vxlan mutlicast-group decap' in config
+        value = 'vxlan multicast-group decap' in config
         return dict(multicast_decap=bool(value))
 
     def _parse_udp_port(self, config):
@@ -911,7 +911,7 @@ class VxlanInterface(BaseInterface):
         return dict(vlans=values)
 
     def _parse_flood_list(self, config):
-        match = re.search(r'vxlan flood vtep (.+)$', config, re.M)
+        match = re.search(r'^ *vxlan flood vtep +([\d. ]+)$', config, re.M)
         values = list()
         if match:
             values = match.group(1).split(' ')
@@ -978,7 +978,7 @@ class VxlanInterface(BaseInterface):
             True if the operation succeeds otherwise False
         """
         string = 'vxlan multicast-group decap'
-        if(default or disable):
+        if default or disable:
             cmds = self.command_builder(string, value=None, default=default,
                                         disable=disable)
         else:
@@ -1064,7 +1064,7 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        cmd = 'vxlan vlan %s vni %s' % (vid, vni)
+        cmd = 'vxlan vlan add %s vni %s' % (vid, vni)
         return self.configure_interface(name, cmd)
 
     def remove_vlan(self, name, vid):
@@ -1080,7 +1080,7 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        return self.configure_interface(name, 'no vxlan vlan %s vni' % vid)
+        return self.configure_interface(name, 'vxlan vlan remove %s vni' % vid)
 
 
 INTERFACE_CLASS_MAP = {

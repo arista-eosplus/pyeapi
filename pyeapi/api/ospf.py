@@ -55,16 +55,20 @@ class Ospf(Entity):
                 vrf (str): VRF name to return OSPF routing config for
            Returns:
                dict:
-                    keys: router_id (int): OSPF router-id
-                          vrf (str): VRF of the OSPF process
-                          networks (dict): All networks that
-                                           are advertised in OSPF
-                          ospf_process_id (int): OSPF proc id
-                          redistribution (dict): All protocols that
-                                                 are configured to be
-                                                 redistributed in OSPF
-                          shutdown (bool): Gives the current shutdown
-                                           off the process
+                    keys:
+                         router_id (int): OSPF router-id
+
+                         vrf (str): VRF of the OSPF process
+                         networks (dict): All networks that
+                         are advertised in OSPF
+
+                         ospf_process_id (int): OSPF proc id
+
+                         redistribution (dict): All protocols that
+                         are configured to be redistributed in OSPF
+
+                         shutdown (bool): Gives the current shutdown
+                         off the process
         """
         match = '^router ospf .*'
         if vrf:

@@ -36,33 +36,39 @@ EOS and eAPI.
 
 Parameters:
     name (string): The interface name the configuration is in reference
-        to.  The interface name is the full interface identifier
+        to.  The interface name is the full interface identifier.
 
     address (string): The interface IP address in the form of
         address/len.
 
     mtu (integer): The interface MTU value.  The MTU value accepts
-        integers in the range of 68 to 65535 bytes
+        integers in the range of 68 to 65535 bytes.  See RFC 791 and
+        RFC 8200 for more information.
 """
 
 import re
 
 from pyeapi.api import EntityCollection
+from pyeapi.utils import _interpolate_docstr
 
+IP_MTU_MIN = 68
+IP_MTU_MAX = 65535
 
 SWITCHPORT_RE = re.compile(r'no switchport$', re.M)
 
 
-class Ipinterfaces(EntityCollection):
+class Ipinterfaces( EntityCollection ):
 
-    def get(self, name):
+    def get( self, name ):
         """Returns the specific IP interface properties
 
         The Ipinterface resource returns the following:
 
             * name (str): The name of the interface
             * address (str): The IP address of the interface in the form
-                of A.B.C.D/E
+                of A.B.C.D/E (None if no ip configured)
+            * secondary (list): The list of secondary IP addresses of the
+                interface (if any configured)
             * mtu (int): The configured value for IP MTU.
 
 
@@ -75,22 +81,21 @@ class Ipinterfaces(EntityCollection):
                 the current configuration of the node.  If the specified
                 interface does not exist then None is returned.
         """
-        config = self.get_block('interface %s' % name)
-
-        if name[0:2] in ['Et', 'Po'] and not SWITCHPORT_RE.search(config,
-                                                                  re.M):
+        config = self.get_block( 'interface %s' % name )
+        if name[ 0:2 ] in [
+                'Et', 'Po' ] and not SWITCHPORT_RE.search( config, re.M ):
             return None
 
-        resource = dict(name=name)
-        resource.update(self._parse_address(config))
-        resource.update(self._parse_mtu(config))
+        resource = dict( name=name )
+        resource.update( self._parse_address(config) )
+        resource.update( self._parse_mtu(config) )
         return resource
 
-    def _parse_address(self, config):
+    def _parse_address( self, config ):
         """Parses the config block and returns the ip address value
 
-        The provided configuration block is scaned and the configured value
-        for the IP address is returned as a dict object.  If the IP address
+        The provided configuration block is scanned and the configured value
+        for the IP address is returned as a dict object. If the IP address
         value is not configured, then None is returned for the value
 
         Args:
@@ -99,9 +104,11 @@ class Ipinterfaces(EntityCollection):
         Return:
             dict: A dict object intended to be merged into the resource dict
         """
-        match = re.search(r'ip address ([^\s]+)', config)
-        value = match.group(1) if match else None
-        return dict(address=value)
+        match = re.findall( r'ip address ([^\s]+)', config, re.M )
+        primary, secondary = ( match[0],
+                match[1:] ) if match else ( None, None )
+        return dict( address=primary,
+         secondary=secondary ) if secondary else dict( address=primary )
 
     def _parse_mtu(self, config):
         """Parses the config block and returns the configured IP MTU value
@@ -117,7 +124,7 @@ class Ipinterfaces(EntityCollection):
             dict: A dict object intended to be merged into the resource dict
         """
         match = re.search(r'mtu (\d+)', config)
-        return dict(mtu=int(match.group(1)))
+        return dict( mtu=int(match.group( 1 )) if match else None )
 
     def getall(self):
         """ Returns all of the IP interfaces found in the running-config
@@ -211,6 +218,7 @@ class Ipinterfaces(EntityCollection):
                                              default=default, disable=disable))
         return self.configure(commands)
 
+    @_interpolate_docstr( 'IP_MTU_MIN', 'IP_MTU_MAX' )
     def set_mtu(self, name, value=None, default=False, disable=False):
         """ Configures the interface IP MTU
 
@@ -219,7 +227,7 @@ class Ipinterfaces(EntityCollection):
                 config to
 
             value (integer): The MTU value to set the interface to.  Accepted
-                values include 68 to 65535
+                values include IP_MTU_MIN to IP_MTU_MAX
 
             default (bool): Configures the mtu parameter to its default
                 value using the EOS CLI default command
@@ -237,7 +245,7 @@ class Ipinterfaces(EntityCollection):
         """
         if value is not None:
             value = int(value)
-            if not 68 <= value <= 65535:
+            if not IP_MTU_MIN <= value <= IP_MTU_MAX:
                 raise ValueError('invalid mtu value')
 
         commands = ['interface %s' % name]
