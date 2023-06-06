@@ -3,7 +3,7 @@ Release 1.0.0
 
 2023-06-06
 
-- this is a Python3 (3.7 onwards) release only (Python2 is no longer supported)
+- This is a Python3 (3.7 onwards) release only (Python2 is no longer supported)
 - Arista EOS 4.22 or later required
 
 New Modules
