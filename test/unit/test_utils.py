@@ -1,13 +1,9 @@
-import sys
 import unittest
 
-from mock import patch, Mock
+from unittest.mock import patch, Mock
 import pyeapi.utils
 
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable
+from collections.abc import Iterable
 
 class TestUtils(unittest.TestCase):
 
