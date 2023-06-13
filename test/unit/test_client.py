@@ -36,7 +36,7 @@ import imp
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
-from mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 
 from testlib import get_fixture, random_string, random_int
 

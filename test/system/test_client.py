@@ -37,7 +37,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_int, random_string, get_fixture
-from mock import patch
+from unittest.mock import patch
 
 import pyeapi.client
 import pyeapi.eapilib

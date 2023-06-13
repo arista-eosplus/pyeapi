@@ -34,7 +34,7 @@ import random
 import string
 import unittest
 
-from mock import MagicMock as Mock
+from unittest.mock import MagicMock as Mock
 
 from pyeapi.client import Node
 
