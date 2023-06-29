@@ -250,7 +250,7 @@ class CliVariants:
             expand( 'x', CliVariants( 'a', 'b'), 'y' )
             will return: [ ['x', 'a', 'y'], ['x', 'b', 'y'] ]
         """
-        assert isinstance(cmds, list), 'argument cmnds must be list type'
+        assert isinstance(cmds, list), 'argument cmds must be list type'
         if not cmds:
             return [ [] ]
         head = cmds[0]
