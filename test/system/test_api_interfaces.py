@@ -155,7 +155,7 @@ class TestResourceInterfaces(DutSystemTest):
             intf_status = intf_status[0]['interfaces'][intf]['interfaceStatus']
             dut.config(['interface %s' % intf, 'shutdown'])
             result = dut.api('interfaces').default(intf)
-            sleep( 10 ) # if intf was 'connected', give it a time to come up
+            sleep( 10 )  # if intf was 'connected', give it a time to come up
             self.assertTrue(result)
             config = dut.run_commands('show interfaces %s' % intf)
             config = config[0]['interfaces'][intf]
@@ -222,42 +222,6 @@ class TestResourceInterfaces(DutSystemTest):
             config = dut.run_commands('show running-config interfaces %s' %
                                       intf, 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
-
-
-
-    def test_set_vrf(self):
-        for dut in self.duts:
-            intf = random_interface(dut)
-            dut.config('default interface %s' % intf)
-            # Verify set_vrf returns False if no vrf by name is configured
-            result = dut.api('interfaces').set_vrf(intf, 'test')
-            self.assertFalse(result)
-            if dut.version_number >= '4.23':
-                dut.config('vrf instance test')
-            else:
-                dut.config('vrf definition test')
-            # Verify interface has vrf applied
-            result = dut.api('interfaces').set_vrf(intf, 'test')
-            self.assertTrue(result)
-            config = dut.run_commands('show running-config interfaces %s' %
-                                      intf, 'text')
-            if dut.version_number >= '4.23':
-                self.assertIn('vrf test', config[0]['output'])
-            else:
-                self.assertIn('vrf forwarding test', config[0]['output'])
-            # Verify interface has vrf removed
-            result = dut.api('interfaces').set_vrf(intf, 'test', disable=True)
-            self.assertTrue(result)
-            config = dut.run_commands('show running-config interfaces %s' %
-                                      intf, 'text')
-            if dut.version_number >= '4.23':
-                self.assertIn('vrf test', config[0]['output'])
-                # Remove test vrf
-                dut.config('no vrf instance test')
-            else:
-                self.assertIn('vrf forwarding test', config[0]['output'])
-                # Remove test vrf
-                dut.config('no vrf definition test')
 
 
     def test_set_vrf(self):
