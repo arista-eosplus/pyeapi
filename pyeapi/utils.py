@@ -245,10 +245,18 @@ class CliVariants:
     """
     @staticmethod
     def expand( cmds ):
-        """cmds is a list of str and CliVariants, this method returns a list
-        of all full variant combinations present in cmds, e.g.:
-            expand( 'x', CliVariants( 'a', 'b'), 'y' )
-            will return: [ ['x', 'a', 'y'], ['x', 'b', 'y'] ]
+        """ Expands cmds argument into a list of all CLI variants 
+        
+        The method returns a list of all full variant combinations present
+        in the the cmds arguement
+
+        Args:
+            cmds (list): a list made of str and CliVariants types 
+
+        Returns:
+            expanded list, e.g.:
+                expand( 'x', CliVariants( 'a', 'b'), 'y' )
+                will return: [ ['x', 'a', 'y'], ['x', 'b', 'y'] ]
         """
         assert isinstance(cmds, list), 'argument cmds must be list type'
         if not cmds:
