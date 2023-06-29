@@ -245,7 +245,7 @@ class CliVariants:
     """
     @staticmethod
     def expand( cmds ):
-        """cnds is a list of str and CliVariants, this method returns a list
+        """cmds is a list of str and CliVariants, this method returns a list
         of all full variant combinations present in cmds, e.g.:
             expand( 'x', CliVariants( 'a', 'b'), 'y' )
             will return: [ ['x', 'a', 'y'], ['x', 'b', 'y'] ]
