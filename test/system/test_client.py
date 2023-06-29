@@ -117,7 +117,8 @@ class TestClient(unittest.TestCase):
     def test_no_enable_single_command_no_auth(self):
         for dut in self.duts:
             with self.assertRaises(pyeapi.eapilib.CommandError):
-                dut.run_commands(['disable', 'show running-config'], 'json', send_enable=False)
+                dut.run_commands(['disable',
+                    'show running-config'], 'json', send_enable=False)
 
     def test_enable_multiple_commands(self):
         for dut in self.duts:
@@ -276,33 +277,28 @@ class TestNode(unittest.TestCase):
 
     def test_exception_trace(self):
         # Send commands that will return an error and validate the errors
-
         # General format of an error message:
-        rfmt = r'Error \[%d\]: CLI command \d+ of \d+ \'.*\' failed: %s \[%s\]'
+        rfmt = r'Error \[%d\]: CLI command \d+ of \d+ \'[^\']*\' failed: %s\[%s\]'
         # Design error tests
         cases = []
         # Send an incomplete command
-        cases.append(('show run', rfmt
-                      % (1002, 'invalid command',
-                         r'incomplete token \(at token \d+: \'.*\'\)')))
+        cases.append( ('show run', rfmt % (1002, r'invalid command \[[^[]+',
+            r'"Incomplete token \(at token \d+:[^\)]+\)"')))
         # Send a mangled command
-        cases.append(('shwo version', rfmt
-                      % (1002, 'invalid command',
-                         r'Invalid input \(at token \d+: \'.*\'\)')))
+        cases.append(('shwo version', rfmt % (1002, r'invalid command \[[^[]+',
+            r'"Invalid input \(at token \d+:[^\)]+\)"')))
         # Send a command that cannot be run through the api
         # note the command for reload looks to change in new EOS
         # in 4.15 the  reload now is replaced with 'force' if you are
         # testing some DUT running older code and this test fails
         # change the error message to the following:
         # To reload the machine over the API, please use 'reload now' instead
-        cases.append(('reload', rfmt
-                      % (1004, 'incompatible command',
-                         'Command not permitted via API access..*')))
+        cases.append(('reload', rfmt % (1004, r'incompatible command \[[^[]+',
+            r"'Command not permitted via API access\..*")))
         # Send a command that has insufficient priv
-        cases.append(('show running-config', rfmt
-                      % (1002, 'invalid command',
-                         r'Invalid input \(privileged mode required\)')))
-
+        cases.append(('show running-config', rfmt % (1002,
+            r'invalid command \[[^[]+',
+            r"'Invalid input \(privileged mode required\)'")))
         for dut in self.duts:
             for (cmd, regex) in cases:
                 try:
@@ -317,10 +313,8 @@ class TestNode(unittest.TestCase):
                     self.fail('A CommandError should have been raised')
                 except pyeapi.eapilib.CommandError as exc:
                     # Validate the properties of the exception
-                    if cmd != 'show running-config':
-                        self.assertEqual(len(exc.trace), 4)
-                    else:
-                        self.assertEqual(len(exc.trace), 3)
+                    self.assertEqual( len(exc.trace),
+                        3 if cmd == 'show running-config' else 4 )
                     self.assertIsNotNone(exc.command_error)
                     self.assertIsNotNone(exc.output)
                     self.assertIsNotNone(exc.commands)

@@ -60,7 +60,7 @@ Parameters:
 import re
 
 from pyeapi.api import EntityCollection
-from pyeapi.utils import ProxyCall
+from pyeapi.utils import ProxyCall, CliVariants
 
 MIN_LINKS_RE = re.compile(r'(?<=\s{3}min-links\s)(?P<value>.+)$', re.M)
 
@@ -884,8 +884,9 @@ class VxlanInterface(BaseInterface):
         return dict(multicast_group=value)
 
     def _parse_multicast_decap(self, config):
-        value = 'vxlan multicast-group decap' in config
-        return dict(multicast_decap=bool(value))
+        val1 = 'vxlan multicast-group decap' in config
+        val2 = 'no vxlan multicast-group decap' in config
+        return dict( multicast_decap=bool(val1 ^ val2) )
 
     def _parse_udp_port(self, config):
         match = re.search(r'vxlan udp-port (\d+)', config)
@@ -956,10 +957,14 @@ class VxlanInterface(BaseInterface):
         Returns:
             True if the operation succeeds otherwise False
         """
-        string = 'vxlan multicast-group'
-        cmds = self.command_builder(string, value=value, default=default,
-                                    disable=disable)
-        return self.configure_interface(name, cmds)
+        string_dpr = 'vxlan multicast-group'
+        cmds_dpr = self.command_builder(string_dpr,
+            value=value, default=default, disable=disable)
+        string_new = 'vxlan multicast-group decap'
+        cmds_new = self.command_builder(string_new,
+            value=value, default=default, disable=disable)
+        return self.configure_interface(name,
+            CliVariants(cmds_new, cmds_dpr) )
 
     def set_multicast_decap(self, name, default=False,
                             disable=False):
@@ -1080,7 +1085,9 @@ class VxlanInterface(BaseInterface):
             True if the command completes successfully
 
         """
-        return self.configure_interface(name, 'vxlan vlan remove %s vni' % vid)
+        return self.configure_interface( name,
+            CliVariants(f'vxlan vlan remove {vid} vni $',
+                f'vxlan vlan remove {vid} vni') )
 
 
 INTERFACE_CLASS_MAP = {
