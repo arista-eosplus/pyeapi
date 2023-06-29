@@ -126,7 +126,7 @@ class TestApiVrrp(DutSystemTest):
             self.maxDiff = None
             # now delete dict items which vary between versions
             for key in ( 'preempt_delay_min', 'preempt_delay_reload' ):
-              del vrrp_conf[ key ], response[ key ]
+                del vrrp_conf[ key ], response[ key ]
             self.assertEqual(response, vrrp_conf)
 
     def test_delete(self):
@@ -202,7 +202,7 @@ class TestApiVrrp(DutSystemTest):
             response = dut.api('vrrp').get(interface)[vrid]
             # now delete dict items which vary between versions
             for key in ( 'preempt_delay_min', 'preempt_delay_reload' ):
-              del vrrp_update[ key ], response[ key ]
+                del vrrp_update[ key ], response[ key ]
             self.maxDiff = None
             self.assertEqual(response, vrrp_update)
 

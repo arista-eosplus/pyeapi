@@ -243,10 +243,6 @@ class CliVariants:
     or with 2 or more sequences of cli (or a mix of list and str types), e.g.:
         ``CliVariants( ['new cli1', 'new cli2'], 'alt cli3', 'legacy cli4' )``
     """
-    def __init__(self, *cli):
-        assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
-        self.variants = [ v if not isinstance(v,
-            str) and isinstance(v, Iterable) else [v] for v in cli ]
     @staticmethod
     def expand( cmds ):
         """cnds is a list of str and CliVariants, this method returns a list
@@ -264,6 +260,11 @@ class CliVariants:
                 for e in CliVariants.expand( tail ) ]
         else:
             return [ [head] + e for e in CliVariants.expand(tail) ]
+
+    def __init__(self, *cli):
+        assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
+        self.variants = [ v if not isinstance(v,
+            str) and isinstance(v, Iterable) else [v] for v in cli ]
 
 
 def _interpolate_docstr( *tkns ):

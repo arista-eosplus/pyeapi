@@ -100,8 +100,8 @@ class EapiConfigUnitTest(unittest.TestCase):
             called_args = self.node.config.call_args.args[0]
             variants = [ x for x in called_args if isinstance(x, CliVariants) ]
             if not variants:
-               self.node.config.assert_called_with(cmds)
-               return result
+                self.node.config.assert_called_with(cmds)
+                return result
             # process all variants
             cli_variants = CliVariants.expand( called_args )
             self.assertIn( cmds, cli_variants )
