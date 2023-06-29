@@ -97,7 +97,7 @@ class EapiConfigUnitTest(unittest.TestCase):
         if cmds is not None:
             # if config was called with CliVariants, then create all possible
             # cli combinations with CliVariants and see if cmds is one of them
-            called_args = self.node.config.call_args.args[0]
+            called_args = list( self.node.config.call_args )[ 0 ][ 0 ]
             variants = [ x for x in called_args if isinstance(x, CliVariants) ]
             if not variants:
                 self.node.config.assert_called_with(cmds)
