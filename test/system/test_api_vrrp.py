@@ -117,19 +117,16 @@ class TestApiVrrp(DutSystemTest):
         # vrrp_conf = dict(VR_CONFIG)
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            dut.config(['interface %s' % interface,
-                        'no vrrp %d' % vrid,
-                        'exit'])
-
+            dut.config([f'interface {interface}', f'no vrrp {vrid}', 'exit'])
             response = dut.api('vrrp').create(interface, vrid, **vrrp_conf)
             self.assertIs(response, True)
-
             # Fix the configuration dict for proper output
             vrrp_conf = dut.api('vrrp').vrconf_format(vrrp_conf)
-
             response = dut.api('vrrp').get(interface)[vrid]
-
             self.maxDiff = None
+            # now delete dict items which vary between versions
+            for key in ( 'preempt_delay_min', 'preempt_delay_reload' ):
+              del vrrp_conf[ key ], response[ key ]
             self.assertEqual(response, vrrp_conf)
 
     def test_delete(self):
@@ -169,21 +166,16 @@ class TestApiVrrp(DutSystemTest):
             self.assertIs(response, True)
 
     def test_update_with_create(self):
-        pass
         vrid = 103
         import copy
         vrrp_conf = copy.deepcopy(VR_CONFIG)
         # vrrp_conf = dict(VR_CONFIG)
         for dut in self.duts:
             interface = self._vlan_setup(dut)
-            dut.config(['interface %s' % interface,
-                        'no vrrp %d' % vrid,
-                        'exit'])
-
+            dut.config([f'interface {interface}', f'no vrrp {vrid}', 'exit'])
             # Create the inital vrrp on the interface
             response = dut.api('vrrp').create(interface, vrid, **vrrp_conf)
             self.assertIs(response, True)
-
             # Update some of the information on the vrrp
             vrrp_update = {
                 'primary_ip': '10.10.10.12',
@@ -204,13 +196,13 @@ class TestApiVrrp(DutSystemTest):
                 ],
                 'bfd_ip': None,
             }
-
             response = dut.api('vrrp').create(interface, vrid, **vrrp_update)
             self.assertIs(response, True)
             vrrp_update = dut.api('vrrp').vrconf_format(vrrp_update)
-
             response = dut.api('vrrp').get(interface)[vrid]
-
+            # now delete dict items which vary between versions
+            for key in ( 'preempt_delay_min', 'preempt_delay_reload' ):
+              del vrrp_update[ key ], response[ key ]
             self.maxDiff = None
             self.assertEqual(response, vrrp_update)
 

@@ -247,6 +247,23 @@ class CliVariants:
         assert len( cli ) >= 2, 'must be initialized with 2 or more arguments'
         self.variants = [ v if not isinstance(v,
             str) and isinstance(v, Iterable) else [v] for v in cli ]
+    @staticmethod
+    def expand( cmds ):
+        """cnds is a list of str and CliVariants, this method returns a list
+        of all full variant combinations present in cmds, e.g.:
+            expand( 'x', CliVariants( 'a', 'b'), 'y' )
+            will return: [ ['x', 'a', 'y'], ['x', 'b', 'y'] ]
+        """
+        assert isinstance(cmds, list), 'argument cmnds must be list type'
+        if not cmds:
+            return [ [] ]
+        head = cmds[0]
+        tail = cmds[1:]
+        if isinstance( head, CliVariants ):
+            return [ v + e for v in head.variants
+                for e in CliVariants.expand( tail ) ]
+        else:
+            return [ [head] + e for e in CliVariants.expand(tail) ]
 
 
 def _interpolate_docstr( *tkns ):

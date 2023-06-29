@@ -31,13 +31,14 @@
 #
 import os
 import unittest
+from pyeapi.utils import CliVariants
 
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_string, random_int
 from systestlib import DutSystemTest, random_interface
-
+from time import sleep
 
 class TestResourceInterfaces(DutSystemTest):
 
@@ -150,12 +151,15 @@ class TestResourceInterfaces(DutSystemTest):
     def test_default(self):
         for dut in self.duts:
             intf = random_interface(dut)
+            intf_status = dut.run_commands('show interfaces %s' % intf)
+            intf_status = intf_status[0]['interfaces'][intf]['interfaceStatus']
             dut.config(['interface %s' % intf, 'shutdown'])
             result = dut.api('interfaces').default(intf)
+            sleep( 10 ) # if intf was 'connected', give it a time to come up
             self.assertTrue(result)
             config = dut.run_commands('show interfaces %s' % intf)
             config = config[0]['interfaces'][intf]
-            self.assertEqual(config['interfaceStatus'], 'connected')
+            self.assertEqual(config['interfaceStatus'], intf_status)
 
     def test_set_description(self):
         for dut in self.duts:
@@ -219,6 +223,8 @@ class TestResourceInterfaces(DutSystemTest):
                                       intf, 'text')
             self.assertNotIn('no sflow enable', config[0]['output'])
 
+
+
     def test_set_vrf(self):
         for dut in self.duts:
             intf = random_interface(dut)
@@ -252,6 +258,32 @@ class TestResourceInterfaces(DutSystemTest):
                 self.assertIn('vrf forwarding test', config[0]['output'])
                 # Remove test vrf
                 dut.config('no vrf definition test')
+
+
+    def test_set_vrf(self):
+        for dut in self.duts:
+            intf = random_interface(dut)
+            dut.config('default interface %s' % intf)
+            # Verify set_vrf returns False if no vrf by name is configured
+            result = dut.api('interfaces').set_vrf(intf, 'test')
+            self.assertFalse(result)
+            dut.config( CliVariants('vrf instance test', 'vrf definition test') )
+            # Verify interface has vrf applied
+            result = dut.api('interfaces').set_vrf(intf, 'test')
+            self.assertTrue(result)
+            config = dut.run_commands(
+                f'show running-config interfaces {intf}', 'text' )
+            self.assertIn('vrf test' if dut.version_number >= '4.23'
+                else 'vrf forwarding test', config[0]['output'])
+            # Verify interface has vrf removed
+            result = dut.api('interfaces').set_vrf(intf, 'test', disable=True)
+            self.assertTrue(result)
+            config = dut.run_commands(
+                f'show running-config interfaces {intf}', 'text' )
+            self.assertNotIn('vrf test' if dut.version_number >= '4.23'
+                else 'vrf forwarding test', config[0]['output'])
+            dut.config( CliVariants(
+                'no vrf instance test', 'no vrf definition test') )
 
 
 class TestPortchannelInterface(DutSystemTest):
@@ -407,7 +439,7 @@ class TestPortchannelInterface(DutSystemTest):
 
     def test_minimum_links_invalid_value(self):
         for dut in self.duts:
-            minlinks = random_int(17, 128)
+            minlinks = random_int(65, 128)
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
                                                              minlinks)
             self.assertFalse(result)
@@ -508,6 +540,25 @@ class TestApiVxlanInterface(DutSystemTest):
     def notcontains(self, text, dut):
         self.assertNotIn(text, self.get_config(dut), 'dut=%s' % dut)
 
+    def may_contain( self, text, dut, first=False, last=False ):
+        """handles multiple variants of cli, typically to handle deprecated
+        variants of the cli. The first and last calls in the variant sequence
+        must be initialized respectively. At least one call in the sequence
+        should result in a positive assertion
+        """
+        if first:
+            self.skip_rest = False
+        if self.skip_rest:
+            return
+        if last:
+            self.assertIn(text, self.get_config(dut), 'dut=%s' % dut)
+            return
+        try:
+            self.assertIn(text, self.get_config(dut), 'dut=%s' % dut)
+            self.skip_rest = True
+        except AssertionError:
+            pass
+
     def test_set_source_interface(self):
         for dut in self.duts:
             dut.config(['no interface Vxlan1', 'interface Vxlan1'])
@@ -540,12 +591,14 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.set_multicast_group('Vxlan1', '239.10.10.10')
             self.assertTrue(instance)
-            self.contains('vxlan multicast-group 239.10.10.10', dut)
+            self.contains('vxlan multicast-group', dut)
+            self.contains('239.10.10.10', dut)
 
     def test_set_multicast_group_default(self):
         for dut in self.duts:
-            dut.config(['no interface Vxlan1', 'interface Vxlan1',
-                        'vxlan multicast-group 239.10.10.10'])
+            dut.config( ['no interface Vxlan1', 'interface Vxlan1',
+                CliVariants( 'vxlan multicast-group decap 239.10.10.10',
+                   'vxlan multicast-group 239.10.10.10') ])
             api = dut.api('interfaces')
             instance = api.set_multicast_group('Vxlan1', default=True)
             self.assertTrue(instance)
@@ -553,8 +606,9 @@ class TestApiVxlanInterface(DutSystemTest):
 
     def test_set_multicast_group_negate(self):
         for dut in self.duts:
-            dut.config(['no interface Vxlan1', 'interface Vxlan1',
-                        'vxlan multicast-group 239.10.10.10'])
+            dut.config( ['no interface Vxlan1', 'interface Vxlan1',
+                CliVariants( 'vxlan multicast-group decap 239.10.10.10',
+                   'vxlan multicast-group 239.10.10.10') ])
             api = dut.api('interfaces')
             instance = api.set_multicast_group('Vxlan1', disable=True)
             self.assertTrue(instance)
@@ -635,7 +689,8 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.update_vlan('Vxlan1', '10', '10')
             self.assertTrue(instance)
-            self.contains('vxlan vlan add 10 vni 10', dut)
+            self.may_contain('vxlan vlan 10 vni 10', dut, first=True)
+            self.may_contain('vxlan vlan add 10 vni 10', dut, last=True)
 
     def test_remove_vlan(self):
         for dut in self.duts:
@@ -643,7 +698,7 @@ class TestApiVxlanInterface(DutSystemTest):
             api = dut.api('interfaces')
             instance = api.remove_vlan('Vxlan1', '10')
             self.assertTrue(instance)
-            self.notcontains('vxlan vlan remove 10 vni 10', dut)
+            self.notcontains('vxlan vlan remove 10 vni 10 $', dut)
 
 
 if __name__ == '__main__':
