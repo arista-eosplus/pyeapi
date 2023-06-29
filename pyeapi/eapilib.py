@@ -433,14 +433,16 @@ class EapiConnection(object):
             self.transport.endheaders(message_body=data)
             response = self.transport.getresponse()
             response_content = response.read()
+            if isinstance( response_content, bytes ):
+                response_content = response_content.decode()
             _LOGGER.debug('Response: status:{status}, reason:{reason}'.format(
                           status=response.status,
                           reason=response.reason))
             _LOGGER.debug('Response content: {}'.format(response_content))
 
             if response.status == 401:
-                raise ConnectionError(str(self), '%s. %s' % (response.reason,
-                                                             response_content))
+                raise ConnectionError(str(self),
+                    f'{response.reason}. {response_content}')
 
             # Python 3.7 json.loads() works with bytes or strings,
             # thus no decoding is required

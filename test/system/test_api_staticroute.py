@@ -83,8 +83,7 @@ class TestApiStaticroute(DutSystemTest):
         # when creating routes with varying parameters included.
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing'])
+            dut.config(['no ip routing', 'ip routing'])
 
             for t_distance in DISTANCES:
                 for t_tag in TAGS:
@@ -112,8 +111,7 @@ class TestApiStaticroute(DutSystemTest):
         # is passed in when the route exists on the switch.
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing'])
+            dut.config(['no ip routing', 'ip routing'])
 
             ip_dest = '1.2.3.0/24'
             next_hop = 'Ethernet1'
@@ -152,9 +150,7 @@ class TestApiStaticroute(DutSystemTest):
         # name 'test10').
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing'])
-
+            dut.config(['no ip routing', 'ip routing'])
             # Declare a set of 3 routes with same ip dest and next hop.
             # Set different distance, tag and name for each route,
             # including values 1 and 10 in each, so the test will verify
@@ -165,35 +161,22 @@ class TestApiStaticroute(DutSystemTest):
                 'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 tag 1 name test10'
             route3 = \
                 'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 2 tag 10 name test1'
-
             dut.config([route1, route2, route3])
-
             routes = {
                 '1.2.3.0/24': {
                     'Ethernet1': {
                         '1.1.1.1': {
-                            10: {
-                                'tag': 1,
-                                'route_name': 'test1'
-                            },
-                            1: {
-                                'tag': 1,
-                                'route_name': 'test10'
-                            },
-                            2: {
-                                'tag': 10,
-                                'route_name': 'test1'
-                            }
+                            10: { 'tag': 1, 'route_name': 'test1' },
+                            1: { 'tag': 1, 'route_name': 'test10' },
+                            2: { 'tag': 10, 'route_name': 'test1' }
                         }
                     }
                 }
             }
-
             # Get the list of ip routes from the switch
             result = dut.api('staticroute').getall()
-
             # Assert that the result dict is equivalent to the routes dict
-            self.assertEqual(result, routes)
+            self.assertEqual(result['1.2.3.0/24'], routes['1.2.3.0/24'])
 
     def test_delete(self):
         # Validate the delete function returns without an error
@@ -203,8 +186,7 @@ class TestApiStaticroute(DutSystemTest):
         # does not error.
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing'])
+            dut.config(['no ip routing', 'ip routing'])
 
             for t_distance in DISTANCES:
                 for t_tag in TAGS:
@@ -235,8 +217,7 @@ class TestApiStaticroute(DutSystemTest):
         # function.
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing'])
+            dut.config(['no ip routing', 'ip routing'])
 
             for t_distance in DISTANCES:
                 for t_tag in TAGS:
@@ -264,8 +245,7 @@ class TestApiStaticroute(DutSystemTest):
         # when modifying the tag on an existing route
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing',
+            dut.config(['no ip routing', 'ip routing',
                         'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 10 tag 99'])
 
             result = dut.api('staticroute').set_tag(
@@ -278,8 +258,7 @@ class TestApiStaticroute(DutSystemTest):
         # when modifying the tag on an existing route
 
         for dut in self.duts:
-            dut.config(['no ip routing delete-static-routes',
-                        'ip routing',
+            dut.config(['no ip routing', 'ip routing',
                         'ip route 1.2.3.0/24 Ethernet1 1.1.1.1 1 name test99'])
 
             result = dut.api('staticroute').set_route_name(

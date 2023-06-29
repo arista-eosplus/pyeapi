@@ -662,6 +662,8 @@ class Node(object):
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
         response = self.run_commands(commands, **kwargs)
+        # after config change the _chunkify lru_cache has to be cleared
+        self._chunkify.cache_clear()
 
         if self.autorefresh:
             self.refresh()
@@ -684,6 +686,8 @@ class Node(object):
         # push the configure command onto the command stack
         commands.insert(0, 'configure session %s' % self._session_name)
         response = self.run_commands(commands, **kwargs)
+        # after config change the _chunkify lru_cache has to be cleared
+        self._chunkify.cache_clear()
 
         # pop the configure command output off the stack
         response.pop(0)

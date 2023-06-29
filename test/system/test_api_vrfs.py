@@ -37,6 +37,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
 from testlib import random_string
 from systestlib import DutSystemTest
+from pyeapi.utils import CliVariants
 
 
 class TestApiVrfs(DutSystemTest):
@@ -60,21 +61,19 @@ class TestApiVrfs(DutSystemTest):
 
     def test_getall(self):
         for dut in self.duts:
-            if dut.version_number >= '4.23':
-                dut.config(['no vrf instance blah', 'vrf instance blah',
-                            'no vrf instance second', 'vrf instance second'])
-            else:
-                dut.config(['no vrf definition blah', 'vrf definition blah',
-                            'no vrf definition second', 'vrf definition second'])
+            dut.config( CliVariants(
+                ['no vrf instance blah', 'vrf instance blah',
+                'no vrf instance second', 'vrf instance second'],
+                ['no vrf definition blah', 'vrf definition blah',
+                'no vrf definition second', 'vrf definition second']) )
             response = dut.api('vrfs').getall()
-            self.assertIsInstance(response, dict, 'dut=%s' % dut)
-            self.assertEqual(len(response), 2)
-            for vrf_name in ['blah', 'second']:
-                self.assertIn(vrf_name, response, 'dut=%s' % dut)
-            if dut.version_number >= '4.23':
-                dut.config(['no vrf instance blah', 'no vrf instance second'])
-            else:
-                dut.config(['no vrf definition blah', 'no vrf definition second'])
+            self.assertIsInstance( response, dict, f'dut={dut}' )
+            self.assertEqual( len(response), 2 )
+            for vrf_name in ( 'blah', 'second' ):
+                self.assertIn( vrf_name, response, f'dut={dut}' )
+            dut.config( CliVariants(
+                ['no vrf instance blah', 'no vrf instance second'],
+                ['no vrf definition blah', 'no vrf definition second']) )
 
     def test_create_and_return_true(self):
         for dut in self.duts:

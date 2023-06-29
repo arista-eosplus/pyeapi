@@ -34,7 +34,8 @@ import random
 import string
 import unittest
 
-from mock import MagicMock as Mock
+from unittest.mock import MagicMock as Mock
+from pyeapi.utils import CliVariants
 
 from pyeapi.client import Node
 
@@ -94,7 +95,16 @@ class EapiConfigUnitTest(unittest.TestCase):
         result = func(*fargs, **fkwargs)
 
         if cmds is not None:
-            self.node.config.assert_called_with(cmds)
+            # if config was called with CliVariants, then create all possible
+            # cli combinations with CliVariants and see if cmds is one of them
+            called_args = list( self.node.config.call_args )[ 0 ][ 0 ]
+            variants = [ x for x in called_args if isinstance(x, CliVariants) ]
+            if not variants:
+                self.node.config.assert_called_with(cmds)
+                return result
+            # process all variants
+            cli_variants = CliVariants.expand( called_args )
+            self.assertIn( cmds, cli_variants )
         else:
             self.assertEqual(self.node.config.call_count, 0)
 
