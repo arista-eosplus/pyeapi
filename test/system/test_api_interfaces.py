@@ -403,9 +403,9 @@ class TestPortchannelInterface(DutSystemTest):
 
     def test_minimum_links_invalid_value(self):
         for dut in self.duts:
-            minlinks = random_int(65, 128)
-            result = dut.api('interfaces').set_minimum_links('Port-Channel1',
-                                                             minlinks)
+            minlinks = random_int(129, 256)  # some duts may support up to 128
+            result = dut.api(
+                'interfaces').set_minimum_links('Port-Channel1', minlinks)
             self.assertFalse(result)
 
     def test_create_and_delete_portchannel_sub_interface(self):
