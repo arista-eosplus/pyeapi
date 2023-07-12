@@ -245,13 +245,13 @@ class CliVariants:
     """
     @staticmethod
     def expand( cmds ):
-        """ Expands cmds argument into a list of all CLI variants 
-        
+        """ Expands cmds argument into a list of all CLI variants
+
         The method returns a list of all full variant combinations present
         in the the cmds arguement
 
         Args:
-            cmds (list): a list made of str and CliVariants types 
+            cmds (list): a list made of str and CliVariants types
 
         Returns:
             expanded list, e.g.:
