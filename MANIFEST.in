@@ -4,6 +4,7 @@ include .coveragerc
 include LICENSE
 include Makefile
 include VERSION
+include *.yaml
 recursive-include examples *.conf
 recursive-include examples *.py
 recursive-include test *.conf
