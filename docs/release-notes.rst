@@ -6,6 +6,7 @@ Release Notes
     :maxdepth: 2
     :titlesonly:
 
+    release-notes-1.0.3.rst
     release-notes-1.0.2.rst
     release-notes-1.0.0.rst
     release-notes-0.8.4.rst
