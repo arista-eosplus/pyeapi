@@ -390,7 +390,7 @@ class TestPortchannelInterface(DutSystemTest):
 
     def test_minimum_links_valid(self):
         for dut in self.duts:
-            minlinks = random_int(1, 16)
+            minlinks = random_int(1, 8)  # some physical duts may have only 8 links
             dut.config(['no interface Port-Channel1',
                         'interface Port-Channel1'])
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
