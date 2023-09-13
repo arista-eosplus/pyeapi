@@ -718,7 +718,10 @@ class Node(object):
         last parsed (sub)section, which in turn may contain sub-sections
         """
         def is_subsection_present( section, indent ):
-            return any( [line[ indent ] == ' ' for line in section] )
+            try:
+                return any( [line[ indent ] == ' ' for line in section] )
+            except IndexError:
+                return False
         sections = {}
         key = None
         for line in config.splitlines( keepends=True )[ indent > 0: ]:
