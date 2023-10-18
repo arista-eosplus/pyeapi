@@ -346,6 +346,8 @@ class EapiConnection(object):
         reqid = id(self) if reqid is None else reqid
         params = {'version': 1, 'cmds': commands, 'format': encoding}
         streaming = False
+        if 'apiVersion' in kwargs:
+            params['version'] = kwargs['apiVersion']        
         if 'autoComplete' in kwargs:
             params['autoComplete'] = kwargs['autoComplete']
         if 'expandAliases' in kwargs:
