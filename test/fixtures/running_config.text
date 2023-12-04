@@ -376,6 +376,13 @@ environment fan-speed auto
 !
 clock timezone US/Eastern
 !
+banner login
++++++++++++++++++++++++++++++++++++++++++
+              banner:
+         
+EOF
+!
+
 no virtual-cable
 !
 vlan 1
