@@ -347,7 +347,7 @@ class EapiConnection(object):
         params = {'version': 1, 'cmds': commands, 'format': encoding}
         streaming = False
         if 'apiVersion' in kwargs:
-            params['version'] = kwargs['apiVersion']        
+            params['version'] = kwargs['apiVersion']
         if 'autoComplete' in kwargs:
             params['autoComplete'] = kwargs['autoComplete']
         if 'expandAliases' in kwargs:

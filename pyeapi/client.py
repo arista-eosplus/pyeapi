@@ -719,8 +719,10 @@ class Node(object):
         """
         def is_subsection_present( section, indent ):
             return any( line[ indent ] == ' ' for line in section )
+
         def get_indent( line ):
             return len( line ) - len( line.lstrip() )
+
         sections = {}
         key = None
         banner = None
@@ -750,55 +752,6 @@ class Node(object):
             key = line_rs
             sections[ key ] = line
         return sections
-
-
-#    @lru_cache(maxsize=None)
-#    def _chunkify( self, config, indent=0 ):
-#        """parse device config and return a dict holding sections and
-#        sub-sections:
-#        - a section always begins with a line with zero indents,
-#        - a sub-section always begins with an indented line
-#        a (sub)section typically contains a begin line (with a lower indent)
-#        and a body (with a higher indent). A section might be degenerative (no
-#        body, just the section line itself), while sub-sections always contain
-#        a sub-section line plus some body). E.g., here's a snippet of a section
-#        dict:
-#        { ...
-#          'spanning-tree mode none': 'spanning-tree mode none\n',
-#          ...
-#          'mac security': 'mac security\n  profile PR\n    cipher aes256-gcm',
-#          '   profile PR': '  profile PR\n    cipher aes256-gcm'
-#          ... }
-#
-#        it's imperative that the most outer call is made with indent=0, as the
-#        indent parameter defines processing of nested sub-sections, i.e., if
-#        indent > 0, then it's a recursive call and `config` argument contains
-#        last parsed (sub)section, which in turn may contain sub-sections
-#        """
-#        def is_subsection_present( section, indent ):
-#            return any( [line[ indent ] == ' ' for line in section] )
-#        sections = {}
-#        key = None
-#        for line in config.splitlines( keepends=True )[ indent > 0: ]:
-#            # indent > 0: no need processing subsection line, which is 1st line
-#            if line[ indent ] == ' ':  # section continuation
-#                sections[key] += line
-#                continue
-#            # new section is found (if key is not None)
-#            if key:  # process prior (last recorded) section
-#                lines = sections[key].splitlines()[ 1: ]
-#                if len( lines ):  # section may contain sub-sections
-#                    ind = len( lines[0] ) - len( lines[0].lstrip() )
-#                    if is_subsection_present( lines, ind ):
-#                        subs = self._chunkify( sections[key], indent=ind )
-#                        subs.update( sections )
-#                        sections = subs
-#                elif indent > 0:  # record only subsections
-#                    del sections[key]
-#            key = line.rstrip()
-#            sections[key] = line
-#        return sections
-
 
     def section(self, regex, config='running_config'):
         """Returns a section of the config
