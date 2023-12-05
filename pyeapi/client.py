@@ -731,7 +731,7 @@ class Node(object):
             if indent == 0:
                 if banner:
                     sections[ banner ] += line
-                    if line == 'EOF\n':
+                    if line_rs == 'EOF':
                         banner = None
                     continue
                 if line.startswith( 'banner ' ):

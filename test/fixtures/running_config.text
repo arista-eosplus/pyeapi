@@ -376,13 +376,6 @@ environment fan-speed auto
 !
 clock timezone US/Eastern
 !
-banner login
-+++++++++++++++++++++++++++++++++++++++++
-              banner:
-         
-EOF
-!
-
 no virtual-cable
 !
 vlan 1
@@ -410,6 +403,22 @@ vlan 300
    name VLAN0300
    state active
    no private-vlan
+!
+banner login
++++++++++++++++++++++++++++++++++++++++++
+              banner:
+         
+vlan 1
+this
+is the loging ban
+that would b emult
+EOF
+!
+
+banner motd
+this text
+can be multine
+EOF
 !
 interface Port-Channel10
    no description
@@ -2112,16 +2121,6 @@ monitor reachability
 no ip tacacs source-interface
 !
 no vxlan vni notation dotted
-!
-banner login
-this
-is the loging ban
-that would b emult
-EOF
-banner motd
-this text
-can be multine
-EOF
 !
 system coredump compressed
 !
