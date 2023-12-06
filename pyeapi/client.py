@@ -742,7 +742,8 @@ class Node(object):
                 # key is always expected to be set by now
                 sections[ key ] += line
                 continue
-            if subsection := sections.get( key, '' ).splitlines()[ 1: ]:
+            subsection = sections.get( key, '' ).splitlines()[ 1: ]
+            if subsection:
                 sub_indent = get_indent( subsection[0] )
                 if is_subsection_present( subsection, sub_indent ):
                     parsed = self._chunkify( sections[key], indent=sub_indent )
