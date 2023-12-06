@@ -33,6 +33,7 @@ import unittest
 import random
 
 from testlib import get_fixture
+from pyeapi.utils import CliVariants
 
 import pyeapi.client
 
@@ -48,9 +49,16 @@ class DutSystemTest(unittest.TestCase):
 
         self.duts = list()
         for name in config.sections():
-            if name.startswith('connection:') and 'localhost' not in name:
-                name = name.split(':')[1]
-                self.duts.append(pyeapi.client.connect_to(name))
+            if not name.startswith('connection:'):
+                continue
+            if 'localhost' in name:
+                continue
+            name = name.split(':')[1]
+            self.duts.append( pyeapi.client.connect_to(name) )
+            # revert to a legacy behavior for interface availability
+            if self.duts[ -1 ]:
+                self.duts[ -1 ].config( CliVariants(
+                    'service interface inactive expose', 'enable') )
 
     def sort_dict_by_keys(self, d):
         keys = sorted(d.keys())
