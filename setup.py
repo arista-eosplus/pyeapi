@@ -66,7 +66,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['check-manifest', 'pep8', 'pyflakes', 'twine'],
-        'test': ['coverage', 'mock'],
+        'test': ['coverage'],
     },
 )
 
