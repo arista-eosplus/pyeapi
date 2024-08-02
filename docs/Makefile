@@ -55,7 +55,6 @@ clean:
 	rm -rf $(APIDIR)/*
 
 html:
-	make modules
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
