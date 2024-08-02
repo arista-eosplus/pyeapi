@@ -15,7 +15,7 @@ build:
     # golang: "1.20"
   jobs:
     pre_build:
-      - make modules
+      - make -C docs modules
 
 
 # Build documentation in the "docs/" directory with Sphinx
