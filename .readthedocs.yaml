@@ -14,7 +14,7 @@ build:
     # rust: "1.70"
     # golang: "1.20"
   jobs:
-    pre_install:
+    pre_build:
       - make modules
 
 
