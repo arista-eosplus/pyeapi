@@ -55,12 +55,13 @@ clean:
 	rm -rf $(APIDIR)/*
 
 html:
+	make modules
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 modules:
-	python $(CWD)/generate_modules.py
+	python3 $(CWD)/generate_modules.py
 
 docs: clean modules html
 
