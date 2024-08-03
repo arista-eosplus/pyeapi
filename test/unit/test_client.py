@@ -32,7 +32,7 @@
 import sys
 import os
 import unittest
-import imp
+import importlib
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../lib'))
 
@@ -227,7 +227,7 @@ class TestClient(unittest.TestCase):
     def setUp(self):
         if 'EAPI_CONF' in os.environ:
             del os.environ['EAPI_CONF']
-        imp.reload(pyeapi.client)
+        importlib.reload(pyeapi.client)
 
     def test_load_config_for_connection_with_filename(self):
         conf = get_fixture('eapi.conf')
