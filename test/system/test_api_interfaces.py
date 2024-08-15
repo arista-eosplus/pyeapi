@@ -44,7 +44,7 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            intf = random_interface(dut)
+            intf = random_interface( dut, exclude=['Ethernet1'] )
             dut.config(['default interface %s' % intf,
                         'interface %s' % intf,
                         'description this is a test',
