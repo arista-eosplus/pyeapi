@@ -60,7 +60,7 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 modules:
-	python $(CWD)/generate_modules.py
+	python3 $(CWD)/generate_modules.py
 
 docs: clean modules html
 

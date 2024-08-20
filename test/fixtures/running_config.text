@@ -404,6 +404,22 @@ vlan 300
    state active
    no private-vlan
 !
+banner login
++++++++++++++++++++++++++++++++++++++++++
+              banner:
+         
+vlan 1
+this
+is the loging ban
+that would b emult
+EOF
+!
+
+banner motd
+this text
+can be multine
+EOF
+!
 interface Port-Channel10
    no description
    no shutdown
@@ -2105,16 +2121,6 @@ monitor reachability
 no ip tacacs source-interface
 !
 no vxlan vni notation dotted
-!
-banner login
-this
-is the loging ban
-that would b emult
-EOF
-banner motd
-this text
-can be multine
-EOF
 !
 system coredump compressed
 !

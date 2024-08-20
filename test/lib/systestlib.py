@@ -33,6 +33,7 @@ import unittest
 import random
 
 from testlib import get_fixture
+from pyeapi.utils import CliVariants
 
 import pyeapi.client
 
@@ -48,9 +49,16 @@ class DutSystemTest(unittest.TestCase):
 
         self.duts = list()
         for name in config.sections():
-            if name.startswith('connection:') and 'localhost' not in name:
-                name = name.split(':')[1]
-                self.duts.append(pyeapi.client.connect_to(name))
+            if not name.startswith('connection:'):
+                continue
+            if 'localhost' in name:
+                continue
+            name = name.split(':')[1]
+            self.duts.append( pyeapi.client.connect_to(name) )
+            # revert to a legacy behavior for interface availability
+            if self.duts[ -1 ]:
+                self.duts[ -1 ].config( CliVariants(
+                    'service interface inactive expose', 'enable') )
 
     def sort_dict_by_keys(self, d):
         keys = sorted(d.keys())
@@ -58,9 +66,15 @@ class DutSystemTest(unittest.TestCase):
 
 
 def random_interface(dut, exclude=None):
+    # interfaces read in 'show run all' and those actually present may differ,
+    # thus interface list must be picked from the actually present
+    if not getattr( random_interface, 'present', False ):
+        random_interface.present = dut.run_commands(
+            'show interfaces', send_enable=False )[ 0 ][ 'interfaces' ].keys()
     exclude = [] if exclude is None else exclude
     interfaces = dut.api('interfaces')
-    names = [name for name in list(interfaces.keys()) if name.startswith('Et')]
+    names = [ name for name in list(interfaces.keys()) if name.startswith('Et') ]
+    names = [ name for name in names if name in random_interface.present ]
 
     exclude_interfaces = dut.settings.get('exclude_interfaces', [])
     if exclude_interfaces:

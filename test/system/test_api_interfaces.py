@@ -44,7 +44,7 @@ class TestResourceInterfaces(DutSystemTest):
 
     def test_get(self):
         for dut in self.duts:
-            intf = random_interface(dut)
+            intf = random_interface( dut, exclude=['Ethernet1'] )
             dut.config(['default interface %s' % intf,
                         'interface %s' % intf,
                         'description this is a test',
@@ -390,7 +390,7 @@ class TestPortchannelInterface(DutSystemTest):
 
     def test_minimum_links_valid(self):
         for dut in self.duts:
-            minlinks = random_int(1, 16)
+            minlinks = random_int(1, 8)  # some physical duts may have only 8 links
             dut.config(['no interface Port-Channel1',
                         'interface Port-Channel1'])
             result = dut.api('interfaces').set_minimum_links('Port-Channel1',
@@ -403,7 +403,7 @@ class TestPortchannelInterface(DutSystemTest):
 
     def test_minimum_links_invalid_value(self):
         for dut in self.duts:
-            minlinks = random_int(129, 256)  # some duts may support up to 128
+            minlinks = 1025  # hope it will hold for a while
             result = dut.api(
                 'interfaces').set_minimum_links('Port-Channel1', minlinks)
             self.assertFalse(result)
