@@ -87,7 +87,7 @@ class TestApiVlans(DutSystemTest):
 
     def test_default(self):
         for dut in self.duts:
-            vid = str(random_int(2, 4095))
+            vid = str(random_int(2, 4094))
             name = random_string(maxchar=20)
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid,
                         'vlan %s' % vid, 'name %s' % name])
@@ -99,7 +99,7 @@ class TestApiVlans(DutSystemTest):
     def test_set_name(self):
         for dut in self.duts:
             name = random_string(maxchar=20)
-            vid = str(random_int(2, 4095))
+            vid = str(random_int(2, 4094))
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid])
             result = dut.api('vlans').set_name(vid, name)
             self.assertTrue(result, 'dut=%s' % dut)
@@ -109,7 +109,7 @@ class TestApiVlans(DutSystemTest):
 
     def test_set_state_active(self):
         for dut in self.duts:
-            vid = str(random_int(2, 4095))
+            vid = str(random_int(2, 4094))
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid, 'state suspend'])
             result = dut.api('vlans').set_state(vid, 'active')
             self.assertTrue(result, 'dut=%s' % dut)
@@ -119,7 +119,7 @@ class TestApiVlans(DutSystemTest):
 
     def test_set_state_suspend(self):
         for dut in self.duts:
-            vid = str(random_int(2, 4095))
+            vid = str(random_int(2, 4094))
             dut.config(['no vlan %s' % vid, 'vlan %s' % vid, 'state active'])
             result = dut.api('vlans').set_state(vid, 'suspend')
             self.assertTrue(result, 'dut=%s' % dut)
