@@ -344,19 +344,14 @@ class EapiConnection(object):
         """
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
-        params = {'version': 1, 'cmds': commands, 'format': encoding}
-        streaming = False
-        if 'apiVersion' in kwargs:
-            params['version'] = kwargs['apiVersion']
-        if 'autoComplete' in kwargs:
-            params['autoComplete'] = kwargs['autoComplete']
-        if 'expandAliases' in kwargs:
-            params['expandAliases'] = kwargs['expandAliases']
-        if 'streaming' in kwargs:
-            streaming = kwargs['streaming']
-        return json.dumps({'jsonrpc': '2.0', 'method': 'runCmds',
+        streaming = kwargs.pop( 'streaming', False )
+        params = { 'version': kwargs.pop('apiVersion', 1), 
+            'format': kwargs.pop('format', encoding) }           
+        params.update( kwargs )
+        params.update({ 'cmds': commands })
+        return json.dumps( {'jsonrpc': '2.0', 'method': 'runCmds',
                            'params': params, 'id': str(reqid),
-                           'streaming': streaming})
+                           'streaming': streaming} )
 
     def send(self, data):
         """Sends the eAPI request to the destination node
