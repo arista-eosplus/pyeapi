@@ -349,6 +349,8 @@ class EapiConnection(object):
             'format': kwargs.pop('format', encoding) }           
         params.update( kwargs )
         params.update({ 'cmds': commands })
+        params = { k:v for k,v in params.items() if k in 
+            ('version', 'cmds', 'autoComplete', 'expandAliases', 'timestamps' ) }
         return json.dumps( {'jsonrpc': '2.0', 'method': 'runCmds',
                            'params': params, 'id': str(reqid),
                            'streaming': streaming} )
