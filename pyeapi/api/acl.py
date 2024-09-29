@@ -267,11 +267,13 @@ class ExtendedAcls(EntityCollection):
         return self.configure('default ip access-list %s' % name)
 
     def update_entry(self, name, seqno, action, protocol, srcaddr,
-                     srcprefixlen, dstaddr, dstprefixlen, log=False):
+                     srcprefixlen, dstaddr, dstprefixlen, log=False, dstport=None):
         cmds = ['ip access-list %s' % name]
         cmds.append('no %s' % seqno)
         entry = '%s %s %s %s/%s %s/%s' % (seqno, action, protocol, srcaddr,
                                           srcprefixlen, dstaddr, dstprefixlen)
+        if dstport is not None:
+            entry += ' eq %d' % dstport
         if log:
             entry += ' log'
         cmds.append(entry)
@@ -279,10 +281,12 @@ class ExtendedAcls(EntityCollection):
         return self.configure(cmds)
 
     def add_entry(self, name, action, protocol, srcaddr, srcprefixlen,
-                  dstaddr, dstprefixlen, log=False, seqno=None):
+                  dstaddr, dstprefixlen, log=False, seqno=None, dstport=None):
         cmds = ['ip access-list %s' % name]
         entry = '%s %s %s/%s %s/%s' % (action, protocol, srcaddr,
                                        srcprefixlen, dstaddr, dstprefixlen)
+        if dstport is not None:
+            entry += ' eq %d' % dstport
         if seqno is not None:
             entry = '%s %s' % (seqno, entry)
         if log:
