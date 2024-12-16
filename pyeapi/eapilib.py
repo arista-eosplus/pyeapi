@@ -251,16 +251,14 @@ class HTTPSCertConnection(HTTPSConnection):
         if self._tunnel_host:
             self.sock = sock
             self._tunnel()
+        context = ssl.SSLContext()
+        context.load_cert_chain( certfile=self.cert_file, keyfile=self.key_file )
         # If there's no CA File, don't force Server Certificate Check
+        context.verify_mode = ssl.CERT_NONE
         if self.ca_file:
-            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
-                                                   self.cert_file,
-                                                   ca_certs=self.ca_file,
-                                                   cert_reqs=ssl.CERT_REQUIRED)
-        else:
-            self.sock = ssl.SSLContext.wrap_socket(sock, self.key_file,
-                                                   self.cert_file,
-                                                   cert_reqs=ssl.CERT_NONE)
+            context.verify_mode = ssl.CERT_REQUIRED
+            context.load_verify_locations( ca_certs=self.ca_file )
+        self.sock = context.wrap_socket( sock )
 
 
 class EapiConnection(object):
@@ -692,8 +690,9 @@ class HttpsEapiConnection(EapiConnection):
 
 
 class HttpsEapiCertConnection(EapiConnection):
-    def __init__(self, host, port=None, path=None, key_file=None,
-                 cert_file=None, ca_file=None, timeout=60, **kwargs):
+    def __init__(self, host, port=None, path=None, username=None,
+                 password=None, key_file=None, cert_file=None,
+                 ca_file=None, timeout=60, **kwargs):
         if key_file is None or cert_file is None:
             raise ValueError("For https_cert connections both a key_file and "
                              "cert_file are required. A ca_file is also "
@@ -706,7 +705,7 @@ class HttpsEapiCertConnection(EapiConnection):
                                              key_file=key_file,
                                              cert_file=cert_file,
                                              ca_file=ca_file, timeout=timeout)
-
+        self.authentication(username, password)
 
 class SessionApiConnection(object):
     def authentication(self, username, password):
