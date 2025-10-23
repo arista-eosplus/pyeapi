@@ -101,10 +101,9 @@ def load_module(name):
         mod = sys.modules[name]
     except KeyError:
         mod = import_module(name)
-    finally:
-        if not mod:
-            raise ImportError('unable to import module %s' % name)
-        return mod
+    if not mod:
+        raise ImportError('unable to import module %s' % name)
+    return mod
 
 
 class ProxyCall(object):
