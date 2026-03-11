@@ -219,8 +219,10 @@ class HTTPSCertConnection(HTTPSConnection):
 
     def __init__(self, path, host, port, key_file, cert_file, ca_file,
                  timeout=None):
-        HTTPSConnection.__init__(self, host, key_file=key_file,
-                                 cert_file=cert_file)
+        # key_file & cert_file deprecated in Python 3.6 and removed in 3.12
+        # so, don't pass those to HTTPSConnection.__init__() --
+        # The SSL context with the client cert is built in connect() instead.
+        HTTPSConnection.__init__(self, host)
         self.key_file = key_file
         self.cert_file = cert_file
         self.ca_file = ca_file
@@ -251,14 +253,22 @@ class HTTPSCertConnection(HTTPSConnection):
         if self._tunnel_host:
             self.sock = sock
             self._tunnel()
-        context = ssl.SSLContext()
-        context.load_cert_chain( certfile=self.cert_file, keyfile=self.key_file )
-        # If there's no CA File, don't force Server Certificate Check
-        context.verify_mode = ssl.CERT_NONE
+        # empty call ssl.SSLContext() is deprecated since 3.10, thus handle it
+        # properly with PROTOCOL_TLS_CLIENT defaulting to check_hostname=True
+        # and verify_mode=CERT_REQUIRED.
+        # When no CA file is provided disable server-certificate verification
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_cert_chain(certfile=self.cert_file, keyfile=self.key_file)
         if self.ca_file:
-            context.verify_mode = ssl.CERT_REQUIRED
-            context.load_verify_locations( ca_certs=self.ca_file )
-        self.sock = context.wrap_socket( sock )
+            # Server certificate verification enabled, below settings are
+            # defaults: (check_hostname=True, verify_mode=CERT_REQUIRED)
+            context.load_verify_locations(ca_certs=self.ca_file)
+        else:
+            # No CA file supplied: disable server certificate verification.
+            # check_hostname must be cleared before verify_mode can be set
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        self.sock = context.wrap_socket(sock, server_hostname=self.host)
 
 
 class EapiConnection(object):
@@ -343,11 +353,11 @@ class EapiConnection(object):
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         streaming = kwargs.pop( 'streaming', False )
-        params = { 'version': kwargs.pop('apiVersion', 1), 
-            'format': kwargs.pop('format', encoding) }           
+        params = { 'version': kwargs.pop('apiVersion', 1),
+            'format': kwargs.pop('format', encoding) }
         params.update( kwargs )
         params.update({ 'cmds': commands })
-        params = { k:v for k,v in params.items() if k in ('version',
+        params = { k: v for k, v in params.items() if k in ('version',
             'format', 'cmds', 'autoComplete', 'expandAliases', 'timestamps') }
         return json.dumps( {'jsonrpc': '2.0', 'method': 'runCmds',
                            'params': params, 'id': str(reqid),
@@ -558,7 +568,7 @@ class EapiConnection(object):
     def _parse_error_message(self, message):
         """Parses the eAPI failure response message
 
-        This method accepts an eAPI failure message and parses the necesary
+        This method accepts an eAPI failure message and parses the necessary
         parts in order to generate a CommandError.
 
         Args:
@@ -612,7 +622,7 @@ class EapiConnection(object):
             CommandError:  A CommandError is raised that includes the error
                 code, error message along with the list of commands that were
                 sent to the node.  The exception instance is also stored in
-                the error property and is availble until the next request is
+                the error property and is available until the next request is
                 sent
         """
         if encoding not in ('json', 'text'):
