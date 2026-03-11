@@ -296,8 +296,8 @@ class TestHTTPSCertConnection(unittest.TestCase):
             conn = pyeapi.eapilib.HTTPSCertConnection.__new__(
                 pyeapi.eapilib.HTTPSCertConnection)
             # Manually call __init__ via the class (bypasses MRO issues)
-            with patch.object(pyeapi.eapilib.HTTPSConnection, '__init__',
-                               return_value=None) as mock_init:
+            with patch.object(
+                    pyeapi.eapilib.HTTPSConnection, '__init__', return_value=None) as mock_init:
                 # Patch out attribute access that HTTPSConnection normally sets
                 conn.__dict__.update({
                     'key_file': None, 'cert_file': None, 'ca_file': None,
@@ -315,12 +315,14 @@ class TestHTTPSCertConnection(unittest.TestCase):
                 )
                 # The super().__init__() call must NOT include key_file or cert_file
                 args, kwargs = mock_init.call_args
-                self.assertNotIn('key_file', kwargs,
-                                 'key_file must not be passed to '
-                                 'HTTPSConnection.__init__()')
-                self.assertNotIn('cert_file', kwargs,
-                                 'cert_file must not be passed to '
-                                 'HTTPSConnection.__init__()')
+                self.assertNotIn(
+                    'key_file', kwargs,
+                    'key_file must not be passed to '
+                    'HTTPSConnection.__init__()')
+                self.assertNotIn(
+                    'cert_file', kwargs,
+                    'cert_file must not be passed to '
+                    'HTTPSConnection.__init__()')
 
     def test_str_and_repr(self):
         """__str__ and __repr__ must include host, port, path, key and cert."""
