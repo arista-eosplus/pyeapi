@@ -1,7 +1,6 @@
 import unittest
 import json
 import ssl
-import socket
 
 from unittest.mock import Mock, patch, MagicMock, call
 
@@ -272,7 +271,7 @@ class TestHTTPSCertConnection(unittest.TestCase):
         HTTPSConnection.__init__(), which removed those parameters in 3.12.
         """
         try:
-            conn = pyeapi.eapilib.HTTPSCertConnection(
+            _ = pyeapi.eapilib.HTTPSCertConnection(
                 path='/command-api',
                 host='switch1',
                 port=443,
@@ -290,7 +289,7 @@ class TestHTTPSCertConnection(unittest.TestCase):
     def test_init_key_cert_not_forwarded_to_https_connection(self):
         """HTTPSConnection.__init__() must be called WITHOUT key_file/cert_file."""
         with patch('pyeapi.eapilib.HTTPSConnection.__init__',
-                   return_value=None) as mock_super_init:
+                   return_value=None):
             # Provide the minimum attributes that HTTPSConnection normally sets
             # so that our __init__ can complete without AttributeError.
             conn = pyeapi.eapilib.HTTPSCertConnection.__new__(

@@ -219,8 +219,8 @@ class HTTPSCertConnection(HTTPSConnection):
 
     def __init__(self, path, host, port, key_file, cert_file, ca_file,
                  timeout=None):
-        # key_file & cert_file deprecated in Python 3.6 and removed in 3.12 so, don't pass those to
-        # HTTPSConnection.__init__() --
+        # key_file & cert_file deprecated in Python 3.6 and removed in 3.12
+        # so, don't pass those to HTTPSConnection.__init__() --
         # The SSL context with the client cert is built in connect() instead.
         HTTPSConnection.__init__(self, host)
         self.key_file = key_file
@@ -253,15 +253,15 @@ class HTTPSCertConnection(HTTPSConnection):
         if self._tunnel_host:
             self.sock = sock
             self._tunnel()
-        # empty call ssl.SSLContext() is deprecated since 3.10, thus handle is properly
-        # with PROTOCOL_TLS_CLIENT defaulting to check_hostname=True and
-        # verify_mode=CERT_REQUIRED.
-        # When no CA file is provided we disable server-certificate verification
+        # empty call ssl.SSLContext() is deprecated since 3.10, thus handle it
+        # properly with PROTOCOL_TLS_CLIENT defaulting to check_hostname=True
+        # and verify_mode=CERT_REQUIRED.
+        # When no CA file is provided disable server-certificate verification
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_cert_chain(certfile=self.cert_file, keyfile=self.key_file)
         if self.ca_file:
-            # Server certificate verification enabled, below settings are defaults:
-            # (check_hostname=True, verify_mode=CERT_REQUIRED)
+            # Server certificate verification enabled, below settings are
+            # defaults: (check_hostname=True, verify_mode=CERT_REQUIRED)
             context.load_verify_locations(ca_certs=self.ca_file)
         else:
             # No CA file supplied: disable server certificate verification.
@@ -353,11 +353,11 @@ class EapiConnection(object):
         commands = make_iterable(commands)
         reqid = id(self) if reqid is None else reqid
         streaming = kwargs.pop( 'streaming', False )
-        params = { 'version': kwargs.pop('apiVersion', 1), 
-            'format': kwargs.pop('format', encoding) }           
+        params = { 'version': kwargs.pop('apiVersion', 1),
+            'format': kwargs.pop('format', encoding) }
         params.update( kwargs )
         params.update({ 'cmds': commands })
-        params = { k:v for k,v in params.items() if k in ('version',
+        params = { k: v for k, v in params.items() if k in ('version',
             'format', 'cmds', 'autoComplete', 'expandAliases', 'timestamps') }
         return json.dumps( {'jsonrpc': '2.0', 'method': 'runCmds',
                            'params': params, 'id': str(reqid),
