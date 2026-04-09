@@ -717,27 +717,47 @@ class Node(object):
         indent > 0, then it's a recursive call and `config` argument contains
         last parsed (sub)section, which in turn may contain sub-sections
         """
-        def is_subsection_present( section, indent ):
-            return any( line[ indent ] == ' ' for line in section )
+        def is_subsection_present( section, indent, section_key ):
+            for line in section:
+                if len( line ) <= indent:
+                    raise ValueError(
+                        f'Unable to parse section {section_key!r} at indent '
+                        f'{indent} due to short line {line!r}; likely '
+                        'unhandled multiline literal block (EOF-terminated)'
+                    )
+                if line[ indent ] == ' ':
+                    return True
+            return False
 
         def get_indent( line ):
             return len( line ) - len( line.lstrip() )
 
         sections = {}
         key = None
-        banner = None
+        multiline = None
         for line in config.splitlines( keepends=True )[ indent > 0: ]:
             line_rs = line.rstrip()
-            if indent == 0:
-                if banner:
-                    sections[ banner ] += line
-                    if line_rs == 'EOF':
-                        banner = None
-                    continue
-                if line.startswith( 'banner ' ):
-                    banner = line_rs
-                    sections[ banner ] = line
-                    continue
+
+            if multiline:
+                sections[ multiline ] += line
+                if line_rs == 'EOF':
+                    multiline = None
+                continue
+
+            if indent == 0 and line.startswith( 'banner ' ):
+                multiline = line_rs
+                sections[ multiline ] = line
+                continue
+
+            if line_rs.lstrip().startswith( 'code unit ' ):
+                if key is None:
+                    key = line_rs
+                    sections[ key ] = line
+                else:
+                    sections[ key ] += line
+                multiline = key
+                continue
+
             if get_indent( line_rs ) > indent:  # i.e. subsection line
                 # key is always expected to be set by now
                 sections[ key ] += line
@@ -745,7 +765,7 @@ class Node(object):
             subsection = sections.get( key, '' ).splitlines()[ 1: ]
             if subsection:
                 sub_indent = get_indent( subsection[0] )
-                if is_subsection_present( subsection, sub_indent ):
+                if is_subsection_present( subsection, sub_indent, key ):
                     parsed = self._chunkify( sections[key], indent=sub_indent )
                     parsed.update( sections )
                     sections = parsed

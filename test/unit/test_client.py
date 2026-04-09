@@ -221,6 +221,26 @@ class TestNode(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.node.enable(cmds)
 
+    def test_chunkify_supports_code_unit_multiline_blocks(self):
+        with open(get_fixture('running_config.code_unit')) as config_file:
+            config = config_file.read()
+
+        sections = self.node._chunkify(config)
+        self.assertIn('router bgp 43902', sections)
+
+    def test_chunkify_raises_for_unknown_multiline_literal_blocks(self):
+        config = ('router test\n'
+                  '   alpha\n'
+                  '      unknown literal start\n'
+                  '            nested content\n'
+                  '         \n'
+                  '      END\n'
+                  '   !\n'
+                  '!\n')
+
+        with self.assertRaises(ValueError):
+            self.node._chunkify(config)
+
 
 class TestClient(unittest.TestCase):
 

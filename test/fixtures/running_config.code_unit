@@ -1,0 +1,19 @@
+router bgp 43902
+   router-id 1.1.1.1
+!
+router general
+   control-functions
+      code unit REDISTRIBUTE_STATIC_BGP_POLICIES
+               function STATIC_TO_BGP() {
+                     if igp.tag is 10 {
+                  
+                       community = {
+                     5405:65531,
+                     5405:65533,
+                     5405:65532
+                   };
+                 }
+               }
+      EOF
+   !
+!
