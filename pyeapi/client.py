@@ -669,10 +669,8 @@ class Node(object):
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
         with self._exclusive_connection():
-            try:
-                response = self.run_commands(commands, **kwargs)
-            finally:
-                self._return_to_exec_mode()
+            response = self.run_commands(commands, **kwargs)
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -697,10 +695,8 @@ class Node(object):
         # push the configure command onto the command stack
         commands.insert(0, 'configure session %s' % self._session_name)
         with self._exclusive_connection():
-            try:
-                response = self.run_commands(commands, **kwargs)
-            finally:
-                self._return_to_exec_mode()
+            response = self.run_commands(commands, **kwargs)
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -719,12 +715,13 @@ class Node(object):
         return contextlib.nullcontext()
 
     def _return_to_exec_mode(self):
-        """Leaves config mode on connections that keep the CLI mode
+        """Leaves config mode after a successful config request
 
-        On those connections the mode entered by a config request would
-        otherwise carry over to the next request.  ``end`` is sent on its
-        own, and without ``enable`` first, because EOS 4.23 and earlier
-        reject ``enable`` in config mode.
+        On connections that keep the CLI mode, the mode entered by a config
+        request would otherwise carry over to the next request.  Such a
+        connection leaves config mode itself when a request fails.  ``end``
+        is sent on its own, and without ``enable`` first, because EOS 4.23
+        and earlier reject ``enable`` in config mode.
         """
         if not self._keeps_cli_mode():
             return

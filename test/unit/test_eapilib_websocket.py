@@ -216,6 +216,74 @@ class TestWebsocketEapiConnection(unittest.TestCase):
         with self.assertRaisesRegex(CommandError, 'invalid command'):
             conn.execute(['show bogus'])
 
+    def test_failed_request_sends_end_before_raising(self):
+        def fail_bogus(request: dict) -> dict:
+            if 'bogus' not in request['params']['cmds']:
+                return ok_response(request)
+            return {'jsonrpc': '2.0', 'id': request['id'], 'error': {
+                'code': 1002,
+                'message': ("CLI command 3 of 3 'bogus' failed: "
+                            'invalid command'),
+                'data': [{}, {}, {'errors': ['Invalid input']}]}}
+
+        self.server.prepare(FakeWebSocket(respond=fail_bogus))
+        conn = self.connect()
+        with self.assertRaisesRegex(CommandError, 'invalid command'):
+            conn.execute(['configure', 'interface Ethernet1', 'bogus'])
+        sent = [request['params']['cmds']
+                for request in self.server.opened[0].requests]
+        self.assertEqual(sent, [['configure', 'interface Ethernet1', 'bogus'],
+                                ['end']])
+        # EOS rejects a request whose format is null
+        self.assertEqual(self.server.opened[0].requests[1]['params']['format'],
+                         'json')
+
+    def test_rejected_end_is_not_retried(self):
+        def reject_all(request: dict) -> dict:
+            return {'jsonrpc': '2.0', 'id': request['id'], 'error': {
+                'code': 1002, 'message': 'invalid command'}}
+
+        self.server.prepare(FakeWebSocket(respond=reject_all))
+        conn = self.connect()
+        with self.assertRaises(CommandError):
+            conn.execute(['show bogus'])
+        sent = [request['params']['cmds']
+                for request in self.server.opened[0].requests]
+        self.assertEqual(sent, [['show bogus'], ['end']])
+
+    def test_drop_while_leaving_config_mode_raises_original_error(self):
+        server = self.server
+
+        def fail_then_drop(request: dict) -> dict | None:
+            if request['params']['cmds'] == ['end']:
+                server.opened[0].server_drop()
+                return None
+            return {'jsonrpc': '2.0', 'id': request['id'], 'error': {
+                'code': 1002, 'message': 'invalid command'}}
+
+        class DroppingWebSocket(FakeWebSocket):
+            def send(self, payload: str) -> None:
+                message = json.loads(payload)
+                if 'request' in message:
+                    request = message['request']
+                    self.requests.append(request)
+                    reply = fail_then_drop(request)
+                    if reply is not None:
+                        self.push_response(reply)
+                    return
+                super().send(payload)
+
+        self.server.prepare(DroppingWebSocket(respond=None))
+        conn = self.connect()
+        with self.assertLogs('pyeapi.eapilib', level='WARNING'):
+            with self.assertRaisesRegex(CommandError, 'invalid command'):
+                conn.execute(['configure', 'bogus'])
+
+    def test_successful_request_sends_no_end(self):
+        conn = self.connect()
+        conn.execute(['configure', 'interface Ethernet1'])
+        self.assertEqual(len(self.server.opened[0].requests), 1)
+
     def test_request_ids_are_unique(self):
         conn = self.connect()
         conn.execute(['show version'])

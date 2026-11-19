@@ -293,7 +293,8 @@ class EapiConnection(object):
     be instantiated directly.
     """
 
-    # True when a CLI mode entered by one request carries over to the next
+    # True when a CLI mode entered by one request carries over to the next.
+    # Such a connection must itself leave config mode after a failed request.
     keeps_cli_mode = False
 
     def __init__(self):
@@ -766,18 +767,23 @@ class WebsocketEapiConnection(EapiConnection):
       ``idle_timeout`` (seconds, default 30, ``None`` to disable) closes an
       idle connection to free its slot; the next request reconnects.
     * The CLI mode carries over between requests, unlike on the HTTP
-      transports.  ``Node`` sends ``end`` after each of its config requests,
-      so its next request starts in exec mode.  Code that calls
-      ``execute()`` directly and enters a mode must leave it again; ``end``
-      itself is rejected in exec mode.  An idle close, a timeout reset or a
-      reconnect also returns to exec mode, and a configure session left open
-      that way stays pending on the switch until it is committed or aborted.
+      transports.  After a request fails, the connection sends ``end``
+      before raising ``CommandError``, because eAPI stops at the failing
+      command and never reaches the batch's own ``end``.  ``Node`` also sends
+      ``end`` after each successful config request.  A batch that enters a
+      mode through ``Node.run_commands()``, ``Node.enable()`` or
+      ``execute()`` must end with ``end`` itself.  An idle close, a timeout
+      reset or a reconnect also returns to exec mode, and a configure
+      session left open that way stays pending on the switch until it is
+      committed or aborted.
     * Threads can share one connection.  ``Node`` holds it with
       ``exclusive()`` across each config request and its ``end``, so other
       threads' requests never run in config mode.  Hold ``exclusive()`` the
-      same way around ``execute()`` calls that enter and then leave a mode.
-      Sharing gains no throughput: the switch runs a connection's requests
-      one at a time.
+      same way around ``execute()`` calls that enter a mode.  Requests that
+      other threads had already sent before a failing batch still run in the
+      mode it left, so hold ``exclusive()`` for such batches too, or give
+      each thread its own connection.  Sharing gains no throughput: the
+      switch runs a connection's requests one at a time.
     * A request that times out resets the connection, because the switch
       keeps running the command and would make the next request wait behind
       it.  The command itself is not stopped.
@@ -1005,6 +1011,14 @@ class WebsocketEapiConnection(EapiConnection):
                                **kwargs)
 
     def send(self, data: str) -> dict:
+        response = self._exchange(data)
+        if 'error' in response:
+            self._leave_config_mode()
+        self._raise_for_error(response)
+        return response
+
+    def _exchange(self, data: str) -> dict:
+        """Sends one request and waits for its response"""
         _LOGGER.debug('Request content: %s', self._sanitize_request(data))
         request = json.loads(data)
         request_id = str(request['id'])
@@ -1050,9 +1064,27 @@ class WebsocketEapiConnection(EapiConnection):
             transport.abort()
             raise ConnectionError(str(self), reason) from exc
         _LOGGER.debug('Response content: %s', response)
-
-        self._raise_for_error(response)
         return response
+
+    def _leave_config_mode(self) -> None:
+        """Sends ``end`` after a failed request
+
+        eAPI stops at the first failing command, so a batch that entered a
+        mode never reaches its own ``end``.  Over HTTP the next request gets
+        a fresh CLI session; here it would inherit the mode.
+        """
+        with self._exclusive:
+            try:
+                response = self._exchange(
+                    self.request(['end'], encoding='json'))
+            except ConnectionError:
+                # The connection was reset, so the next request starts in
+                # exec mode anyway.
+                _LOGGER.debug('%s: reset while leaving config mode', self)
+                return
+        if 'error' in response:
+            # end is rejected in exec mode: the failed request never left it.
+            _LOGGER.debug('%s: already in exec mode', self)
 
     def _discard(self, request_id: str) -> None:
         with self._state_lock:

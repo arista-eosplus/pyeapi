@@ -241,10 +241,11 @@ Behaviour to be aware of:
 * A request that fails after it may have reached the switch raises
   ``ConnectionError`` and is not resent.
 * Unlike the HTTP transports, the websocket keeps the CLI mode between
-  requests. ``Node`` sends ``end`` after each of its config requests, so its
-  next request starts in exec mode. Code that calls ``connection.execute()``
-  directly and enters a mode must leave it again; ``end`` itself is rejected
-  in exec mode.
+  requests. pyeapi returns it to exec mode in two cases: after any request
+  that fails (eAPI stops at the failing command, so a batch never reaches its
+  own ``end``), and after each successful ``Node.config()`` or config session
+  request. A batch that enters a mode through ``Node.run_commands()``,
+  ``Node.enable()`` or ``connection.execute()`` must end with ``end`` itself.
 * An idle close, a timeout reset or a reconnect also returns the websocket to
   exec mode. A configure session left open that way stays pending on the
   switch until it is committed or aborted.
@@ -252,8 +253,10 @@ Behaviour to be aware of:
   ``connection.exclusive()`` across each config request and its ``end``, so
   other threads' requests never run in config mode. Hold
   ``connection.exclusive()`` the same way around ``execute()`` calls that
-  enter and then leave a mode. Sharing gains no throughput, because the switch
-  runs a connection's requests one at a time.
+  enter a mode. Requests that other threads had already sent before a failing
+  batch still run in the mode it left, so hold ``connection.exclusive()`` for
+  such batches too, or give each thread its own connection. Sharing gains no
+  throughput, because the switch runs a connection's requests one at a time.
 
 *******************
 The DEFAULT Section
