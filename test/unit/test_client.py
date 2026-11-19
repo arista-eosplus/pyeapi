@@ -242,6 +242,88 @@ class TestNode(unittest.TestCase):
             self.node._chunkify(config)
 
 
+class ModeKeepingConnection(object):
+    """Records each request; commands listed in fail_on raise instead"""
+
+    def __init__(self, keeps_cli_mode=True, fail_on=None):
+        self.keeps_cli_mode = keeps_cli_mode
+        self.fail_on = fail_on or {}
+        self.requests = []
+
+    def execute(self, commands, encoding='json', **kwargs):
+        commands = list(commands)
+        self.requests.append(commands)
+        for command in commands:
+            if isinstance(command, str) and command in self.fail_on:
+                raise self.fail_on[command]
+        result = {'output': ''} if encoding == 'text' else {}
+        return {'result': [dict(result) for _ in commands]}
+
+
+class TestNodeReturnsToExecMode(unittest.TestCase):
+
+    def node(self, **kwargs):
+        connection = ModeKeepingConnection(**kwargs)
+        return pyeapi.client.Node(connection), connection
+
+    def test_config_sends_end_after_request(self):
+        node, connection = self.node()
+        result = node.config(['interface Ethernet1', 'description x'])
+        self.assertEqual(result, [{}, {}])
+        self.assertEqual(connection.requests, [
+            ['enable', 'configure terminal', 'interface Ethernet1',
+             'description x'],
+            ['end']])
+
+    def test_failed_config_still_sends_end(self):
+        error = pyeapi.eapilib.CommandError(1002, 'invalid command')
+        node, connection = self.node(fail_on={'bogus': error})
+        with self.assertRaises(pyeapi.eapilib.CommandError):
+            node.config(['interface Ethernet1', 'bogus'])
+        self.assertEqual(connection.requests[-1], ['end'])
+
+    def test_end_sent_after_each_cli_variant(self):
+        error = pyeapi.eapilib.CommandError(1002, 'invalid command')
+        node, connection = self.node(fail_on={'bogus': error})
+        node.config(['interface Ethernet1',
+                     pyeapi.client.CliVariants('bogus', 'description x')])
+        self.assertEqual(connection.requests, [
+            ['enable', 'configure terminal', 'interface Ethernet1', 'bogus'],
+            ['end'],
+            ['enable', 'configure terminal', 'interface Ethernet1',
+             'description x'],
+            ['end']])
+
+    def test_session_methods_send_end_after_each_request(self):
+        node, connection = self.node()
+        node.configure_session()
+        node.config('description x')
+        node.diff()
+        node.commit()
+        self.assertEqual(len(connection.requests), 6)
+        for request in connection.requests[0::2]:
+            self.assertTrue(request[1].startswith('configure session '))
+        self.assertEqual(connection.requests[1::2], [['end']] * 3)
+
+    def test_end_rejected_in_exec_mode_is_ignored(self):
+        error = pyeapi.eapilib.CommandError(1002, 'invalid command')
+        node, connection = self.node(fail_on={'end': error})
+        node.configure_session()
+        self.assertEqual(node.abort(), [{}])
+        self.assertEqual(connection.requests[-1], ['end'])
+
+    def test_connection_error_while_leaving_config_mode_is_ignored(self):
+        error = pyeapi.eapilib.ConnectionError('test', 'connection reset')
+        node, connection = self.node(fail_on={'end': error})
+        self.assertEqual(node.config('hostname x'), [{}])
+
+    def test_no_end_when_connection_does_not_keep_cli_mode(self):
+        node, connection = self.node(keeps_cli_mode=False)
+        node.config('hostname x')
+        self.assertEqual(connection.requests,
+                         [['enable', 'configure terminal', 'hostname x']])
+
+
 class TestClient(unittest.TestCase):
 
     def setUp(self):

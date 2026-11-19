@@ -240,12 +240,14 @@ Behaviour to be aware of:
   the switch.
 * A request that fails after it may have reached the switch raises
   ``ConnectionError`` and is not resent.
-* The websocket keeps the CLI mode between requests, but an idle close, a
-  timeout reset or a reconnect returns it to exec mode. A request that relies
-  on a mode entered by an earlier request then fails, and a configure session
-  left open that way stays pending on the switch until it is committed or
-  aborted. Start each request in the mode it needs, as
-  ``Node.configure_session()`` and ``Node.config()`` already do.
+* Unlike the HTTP transports, the websocket keeps the CLI mode between
+  requests. ``Node`` sends ``end`` after each of its config requests, so its
+  next request starts in exec mode. Code that calls ``connection.execute()``
+  directly and enters a mode must leave it again; ``end`` itself is rejected
+  in exec mode.
+* An idle close, a timeout reset or a reconnect also returns the websocket to
+  exec mode. A configure session left open that way stays pending on the
+  switch until it is committed or aborted.
 
 *******************
 The DEFAULT Section

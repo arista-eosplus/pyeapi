@@ -292,6 +292,9 @@ class EapiConnection(object):
     be instantiated directly.
     """
 
+    # True when a CLI mode entered by one request carries over to the next
+    keeps_cli_mode = False
+
     def __init__(self):
         self.transport = None
         self.error = None
@@ -752,13 +755,13 @@ class WebsocketEapiConnection(EapiConnection):
       idle ones can block plain HTTP eAPI and new websockets entirely.
       ``idle_timeout`` (seconds, default 30, ``None`` to disable) closes an
       idle connection to free its slot; the next request reconnects.
-    * Start each request in the CLI mode it needs.  The websocket keeps the
-      mode between requests, but an idle close, a timeout reset or a
-      reconnect returns it to exec mode.  A request that relies on a mode
-      entered by an earlier request then fails, and a configure session left
-      open that way stays pending on the switch until it is committed or
-      aborted.  ``Node.config()`` and ``Node.configure_session()`` already
-      start every request in the right mode.
+    * The CLI mode carries over between requests, unlike on the HTTP
+      transports.  ``Node`` sends ``end`` after each of its config requests,
+      so its next request starts in exec mode.  Code that calls
+      ``execute()`` directly and enters a mode must leave it again; ``end``
+      itself is rejected in exec mode.  An idle close, a timeout reset or a
+      reconnect also returns to exec mode, and a configure session left open
+      that way stays pending on the switch until it is committed or aborted.
     * A request that times out resets the connection, because the switch
       keeps running the command and would make the next request wait behind
       it.  The command itself is not stopped.
@@ -769,6 +772,8 @@ class WebsocketEapiConnection(EapiConnection):
       uwsgi worker, which drops every websocket on it.  Requests in flight
       fail with ``ConnectionError``; the next one reconnects.
     """
+
+    keeps_cli_mode = True
 
     def __init__(
         self,

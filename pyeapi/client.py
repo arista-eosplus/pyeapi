@@ -91,6 +91,7 @@ contains the settings for nodes used by the connect_to function.
 
 """
 from uuid import uuid4
+import logging
 import os
 import re
 
@@ -109,6 +110,9 @@ from pyeapi.eapilib import HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
 from pyeapi.eapilib import WebsocketEapiConnection
 from pyeapi.eapilib import CommandError
+from pyeapi.eapilib import ConnectionError as EapiConnectionError
+
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
@@ -663,7 +667,10 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
-        response = self.run_commands(commands, **kwargs)
+        try:
+            response = self.run_commands(commands, **kwargs)
+        finally:
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -687,7 +694,10 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure session %s' % self._session_name)
-        response = self.run_commands(commands, **kwargs)
+        try:
+            response = self.run_commands(commands, **kwargs)
+        finally:
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -695,6 +705,27 @@ class Node(object):
         response.pop(0)
 
         return response
+
+    def _return_to_exec_mode(self):
+        """Leaves config mode on connections that keep the CLI mode
+
+        On those connections the mode entered by a config request would
+        otherwise carry over to the next request.  ``end`` is sent on its
+        own, and without ``enable`` first, because EOS 4.23 and earlier
+        reject ``enable`` in config mode.
+        """
+        if getattr(self._connection, 'keeps_cli_mode', False) is not True:
+            return
+        try:
+            self.run_commands(['end'], send_enable=False)
+        except CommandError:
+            # end is rejected in exec mode: the request already left config
+            # mode, as commit and abort do
+            _LOGGER.debug('already in exec mode')
+        except EapiConnectionError:
+            # the connection was reset, so the next request starts in exec
+            # mode anyway
+            _LOGGER.debug('connection reset while leaving config mode')
 
     @lru_cache(maxsize=None)
     def _chunkify( self, config, indent=0 ):

@@ -16,6 +16,7 @@ from unittest.mock import patch
 import websocket
 
 import pyeapi.client
+import pyeapi.eapilib
 from pyeapi.eapilib import CommandError, ConnectionError
 from pyeapi.eapilib import WebsocketEapiConnection
 
@@ -154,6 +155,10 @@ class TestWebsocketEapiConnection(unittest.TestCase):
         self.assertIsNone(conn.error)
         self.assertIsNone(conn._auth)
         self.assertEqual(conn.is_alive(), {'is_alive': True})
+
+    def test_only_websocket_keeps_cli_mode(self):
+        self.assertIs(WebsocketEapiConnection.keeps_cli_mode, True)
+        self.assertIs(pyeapi.eapilib.EapiConnection.keeps_cli_mode, False)
 
     def test_uri_defaults_to_wss_on_443(self):
         conn = self.connect()
