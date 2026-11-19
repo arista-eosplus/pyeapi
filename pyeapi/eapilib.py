@@ -717,6 +717,7 @@ class HttpsEapiCertConnection(EapiConnection):
                                              ca_file=ca_file, timeout=timeout)
         self.authentication(username, password)
 
+
 class SessionApiConnection(object):
     def authentication(self, username, password):
         try:
@@ -731,8 +732,15 @@ class SessionApiConnection(object):
             if resp.status != 200:
                 raise ConnectionError(str(self), '%s. %s' % (resp.reason,
                                                              resp.read()))
-            session = SimpleCookie(resp.getheader("Set-Cookie"))
-            self._auth = ("Cookie", session.output(header="", attrs=[]))
+            cookie = SimpleCookie()
+            for header in resp.headers.get_all("Set-Cookie") or []:
+                cookie.load(header)
+            if not cookie:
+                raise ConnectionError(str(self), 'eAPI login succeeded but '
+                                      'no session cookie was returned')
+            self._auth = ("Cookie", "; ".join(
+                f"{name}={morsel.coded_value}"
+                for name, morsel in cookie.items()))
 
         except OSError as exc:
             _LOGGER.exception(exc)

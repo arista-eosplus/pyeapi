@@ -2,6 +2,7 @@ import unittest
 import json
 import ssl
 
+from http.client import HTTPMessage
 from unittest.mock import Mock, patch, MagicMock, call
 
 import pyeapi.eapilib
@@ -588,6 +589,48 @@ class TestHttpsEapiCertConnection(unittest.TestCase):
         )
         self.assertIsInstance(instance, pyeapi.eapilib.EapiConnection)
 
+
+
+def _http_response(status=200, reason='OK', body=b'', set_cookies=()):
+    response = Mock(name='response', status=status, reason=reason)
+    response.read.return_value = body
+    response.headers = HTTPMessage()
+    for set_cookie in set_cookies:
+        response.headers['Set-Cookie'] = set_cookie
+    return response
+
+
+class TestSessionApiConnection(unittest.TestCase):
+
+    def _session_connection(self, *responses):
+        with patch.object(pyeapi.eapilib.SessionApiConnection,
+                          'authentication'):
+            instance = pyeapi.eapilib.HttpsEapiSessionConnection(
+                'localhost', username='admin', password='secret')
+        instance.transport = Mock(name='transport')
+        instance.transport.getresponse.side_effect = list(responses)
+        return instance
+
+    def test_login_sets_cookie_header(self):
+        instance = self._session_connection(
+            _http_response(set_cookies=['Session=abc123; Path=/; HttpOnly']))
+        instance.authentication('admin', 'secret')
+        self.assertEqual(instance._auth, ('Cookie', 'Session=abc123'))
+        instance.transport.putrequest.assert_called_with('POST', '/login')
+        instance.transport.close.assert_called_once()
+
+    def test_login_joins_multiple_set_cookie_headers(self):
+        instance = self._session_connection(_http_response(
+            set_cookies=['a=1; Path=/', 'b=2; Expires=Wed, 09 Jun 2021 '
+                                        '10:18:14 GMT; Path=/']))
+        instance.authentication('admin', 'secret')
+        self.assertEqual(instance._auth, ('Cookie', 'a=1; b=2'))
+
+    def test_login_without_set_cookie_raises(self):
+        instance = self._session_connection(_http_response())
+        with self.assertRaises(pyeapi.eapilib.ConnectionError):
+            instance.authentication('admin', 'secret')
+        self.assertIsNone(instance._auth)
 
 class TestCommandError(unittest.TestCase):
 
