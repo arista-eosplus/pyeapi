@@ -59,7 +59,7 @@ setup(
     # project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['netaddr'],
+    install_requires=['netaddr', 'websocket-client>=1.6'],
 
     # List additional dependencies here (e.g. development dependencies).
     # You can install these using the following syntax, for example:

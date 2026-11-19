@@ -36,11 +36,21 @@ instance of Connection.  The connection module provides an easy implementation
 for sending and receiving calls over eAPI using a HTTP/S transport.
 """
 
+from __future__ import annotations
+
 import socket
 import base64
+import contextlib
+import itertools
 import logging
 import ssl
 import re
+import threading
+from concurrent.futures import Future
+from concurrent.futures import TimeoutError as FutureTimeoutError
+from typing import Any
+
+import websocket
 
 try:
     import ujson as json
@@ -63,6 +73,10 @@ DEFAULT_HTTP_LOCAL_PORT = 8080
 DEFAULT_HTTPS_LOCAL_PORT = 8443
 DEFAULT_HTTP_PATH = '/command-api'
 DEFAULT_UNIX_SOCKET = '/var/run/command-api.sock'
+DEFAULT_WEBSOCKET_PATH = 'command-api-websocket'
+DEFAULT_WEBSOCKET_IDLE_TIMEOUT = 30
+WEBSOCKET_READER_JOIN_TIMEOUT = 5
+WEBSOCKET_AUTH_SUCCESS = 'success'
 
 
 def https_connection_factory(path, host, port, context=None, timeout=60):
@@ -279,11 +293,24 @@ class EapiConnection(object):
     be instantiated directly.
     """
 
+    # True when a CLI mode entered by one request carries over to the next.
+    # Such a connection must itself leave config mode after a failed request.
+    keeps_cli_mode = False
+
     def __init__(self):
         self.transport = None
         self.error = None
         self.socket_error = None
         self._auth = None
+
+    def exclusive(self):
+        """Holds back other threads' requests on this connection while held
+
+        Use it as a context manager around requests that must run back to
+        back.  Transports that open a new connection for every request
+        return a context that does nothing.
+        """
+        return contextlib.nullcontext()
 
     def __str__(self):
         return 'EapiConnection(transport=%s)' % str(self.transport)
@@ -456,17 +483,7 @@ class EapiConnection(object):
             decoded = json.loads(response_content)
             _LOGGER.debug('eapi_response: %s' % decoded)
 
-            if 'error' in decoded:
-                (code, msg, err, out) = self._parse_error_message(decoded)
-                pattern = "unexpected keyword argument '(.*)'"
-                match = re.search(pattern, msg)
-                if match:
-                    auto_msg = ('%s parameter is not supported in this'
-                                ' version of EOS.' % match.group(1))
-                    _LOGGER.error(auto_msg)
-                    msg = msg + '. ' + auto_msg
-                raise CommandError(code, msg, command_error=err, output=out)
-
+            self._raise_for_error(decoded)
             return decoded
 
         # removed socket.error as it's deprecated in python 3
@@ -484,6 +501,20 @@ class EapiConnection(object):
         finally:
             self.transport.close()
 
+
+    def _raise_for_error(self, decoded):
+        """Raises CommandError if the eAPI response is a failure response"""
+        if 'error' not in decoded:
+            return
+        (code, msg, err, out) = self._parse_error_message(decoded)
+        pattern = "unexpected keyword argument '(.*)'"
+        match = re.search(pattern, msg)
+        if match:
+            auto_msg = ('%s parameter is not supported in this'
+                        ' version of EOS.' % match.group(1))
+            _LOGGER.error(auto_msg)
+            msg = msg + '. ' + auto_msg
+        raise CommandError(code, msg, command_error=err, output=out)
 
     def _sanitize_request( self, data ):
         """remove user-sensitive input from data response"""
@@ -716,6 +747,396 @@ class HttpsEapiCertConnection(EapiConnection):
                                              cert_file=cert_file,
                                              ca_file=ca_file, timeout=timeout)
         self.authentication(username, password)
+
+
+class WebsocketEapiConnection(EapiConnection):
+    """eAPI over one persistent websocket
+
+    One authenticated websocket (``wss://<host>/command-api-websocket``)
+    carries every request, instead of a new HTTPS connection per request.
+    A reader thread owns every ``recv()``: that keeps server pings answered
+    while the connection is idle (the switch drops an unanswered connection
+    after about 90 seconds), and it routes each response to its caller by
+    JSON-RPC id, so threads can share one connection.
+
+    Usage limits:
+
+    * Keep at most one connection per switch, and do not share a switch
+      between tools.  Every open websocket holds a slot on the switch: a few
+      idle ones can block plain HTTP eAPI and new websockets entirely.
+      ``idle_timeout`` (seconds, default 30, ``None`` to disable) closes an
+      idle connection to free its slot; the next request reconnects.
+    * The CLI mode carries over between requests, unlike on the HTTP
+      transports.  After a request fails, the connection sends ``end``
+      before raising ``CommandError``, because eAPI stops at the failing
+      command and never reaches the batch's own ``end``.  ``Node`` also sends
+      ``end`` after each successful config request.  A batch that enters a
+      mode through ``Node.run_commands()``, ``Node.enable()`` or
+      ``execute()`` must end with ``end`` itself.  An idle close, a timeout
+      reset or a reconnect also returns to exec mode, and a configure
+      session left open that way stays pending on the switch until it is
+      committed or aborted.
+    * Threads can share one connection.  ``Node`` holds it with
+      ``exclusive()`` across each config request and its ``end``, so other
+      threads' requests never run in config mode.  Hold ``exclusive()`` the
+      same way around ``execute()`` calls that enter a mode.  Requests that
+      other threads had already sent before a failing batch still run in the
+      mode it left, so hold ``exclusive()`` for such batches too, or give
+      each thread its own connection.  Sharing gains no throughput: the
+      switch runs a connection's requests one at a time.
+    * A request that times out resets the connection, because the switch
+      keeps running the command and would make the next request wait behind
+      it.  The command itself is not stopped.
+    * A request that fails after it may have reached the switch is reported
+      as ``ConnectionError`` and never resent, so a config change cannot be
+      applied twice.
+    * An HTTP eAPI command that runs past uwsgi's harakiri limit kills the
+      uwsgi worker, which drops every websocket on it.  Requests in flight
+      fail with ``ConnectionError``; the next one reconnects.
+    """
+
+    keeps_cli_mode = True
+
+    def __init__(
+        self,
+        host: str,
+        port: int | str | None = None,
+        path: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        context: ssl.SSLContext | None = None,
+        timeout: float | str = 60,
+        enforce_verification: bool = False,
+        idle_timeout: float | str | None = DEFAULT_WEBSOCKET_IDLE_TIMEOUT,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__()
+        # Values read from eapi.conf arrive as strings.
+        port = int(port or DEFAULT_HTTPS_PORT)
+        path = (path or DEFAULT_WEBSOCKET_PATH).lstrip('/')
+        if context is None and not enforce_verification:
+            context = ssl._create_unverified_context()
+
+        self._uri = f'wss://{host}:{port}/{path}'
+        self._username = username
+        self._password = password
+        self._context = context
+        self._timeout = float(timeout)
+        self._idle_timeout = (None if idle_timeout is None
+                              else float(idle_timeout))
+
+        self._request_ids = itertools.count()
+        # Held across requests that must not be interleaved; see exclusive()
+        self._exclusive = threading.RLock()
+        self._send_lock = threading.Lock()
+        self._state_lock = threading.Lock()
+        self._pending: dict[str, Future] = {}
+        self._dead = True
+        self._closed = False
+        self._reader: threading.Thread | None = None
+        self._idle_timer: threading.Timer | None = None
+        # Bumped on every arm and cancel, so a timer that already fired but
+        # lost the race for _send_lock knows it is stale.
+        self._idle_generation = 0
+
+        with self._send_lock:
+            self._connect()
+
+    def __str__(self) -> str:
+        return f'WebsocketEapiConnection(uri={self._uri})'
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def _connect(self) -> None:
+        """Opens, authenticates and starts the reader
+
+        Caller holds ``_send_lock``.
+        """
+        try:
+            transport = websocket.create_connection(
+                self._uri,
+                timeout=self._timeout,
+                sslopt={'context': self._context},
+            )
+        except (websocket.WebSocketException, OSError) as exc:
+            raise ConnectionError(str(self),
+                                  f'Unable to connect: {exc}') from exc
+
+        try:
+            transport.send(json.dumps({
+                'connectionType': 'jsonrpc',
+                'authentication': {
+                    'username': self._username,
+                    'password': self._password,
+                },
+            }))
+            authentication = json.loads(transport.recv())['authentication']
+        except (websocket.WebSocketException, OSError, ValueError,
+                KeyError, TypeError) as exc:
+            transport.shutdown()
+            raise ConnectionError(str(self),
+                                  f'Authentication failed: {exc}') from exc
+
+        if authentication.get('status') != WEBSOCKET_AUTH_SUCCESS:
+            transport.shutdown()
+            raise ConnectionError(
+                str(self),
+                authentication.get('message', 'Authentication failed'))
+
+        # Requests enforce their own timeout. The reader must block until data
+        # arrives, or an idle connection would time out mid-wait.
+        transport.settimeout(None)
+        self.transport = transport
+        self._reader = threading.Thread(
+            target=self._read_responses,
+            args=(transport,),
+            name=f'eapi-websocket-reader-{self._uri}',
+            daemon=True,
+        )
+        self._reader.start()
+        with self._state_lock:
+            self._dead = False
+            self._arm_idle_timer(transport)
+
+    def _read_responses(self, transport: websocket.WebSocket) -> None:
+        """Dispatches responses to waiting callers until the socket closes
+
+        websocket-client answers server pings inside ``recv()``, so this loop
+        is also the keepalive.
+        """
+        reason = 'Connection closed by server'
+        try:
+            while True:
+                message = transport.recv()
+                if not transport.connected:
+                    break
+                self._dispatch(transport, message)
+        except (websocket.WebSocketException, OSError) as exc:
+            reason = f'Connection lost: {exc}'
+        if self._closed:
+            reason = 'Connection closed'
+        with self._state_lock:
+            # Already dead means this side ended it: idle close, timeout reset
+            # or failed send.
+            current = transport is self.transport
+            unexpected = current and not (self._closed or self._dead)
+        if unexpected:
+            _LOGGER.warning('%s: %s', self, reason)
+        transport.shutdown()
+        self._mark_dead(transport, reason)
+
+    def _dispatch(self, transport: websocket.WebSocket,
+                  message: str | bytes) -> None:
+        try:
+            response = json.loads(message)['response']
+            request_id = str(response['id'])
+        except (ValueError, KeyError, TypeError):
+            _LOGGER.warning('%s: dropping unrecognized message: %r',
+                            self, message)
+            return
+        with self._state_lock:
+            future = self._pending.pop(request_id, None)
+            current = transport is self.transport and not self._dead
+            if current and not self._pending:
+                self._arm_idle_timer(transport)
+        if future is None:
+            _LOGGER.warning('%s: dropping response for unknown id %s',
+                            self, request_id)
+            return
+        future.set_result(response)
+
+    def _mark_dead(self, transport: websocket.WebSocket, reason: str) -> None:
+        """Fails pending requests
+
+        Does nothing if a reconnect already replaced ``transport``.
+        """
+        with self._state_lock:
+            if transport is not self.transport:
+                return
+            self._dead = True
+            self._cancel_idle_timer()
+            pending = list(self._pending.values())
+            self._pending.clear()
+        for future in pending:
+            future.set_exception(ConnectionError(str(self), reason))
+
+    def _arm_idle_timer(self, transport: websocket.WebSocket) -> None:
+        """Starts the idle countdown. Caller holds ``_state_lock``."""
+        self._cancel_idle_timer()
+        if self._idle_timeout is None or self._closed:
+            return
+        self._idle_timer = threading.Timer(
+            self._idle_timeout,
+            self._close_if_idle,
+            args=(transport, self._idle_generation),
+        )
+        self._idle_timer.daemon = True
+        self._idle_timer.start()
+
+    def _cancel_idle_timer(self) -> None:
+        """Stops the idle countdown. Caller holds ``_state_lock``."""
+        self._idle_generation += 1
+        if self._idle_timer is not None:
+            self._idle_timer.cancel()
+            self._idle_timer = None
+
+    def _close_if_idle(self, transport: websocket.WebSocket,
+                       generation: int) -> None:
+        with self._send_lock:
+            with self._state_lock:
+                stale = generation != self._idle_generation
+                replaced = transport is not self.transport
+                busy = bool(self._pending)
+                if stale or replaced or busy or self._closed or self._dead:
+                    return
+                # Dead before the close frame goes out, so a request that is
+                # waiting for _send_lock reconnects instead of using this
+                # socket.
+                self._dead = True
+            _LOGGER.info('%s: closing after %ss idle', self,
+                         self._idle_timeout)
+            self._shutdown_transport(transport)
+
+    def request(self, commands: Any, encoding: str | None = None,
+                reqid: str | None = None, **kwargs: Any) -> str:
+        """Builds the request with an id unique to this connection
+
+        The reader routes each response to its caller by this id, so unlike
+        the HTTP transports every request needs its own.
+        """
+        if reqid is None:
+            reqid = f'{id(self)}-{next(self._request_ids)}'
+        return super().request(commands, encoding=encoding, reqid=reqid,
+                               **kwargs)
+
+    def send(self, data: str) -> dict:
+        response = self._exchange(data)
+        if 'error' in response:
+            self._leave_config_mode()
+        self._raise_for_error(response)
+        return response
+
+    def _exchange(self, data: str) -> dict:
+        """Sends one request and waits for its response"""
+        _LOGGER.debug('Request content: %s', self._sanitize_request(data))
+        request = json.loads(data)
+        request_id = str(request['id'])
+        future: Future = Future()
+
+        with self._exclusive:
+            with self._send_lock:
+                if self._closed:
+                    raise ConnectionError(str(self), 'Connection is closed')
+                if self._dead:
+                    # Nothing has been sent for this request yet, so
+                    # reconnecting is safe.
+                    _LOGGER.info('%s: reconnecting', self)
+                    self._connect()
+                with self._state_lock:
+                    if self._dead:
+                        raise ConnectionError(str(self), 'Connection lost')
+                    self._cancel_idle_timer()
+                    self._pending[request_id] = future
+                transport = self.transport
+                try:
+                    transport.send(json.dumps({'request': request}))
+                except (websocket.WebSocketException, OSError) as exc:
+                    # The request may have reached the switch: report it,
+                    # never resend it.
+                    self._discard(request_id)
+                    self._mark_dead(transport, f'Send failed: {exc}')
+                    transport.abort()
+                    raise ConnectionError(str(self),
+                                          f'Send failed: {exc}') from exc
+
+        try:
+            response = future.result(timeout=self._timeout)
+        except FutureTimeoutError as exc:
+            # The switch keeps running the command and answers this
+            # connection's later requests only after it finishes. Reset so the
+            # next request gets a fresh session; the abandoned command still
+            # holds one switch-side worker until it completes.
+            self._discard(request_id)
+            reason = (f'No response within {self._timeout}s; connection '
+                      'reset. The command may still be running on the switch')
+            self._mark_dead(transport, reason)
+            transport.abort()
+            raise ConnectionError(str(self), reason) from exc
+        _LOGGER.debug('Response content: %s', response)
+        return response
+
+    def _leave_config_mode(self) -> None:
+        """Sends ``end`` after a failed request
+
+        eAPI stops at the first failing command, so a batch that entered a
+        mode never reaches its own ``end``.  Over HTTP the next request gets
+        a fresh CLI session; here it would inherit the mode.
+        """
+        with self._exclusive:
+            try:
+                response = self._exchange(
+                    self.request(['end'], encoding='json'))
+            except ConnectionError:
+                # The connection was reset, so the next request starts in
+                # exec mode anyway.
+                _LOGGER.debug('%s: reset while leaving config mode', self)
+                return
+        if 'error' in response:
+            # end is rejected in exec mode: the failed request never left it.
+            _LOGGER.debug('%s: already in exec mode', self)
+
+    def _discard(self, request_id: str) -> None:
+        with self._state_lock:
+            self._pending.pop(request_id, None)
+
+    def _shutdown_transport(self, transport: websocket.WebSocket) -> None:
+        """Closes ``transport`` gracefully and waits for its reader to exit
+
+        Caller holds ``_send_lock``.
+        """
+        reader = self._reader
+        try:
+            if transport.connected:
+                # The reader receives the server's close reply and exits.
+                transport.send_close()
+        except (websocket.WebSocketException, OSError):
+            _LOGGER.debug('%s: close frame not sent', self)
+        if reader is not None:
+            reader.join(WEBSOCKET_READER_JOIN_TIMEOUT)
+            if reader.is_alive():
+                transport.abort()
+                reader.join(WEBSOCKET_READER_JOIN_TIMEOUT)
+        transport.shutdown()
+
+    def close(self) -> None:
+        """Closes the websocket; later requests raise ConnectionError"""
+        with self._send_lock:
+            if self._closed:
+                return
+            self._closed = True
+            with self._state_lock:
+                self._cancel_idle_timer()
+            transport = self.transport
+            if transport is None:
+                return
+            self._shutdown_transport(transport)
+        self._mark_dead(transport, 'Connection closed')
+
+    def is_alive(self) -> dict[str, bool]:
+        with self._state_lock:
+            dead = self._dead
+        return {'is_alive': not self._closed and not dead}
+
+    def exclusive(self) -> threading.RLock:
+        """Holds back other threads' requests on this connection while held
+
+        The lock is re-entrant, so the holder's own requests still go
+        through.  Requests other threads sent before it was taken are not
+        affected.
+        """
+        return self._exclusive
+
 
 class SessionApiConnection(object):
     def authentication(self, username, password):

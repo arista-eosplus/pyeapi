@@ -40,6 +40,7 @@ The following configuration options are available for defining node entries:
       - http
       - https
       - https_certs
+      - websocket
 
 :port: Configures the port to use for the eAPI connection.  A default
     port is used if this parameter is absent, based on the transport setting
@@ -48,6 +49,7 @@ The following configuration options are available for defining node entries:
       - transport: http, default port: 80
       - transport: https, default port: 443
       - transport: https_certs, default port: 443
+      - transport: websocket, default port: 443
       - transport: http_local, default port: 8080
       - transport: socket, default port: n/a
 
@@ -65,6 +67,7 @@ Transport   eapi.conf Required Script run from Authentication Required
 http        Yes                On/Off-switch   Yes
 https       Yes                On/Off-switch   Yes
 https_certs Yes                On/Off-switch   Yes (Auth done via certs, not un/pw)
+websocket   Yes                On/Off-switch   Yes (Once per connection)
 http_local  Yes                On-switch only  No
 socket      No                 On-switch only  No
 =========== ================== =============== ========================
@@ -209,6 +212,51 @@ is provided then no server side validation will be done.
   transport: https_certs
   cert_file: /path/to/certificate/file
   key_file: /path/to/private/key/file
+
+Using a Websocket
+=================
+
+The websocket transport sends every request over one persistent, authenticated
+websocket (``wss://<host>/command-api-websocket``) instead of opening a new
+HTTPS connection for each request. Several threads can share one connection.
+
+.. code-block:: console
+
+  [connection:veos01]
+  transport: websocket
+  username: eapi
+  password: password
+
+Behaviour to be aware of:
+
+* Every open websocket holds a slot on the switch, and a few idle ones can
+  block plain HTTP eAPI and new websockets. Keep at most one connection per
+  switch. A connection closes after 30 idle seconds and the next request
+  reconnects. To change this, pass ``idle_timeout`` (seconds, or ``None`` to
+  never close) to ``pyeapi.client.make_connection('websocket', ...)`` or to
+  ``WebsocketEapiConnection``; it cannot be set from eapi.conf.
+* A request that gets no response within ``timeout`` raises
+  ``ConnectionError`` and resets the connection. The command keeps running on
+  the switch.
+* A request that fails after it may have reached the switch raises
+  ``ConnectionError`` and is not resent.
+* Unlike the HTTP transports, the websocket keeps the CLI mode between
+  requests. pyeapi returns it to exec mode in two cases: after any request
+  that fails (eAPI stops at the failing command, so a batch never reaches its
+  own ``end``), and after each successful ``Node.config()`` or config session
+  request. A batch that enters a mode through ``Node.run_commands()``,
+  ``Node.enable()`` or ``connection.execute()`` must end with ``end`` itself.
+* An idle close, a timeout reset or a reconnect also returns the websocket to
+  exec mode. A configure session left open that way stays pending on the
+  switch until it is committed or aborted.
+* Threads can share one connection. ``Node`` holds it with
+  ``connection.exclusive()`` across each config request and its ``end``, so
+  other threads' requests never run in config mode. Hold
+  ``connection.exclusive()`` the same way around ``execute()`` calls that
+  enter a mode. Requests that other threads had already sent before a failing
+  batch still run in the mode it left, so hold ``connection.exclusive()`` for
+  such batches too, or give each thread its own connection. Sharing gains no
+  throughput, because the switch runs a connection's requests one at a time.
 
 *******************
 The DEFAULT Section

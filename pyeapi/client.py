@@ -91,6 +91,8 @@ contains the settings for nodes used by the connect_to function.
 
 """
 from uuid import uuid4
+import contextlib
+import logging
 import os
 import re
 
@@ -107,7 +109,11 @@ from pyeapi.eapilib import HttpsEapiCertConnection
 from pyeapi.eapilib import HttpEapiSessionConnection
 from pyeapi.eapilib import HttpsEapiSessionConnection
 from pyeapi.eapilib import SocketEapiConnection, HttpLocalEapiConnection
+from pyeapi.eapilib import WebsocketEapiConnection
 from pyeapi.eapilib import CommandError
+from pyeapi.eapilib import ConnectionError as EapiConnectionError
+
+_LOGGER = logging.getLogger(__name__)
 
 CONFIG_SEARCH_PATH = ['~/.eapi.conf', '/mnt/flash/eapi.conf']
 
@@ -119,6 +125,7 @@ TRANSPORTS = {
     'https': HttpsEapiConnection,
     'https_certs': HttpsEapiCertConnection,
     'https_session': HttpsEapiSessionConnection,
+    'websocket': WebsocketEapiConnection,
 }
 
 DEFAULT_TRANSPORT = 'https'
@@ -403,8 +410,8 @@ def connect(transport=None, host='localhost', username='admin',
     Args:
         transport (str): Specifies the type of connection transport to use.
             Valid values for the connection are socket, http_local, http,
-            https, https_certs, http_session, and https_session.  The default
-            value is specified in DEFAULT_TRANSPORT
+            https, https_certs, http_session, https_session, and websocket.
+            The default value is specified in DEFAULT_TRANSPORT
         host (str): The IP addres or DNS host name of the connection device.
             The default value is 'localhost'
         username (str): The username to pass to the device to authenticate
@@ -661,7 +668,9 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
-        response = self.run_commands(commands, **kwargs)
+        with self._exclusive_connection():
+            response = self.run_commands(commands, **kwargs)
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -685,7 +694,9 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure session %s' % self._session_name)
-        response = self.run_commands(commands, **kwargs)
+        with self._exclusive_connection():
+            response = self.run_commands(commands, **kwargs)
+            self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -693,6 +704,37 @@ class Node(object):
         response.pop(0)
 
         return response
+
+    def _keeps_cli_mode(self):
+        return getattr(self._connection, 'keeps_cli_mode', False) is True
+
+    def _exclusive_connection(self):
+        """Holds other threads off the connection until config mode is left"""
+        if self._keeps_cli_mode():
+            return self._connection.exclusive()
+        return contextlib.nullcontext()
+
+    def _return_to_exec_mode(self):
+        """Leaves config mode after a successful config request
+
+        On connections that keep the CLI mode, the mode entered by a config
+        request would otherwise carry over to the next request.  Such a
+        connection leaves config mode itself when a request fails.  ``end``
+        is sent on its own, and without ``enable`` first, because EOS 4.23
+        and earlier reject ``enable`` in config mode.
+        """
+        if not self._keeps_cli_mode():
+            return
+        try:
+            self.run_commands(['end'], send_enable=False)
+        except CommandError:
+            # end is rejected in exec mode: the request already left config
+            # mode, as commit and abort do
+            _LOGGER.debug('already in exec mode')
+        except EapiConnectionError:
+            # the connection was reset, so the next request starts in exec
+            # mode anyway
+            _LOGGER.debug('connection reset while leaving config mode')
 
     @lru_cache(maxsize=None)
     def _chunkify( self, config, indent=0 ):
