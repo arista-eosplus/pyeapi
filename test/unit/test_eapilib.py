@@ -590,7 +590,6 @@ class TestHttpsEapiCertConnection(unittest.TestCase):
         self.assertIsInstance(instance, pyeapi.eapilib.EapiConnection)
 
 
-
 def _http_response(status=200, reason='OK', body=b'', set_cookies=()):
     response = Mock(name='response', status=status, reason=reason)
     response.read.return_value = body
@@ -603,10 +602,8 @@ def _http_response(status=200, reason='OK', body=b'', set_cookies=()):
 class TestSessionApiConnection(unittest.TestCase):
 
     def _session_connection(self, *responses):
-        with patch.object(pyeapi.eapilib.SessionApiConnection,
-                          'authentication'):
-            instance = pyeapi.eapilib.HttpsEapiSessionConnection(
-                'localhost', username='admin', password='secret')
+        instance = pyeapi.eapilib.HttpsEapiSessionConnection(
+            'localhost', username='admin', password='secret')
         instance.transport = Mock(name='transport')
         instance.transport.getresponse.side_effect = list(responses)
         return instance
@@ -614,23 +611,125 @@ class TestSessionApiConnection(unittest.TestCase):
     def test_login_sets_cookie_header(self):
         instance = self._session_connection(
             _http_response(set_cookies=['Session=abc123; Path=/; HttpOnly']))
-        instance.authentication('admin', 'secret')
+        instance._login()
         self.assertEqual(instance._auth, ('Cookie', 'Session=abc123'))
         instance.transport.putrequest.assert_called_with('POST', '/login')
+        body = instance.transport.endheaders.call_args.kwargs['message_body']
+        self.assertEqual(json.loads(body),
+                         {'username': 'admin', 'password': 'secret'})
         instance.transport.close.assert_called_once()
 
     def test_login_joins_multiple_set_cookie_headers(self):
         instance = self._session_connection(_http_response(
             set_cookies=['a=1; Path=/', 'b=2; Expires=Wed, 09 Jun 2021 '
                                         '10:18:14 GMT; Path=/']))
-        instance.authentication('admin', 'secret')
+        instance._login()
         self.assertEqual(instance._auth, ('Cookie', 'a=1; b=2'))
 
     def test_login_without_set_cookie_raises(self):
         instance = self._session_connection(_http_response())
         with self.assertRaises(pyeapi.eapilib.ConnectionError):
-            instance.authentication('admin', 'secret')
+            instance._login()
         self.assertIsNone(instance._auth)
+
+    def test_login_failure_raises_with_decoded_body(self):
+        instance = self._session_connection(_http_response(
+            status=401, reason='Unauthorized', body=b'bad credentials'))
+        with self.assertRaises(pyeapi.eapilib.ConnectionError) as ctx:
+            instance._login()
+        self.assertEqual(ctx.exception.message,
+                         'Unauthorized. bad credentials')
+        instance.transport.close.assert_called_once()
+
+    def test_login_socket_error_raises_connection_error(self):
+        instance = self._session_connection()
+        instance.transport.putrequest.side_effect = OSError('unreachable')
+        with self.assertRaises(pyeapi.eapilib.ConnectionError):
+            instance._login()
+        self.assertIsInstance(instance.socket_error, OSError)
+        instance.transport.close.assert_called_once()
+
+    def test_missing_credentials_raise_value_error(self):
+        with self.assertRaises(ValueError):
+            pyeapi.eapilib.HttpsEapiSessionConnection('localhost')
+        with self.assertRaises(ValueError):
+            pyeapi.eapilib.HttpEapiSessionConnection('localhost',
+                                                     username='admin')
+
+    @patch('pyeapi.eapilib.HttpsConnection.request')
+    @patch('pyeapi.eapilib.HttpsConnection.connect')
+    def test_construction_does_not_log_in(self, mock_connect, mock_request):
+        instance = pyeapi.eapilib.HttpsEapiSessionConnection(
+            'localhost', username='admin', password='secret')
+        self.assertIsNone(instance._auth)
+        mock_connect.assert_not_called()
+
+    def test_first_send_logs_in_then_sends(self):
+        response_json = json.dumps(dict(jsonrpc='2.0', result=[{}], id=1))
+        instance = self._session_connection(
+            _http_response(set_cookies=['Session=abc']),
+            _http_response(body=response_json))
+
+        result = instance.send('{}')
+
+        self.assertEqual(result['result'], [{}])
+        paths = [c.args[1] for c in instance.transport.putrequest.call_args_list]
+        self.assertEqual(paths, ['/login', '/command-api'])
+        instance.transport.putheader.assert_any_call('Cookie', 'Session=abc')
+
+    def test_unauthorized_after_fresh_login_does_not_retry(self):
+        instance = self._session_connection(
+            _http_response(set_cookies=['Session=abc']),
+            _http_response(status=401, reason='Unauthorized'))
+        with self.assertRaises(pyeapi.eapilib.UnauthorizedError):
+            instance.send('{}')
+        self.assertEqual(instance.transport.putrequest.call_count, 2)
+
+    def test_failed_first_login_raises_from_send(self):
+        instance = self._session_connection(_http_response(
+            status=401, reason='Unauthorized', body=b'bad credentials'))
+        with self.assertRaises(pyeapi.eapilib.ConnectionError):
+            instance.send('{}')
+        instance.transport.putrequest.assert_called_once_with('POST', '/login')
+
+    def test_authentication_resets_session(self):
+        instance = self._session_connection()
+        instance._auth = ('Cookie', 'Session=old')
+        instance.authentication('other', 'pw')
+        self.assertIsNone(instance._auth)
+        self.assertEqual(instance._username, 'other')
+        instance.transport.putrequest.assert_not_called()
+
+    def test_send_logs_in_again_after_session_expires(self):
+        response_json = json.dumps(dict(jsonrpc='2.0', result=[{}], id=1))
+        instance = self._session_connection(
+            _http_response(status=401, reason='Unauthorized'),
+            _http_response(set_cookies=['Session=fresh']),
+            _http_response(body=response_json))
+        instance._auth = ('Cookie', 'Session=expired')
+
+        result = instance.send('{}')
+
+        self.assertEqual(result['result'], [{}])
+        self.assertEqual(instance._auth, ('Cookie', 'Session=fresh'))
+        paths = [c.args[1] for c in instance.transport.putrequest.call_args_list]
+        self.assertEqual(paths, ['/command-api', '/login', '/command-api'])
+        instance.transport.putheader.assert_any_call('Cookie', 'Session=fresh')
+
+    def test_send_raises_when_retry_is_also_unauthorized(self):
+        instance = self._session_connection(
+            _http_response(status=401, reason='Unauthorized'),
+            _http_response(set_cookies=['Session=fresh']),
+            _http_response(status=401, reason='Unauthorized'))
+        instance._auth = ('Cookie', 'Session=expired')
+        with self.assertRaises(pyeapi.eapilib.UnauthorizedError):
+            instance.send('{}')
+        self.assertEqual(instance.transport.putrequest.call_count, 3)
+
+    def test_unauthorized_error_is_connection_error(self):
+        self.assertTrue(issubclass(pyeapi.eapilib.UnauthorizedError,
+                                   pyeapi.eapilib.ConnectionError))
+
 
 class TestCommandError(unittest.TestCase):
 

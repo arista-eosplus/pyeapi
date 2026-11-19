@@ -167,6 +167,10 @@ class ConnectionError(EapiError):
         super(ConnectionError, self).__init__(message)
 
 
+class UnauthorizedError(ConnectionError):
+    """Raised when eAPI rejects a request with HTTP 401 Unauthorized"""
+
+
 class SocketConnection(HTTPConnection):
 
     def __init__(self, path, timeout=60):
@@ -448,7 +452,7 @@ class EapiConnection(object):
             _LOGGER.debug('Response content: {}'.format(response_content))
 
             if response.status == 401:
-                raise ConnectionError(str(self),
+                raise UnauthorizedError(str(self),
                     f'{response.reason}. {response_content}')
 
             # Python 3.7 json.loads() works with bytes or strings,
@@ -719,28 +723,64 @@ class HttpsEapiCertConnection(EapiConnection):
 
 
 class SessionApiConnection(object):
-    def authentication(self, username, password):
-        try:
-            data = json.dumps({"username": username, "password": password})
-            self.transport.putrequest("POST", "/login")
-            self.transport.putheader("Content-type", "application/json")
-            self.transport.putheader("Content-length", "%d" % len(data))
+    """Mixin that authenticates via the eAPI /login endpoint
 
-            data = data.encode()
-            self.transport.endheaders(message_body=data)
+    The login is deferred until the first request is sent.  The session
+    cookie returned by /login is sent with every request.  When the session
+    expires and eAPI answers 401, the stored credentials are used to log in
+    again and the request is retried once.
+    """
+
+    def authentication(self, username, password):
+        if username is None or password is None:
+            raise ValueError("Session connections require both a username "
+                             "and a password")
+        self._username = username
+        self._password = password
+        self._auth = None
+
+    def _login(self):
+        body = json.dumps({"username": self._username,
+                           "password": self._password})
+        resp = self._post_session_endpoint("/login", body)
+        set_cookie_headers = resp.headers.get_all("Set-Cookie") or []
+        cookie = SimpleCookie()
+        for header in set_cookie_headers:
+            cookie.load(header)
+        if not cookie:
+            raise ConnectionError(str(self), 'eAPI login succeeded but no '
+                                  'session cookie was returned')
+        cookie_header = "; ".join(f"{name}={morsel.coded_value}"
+                                  for name, morsel in cookie.items())
+        self._auth = ("Cookie", cookie_header)
+
+    def send(self, data):
+        if self._auth is None:
+            self._login()
+            return super(SessionApiConnection, self).send(data)
+        try:
+            return super(SessionApiConnection, self).send(data)
+        except UnauthorizedError:
+            _LOGGER.debug('eAPI session rejected, logging in again')
+            self._login()
+            return super(SessionApiConnection, self).send(data)
+
+    def _post_session_endpoint(self, path, body):
+        encoded_body = body.encode()
+        try:
+            self.transport.putrequest("POST", path)
+            self.transport.putheader("Content-type", "application/json")
+            self.transport.putheader("Content-length",
+                                     "%d" % len(encoded_body))
+            self.transport.endheaders(message_body=encoded_body)
             resp = self.transport.getresponse()
+            content = resp.read()
             if resp.status != 200:
-                raise ConnectionError(str(self), '%s. %s' % (resp.reason,
-                                                             resp.read()))
-            cookie = SimpleCookie()
-            for header in resp.headers.get_all("Set-Cookie") or []:
-                cookie.load(header)
-            if not cookie:
-                raise ConnectionError(str(self), 'eAPI login succeeded but '
-                                      'no session cookie was returned')
-            self._auth = ("Cookie", "; ".join(
-                f"{name}={morsel.coded_value}"
-                for name, morsel in cookie.items()))
+                if isinstance(content, bytes):
+                    content = content.decode(errors="replace")
+                raise ConnectionError(str(self),
+                                      f'{resp.reason}. {content}')
+            return resp
 
         except OSError as exc:
             _LOGGER.exception(exc)
