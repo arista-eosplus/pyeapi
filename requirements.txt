@@ -1,1 +1,2 @@
 netaddr
+websocket-client>=1.6
