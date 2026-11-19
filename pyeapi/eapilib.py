@@ -456,17 +456,7 @@ class EapiConnection(object):
             decoded = json.loads(response_content)
             _LOGGER.debug('eapi_response: %s' % decoded)
 
-            if 'error' in decoded:
-                (code, msg, err, out) = self._parse_error_message(decoded)
-                pattern = "unexpected keyword argument '(.*)'"
-                match = re.search(pattern, msg)
-                if match:
-                    auto_msg = ('%s parameter is not supported in this'
-                                ' version of EOS.' % match.group(1))
-                    _LOGGER.error(auto_msg)
-                    msg = msg + '. ' + auto_msg
-                raise CommandError(code, msg, command_error=err, output=out)
-
+            self._raise_for_error(decoded)
             return decoded
 
         # removed socket.error as it's deprecated in python 3
@@ -484,6 +474,20 @@ class EapiConnection(object):
         finally:
             self.transport.close()
 
+
+    def _raise_for_error(self, decoded):
+        """Raises CommandError if the eAPI response is a failure response"""
+        if 'error' not in decoded:
+            return
+        (code, msg, err, out) = self._parse_error_message(decoded)
+        pattern = "unexpected keyword argument '(.*)'"
+        match = re.search(pattern, msg)
+        if match:
+            auto_msg = ('%s parameter is not supported in this'
+                        ' version of EOS.' % match.group(1))
+            _LOGGER.error(auto_msg)
+            msg = msg + '. ' + auto_msg
+        raise CommandError(code, msg, command_error=err, output=out)
 
     def _sanitize_request( self, data ):
         """remove user-sensitive input from data response"""
