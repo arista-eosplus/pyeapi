@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import socket
 import base64
+import contextlib
 import itertools
 import logging
 import ssl
@@ -300,6 +301,15 @@ class EapiConnection(object):
         self.error = None
         self.socket_error = None
         self._auth = None
+
+    def exclusive(self):
+        """Holds back other threads' requests on this connection while held
+
+        Use it as a context manager around requests that must run back to
+        back.  Transports that open a new connection for every request
+        return a context that does nothing.
+        """
+        return contextlib.nullcontext()
 
     def __str__(self):
         return 'EapiConnection(transport=%s)' % str(self.transport)
@@ -762,6 +772,12 @@ class WebsocketEapiConnection(EapiConnection):
       itself is rejected in exec mode.  An idle close, a timeout reset or a
       reconnect also returns to exec mode, and a configure session left open
       that way stays pending on the switch until it is committed or aborted.
+    * Threads can share one connection.  ``Node`` holds it with
+      ``exclusive()`` across each config request and its ``end``, so other
+      threads' requests never run in config mode.  Hold ``exclusive()`` the
+      same way around ``execute()`` calls that enter and then leave a mode.
+      Sharing gains no throughput: the switch runs a connection's requests
+      one at a time.
     * A request that times out resets the connection, because the switch
       keeps running the command and would make the next request wait behind
       it.  The command itself is not stopped.
@@ -804,6 +820,8 @@ class WebsocketEapiConnection(EapiConnection):
                               else float(idle_timeout))
 
         self._request_ids = itertools.count()
+        # Held across requests that must not be interleaved; see exclusive()
+        self._exclusive = threading.RLock()
         self._send_lock = threading.Lock()
         self._state_lock = threading.Lock()
         self._pending: dict[str, Future] = {}
@@ -992,30 +1010,31 @@ class WebsocketEapiConnection(EapiConnection):
         request_id = str(request['id'])
         future: Future = Future()
 
-        with self._send_lock:
-            if self._closed:
-                raise ConnectionError(str(self), 'Connection is closed')
-            if self._dead:
-                # Nothing has been sent for this request yet, so
-                # reconnecting is safe.
-                _LOGGER.info('%s: reconnecting', self)
-                self._connect()
-            with self._state_lock:
+        with self._exclusive:
+            with self._send_lock:
+                if self._closed:
+                    raise ConnectionError(str(self), 'Connection is closed')
                 if self._dead:
-                    raise ConnectionError(str(self), 'Connection lost')
-                self._cancel_idle_timer()
-                self._pending[request_id] = future
-            transport = self.transport
-            try:
-                transport.send(json.dumps({'request': request}))
-            except (websocket.WebSocketException, OSError) as exc:
-                # The request may have reached the switch: report it,
-                # never resend it.
-                self._discard(request_id)
-                self._mark_dead(transport, f'Send failed: {exc}')
-                transport.abort()
-                raise ConnectionError(str(self),
-                                      f'Send failed: {exc}') from exc
+                    # Nothing has been sent for this request yet, so
+                    # reconnecting is safe.
+                    _LOGGER.info('%s: reconnecting', self)
+                    self._connect()
+                with self._state_lock:
+                    if self._dead:
+                        raise ConnectionError(str(self), 'Connection lost')
+                    self._cancel_idle_timer()
+                    self._pending[request_id] = future
+                transport = self.transport
+                try:
+                    transport.send(json.dumps({'request': request}))
+                except (websocket.WebSocketException, OSError) as exc:
+                    # The request may have reached the switch: report it,
+                    # never resend it.
+                    self._discard(request_id)
+                    self._mark_dead(transport, f'Send failed: {exc}')
+                    transport.abort()
+                    raise ConnectionError(str(self),
+                                          f'Send failed: {exc}') from exc
 
         try:
             response = future.result(timeout=self._timeout)
@@ -1076,6 +1095,15 @@ class WebsocketEapiConnection(EapiConnection):
         with self._state_lock:
             dead = self._dead
         return {'is_alive': not self._closed and not dead}
+
+    def exclusive(self) -> threading.RLock:
+        """Holds back other threads' requests on this connection while held
+
+        The lock is re-entrant, so the holder's own requests still go
+        through.  Requests other threads sent before it was taken are not
+        affected.
+        """
+        return self._exclusive
 
 
 class SessionApiConnection(object):

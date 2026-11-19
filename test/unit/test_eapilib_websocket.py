@@ -319,6 +319,49 @@ class TestWebsocketEapiConnection(unittest.TestCase):
             matched = sum(pool.map(worker, range(thread_count)))
         self.assertEqual(matched, thread_count * requests_per_thread)
 
+    def test_exclusive_holds_back_other_threads(self):
+        conn = self.connect()
+        sock = self.server.opened[0]
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            with conn.exclusive():
+                conn.execute(['show held'])
+                other = pool.submit(conn.execute, ['show other'])
+                time.sleep(0.1)
+                self.assertEqual(len(sock.requests), 1)
+                self.assertFalse(other.done())
+            self.assertEqual(other.result()['result'][0]['command'],
+                             'show other')
+
+    def test_exclusive_is_a_no_op_on_other_transports(self):
+        with pyeapi.eapilib.EapiConnection().exclusive():
+            pass
+
+    def test_shared_node_config_is_not_interleaved(self):
+        self.server.prepare(FakeWebSocket(
+            reply_delay=lambda: random.uniform(0, 0.002)))
+        conn = self.connect()
+        node = pyeapi.client.Node(conn)
+        rounds = 50
+
+        def configurer() -> None:
+            for index in range(rounds):
+                node.config(['interface Ethernet1', f'description {index}'])
+
+        def reader() -> None:
+            for _ in range(rounds * 3):
+                node.run_commands(['show version'])
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            for future in [pool.submit(configurer), pool.submit(reader)]:
+                future.result()
+        sent = [request['params']['cmds']
+                for request in self.server.opened[0].requests]
+        config_indexes = [index for index, cmds in enumerate(sent)
+                          if 'configure terminal' in cmds]
+        self.assertEqual(len(config_indexes), rounds)
+        for index in config_indexes:
+            self.assertEqual(sent[index + 1], ['end'])
+
     def test_idle_connection_closes_and_next_request_reconnects(self):
         conn = self.connect(idle_timeout=0.1)
         self.wait_until(lambda: conn.is_alive() == {'is_alive': False})

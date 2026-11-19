@@ -248,6 +248,12 @@ Behaviour to be aware of:
 * An idle close, a timeout reset or a reconnect also returns the websocket to
   exec mode. A configure session left open that way stays pending on the
   switch until it is committed or aborted.
+* Threads can share one connection. ``Node`` holds it with
+  ``connection.exclusive()`` across each config request and its ``end``, so
+  other threads' requests never run in config mode. Hold
+  ``connection.exclusive()`` the same way around ``execute()`` calls that
+  enter and then leave a mode. Sharing gains no throughput, because the switch
+  runs a connection's requests one at a time.
 
 *******************
 The DEFAULT Section

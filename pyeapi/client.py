@@ -91,6 +91,7 @@ contains the settings for nodes used by the connect_to function.
 
 """
 from uuid import uuid4
+import contextlib
 import logging
 import os
 import re
@@ -667,10 +668,11 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure terminal')
-        try:
-            response = self.run_commands(commands, **kwargs)
-        finally:
-            self._return_to_exec_mode()
+        with self._exclusive_connection():
+            try:
+                response = self.run_commands(commands, **kwargs)
+            finally:
+                self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -694,10 +696,11 @@ class Node(object):
 
         # push the configure command onto the command stack
         commands.insert(0, 'configure session %s' % self._session_name)
-        try:
-            response = self.run_commands(commands, **kwargs)
-        finally:
-            self._return_to_exec_mode()
+        with self._exclusive_connection():
+            try:
+                response = self.run_commands(commands, **kwargs)
+            finally:
+                self._return_to_exec_mode()
         # after config change the _chunkify lru_cache has to be cleared
         self._chunkify.cache_clear()
 
@@ -705,6 +708,15 @@ class Node(object):
         response.pop(0)
 
         return response
+
+    def _keeps_cli_mode(self):
+        return getattr(self._connection, 'keeps_cli_mode', False) is True
+
+    def _exclusive_connection(self):
+        """Holds other threads off the connection until config mode is left"""
+        if self._keeps_cli_mode():
+            return self._connection.exclusive()
+        return contextlib.nullcontext()
 
     def _return_to_exec_mode(self):
         """Leaves config mode on connections that keep the CLI mode
@@ -714,7 +726,7 @@ class Node(object):
         own, and without ``enable`` first, because EOS 4.23 and earlier
         reject ``enable`` in config mode.
         """
-        if getattr(self._connection, 'keeps_cli_mode', False) is not True:
+        if not self._keeps_cli_mode():
             return
         try:
             self.run_commands(['end'], send_enable=False)

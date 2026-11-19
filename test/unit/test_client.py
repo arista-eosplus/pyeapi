@@ -29,6 +29,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+import contextlib
 import sys
 import os
 import unittest
@@ -243,16 +244,30 @@ class TestNode(unittest.TestCase):
 
 
 class ModeKeepingConnection(object):
-    """Records each request; commands listed in fail_on raise instead"""
+    """Records each request; commands listed in fail_on raise instead
+
+    held_requests records, per request, whether exclusive() was held.
+    """
 
     def __init__(self, keeps_cli_mode=True, fail_on=None):
         self.keeps_cli_mode = keeps_cli_mode
         self.fail_on = fail_on or {}
         self.requests = []
+        self.held_requests = []
+        self.held = False
+
+    @contextlib.contextmanager
+    def exclusive(self):
+        self.held = True
+        try:
+            yield
+        finally:
+            self.held = False
 
     def execute(self, commands, encoding='json', **kwargs):
         commands = list(commands)
         self.requests.append(commands)
+        self.held_requests.append(self.held)
         for command in commands:
             if isinstance(command, str) and command in self.fail_on:
                 raise self.fail_on[command]
@@ -316,6 +331,20 @@ class TestNodeReturnsToExecMode(unittest.TestCase):
         error = pyeapi.eapilib.ConnectionError('test', 'connection reset')
         node, connection = self.node(fail_on={'end': error})
         self.assertEqual(node.config('hostname x'), [{}])
+
+    def test_config_request_and_end_hold_the_connection(self):
+        node, connection = self.node()
+        node.config('hostname x')
+        node.configure_session()
+        node.config('hostname y')
+        node.commit()
+        self.assertEqual(connection.held_requests, [True] * 6)
+        self.assertFalse(connection.held)
+
+    def test_run_commands_does_not_hold_the_connection(self):
+        node, connection = self.node()
+        node.run_commands(['show version'])
+        self.assertEqual(connection.held_requests, [False])
 
     def test_no_end_when_connection_does_not_keep_cli_mode(self):
         node, connection = self.node(keeps_cli_mode=False)
