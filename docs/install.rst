@@ -22,7 +22,7 @@ to install pyeapi
 
   admin:~ admin$ sudo pip install pyeapi
 
-.. Note:: You will likely notice Pip install netaddr, a dependency of pyeapi.
+.. Note:: You will likely notice Pip install netaddr and websocket-client, dependencies of pyeapi.
 
 
 Pip - Upgrade Pyeapi
@@ -42,14 +42,16 @@ If you want to install pyeapi on a switch with no internet access:
 **Step 1:** Download Pypi Package
 
 - `Download <https://pypi.python.org/pypi/pyeapi>`_ the latest version of **pyeapi** on your local machine.
-- You will also need a dependency package `netaddr <https://pypi.python.org/pypi/netaddr>`_.
+- You will also need the dependency packages `netaddr <https://pypi.python.org/pypi/netaddr>`_
+  and `websocket-client <https://pypi.python.org/pypi/websocket-client>`_.
 
-**Step 2:** SCP both files to the Arista switch and install
+**Step 2:** SCP the files to the Arista switch and install
 
 .. code-block:: console
 
   admin:~ admin$ scp path/to/pyeapi-<VERSION>.tar.gz ansible@veos01:/mnt/flash/
   admin:~ admin$ scp path/to/netaddr-<VERSION>.tar.gz ansible@veos01:/mnt/flash/
+  admin:~ admin$ scp path/to/websocket-client-<VERSION>.tar.gz ansible@veos01:/mnt/flash/
 
 Then SSH into your node and install it. Be sure to replace ``<VERSION>`` with the
 actual filename:
@@ -57,6 +59,7 @@ actual filename:
 .. code-block:: console
 
   [admin@veos ~]$ sudo pip install /mnt/flash/netaddr-<VERSION>.tar.gz
+  [admin@veos ~]$ sudo pip install /mnt/flash/websocket-client-<VERSION>.tar.gz
   [admin@veos ~]$ sudo pip install /mnt/flash/pyeapi-<VERSION>.tar.gz
 
 These packages must be re-installed on reboot. Therefore, add the install
@@ -72,6 +75,7 @@ Add the lines (the #! may already exist in your rc.eos)
 
   #!/bin/bash
   sudo pip install /mnt/flash/netaddr-<VERSION>.tar.gz
+  sudo pip install /mnt/flash/websocket-client-<VERSION>.tar.gz
   sudo pip install /mnt/flash/pyeapi-<VERSION>.tar.gz
 
 
