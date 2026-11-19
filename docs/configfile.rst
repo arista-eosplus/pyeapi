@@ -40,6 +40,8 @@ The following configuration options are available for defining node entries:
       - http
       - https
       - https_certs
+      - http_session
+      - https_session
 
 :port: Configures the port to use for the eAPI connection.  A default
     port is used if this parameter is absent, based on the transport setting
@@ -48,6 +50,8 @@ The following configuration options are available for defining node entries:
       - transport: http, default port: 80
       - transport: https, default port: 443
       - transport: https_certs, default port: 443
+      - transport: http_session, default port: 80
+      - transport: https_session, default port: 443
       - transport: http_local, default port: 8080
       - transport: socket, default port: n/a
 
@@ -59,15 +63,17 @@ It's important to understand the nuances of the pyeapi configuration file so
 you can simplify your implementation. Here's a quick summary of when the
 eapi.conf file is needed:
 
-=========== ================== =============== ========================
-Transport   eapi.conf Required Script run from Authentication Required
-=========== ================== =============== ========================
-http        Yes                On/Off-switch   Yes
-https       Yes                On/Off-switch   Yes
-https_certs Yes                On/Off-switch   Yes (Auth done via certs, not un/pw)
-http_local  Yes                On-switch only  No
-socket      No                 On-switch only  No
-=========== ================== =============== ========================
+============= ================== =============== ========================
+Transport     eapi.conf Required Script run from Authentication Required
+============= ================== =============== ========================
+http          Yes                On/Off-switch   Yes
+https         Yes                On/Off-switch   Yes
+https_certs   Yes                On/Off-switch   Yes (Auth done via certs, not un/pw)
+http_session  Yes                On/Off-switch   Yes (Login once, then session cookie)
+https_session Yes                On/Off-switch   Yes (Login once, then session cookie)
+http_local    Yes                On-switch only  No
+socket        No                 On-switch only  No
+============= ================== =============== ========================
 
 
 ********************************
@@ -209,6 +215,37 @@ is provided then no server side validation will be done.
   transport: https_certs
   cert_file: /path/to/certificate/file
   key_file: /path/to/private/key/file
+
+Using Session-Based Authentication
+==================================
+
+The ``http_session`` and ``https_session`` transports log in once through the
+eAPI ``/login`` endpoint and send the returned session cookie with every
+request, instead of sending username/password on each call. This reduces the
+load on centralized AAA (TACACS+/RADIUS) servers when many commands are run.
+
+.. code-block:: console
+
+  [connection:veos03]
+  transport: https_session
+  username: eapi
+  password: password
+
+Behaviour to be aware of:
+
+* The login is deferred until the first command is sent, as with the other
+  transports. A rejected login or an unreachable device raises
+  ``ConnectionError`` from that first command, not from ``pyeapi.connect()``.
+* Both a username and a password are required. A missing one raises
+  ``ValueError`` when the connection is created.
+* When the session expires, eAPI answers with HTTP 401. pyeapi then logs in
+  again with the stored credentials and retries the request once. If the retry
+  is also rejected, ``UnauthorizedError`` (a subclass of ``ConnectionError``) is
+  raised.
+* EOS shares one session among clients on the same host that use the same
+  credentials, and the session timeout counts from login, not from the last
+  request. In both cases pyeapi logs in again automatically when the session
+  ends.
 
 *******************
 The DEFAULT Section
